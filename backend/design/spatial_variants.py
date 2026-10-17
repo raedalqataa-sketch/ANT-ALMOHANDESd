@@ -26,7 +26,7 @@ def mirror_candidate(source):
         for wall in floor["walls"]:
             wall["start"] = (round(site_width - wall["start"][0], 8), wall["start"][1])
             wall["end"] = (round(site_width - wall["end"][0], 8), wall["end"][1])
-            if wall["axis"] == "horizontal" and wall["start"][0] > wall["end"][0]:
+            if wall.get("axis", "horizontal" if wall["start"][1] == wall["end"][1] else "vertical") == "horizontal" and wall["start"][0] > wall["end"][0]:
                 wall["start"], wall["end"] = wall["end"], wall["start"]
         for opening in floor["openings"]:
             opening["center"] = (round(site_width - opening["center"][0], 8), opening["center"][1])
