@@ -6,6 +6,7 @@ from .requirements import project_profile, rules_summary, import_brief
 from .generator import generate_candidates
 from .validators import validate_model, release_decision
 from .export import svg, export_pdf, export_dxf
+from .diversity import diversity_report
 
 router=APIRouter(prefix='/api/v2',tags=['architectural-drafts'])
 OUT=Path(__file__).resolve().parents[2]/'outputs'
@@ -82,6 +83,6 @@ def design(options:DesignOptions):
         candidates.append(model)
     # Deterministic comparison, not a fabricated overall architectural quality score.
     candidates.sort(key=lambda c:(c['metrics']['failed_checks'],c['metrics']['pending_checks'],c['metrics']['circulation_m2'],c['metrics']['footprint_m2']))
-    return {'status':'DRAFT_REVIEW','candidates':candidates,
+    return {'status':'DRAFT_REVIEW','diversity':diversity_report(candidates),'candidates':candidates,
             'ranking_reason':'الأقل فشلًا ثم الأقل تعليقًا ثم مساحة الحركة والمبنى. لا تمثل درجة جودة معمارية شاملة.',
             'search_limit':'ثلاثة أحجام مبنى كحد أقصى ضمن عائلة توزيع واحدة؛ لا ضمان أمثلية ولا تغطية كل الحلول.'}
