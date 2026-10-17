@@ -3,3 +3,7 @@ __pycache__/
 .pytest_cache/
 outputs/
 *.png
+
+quality_review/exports/
+quality_review/tiling_failures.json
+quality_review/results.json

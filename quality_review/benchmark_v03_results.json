@@ -1,0 +1,18 @@
+{
+  "seed": 20261017,
+  "baseline_v02": {
+    "random_accepted": 118,
+    "random_invalid_accepted": 0,
+    "tiling_accepted": 64,
+    "tiling_total": 300
+  },
+  "v03": {
+    "random_total": 1200,
+    "random_accepted": 130,
+    "random_invalid_accepted": 0,
+    "tiling_total": 300,
+    "tiling_accepted": 296,
+    "tiling_invalid_accepted": 0
+  },
+  "scope": "Synthetic rectangle-packing benchmark. Not a measure of architectural quality, real-world success, or the separate villa-layout family."
+}

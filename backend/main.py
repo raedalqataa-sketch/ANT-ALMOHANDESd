@@ -12,10 +12,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 import arabic_reshaper
 from bidi.algorithm import get_display
 
-app = FastAPI(title='ANT ALMOHANDES - Prototype', version='0.1.0')
+app = FastAPI(title='ANT ALMOHANDES - Prototype', version='0.3.0')
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'outputs'; OUT.mkdir(exist_ok=True)
-pdfmetrics.registerFont(TTFont('Arabic',str(ROOT/'frontend'/'Arabic.ttf')))
+pdfmetrics.registerFont(TTFont('Arabic',str(ROOT/'frontend'/'Latin.ttf')))
 def arabic(text):
     return get_display(arabic_reshaper.reshape(str(text)))
 class Room(BaseModel):
@@ -41,16 +41,7 @@ def validate(p):
     checks.append({'gate':'construction_details','status':'PENDING','reason':'الجدران والتفاصيل التنفيذية لم تُنمذج'})
     return checks
 
-def layout(p):
-    # Deterministic shelf packing for visualization only; no claim of architectural fitness.
-    x=y=row_h=0.0; placed=[]
-    for r in sorted(p.rooms,key=lambda a:a.depth,reverse=True):
-        if r.width>p.plot_width or r.depth>p.plot_depth: raise ValueError('أبعاد أحد الفراغات أكبر من الأرض')
-        if x+r.width>p.plot_width+1e-8: x=0;y+=row_h;row_h=0
-        if y+r.depth>p.plot_depth+1e-8: raise ValueError('الفراغات لا تتسع داخل الأبعاد المدخلة وفق الترتيب التجريبي')
-        placed.append({'name':r.name,'kind':r.kind,'x':x,'y':y,'width':r.width,'depth':r.depth})
-        x+=r.width;row_h=max(row_h,r.depth)
-    return placed
+from backend.packing import layout
 
 @app.get('/api/health')
 def health():return {'status':'ok','mode':'prototype'}
@@ -111,10 +102,11 @@ def generate(p:Project):
     return {**report,'downloads':{k:f'/api/files/{job}.{k}' for k in ('dxf','pdf','json')}}
 @app.get('/api/files/{filename}')
 def get_file(filename:str):
-    if not filename.endswith(('.pdf','.dxf','.json')) or '/' in filename or '..' in filename:raise HTTPException(400)
+    import re
+    if not re.fullmatch(r'[a-f0-9]{32}(?:-(?:GF|FF|SITE))?\.(?:pdf|dxf|json|svg)',filename):raise HTTPException(400)
     path=OUT/filename
     if not path.is_file():raise HTTPException(404)
-    return FileResponse(path,filename=filename)
+    return FileResponse(path,filename=filename,media_type='image/svg+xml' if path.suffix=='.svg' else None)
 
 @app.get('/api/template.xlsx')
 def excel_template():
@@ -126,9 +118,20 @@ def excel_template():
     data=BytesIO(); wb.save(data); wb.close()
     return Response(data.getvalue(),media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',headers={'Content-Disposition':'attachment; filename="project-template.xlsx"'})
 
+from backend.design.api import router as architectural_router
+app.include_router(architectural_router)
+
+@app.get('/studio')
+def architectural_studio():
+    return FileResponse(ROOT/'frontend'/'studio.html')
+
+@app.get('/rectangles')
+def rectangle_frontend():
+    return FileResponse(ROOT/'frontend'/'index.html')
+
 @app.get('/')
 def frontend():
-    return FileResponse(ROOT/'frontend'/'index.html')
+    return FileResponse(ROOT/'frontend'/'studio.html')
 
 from fastapi.staticfiles import StaticFiles
 app.mount('/assets',StaticFiles(directory=ROOT/'frontend'),name='assets')

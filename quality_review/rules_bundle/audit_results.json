@@ -1,0 +1,47 @@
+{
+  "filename": "floor_plan_rules_v1.json",
+  "file_sha256": "7d947bf617a9e7f966c8d94072f03252e5ef98ffaf32db9e3d0bcfe6307fc3a3",
+  "json_valid": true,
+  "embedded_source_count": 16,
+  "catalog_counts": {
+    "canonical_engine_rules": 85,
+    "adopted_image_patterns": 18,
+    "proposed_engineering_specification": 36
+  },
+  "explicit_constraint_count": 4,
+  "unique_rule_constraint_ids": 143,
+  "duplicate_rule_constraint_ids": [],
+  "source_hash_method": "UTF-8, ensure_ascii=False, sort_keys=True, separators=(comma,colon)",
+  "source_hash_mismatches": [],
+  "unresolved_catalog_source_refs": [],
+  "source_pointer_errors": [],
+  "counts_match": true,
+  "verification_limits": [
+    "Checks validate the supplied JSON internal consistency, not the historical authenticity of its embedded sources.",
+    "The current application engine is not certified by reference text or by its SITE_V9 implementation snapshot.",
+    "No rules were activated and no application or project parameters were changed.",
+    "Not a full semantic conflict audit of all embedded source text."
+  ],
+  "known_gaps": [
+    {
+      "id": "GAP-01",
+      "item": "Original full constitution and selected SYS-04 payload",
+      "status": "NOT_EMBEDDED_IN_RETRIEVED_SET"
+    },
+    {
+      "id": "GAP-02",
+      "item": "Official site-specific regulations and survey data",
+      "status": "REQUIRED_PER_PROJECT"
+    },
+    {
+      "id": "GAP-03",
+      "item": "Validator code and full test evidence for all source bindings",
+      "status": "NOT_INCLUDED_AS_IMPLEMENTED_ENGINE"
+    },
+    {
+      "id": "GAP-04",
+      "item": "External parent resources referenced within original sources",
+      "status": "NOT_ALL_INDEPENDENTLY_RETRIEVED"
+    }
+  ]
+}

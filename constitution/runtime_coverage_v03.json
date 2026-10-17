@@ -1,0 +1,1232 @@
+{
+  "version": "0.3.0",
+  "bundle_sha256": "7d947bf617a9e7f966c8d94072f03252e5ef98ffaf32db9e3d0bcfe6307fc3a3",
+  "authority_note": "Current user authorized implementation; historical source statuses do not certify this runtime. Proposed dimensions and unresolved project decisions remain disclosed.",
+  "checks": [
+    {
+      "check_id": "finite_geometry",
+      "rule_id": "SPEC-IN-02",
+      "scope_ar": "أبعاد وإحداثيات محدودة ومساحات مستطيلات موجبة",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "references",
+      "rule_id": "SPEC-OP-01",
+      "scope_ar": "معرفات فريدة وروابط العناصر في الدور والمراجعة نفسها",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "room_wall_enclosure",
+      "rule_id": "SPEC-OP-01",
+      "scope_ar": "كل جانب غرفة ممثل بجدران مترابطة قبل اقتطاع الفتحات",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "bounds",
+      "rule_id": "SPEC-IN-04",
+      "scope_ar": "حدود الغرف والمبنى داخل حدود الأرض المقترحة",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "overlap",
+      "rule_id": "SPEC-GEN-02",
+      "scope_ar": "لا تداخل بين المساحات الصافية للغرف في الدور نفسه",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "areas",
+      "rule_id": "SPEC-PG-02",
+      "scope_ar": "المساحات الصافية مشتقة من مستطيلات الغرف",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "mandatory_program",
+      "rule_id": "SPEC-PG-01",
+      "scope_ar": "وجود تمثيل مكاني للمتطلبات الإلزامية الأربعة؛ لا يثبت كفاية استعمالها",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "stair_geometry",
+      "rule_id": "SPEC-ST-01",
+      "scope_ar": "غلاف الرحلتين والبسطة داخل حجرة السلم، ومجموع القوائم يساوي الارتفاع المقترح",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "reachability",
+      "rule_id": "SPEC-PR-01",
+      "scope_ar": "كل فراغ متصل بمدخل خارجي عبر أبواب فعلية أو سلم",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "guest_route",
+      "rule_id": "IMG-PAT-003",
+      "scope_ar": "مسار مدخل الرجال إلى خدماتهم داخل نطاق الضيافة فقط",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "opening_fit",
+      "rule_id": "SPEC-OP-01",
+      "scope_ar": "عرض كل فتحة ومركزها داخل الجدار المرتبط",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "door_envelopes",
+      "rule_id": "SPEC-OP-02",
+      "scope_ar": "لا يتقاطع الغلاف المستطيل المحافظ لدوران الأبواب مع الأثاث أو باب آخر",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "physical_windows",
+      "rule_id": "USR-01",
+      "scope_ar": "فتحة نافذة خارجية فعلية لكل غرفة نوم ومطبخ وحمام",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "opening_legality",
+      "rule_id": "SPEC-NV-01",
+      "scope_ar": "كل نافذة على جهة مسموحة حسب بيانات المشروع",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "ventilation_quantity",
+      "rule_id": "SPEC-NV-03",
+      "scope_ar": "كفاية التهوية والإضاءة وفق معيار موثق",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "fixture_presence",
+      "rule_id": "SPEC-FU-03",
+      "scope_ar": "التجهيزات الأساسية المقترحة موجودة للمطابخ والحمامات والتخزين والطعام والغسيل",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "furniture_bounds",
+      "rule_id": "SPEC-FU-02",
+      "scope_ar": "الأثاث داخل المساحة الصافية دون تداخل مادي غير مقصود",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "placed_bed_capacity",
+      "rule_id": "SPEC-FU-01",
+      "scope_ar": "عدد أماكن النوم الموضوعة فعليًا يغطي عدد الأفراد",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "household_assignment",
+      "rule_id": "SPEC-IN-03",
+      "scope_ar": "توزيع أفراد الأسرة على الغرف معتمد",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "furniture_use",
+      "rule_id": "SPEC-FU-02",
+      "scope_ar": "مناطق استعمال الأثاث والفتح والصيانة والوصول كاملة",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "privacy_sightlines",
+      "rule_id": "SPEC-PR-02",
+      "scope_ar": "عدم كشف المناطق الخاصة من المداخل",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "core_stacking",
+      "rule_id": "SPEC-ST-03",
+      "scope_ar": "تطابق موضع وحجرة السلم بين الدورين",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "stair_headroom",
+      "rule_id": "SPEC-ST-02",
+      "scope_ar": "الخلوص الرأسي ومطابقة السلم للاشتراطات",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "parking_envelope",
+      "rule_id": "SPEC-PK-01",
+      "scope_ar": "غلاف الموقف المقترح داخل الأرض ولا يتداخل مع المبنى",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model result"
+    },
+    {
+      "check_id": "parking_maneuver",
+      "rule_id": "SPEC-PK-01",
+      "scope_ar": "اتصال الموقف بالشارع ومناورة السيارة والبوابة",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "local_regulations",
+      "rule_id": "SPEC-IN-06",
+      "scope_ar": "حدود الأرض والارتدادات والاشتراطات الرسمية متحققة",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "services_stacking",
+      "rule_id": "SPEC-SV-01",
+      "scope_ar": "تنسيق الخدمات رأسيًا ومسارات الصرف والتغذية",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "decisions",
+      "rule_id": "SPEC-PG-01",
+      "scope_ar": "حسم تعارضات المصعد والخادمة ومدخل الخدمة",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    },
+    {
+      "check_id": "dimensions",
+      "rule_id": "SPEC-QC-01",
+      "scope_ar": "سلاسل أبعاد وتفاصيل تنفيذية كاملة",
+      "implementation_status": "PENDING_RESULT_ONLY"
+    }
+  ],
+  "rule_coverage": [
+    {
+      "rule_id": "MASTER_CORE_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASTER_CORE_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASTER_CORE_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASTER_CORE_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASTER_CORE_005",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "REQ_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "REQ_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "REQ_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "REQ_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "REQ_005",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SITE_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SITE_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SITE_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SITE_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SITE_005",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ZONE_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_005",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_006",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "PRIV_007",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FAMILY_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FAMILY_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FAMILY_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FAMILY_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ELDER_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ELDER_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ELDER_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BED_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BED_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BED_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BED_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BATH_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BATH_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BATH_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "BATH_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SERV_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "SERV_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "CORE_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "CORE_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STACK_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STACK_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STACK_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DIM_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DIM_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DIM_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FURN_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FURN_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "FURN_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASS_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASS_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASS_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "MASS_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ELEV_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ELEV_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "ELEV_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RENDER_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RENDER_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STRUCT_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STRUCT_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STRUCT_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STRUCT_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STRUCT_005",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "STRUCT_006",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "OPEN_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "OPEN_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DOC_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DOC_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DOC_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "DOC_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "COLLAB_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "COLLAB_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "COLLAB_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_001",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_002",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_003",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_004",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_005",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_006",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_007",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_008",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_009",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "RUNTIME_010",
+      "catalog": "canonical_engine_rules",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "SOURCE_REQUIREMENT"
+    },
+    {
+      "rule_id": "IMG-PAT-001",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-002",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-003",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [
+        "guest_route"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-004",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-005",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-006",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-007",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-008",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-009",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-010",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-011",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-012",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-013",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-014",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-015",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-016",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-017",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "IMG-PAT-018",
+      "catalog": "adopted_image_patterns",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "USER_ADOPTED_REFERENCE"
+    },
+    {
+      "rule_id": "SPEC-IN-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-IN-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "finite_geometry"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-IN-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "household_assignment"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-IN-04",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "bounds"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-IN-05",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-IN-06",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "local_regulations"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-PG-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "mandatory_program",
+        "decisions"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-PG-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "areas"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-GEN-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-GEN-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "overlap"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-GEN-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-PR-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "reachability"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-PR-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "privacy_sightlines"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-PR-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-OP-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "references",
+        "room_wall_enclosure",
+        "opening_fit"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-OP-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "door_envelopes"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-NV-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "opening_legality"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-NV-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-NV-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "ventilation_quantity"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-ST-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "stair_geometry"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-ST-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "stair_headroom"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-ST-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "core_stacking"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-FU-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "placed_bed_capacity"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-FU-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "furniture_bounds",
+        "furniture_use"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-FU-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "fixture_presence"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-SV-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "services_stacking"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-PK-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "parking_envelope",
+        "parking_maneuver"
+      ],
+      "implementation_status": "PARTIAL",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-QC-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [
+        "dimensions"
+      ],
+      "implementation_status": "PENDING_RESULT_ONLY",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-QC-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-QC-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-QC-04",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-QC-05",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-RV-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-RV-02",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-RV-03",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    },
+    {
+      "rule_id": "SPEC-RL-01",
+      "catalog": "proposed_engineering_specification",
+      "runtime_check_ids": [],
+      "implementation_status": "NOT_IMPLEMENTED_OR_NOT_CERTIFIED",
+      "source_status": "DRAFT_FOR_ENGINEER_REVIEW"
+    }
+  ],
+  "scope": "No claim of complete rule activation or executive approval.",
+  "explicit_constraints": [
+    {
+      "rule_id": "USR-01",
+      "runtime_check_ids": [
+        "physical_windows"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "rule_id": "USR-02",
+      "runtime_check_ids": [],
+      "status": "TARGET_OR_POLICY_NOT_FULLY_IMPLEMENTED"
+    },
+    {
+      "rule_id": "USR-03",
+      "runtime_check_ids": [],
+      "status": "TARGET_OR_POLICY_NOT_FULLY_IMPLEMENTED"
+    },
+    {
+      "rule_id": "USR-04",
+      "runtime_check_ids": [],
+      "status": "TARGET_OR_POLICY_NOT_FULLY_IMPLEMENTED"
+    }
+  ]
+}

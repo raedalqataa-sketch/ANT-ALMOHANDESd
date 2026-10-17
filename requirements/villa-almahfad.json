@@ -1,0 +1,390 @@
+{
+  "schema_version": "1.0",
+  "project_id": "villa-almahfad",
+  "project_name": "فيلا المحفد",
+  "approval": {
+    "status": "user_approved_requirements_source",
+    "user_instruction": "اعتمد متطلبات ملف الاكسل",
+    "date": "2026-10-17",
+    "scope": "اعتماد المصدر؛ التعارضات والحقول المجهولة ليست قرارات محسومة"
+  },
+  "source": {
+    "filename": "villa-almahfad-filled.xlsx",
+    "sheet": "مدخلات الفيلا",
+    "sha256": "b95bf4abc3b52c5e356ddb34fa06d943002ad718649c23dea113571b12d50ba6"
+  },
+  "site": {
+    "plot_width_m": 20,
+    "plot_depth_m": 30,
+    "plot_area_m2": 600,
+    "geometry": "rectangular_per_workbook",
+    "north": "أعلى الرسم بحسب الملف المصدر",
+    "possible_entrance_sides": [
+      "south",
+      "west"
+    ],
+    "confirmed_street_sides": null,
+    "street_widths_m": null,
+    "frontage_orientation_confirmed": false,
+    "setbacks_m": null,
+    "local_regulations": null,
+    "survey_available": false,
+    "location_summary": "اليمن، محافظة صنعاء؛ تفاصيل الموقع في المصدر"
+  },
+  "household": {
+    "members": 9,
+    "floors": 2,
+    "elderly_note": "ورد في الملف: أب وزوجته؛ احتياجات الوصول وأعمار الآخرين غير محددة",
+    "children_ages": null,
+    "children_bedroom_count": null,
+    "sleeping_arrangement": null
+  },
+  "design_intent": {
+    "use": "عائلي",
+    "level": "فاخر",
+    "style": "نيو كلاسيك",
+    "priority": "توازن وظيفي وجمالي",
+    "guest_frequency": "متوسط",
+    "privacy_context": "خصوصية المساكن اليمنية",
+    "footprint_area_m2": null,
+    "footprint_location": null,
+    "designer_can_propose_footprint": true,
+    "footprint_note": "حرية الاقتراح ضمن الأرض والمتطلبات؛ لا تتيح افتراض اشتراطات رسمية"
+  },
+  "required": [
+    {
+      "id": "separate_family_entrance",
+      "label": "مدخل عائلة مستقل",
+      "quantity": 1
+    },
+    {
+      "id": "ground_guest_or_elderly_room",
+      "label": "غرفة أرضية لضيف أو كبير سن",
+      "quantity": 1,
+      "alternative_use": true
+    },
+    {
+      "id": "parking",
+      "label": "موقف سيارة",
+      "quantity": 1
+    },
+    {
+      "id": "storage",
+      "label": "مستودع",
+      "quantity": 1
+    }
+  ],
+  "preferred_spaces": [
+    {
+      "id": "men_majlis",
+      "label": "مجلس رجال",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "men_washbasins",
+      "label": "مغاسل رجال",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "men_wc",
+      "label": "حمام رجال",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "guest_dining",
+      "label": "طعام ضيوف",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "women_majlis",
+      "label": "مجلس نساء",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "family_lounge",
+      "label": "صالة عائلية",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "family_dining",
+      "label": "طعام عائلي",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "daily_living",
+      "label": "معيشة يومية",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "master_bedroom",
+      "label": "غرفة نوم رئيسية",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "master_dressing",
+      "label": "ملابس رئيسية",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "master_bathroom",
+      "label": "حمام رئيسي",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "children_bedrooms",
+      "label": "غرف نوم الأبناء",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "private_bedroom_bathroom",
+      "label": "حمام غرف خاص",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "shared_family_bathroom",
+      "label": "حمام عائلي مشترك",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "main_kitchen",
+      "label": "مطبخ رئيسي",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "prep_kitchen",
+      "label": "مطبخ تحضيري",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "pantry",
+      "label": "مخزن مؤن",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "laundry",
+      "label": "غسيل",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "stairs",
+      "label": "سلم",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "courtyard_outdoor_seating",
+      "label": "حوش وجلسة خارجية",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "garden",
+      "label": "حديقة",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "usable_roof",
+      "label": "سطح مستخدم",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "home_office",
+      "label": "مكتب منزلي",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "prayer_room",
+      "label": "مصلى",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "children_play",
+      "label": "ألعاب أطفال",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    },
+    {
+      "id": "home_gym",
+      "label": "نادي منزلي",
+      "source_preferred_quantity": 1,
+      "priority": "preferred",
+      "final_dimensions_m": null
+    }
+  ],
+  "preferred_space_note": "العدد 1 كما لُخّصت الطلبات في الملف؛ لا يحسم عدد غرف الأبناء المطلوب لأسرة من 9 أفراد. لا يُحوّل الفراغ المفضل إلى إلزامي، ولا يلغي احتياجات السلامة أو الأنظمة المعتمدة.",
+  "privacy_preferences": [
+    {
+      "id": "men_family_separation",
+      "label": "فصل الرجال عن العائلة",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "separate_men_entrance",
+      "label": "مدخل رجال مستقل",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "nearby_men_wc",
+      "label": "قرب حمام الرجال",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "screen_family_lounge",
+      "label": "عدم كشف الصالة",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "bedroom_privacy",
+      "label": "خصوصية النوم",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "bathroom_natural_light_ventilation",
+      "label": "الإضاءة والتهوية الطبيعية للحمامات",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "lit_halls",
+      "label": "إضاءة الموزعات",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "kitchen_dining_adjacency",
+      "label": "قرب المطبخ من السفرة",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "reduce_corridors",
+      "label": "تقليل الممرات",
+      "priority": "preferred",
+      "importance": "medium"
+    },
+    {
+      "id": "flexibility",
+      "label": "مرونة الاستخدام",
+      "priority": "preferred",
+      "importance": "medium"
+    }
+  ],
+  "resolved_priority": [
+    {
+      "id": "family_entrance_priority",
+      "decision": "required",
+      "reason": "الملف يصف مدخل العائلة صراحة بالإلزامي رغم وروده مفضلاً في ملخص الخصوصية"
+    }
+  ],
+  "pending_decisions": [
+    {
+      "id": "elevator",
+      "label": "المصعد",
+      "source_positions": [
+        "غير مطلوب في بيانات المشروع",
+        "مفضل في الطلبات"
+      ],
+      "decision": null
+    },
+    {
+      "id": "maid_room",
+      "label": "غرفة الخادمة",
+      "source_positions": [
+        "غير مطلوبة في بيانات المشروع",
+        "مفضلة في الطلبات"
+      ],
+      "decision": null
+    },
+    {
+      "id": "kitchen_service_entrance",
+      "label": "مدخل خدمة المطبخ",
+      "source_positions": [
+        "لا في بيانات المشروع",
+        "مفضل في الخصوصية"
+      ],
+      "decision": null
+    }
+  ],
+  "unknowns": [
+    "أعمار الأسرة وتوزيع غرف النوم",
+    "اتجاه الواجهة الفعلي وجهات الشوارع وعروضها",
+    "الارتدادات والاشتراطات المعتمدة",
+    "الأبعاد الصافية النهائية للفراغات",
+    "مساحة المبنى وموقعه النهائي على الأرض",
+    "ارتفاعات الأدوار وتفاصيل السلم",
+    "احتياجات الوصول لكبار السن"
+  ],
+  "excluded_undefined_requests": [
+    "طلب خاص 1",
+    "طلب خاص 2",
+    "طلب خاص 3"
+  ],
+  "reference_pdf": {
+    "filename": "VILLA_GF_A2_ARCHITECTURAL_REVIEW-1.pdf",
+    "role": "مرجع بصري للمراجعة فقط",
+    "plot_m": [
+      20,
+      25
+    ],
+    "is_authoritative_for_dimensions": false,
+    "is_authoritative_for_program": false,
+    "note": "لا تُنقل مساحة مبناه أو مساحات غرفه أو توزيع أدواره إلى هذا المشروع تلقائيًا"
+  },
+  "generator_readiness": {
+    "room_dimensions_available": false,
+    "direct_current_api_import_supported": false,
+    "note": "هذه مواصفات مشروع وليست قالب الغرف name,width,depth,kind الذي تقرؤه الواجهة الحالية؛ يلزم ربط نموذج المتطلبات بمحرك التصميم قبل ادعاء تطبيقها في التوليد."
+  }
+}

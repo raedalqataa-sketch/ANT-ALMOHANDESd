@@ -53,5 +53,5 @@ def test_invalid_programs_rejected():
     assert client.post('/api/generate', json=base).status_code == 422
     base['rooms'] = [{'name': 'A', 'width': -1, 'depth': 2}]
     assert client.post('/api/generate', json=base).status_code == 422
-    assert client.get('/api/files/missing.pdf').status_code == 404
+    assert client.get('/api/files/00000000000000000000000000000000.pdf').status_code == 404
     assert client.get('/api/files/main.py').status_code == 400

@@ -5,7 +5,9 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
 COPY frontend ./frontend
-RUN useradd --create-home appuser && mkdir outputs && chown appuser:appuser outputs
+COPY requirements ./requirements
+COPY constitution ./constitution
+RUN useradd --create-home appuser && mkdir outputs && chmod -R a+rX /app && chown appuser:appuser outputs
 USER appuser
 EXPOSE 8000
 CMD ["sh", "-c", "exec uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

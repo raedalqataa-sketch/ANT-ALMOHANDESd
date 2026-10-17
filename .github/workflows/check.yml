@@ -1,4 +1,4 @@
-name: Check prototype
+name: Check architectural drafts
 on: [push, pull_request]
 jobs:
   test:
@@ -10,3 +10,8 @@ jobs:
           python-version: '3.11'
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check frontend/app.js
+      - run: node --check frontend/studio.js
