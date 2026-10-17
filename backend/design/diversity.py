@@ -27,20 +27,24 @@ def topology_signature(model):
 
 
 def spatial_signature(model):
-    site_width = model['site']['width']
+    site = model.get('site')
+    if not site or not site.get('width') or not site.get('depth'):
+        return None
+    site_width = site['width']
     return tuple(sorted((floor['id'], room['kind'], room['zone'],
                          round((room['x'] + room['width'] / 2) / site_width, 3),
-                         round((room['y'] + room['depth'] / 2) / model['site']['depth'], 3))
+                         round((room['y'] + room['depth'] / 2) / site['depth'], 3))
                         for floor in model['floors'] for room in floor['rooms']))
 
 
 def diversity_report(candidates):
     signatures = [topology_signature(c) for c in candidates]
     distinct = len(set(signatures))
+    signatures_spatial = [s for c in candidates if (s := spatial_signature(c)) is not None]
     return {
         "candidate_count": len(candidates),
         "distinct_topology_count": distinct,
-        "distinct_spatial_arrangement_count": len(set(spatial_signature(c) for c in candidates)),
+        "distinct_spatial_arrangement_count": (len(set(signatures_spatial)) if len(signatures_spatial) == len(candidates) else None),
         "distinct_topologies_confirmed": distinct == len(candidates),
         "status": "DIVERSE" if distinct == len(candidates) else "REPEATED_TOPOLOGY",
         "note_ar": (
