@@ -7,6 +7,7 @@ import json
 from uuid import uuid4
 from .models import Rect, RoomEntity, WallEntity, OpeningEntity, Fixture, FloorModel
 from .requirements import project_profile, rules_summary
+from .spatial_variants import mirror_candidate
 
 EXT = .25
 INT = .15
@@ -246,5 +247,8 @@ def generate_candidates(options):
     if options.footprint_width or options.footprint_depth:
         sizes=[(options.footprint_width or 14.8,options.footprint_depth or 20)]
     for i,(w,d) in enumerate(sizes[:options.candidate_count],1):
-        candidates.append(make_candidate(profile,w,d,options.floor_height,i))
+        candidate = make_candidate(profile,w,d,options.floor_height,i)
+        if i == 2:
+            candidate = mirror_candidate(candidate)
+        candidates.append(candidate)
     return candidates
