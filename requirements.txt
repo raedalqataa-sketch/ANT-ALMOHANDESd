@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+openpyxl
+ezdxf
+reportlab
+python-multipart
+pytest
+httpx
+arabic-reshaper
+python-bidi
