@@ -62,3 +62,47 @@ def propose_massing(site_width, site_depth, origin_x, origin_y, width, depth):
                          "plot_boundaries_and_access", "structural_feasibility"],
         })
     return result
+
+
+def evaluate_functional_massing(envelopes, program, minimum_court_width_m=3.0):
+    """Rank concept envelopes against user-provided zone area targets.
+
+    This does not place rooms or assert code compliance. Program may supply
+    positive area targets for guest, family and service zones.
+    """
+    if not isinstance(program, dict) or not program:
+        raise ValueError("Provide at least one functional-zone area target")
+    targets = {}
+    for zone, area in program.items():
+        if zone not in ("guest", "family", "service", "private"):
+            raise ValueError(f"Unsupported functional zone: {zone}")
+        if not isinstance(area, (int, float)) or isinstance(area, bool) or area <= 0:
+            raise ValueError(f"Invalid area for {zone}")
+        targets[zone] = float(area)
+    required = sum(targets.values())
+    results = []
+    for envelope in envelopes:
+        area = envelope["envelope_area_m2"]
+        family = envelope["family"]
+        rects = envelope["rectangles"]
+        reasons = []
+        if area < required:
+            reasons.append("INSUFFICIENT_ENVELOPE_AREA")
+        if family == "U_SHAPE":
+            # U concept's central open gap is not automatically a habitable courtyard.
+            gap = rects[1]["width"] - rects[2]["width"]
+            if gap < minimum_court_width_m:
+                reasons.append("COURT_GAP_BELOW_CONCEPT_TARGET")
+        if family in ("L_SHAPE", "U_SHAPE"):
+            reasons.append("EXTERNAL_OPENING_AND_PRIVACY_REVIEW_REQUIRED")
+        results.append({
+            "family": family,
+            "zone_area_targets_m2": targets,
+            "envelope_area_m2": area,
+            "nominal_area_surplus_m2": round(area - required, 3),
+            "feasibility": "REJECT_CONCEPT" if "INSUFFICIENT_ENVELOPE_AREA" in reasons
+                           or "COURT_GAP_BELOW_CONCEPT_TARGET" in reasons else "PENDING_LAYOUT",
+            "review_reasons": reasons,
+            "note_ar": "فحص مساحة مبدئي فقط؛ لم تُوزع الغرف أو تُتحقق العلاقات والتهوية والاشتراطات.",
+        })
+    return results
