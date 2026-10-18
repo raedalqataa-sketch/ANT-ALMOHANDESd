@@ -135,3 +135,12 @@ def frontend():
 
 from fastapi.staticfiles import StaticFiles
 app.mount('/assets',StaticFiles(directory=ROOT/'frontend'),name='assets')
+
+
+from backend.design.general_api import router as general_router
+app.include_router(general_router)
+app.mount('/generator-assets',StaticFiles(directory=ROOT/'web_generator'),name='generator-assets')
+
+@app.get('/generate/')
+def general_frontend():
+    return FileResponse(ROOT/'web_generator'/'index.html')

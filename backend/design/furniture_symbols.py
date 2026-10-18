@@ -69,6 +69,7 @@ class Painter:
         shape(0,'#d4c8b7',SEAM,.010);shape(min(w,h)*.06,fill,'#c4b8a5',.006)
 
     def marble(self,x,y,w,h,light=True):
+        if getattr(self.scene,'linework_only',False):return
         vein='#d3c9b9' if light else '#98806b'
         # Curves stay in the central rectangle, inside even a racetrack top.
         for f in (.32,.68):

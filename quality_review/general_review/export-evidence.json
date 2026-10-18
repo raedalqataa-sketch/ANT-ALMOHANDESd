@@ -1,0 +1,11 @@
+{
+  "native_wasm_geometry_equal": true,
+  "dxf_version": "AC1024",
+  "audit_errors": 0,
+  "hatch_solid_count": 0,
+  "units": 6,
+  "wall_outline_lineweight_100th_mm": 50,
+  "python_tests": 53,
+  "site_legacy_js_suites": 6,
+  "ollama_inference_tested": false
+}

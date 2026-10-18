@@ -1,0 +1,76 @@
+'use strict';
+(()=>{
+ const $=id=>document.getElementById(id),kinds={master:'نوم رئيسية',bedroom:'غرفة نوم',majlis:'مجلس',living:'معيشة',dining:'طعام',kitchen:'مطبخ',bathroom:'حمام',office:'مكتب',storage:'مستودع',laundry:'غسيل'};
+ const scalar=['project_name','plot_width','plot_depth','floors','entrance_face','wall_thickness','corridor_width','floor_height','notes'];
+ const state={rooms:[],result:null,selected:null,floor:'GF',stale:false,busy:false,zoom:1,aiDraft:null};window.AntGeneral=state;
+ const canonical=x=>JSON.stringify(x,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
+ const uid=()=>('r'+crypto.randomUUID().replaceAll('-','')).slice(0,30);
+ function defaultRooms(floors){return [
+  ['مجلس','majlis',0,1,24,3.5,0],['معيشة عائلية','living',0,1,24,3.5,0],['مطبخ','kitchen',0,1,16,3,0],['غرفة طعام','dining',0,1,16,3,0],['حمام ضيوف','bathroom',0,1,4,1.6,0],
+  ['نوم رئيسية','master',floors-1,1,20,3.5,2],['غرف الأبناء','bedroom',floors-1,2,16,3.2,2],['حمام عائلي','bathroom',floors-1,1,5,1.6,0]
+ ].map(([name,kind,floor,count,min_area,min_side,capacity])=>({id:uid(),name,kind,floor,count,min_area,min_side,capacity}));}
+ function error(message){$('error').textContent=message||'';$('error').hidden=!message;}
+ function brief(){const b=Object.fromEntries(scalar.map(id=>[id,['project_name','entrance_face','notes'].includes(id)?$(id).value:Number($(id).value)]));b.setbacks=Object.fromEntries(['north','south','east','west'].map(id=>[id,Number($(id).value)]));b.rooms=structuredClone(state.rooms);return b;}
+ function persist(){try{localStorage.setItem('ant-general-brief-050',JSON.stringify(brief()))}catch{}}
+ function changed(){state.stale=!!state.result;$('stale').hidden=!state.stale;$('downloads').replaceChildren();$('choose').disabled=true;state.aiDraft=null;$('ai-review').hidden=true;persist();total();}
+ function control(row,key,choices){const el=document.createElement(choices?'select':'input');if(choices)for(const [v,label]of Object.entries(choices)){const op=new Option(label,v);el.add(op)}
+  el.value=row[key];el.setAttribute('aria-label',row.name+' — '+({name:'الاسم',kind:'النوع',floor:'الدور',count:'العدد',min_area:'المساحة',min_side:'أقل ضلع',capacity:'سعة النوم'}[key]));
+  if(!choices&&key!=='name'){el.type='number';el.step=['count','capacity'].includes(key)?'1':'.1';el.min=({count:1,min_area:3,min_side:1.4,capacity:0})[key];el.max=({count:12,min_area:100,min_side:10,capacity:2})[key]}
+  if(key==='name')el.maxLength=65;
+  const event=choices?'change':'input';el.addEventListener(event,()=>{row[key]=['name','kind'].includes(key)?el.value:Number(el.value);if(key==='kind'&&!['bedroom','master'].includes(row.kind))row.capacity=0;changed();if(key==='kind')renderRooms()});return el;
+ }
+ function renderRooms(){const body=$('rooms');body.replaceChildren();for(const row of state.rooms){const tr=document.createElement('tr');
+  for(const key of ['name','kind','floor','count','min_area','min_side','capacity']){const td=document.createElement('td');td.append(control(row,key,key==='kind'?kinds:key==='floor'?{0:'أرضي',1:'أول'}:null));tr.append(td)}
+  const td=document.createElement('td'),remove=document.createElement('button');remove.type='button';remove.className='remove';remove.textContent='×';remove.setAttribute('aria-label','حذف '+row.name);remove.onclick=()=>{state.rooms=state.rooms.filter(r=>r!==row);renderRooms();changed()};td.append(remove);tr.append(td);body.append(tr)}total();
+ }
+ function total(){const count=state.rooms.reduce((s,r)=>s+(Number(r.count)||0),0),area=state.rooms.reduce((s,r)=>s+(r.min_area*r.count||0),0);$('program-total').textContent=`${count} فراغًا مطلوبًا · ${area.toFixed(0)} م² صافي الحد الأدنى للدورين`}
+ function restore(b){for(const id of scalar)if(b[id]!==undefined)$(id).value=b[id];for(const id of ['north','south','east','west'])if(b.setbacks?.[id]!==undefined)$(id).value=b.setbacks[id];state.rooms=b.rooms;renderRooms();}
+ function validate(b){if(!$('brief-form').reportValidity())throw Error('راجع الأبعاد في نموذج المشروع.');if(!b.rooms.length||b.rooms.length>30)throw Error('أدخل بين صف واحد و30 صفًا في البرنامج.');
+  const ids=new Set();for(const r of b.rooms){if(!r.name?.trim()||!kinds[r.kind]||!r.id||ids.has(r.id))throw Error('راجع أسماء وأنواع ومعرفات الفراغات.');ids.add(r.id);
+   for(const k of ['floor','count','min_area','min_side','capacity'])if(!Number.isFinite(r[k]))throw Error('راجع القيم الرقمية في البرنامج.');
+   if(!Number.isInteger(r.floor)||r.floor<0||r.floor>=b.floors)throw Error(`الدور المحدد لـ«${r.name}» غير موجود. غيّره في الجدول أو اختر مثال الدور الواحد.`);
+   if(!Number.isInteger(r.count)||r.count<1||r.count>12||r.min_area<3||r.min_area>100||r.min_side<1.4||r.min_side>10||!Number.isInteger(r.capacity)||r.capacity<0||r.capacity>2)throw Error('العدد 1–12، المساحة 3–100 م²، الضلع 1.4–10 م، وسعة النوم 0–2 لكل غرفة.');
+   if(r.capacity&&!['bedroom','master'].includes(r.kind))throw Error('سعة النوم تخص غرف النوم فقط.');}
+  if(b.rooms.reduce((s,r)=>s+r.count,0)>36)throw Error('هذا الإصدار يدعم 36 فراغًا كحد أقصى.');
+  if(b.plot_width-b.setbacks.east-b.setbacks.west<6||b.plot_depth-b.setbacks.north-b.setbacks.south<6)throw Error('حدود البناء المتبقية بعد الارتدادات أصغر من نطاق البحث.');
+ }
+ async function request(path,body){const res=await fetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{});let data;try{data=await res.json()}catch{throw Error('تعذر الاتصال بالخدمة.')}if(!res.ok)throw Error(typeof data.detail==='string'?data.detail:'رفض التحقق المدخلات؛ راجع البرنامج والأبعاد.');return data;}
+ const url=path=>window.AntFiles?window.AntFiles.url(path):path;
+ function link(path,label){const a=document.createElement('a');a.href=url(path);a.download=path.split('/').pop();a.textContent=label;return a;}
+ function renderSelected(){const m=state.selected;if(!m)return;$('viewer').hidden=false;$('empty').hidden=true;$('floor-tabs').replaceChildren();
+  for(const f of m.floors){const button=document.createElement('button');button.textContent=f.name;button.dataset.floor=f.id;button.classList.toggle('active',state.floor===f.id);button.onclick=()=>{state.floor=f.id;state.zoom=1;renderSelected()};$('floor-tabs').append(button)}
+  const path=m.previews[state.floor];$('plan').hidden=!path;if(path)$('plan').src=url(path);else $('plan').removeAttribute('src');$('plan-wrap').style.display=path?'':'none';$('plan').style.width=(100*state.zoom)+'%';$('plan').style.maxWidth=(850*state.zoom)+'px';
+  $('selection-state').textContent=m.model_revision_id.slice(0,12)+' · '+(m.release.drawing_export_allowed?'مسودة للمراجعة':'الرسم محجوب لفشل الفحص');
+  $('downloads').replaceChildren();if(!state.stale){for(const [ext,path]of Object.entries(m.downloads))$('downloads').append(link(path,ext==='dxf'?'↓ DXF 2010':'↓ '+ext.toUpperCase()));if(path)$('downloads').append(link(path,'↓ SVG · '+state.floor));}
+  $('checks').replaceChildren();for(const c of m.checks){const d=document.createElement('details');d.className=c.status==='PASS'?'pass':c.status==='FAIL'?'fail':'pending';const sm=document.createElement('summary');sm.textContent=(c.status==='PASS'?'✓ ':c.status==='FAIL'?'× ':'◷ ')+c.label;const pre=document.createElement('pre');pre.textContent=Object.keys(c.evidence||{}).length?JSON.stringify(c.evidence,null,2):c.status==='PASS'?'اجتاز الفحص الجزئي المحدد.':'هذا البند لم يُتحقق منه.';d.append(sm,pre);$('checks').append(d)}
+  $('metrics').textContent=`مسطح الدور المقترح: ${m.metrics.floor_built_m2} م². الفراغات المطلوبة: ${m.metrics.requested_spaces}. سعة الأسرّة المرسومة: ${m.metrics.bed_capacity}. مساحة الممرات في الأدوار: ${m.metrics.circulation_m2} م². المساحات المرنة الزائدة المقترحة: ${m.metrics.proposed_flexible_m2} م²؛ تحتاج تحديد الاستعمال أو تقليل الكتلة.`;
+  $('choose').disabled=state.stale||!m.release.drawing_export_allowed;
+  let chosen;try{chosen=JSON.parse(localStorage.getItem('ant-general-choice-050')||'null')}catch{}
+  $('chosen').textContent=chosen?.revision===m.model_revision_id?'اخترت هذا المقترح. الاختيار محفوظ في هذا المتصفح، ولا يمثل اعتمادًا تنفيذيًا.':'';
+  for(const b of $('alternatives').children)b.classList.toggle('active',b.dataset.family===m.candidate_id);
+ }
+ function renderResult(){const r=state.result;$('alternatives').replaceChildren();$('unavailable').replaceChildren();
+  for(const m of r.candidates){const b=document.createElement('button');b.className='alternative';b.dataset.family=m.candidate_id;const shape=document.createElement('span');shape.className='shape '+({L:'l',U:'u',stepped:'step'}[m.candidate_id]);shape.setAttribute('aria-hidden','true');const content=document.createElement('span'),title=document.createElement('strong'),small=document.createElement('small');title.textContent=m.search.family_label_ar;small.textContent=`${m.metrics.floor_built_m2} م² / دور · ${m.release.drawing_export_allowed?'متاح للمراجعة':'فشل فحص هندسي'}`;content.append(title,small);b.append(shape,content);b.onclick=()=>{state.selected=m;state.floor='GF';state.zoom=1;renderSelected()};$('alternatives').append(b)}
+  for(const u of r.unavailable){const p=document.createElement('p');p.className='unavailable';p.textContent=u.label+': '+u.reason;$('unavailable').append(p)}
+  const count=r.candidates.filter(m=>m.release.drawing_export_allowed).length;$('result-summary').textContent=`${count} مقترحات قابلة للمعاينة من أصل 3 أنماط؛ الطلب نفسه محفوظ في تقرير كل بديل.`;
+  state.selected=r.candidates.find(m=>m.release.drawing_export_allowed)||r.candidates[0]||null;if(state.selected)renderSelected();else{$('viewer').hidden=true;$('empty').hidden=false;$('empty').querySelector('h3').textContent='لم يجد البحث حلًا ضمن الحدود المدخلة';$('empty').querySelector('p').textContent='راجع أسباب التعذر أعلاه؛ لم تُحذف أي غرفة لتصنيع نتيجة.';}
+ }
+ $('brief-form').onsubmit=async event=>{event.preventDefault();if(state.busy)return;error('');try{const b=brief();validate(b);persist();state.busy=true;$('generate').disabled=true;$('generate').textContent='جارٍ البحث ورسم البدائل…';$('engine-state').textContent='يجري تحميل المحرك عند أول استخدام، ثم فحص البرنامج وتوليد الملفات…';
+   const result=await request('/api/v3/design',b);state.result=result;state.stale=canonical(brief())!==canonical(b);$('stale').hidden=!state.stale;renderResult();$('engine-state').textContent='اكتمل البحث الهندسي. البنود المعلقة تظهر مع كل مقترح.';
+   try{localStorage.setItem('ant-general-last-050',JSON.stringify({candidates:result.candidates.map(m=>m.downloads.json),unavailable:result.unavailable}))}catch{}
+   $('results').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){error(e.message);$('engine-state').textContent='لم يكتمل التوليد. راجع الرسالة والمدخلات.';}finally{state.busy=false;$('generate').disabled=false;$('generate').innerHTML='توليد المقترحات الثلاثة <span>←</span>';}};
+ $('add-room').onclick=()=>{if(state.rooms.length>=30)return error('الحد الأقصى 30 صفًا.');state.rooms.push({id:uid(),name:'فراغ جديد',kind:'bedroom',floor:0,count:1,min_area:16,min_side:3.2,capacity:1});renderRooms();changed()};
+ for(const n of [1,2])$(n===1?'one-floor':'two-floors').onclick=()=>{$('floors').value=n;state.rooms=defaultRooms(n);renderRooms();changed()};
+ for(const id of [...scalar,'north','south','east','west'])$(id).addEventListener(['floors','entrance_face'].includes(id)?'change':'input',changed);
+ $('choose').onclick=()=>{if(state.stale||!state.selected?.release.drawing_export_allowed)return;try{localStorage.setItem('ant-general-choice-050',JSON.stringify({revision:state.selected.model_revision_id,family:state.selected.candidate_id,brief:state.selected.brief}));renderSelected()}catch{error('تعذر حفظ الاختيار في هذا المتصفح. نزّل تقرير JSON للاحتفاظ به.')}};
+ const zoom=delta=>{state.zoom=Math.min(3,Math.max(.5,state.zoom+delta));renderSelected()};$('zoom-in').onclick=()=>zoom(.25);$('zoom-out').onclick=()=>zoom(-.25);$('zoom-fit').onclick=()=>{state.zoom=1;renderSelected()};
+ $('save-brief').onclick=()=>{const blob=new Blob([JSON.stringify(brief(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='villa-brief.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+ $('load-brief').onclick=()=>$('brief-file').click();$('brief-file').onchange=async()=>{try{const f=$('brief-file').files[0];if(!f)return;if(f.size>200000)throw Error('ملف المتطلبات أكبر من الحد المتاح.');const b=JSON.parse(await f.text());if(!Array.isArray(b.rooms)||!b.setbacks||b.rooms.length>30||!b.rooms.length)throw Error('ملف متطلبات غير صالح.');const previous=brief();try{restore(b);validate(brief())}catch(e){restore(previous);throw e}changed();error('')}catch(e){error(e.message)}finally{$('brief-file').value=''}};
+ async function aiStatus(){try{const status=await request('/api/v3/ai-status');$('ai-state').textContent=status.configured?'خادم Ollama مضبوط. يُختبر الاتصال عند طلب الاقتراح؛ راجع الجدول قبل تطبيقه.':'غير متصل بنموذج لغوي حاليًا. يمكنك تحرير الجدول والتوليد مجانًا. ربط Ollama متاح عند تشغيل خادم التطبيق.';$('interpret').disabled=!status.configured}catch{$('ai-state').textContent='المساعد غير متاح؛ تحرير الجدول والتوليد الهندسي متاحان.'}}
+ $('interpret').onclick=async()=>{try{error('');const b=brief();validate(b);if(b.notes.trim().length<3)throw Error('اكتب طلبك أولًا في خانة الطلبات الإضافية.');$('interpret').disabled=true;const d=await request('/api/v3/interpret',{brief:b,text:b.notes});state.aiDraft=d;$('ai-draft').textContent=JSON.stringify({rooms:d.rooms,unresolved:d.unresolved},null,2);$('ai-review').hidden=false;}catch(e){error(e.message)}finally{$('interpret').disabled=false}};
+ $('apply-ai').onclick=()=>{if(!state.aiDraft)return;const proposed=state.aiDraft;state.rooms=proposed.rooms;if(proposed.unresolved.length)$('notes').value=proposed.source_text+'\nبنود لم تتحول إلى الجدول: '+proposed.unresolved.join('؛ ');renderRooms();changed();};
+ async function init(){let saved;try{saved=JSON.parse(localStorage.getItem('ant-general-brief-050')||'null')}catch{}if(saved?.rooms?.length&&saved.setbacks)try{restore(saved)}catch{state.rooms=defaultRooms(2);renderRooms()}else{state.rooms=defaultRooms(2);renderRooms()}aiStatus();
+  try{const last=JSON.parse(localStorage.getItem('ant-general-last-050')||'null');if(last?.candidates?.length){const candidates=await Promise.all(last.candidates.map(path=>request(path)));state.result={candidates,unavailable:last.unavailable||[]};state.stale=canonical(brief())!==canonical(candidates[0].brief);$('stale').hidden=!state.stale;renderResult()}}catch{$('engine-state').textContent='ملفات التوليد السابق غير متاحة في هذا المتصفح؛ أعد التوليد.'}
+ }init();
+})();

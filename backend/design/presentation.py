@@ -159,7 +159,7 @@ def scene_pdf(model,path,drawings=None,include_report=True):
     c.save()
 
 
-def scene_dxf(model,path):
+def scene_dxf(model,path,drawings=None):
     doc=ezdxf.new(DXF_VERSION);doc.header['$INSUNITS']=6
     mono=model.get('presentation',{}).get('style')=='monochrome'
     doc.styles.new('ANT_ARABIC',dxfattribs={'font':'DejaVuSans.ttf'})
@@ -172,9 +172,9 @@ def scene_dxf(model,path):
         value=p.get('stroke','none')
         if value=='none':value=p.get('fill','#a3ad9a')
         if value=='none':value='#a3ad9a'
-        return {'layer':layer(p['layer']),'true_color':int(color(value,mono)[1:],16)}
+        return {'layer':layer(p['layer']),'true_color':int(color(value,mono)[1:],16),**({'lineweight':50 if p['layer']=='WALL_OUTLINE' else 13 if p['layer']=='FURNITURE' else 18} if model.get('presentation',{}).get('style')=='linework' else {})}
     for fi,floor in enumerate(model['floors']):
-        scene=architectural_scene(model,floor);off=fi*(model['site']['width']+8)
+        scene=drawings[fi] if drawings is not None else architectural_scene(model,floor);off=fi*(model['site']['width']+8)
         def pt(point):return off+point[0],model['site']['depth']-point[1]
         for p in scene.items:
             if p['layer'] in ('PAPER','SHADOW','UNDERLAY','FINISH_GRID','DECORATION'):continue

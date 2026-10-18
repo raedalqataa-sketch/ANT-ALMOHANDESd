@@ -15,3 +15,4 @@ jobs:
           node-version: '22'
       - run: node --check frontend/app.js
       - run: node --check frontend/studio.js
+      - run: node --check web_generator/app.js

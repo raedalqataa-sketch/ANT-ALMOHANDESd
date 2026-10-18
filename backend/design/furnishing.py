@@ -90,6 +90,16 @@ def bed_layouts(r):
                     b['capacity']=1
                     beds[i]['use_zones']=[dict(x=b['x'],y=2.2,width=1,depth=.7),dict(x=b['x']+1 if i==0 else b['x']-.6,y=.9,width=.6,depth=1.0)]
                 tables=[fixture('bedside',bx1-.55,.25,.45,.45),fixture('bedside',bx2+1.1,.25,.45,.45)]
+            if r.get('capacity')==1:
+                # Explicit customer capacity; existing profiles without this field are unchanged.
+                if r['kind']=='master':
+                    bx=(W-1.)/2
+                    beds=[fixture('single_bed',bx,.2,1.,2.,)]
+                    beds[0]['capacity']=1
+                    beds[0]['use_zones']=[dict(x=bx,y=2.2,width=1.,depth=.7),dict(x=bx+1.,y=.9,width=.6,depth=1.)]
+                    tables=[]
+                else:
+                    beds=beds[:1];tables=tables[:1]
             for group in (beds+tables,beds):yield [transform(q,r,rotation) for q in group]
 
 

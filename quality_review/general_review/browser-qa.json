@@ -1,0 +1,17 @@
+{
+  "three_distinct_schemes": true,
+  "real_program_count_change": true,
+  "blocked_infeasible": true,
+  "selection_persisted": true,
+  "cache_after_reload": true,
+  "stale_downloads_disabled": true,
+  "real_downloads": [
+    "pdf",
+    "dxf",
+    "json"
+  ],
+  "mobile_outer_overflow": false,
+  "page_errors": [],
+  "external_runtime_requests": [],
+  "ollama_live_connected": false
+}
