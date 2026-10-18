@@ -53,6 +53,24 @@ def drawing(model,floor,site_view=False):
             if park['width']<park['depth']:car_symbol(scene,park)
             else:scene.rect(park['x']+.5,park['y']+.45,4.5,1.9,stroke='#555555',lw=.018,layer='PARKING',radius=.18)
             scene.text(park['x']+park['width']/2,park['y']+.3,park['id'],.20,color='#333333',layer='PARKING')
+    # Draw the operator-supplied regulatory geometry as labelled REVIEW OVERLAY,
+    # not as constructed walls or automatically generated rooms.
+    geo=model.get('regulatory_geometry') or {}
+    if site_view:
+        overlay=[]
+        for well in geo.get('light_wells') or []:
+            if well.get('polygon'):overlay.append(('منور '+well['id'],well['polygon']))
+        ann=geo.get('roof_annex')
+        if ann and ann.get('polygon'):overlay.append(('ملحق علوي',ann['polygon']))
+        for proj in geo.get('projections') or []:
+            if proj.get('polygon'):overlay.append(('بروز '+proj['id'],proj['polygon']))
+        for label,poly in overlay:
+            scene.poly(poly,stroke='#666666',lw=.018,layer='REGULATORY_PROPOSED_GEOMETRY',closed=True)
+            xx=sum(p[0] for p in poly)/len(poly)
+            yy=sum(p[1] for p in poly)/len(poly)
+            scene.text(xx,yy,label,.16,layer='REGULATORY_PROPOSED_LABEL')
+        if overlay:
+            scene.text(x0+W/2,y0+D+2.2,'مضلعات تنظيمية مقترحة غير معتمدة وليست جدرانًا',.18,layer='TITLE')
     scene.text(x0+W/2,y0-1.8,model['profile']['project_name'],.48,color='#111111',layer='TITLE')
     scene.text(x0+W/2,y0-.95,('الموقع والمواقف' if site_view else model['search']['family_label_ar']+' · '+floor['name']),.30,color='#222222',layer='TITLE')
     scene.text(x0+W/2,y0-.5,f'أرض {siteW:g} × {siteD:g} م · '+(model['brief'].get('city') or 'السعودية — المدينة غير محددة'),.20,color='#555555',layer='TITLE')
