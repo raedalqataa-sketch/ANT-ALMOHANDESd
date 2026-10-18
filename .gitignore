@@ -13,3 +13,4 @@ mobile_probe/android/.gradle/
 mobile_probe/android/app/build/
 mobile_probe/android/build/
 mobile_probe/android/local.properties
+web_studio/build/
