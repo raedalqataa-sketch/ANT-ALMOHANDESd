@@ -15,11 +15,18 @@ class Scene:
         self.items.append(dict(type='ellipse',x=x,y=y,width=w,depth=h,fill=fill,stroke=stroke,lw=lw,layer=layer))
     def text(self,x,y,text,size=.28,color='#303633',align='center',layer='TEXT',role=None):
         self.items.append(dict(type='text',x=x,y=y,text=str(text),size=size,color=color,align=align,layer=layer,role=role))
+    def path(self,commands,fill='none',stroke='#777b75',lw=.015,layer='DETAIL'):
+        self.items.append(dict(type='path',commands=commands,fill=fill,stroke=stroke,lw=lw,layer=layer))
     def curve(self,points,stroke='#8b887b',lw=.018,layer='DOOR'):
         self.items.append(dict(type='curve',points=points,stroke=stroke,lw=lw,layer=layer))
 
 
 def furniture_symbol(scene,q):
+    from .furniture_symbols import draw_furniture
+    if not draw_furniture(scene,q):legacy_furniture_symbol(scene,q)
+
+
+def legacy_furniture_symbol(scene,q):
     rot=q.get('rotation',0);W,H=(q['depth'],q['width']) if rot in (90,270) else (q['width'],q['depth'])
     def pt(x,y):
         if rot==0:return(q['x']+x,q['y']+y)

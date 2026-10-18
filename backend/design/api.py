@@ -7,6 +7,7 @@ from .requirements import project_profile, rules_summary, import_brief
 from .generator import generate_candidates
 from .validators import validate_model, release_decision
 from .export import svg, export_pdf, export_dxf
+from .furniture_symbols import SYMBOL_VERSION
 
 router=APIRouter(prefix='/api/v2',tags=['architectural-drafts'])
 OUT=Path(__file__).resolve().parents[2]/'outputs'
@@ -16,7 +17,8 @@ OUT=Path(__file__).resolve().parents[2]/'outputs'
 def get_project():
     return {'profile':project_profile(),'rules':rules_summary(),
             'supported_scope':'ثلاث عائلات تنظيم وكتلة للمحفد مع بحث فرش وخلوص؛ لا ضمان لتغطية كل الحلول',
-            'version':'0.4.0',
+            'version':'0.4.1',
+            'export_formats':{'dxf':{'label':'AutoCAD 2010 DXF','acadver':'AC1024','units':'m'}},
             'requirements_import':'معاينة وربط مصدر Excel المعتمد؛ النصوص الجديدة لا تفسر تلقائيًا'}
 
 
@@ -62,6 +64,7 @@ def design(options:DesignOptions):
     OUT.mkdir(exist_ok=True)
     candidates=[]
     for model in models:
+        model.setdefault('presentation',{})['furniture_symbols']=SYMBOL_VERSION
         def canonical(value):
             if isinstance(value,dict):return {k:canonical(v) for k,v in value.items() if k not in ('revision_id','model_revision_id')}
             if isinstance(value,list):return [canonical(v) for v in value]

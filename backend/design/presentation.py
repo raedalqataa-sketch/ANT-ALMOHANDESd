@@ -12,6 +12,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 import arabic_reshaper
 from bidi.algorithm import get_display
 from .scene import architectural_scene
+from .vector_paths import flatten_path, rounded_rect_path
+
+DXF_VERSION='R2010'
+DXF_ACADVER='AC1024'
 
 ROOT=Path(__file__).resolve().parents[2]
 pdfmetrics.registerFont(TTFont('PlanV04',str(ROOT/'frontend'/'PlanFont.ttf')))
@@ -28,8 +32,8 @@ def color(value,mono=False):
     return '#'+f'{v:02x}'*3
 
 
-def scene_svg(model,floor,site_view=False):
-    scene=architectural_scene(model,floor,site_view);mono=model.get('presentation',{}).get('style')=='monochrome'
+def scene_svg(model,floor,site_view=False,drawing=None):
+    scene=drawing if drawing is not None else architectural_scene(model,floor,site_view);mono=model.get('presentation',{}).get('style')=='monochrome'
     root=Element('svg',{'xmlns':'http://www.w3.org/2000/svg','viewBox':' '.join(map(str,scene.viewbox)),
                         'role':'img','aria-label':floor['name'],'data-revision':model['model_revision_id'],'data-model-geometry':model.get('geometry_sha256','')})
     SubElement(root,'style').text=f"@font-face{{font-family:PlanV04;src:url(data:font/ttf;base64,{embedded_font()}) format('truetype')}}text{{font-family:PlanV04,Tahoma,sans-serif}}"
@@ -48,6 +52,9 @@ def scene_svg(model,floor,site_view=False):
             SubElement(g,'ellipse',dict(attrs,cx=str(p['x']+p['width']/2),cy=str(p['y']+p['depth']/2),rx=str(p['width']/2),ry=str(p['depth']/2)))
         elif p['type']=='poly':
             SubElement(g,'polygon' if p['closed'] else 'polyline',dict(attrs,points=' '.join(f'{x},{y}' for x,y in p['points'])))
+        elif p['type']=='path':
+            data=' '.join(cmd[0]+' '+' '.join(str(v) for v in cmd[1:]) for cmd in p['commands'])
+            SubElement(g,'path',dict(attrs,d=data))
         elif p['type']=='curve':
             a,c1,c2,b=p['points'];SubElement(g,'path',dict(attrs,d=f'M {a[0]} {a[1]} C {c1[0]} {c1[1]} {c2[0]} {c2[1]} {b[0]} {b[1]}'))
         else:
@@ -62,12 +69,12 @@ def scene_svg(model,floor,site_view=False):
 def rgb(hexcolor):return tuple(int(hexcolor[i:i+2],16)/255 for i in (1,3,5))
 
 
-def scene_pdf(model,path):
+def scene_pdf(model,path,drawings=None,include_report=True):
     pw,ph=1190.55,1683.78 # A2 portrait; the metric scale bar survives printing/viewer resizing.
-    c=canvas.Canvas(str(path),pagesize=(pw,ph));c.setTitle(model['profile']['project_name']+' — مراجعة معمارية V0.4')
+    c=canvas.Canvas(str(path),pagesize=(pw,ph));c.setTitle(model['profile']['project_name']+' — مراجعة معمارية V0.4.1')
     mono=model.get('presentation',{}).get('style')=='monochrome'
-    for floor in model['floors']:
-        scene=architectural_scene(model,floor);vx,vy,vw,vh=scene.viewbox
+    for index,floor in enumerate(model['floors']):
+        scene=drawings[index] if drawings is not None else architectural_scene(model,floor);vx,vy,vw,vh=scene.viewbox
         scale=min((pw-75)/vw,(ph-80)/vh);ox=(pw-vw*scale)/2;oy=(ph-vh*scale)/2
         def pt(point):return ox+(point[0]-vx)*scale,ph-oy-(point[1]-vy)*scale
         for p in scene.items:
@@ -82,6 +89,14 @@ def scene_pdf(model,path):
                 elif p.get('radius'):c.roundRect(x,y,w,h,p['radius']*scale,fill=fill!='none',stroke=stroke!='none')
                 else:c.rect(x,y,w,h,fill=fill!='none',stroke=stroke!='none')
             elif p['type']=='line':c.line(*pt(p['a']),*pt(p['b']))
+            elif p['type']=='path':
+                path=c.beginPath()
+                for cmd in p['commands']:
+                    if cmd[0]=='M':path.moveTo(*pt((cmd[1],cmd[2])))
+                    elif cmd[0]=='L':path.lineTo(*pt((cmd[1],cmd[2])))
+                    elif cmd[0]=='C':path.curveTo(*pt((cmd[1],cmd[2])),*pt((cmd[3],cmd[4])),*pt((cmd[5],cmd[6])))
+                    elif cmd[0]=='Z':path.close()
+                c.drawPath(path,stroke=stroke!='none',fill=fill!='none')
             elif p['type']=='curve':
                 a,c1,c2,b=p['points'];c.bezier(*pt(a),*pt(c1),*pt(c2),*pt(b))
             elif p['type']=='poly':
@@ -96,6 +111,8 @@ def scene_pdf(model,path):
         c.setFillColorRGB(.48,.53,.46);c.setFont('PlanV04',7)
         c.drawString(42,20,f"{model['candidate_id']} / {model['model_revision_id']} / {floor['id']} / DRAFT - NOT FOR CONSTRUCTION")
         c.showPage()
+    if not include_report:
+        c.save();return
     # The review sheet carries evidence and unresolved items, leaving the plans legible.
     def text(x,y,t,size=13,fill='#3a4c3b',align='right'):
         c.setFillColorRGB(*rgb(fill));c.setFont('PlanV04',size)
@@ -143,7 +160,7 @@ def scene_pdf(model,path):
 
 
 def scene_dxf(model,path):
-    doc=ezdxf.new('R2010');doc.header['$INSUNITS']=6
+    doc=ezdxf.new(DXF_VERSION);doc.header['$INSUNITS']=6
     mono=model.get('presentation',{}).get('style')=='monochrome'
     doc.styles.new('ANT_ARABIC',dxfattribs={'font':'DejaVuSans.ttf'})
     m=doc.modelspace();layers=set()
@@ -177,10 +194,17 @@ def scene_dxf(model,path):
             elif p['type']=='ellipse':
                 center=pt((p['x']+p['width']/2,p['y']+p['depth']/2))
                 major=(p['width']/2,0) if p['width']>=p['depth'] else (0,p['depth']/2)
-                m.add_ellipse(center,major,min(p['width'],p['depth'])/max(p['width'],p['depth']),dxfattribs=a)
+                ratio=min(p['width'],p['depth'])/max(p['width'],p['depth'])
+                if p.get('fill','none')!='none':
+                    hatch=m.add_hatch(color=256,dxfattribs={'layer':layer(p['layer']+'_FILL'),'true_color':int(color(p['fill'],mono)[1:],16)})
+                    hatch.paths.add_edge_path().add_ellipse(center,major,ratio)
+                if p.get('stroke','none')!='none':m.add_ellipse(center,major,ratio,dxfattribs=a)
             else:
-                if p['type']=='rect':
-                    x,y,w,h=p['x'],p['y'],p['width'],p['depth'];points=[(x,y),(x+w,y),(x+w,y+h),(x,y+h)];closed=True
+                if p['type']=='path':points,closed=flatten_path(p['commands'])
+                elif p['type']=='rect':
+                    x,y,w,h=p['x'],p['y'],p['width'],p['depth']
+                    if p.get('radius'):points,closed=flatten_path(rounded_rect_path(x,y,w,h,p['radius']))
+                    else:points=[(x,y),(x+w,y),(x+w,y+h),(x,y+h)];closed=True
                 else:points=p['points'];closed=p['closed']
                 # Filled room/site surfaces stay on switchable presentation layers.
                 if p.get('fill','none')!='none' and closed:
@@ -194,6 +218,6 @@ def scene_dxf(model,path):
     doc.saveas(path);read=ezdxf.readfile(path);audit=read.audit()
     expected=sum(len(f['rooms']) for f in model['floors'])
     actual=len(read.modelspace().query('LWPOLYLINE[layer=="ROOM"]'))
-    if audit.errors or actual!=expected:raise ValueError('فشل فحص DXF')
-    return dict(audit_errors=len(audit.errors),room_count=actual,units=read.header['$INSUNITS'],model_revision_id=model['model_revision_id'],
+    if audit.errors or actual!=expected or read.dxfversion!=DXF_ACADVER:raise ValueError('فشل فحص DXF 2010')
+    return dict(audit_errors=len(audit.errors),room_count=actual,units=read.header['$INSUNITS'],dxf_version=read.dxfversion,format='AutoCAD 2010 DXF',model_revision_id=model['model_revision_id'],
                 graphic_source='shared metric architectural scene',independent_cad_application_verified=False)

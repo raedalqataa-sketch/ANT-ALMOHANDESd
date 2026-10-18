@@ -1,0 +1,37 @@
+{
+  "model_revision_id": "4ee2a4cc845c411c90bf6638e92ff289",
+  "geometry_sha256": "9fffe07b4e55e1d09c5aff91053586bf599528016bfb2e6d644206f8a650362a",
+  "presentation": {
+    "style": "presentation",
+    "source": "reference_quality_brief_v04",
+    "furniture_symbols": "atelier-1.0"
+  },
+  "export_audit": {
+    "audit_errors": 0,
+    "room_count": 29,
+    "units": 6,
+    "dxf_version": "AC1024",
+    "format": "AutoCAD 2010 DXF",
+    "model_revision_id": "4ee2a4cc845c411c90bf6638e92ff289",
+    "graphic_source": "shared metric architectural scene",
+    "independent_cad_application_verified": false
+  },
+  "metrics": {
+    "footprint_m2": 312.0,
+    "net_rooms_m2": 544.09,
+    "circulation_m2": 77.15,
+    "bed_capacity": 10,
+    "passed_checks": 24,
+    "pending_checks": 11,
+    "failed_checks": 0,
+    "family_label_ar": "بهو توزيع ومعيشة مترابطة",
+    "floor_built_m2": {
+      "GF": 312.0,
+      "FF": 281.643
+    },
+    "circulation_ratio": 0.1418,
+    "longest_corridor_m": 5.75,
+    "dining_seats": 10,
+    "bedroom_count_proposed": 3
+  }
+}

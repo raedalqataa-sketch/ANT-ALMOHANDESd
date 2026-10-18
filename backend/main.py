@@ -12,7 +12,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 import arabic_reshaper
 from bidi.algorithm import get_display
 
-app = FastAPI(title='ANT ALMOHANDES - Prototype', version='0.4.0')
+app = FastAPI(title='ANT ALMOHANDES - Prototype', version='0.4.1')
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'outputs'; OUT.mkdir(exist_ok=True)
 pdfmetrics.registerFont(TTFont('Arabic',str(ROOT/'frontend'/'Latin.ttf')))
