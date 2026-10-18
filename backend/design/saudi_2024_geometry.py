@@ -228,4 +228,12 @@ def checks(model, brief):
         "5-1-10(1-6)", 32,
         {"required_action": "بطاقة اشتراطات الموقع، مخططات الواجهات التفصيلية، واعتماد مواد مقاومة للحريق",
          "reason": "الهوية العمرانية المحلية ومواصفات التنفيذ لا تُحسم من مسقط ثنائي الأبعاد"})
+    # Geometry overlays compare declared polygons against actual generator walls,
+    # occupied cells and floor footprints. They supersede placeholder rows only
+    # for the limited dimensional claim they can prove; they never approve SBC.
+    from .saudi_2024_overlay import evaluate as verify_footprints
+    refined = verify_footprints(model, brief)
+    replaced = {r['check_id']: r for r in refined}
+    results = [replaced.pop(row['check_id'], row) for row in results]
+    results.extend(replaced.values())
     return results
