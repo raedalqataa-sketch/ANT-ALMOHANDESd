@@ -34,6 +34,8 @@ class LightWell(Strict):
     length_m: float = Field(gt=0, le=30)
     storeys_served: int = Field(ge=1, le=14)
     opposing_windows: bool
+    polygon: list[tuple[float, float]] | None = Field(default=None, min_length=4, max_length=64)
+    window_ids: list[str] | None = None
     open_to_sky: bool | None = None
     cleaning_door: bool | None = None
     drains_provided: bool | None = None
@@ -41,6 +43,7 @@ class LightWell(Strict):
 
 
 class RoofAnnex(Strict):
+    polygon: list[tuple[float, float]] | None = Field(default=None, min_length=4, max_length=64)
     area_m2: float = Field(gt=0, le=5000)
     street_setbacks_m: dict[Literal['north','south','east','west'], Annotated[float, Field(ge=0, le=30)]] = Field(default_factory=dict)
     parapet_height_m: float | None = Field(default=None, ge=0, le=3)
@@ -51,6 +54,8 @@ class RoofAnnex(Strict):
 
 
 class Projection(Strict):
+    polygon: list[tuple[float, float]] | None = Field(default=None, min_length=4, max_length=64)
+    floor_id: Literal['GF','FF'] = 'FF'
     id: str = Field(min_length=1, max_length=45)
     face: Literal['north','south','east','west']
     kind: Literal['facade','balcony','decorative_cornice','stair']
@@ -61,11 +66,22 @@ class Projection(Strict):
     stair_width_m: float | None = Field(default=None, gt=0, le=6)
 
 
+class FacadeEquipment(Strict):
+    id: str = Field(min_length=1,max_length=45)
+    x: float = Field(ge=0,le=200)
+    y: float = Field(ge=0,le=200)
+    width: float = Field(gt=0,le=10)
+    depth: float = Field(gt=0,le=10)
+    floor_id: Literal['GF','FF'] = 'GF'
+
+
 class FacadeSurvey(Strict):
     face: Literal['north','south','east','west']
     faces_main_street: bool | None = None
     visible_ac_or_services: bool | None = None
     ac_or_services_on_facade: bool | None = None
+    equipment: list[FacadeEquipment] | None = None
+    inventory_complete: bool | None = None
 
 
 class RegulatoryGeometry(Strict):
