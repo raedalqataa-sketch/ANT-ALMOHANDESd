@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "source": {
+    "id": "MOMAH-RES-2024",
+    "title": "اشتراطات إنشاء المباني السكنية",
+    "publisher": "وزارة البلديات والإسكان",
+    "document_year": 2024,
+    "referenced_sbc_edition": 2018,
+    "document_pages": 48,
+    "reference_note": "هذه اشتراطات بلدية 2024 وليست النص الكامل لكود SBC 2024",
+    "official_page": "https://momah.gov.sa/ar/node/15715"
+  },
+  "scope": "Villas only in this runtime; local and parcel exceptions remain unresolved.",
+  "automated": {
+    "villa_storeys": {
+      "section": "3-1",
+      "page": 15,
+      "max": 2,
+      "method": "brief.floors"
+    },
+    "main_entrance_width": {
+      "section": "5-1-7(2)",
+      "page": 30,
+      "min_m": 0.8,
+      "method": "ground-floor main_entry door width"
+    },
+    "internal_corridor_width": {
+      "section": "5-1-4(2)",
+      "page": 28,
+      "min_m": 0.9,
+      "method": "minimum of net corridor width/depth"
+    }
+  },
+  "needs_model_evidence": [
+    {
+      "id": "vehicle-entry-width",
+      "section": "5-1-7(4)",
+      "page": 30,
+      "min_m": 3,
+      "when": "vehicle entrance designed",
+      "required": "measured street gate/driveway throat and legal curb cut"
+    },
+    {
+      "id": "total-height",
+      "section": "5-1-5(3)",
+      "page": 29,
+      "max_m": 14,
+      "when": "always",
+      "required": "surveyed sidewalk datum, slab/roof elevations and roof-annex level"
+    },
+    {
+      "id": "ground-floor-level",
+      "section": "5-1-5(2)",
+      "page": 29,
+      "min_m": 0.3,
+      "max_m": 1.2,
+      "when": "always",
+      "required": "surveyed sidewalk datum and finished ground floor elevation"
+    },
+    {
+      "id": "roof-parapet",
+      "section": "5-1-5(5)",
+      "page": 29,
+      "min_m": 1.7,
+      "max_m": 2,
+      "when": "always",
+      "required": "roof detail and measured parapet height"
+    },
+    {
+      "id": "guards",
+      "section": "5-1-1(1)",
+      "page": 26,
+      "when": "stairs/balconies exist",
+      "required": "guardrail sections, usable heights and opening gaps"
+    },
+    {
+      "id": "surface-drainage",
+      "section": "5-1-1(5)",
+      "page": 26,
+      "min_slope": 0.01,
+      "max_slope": 0.02,
+      "when": "always",
+      "required": "exterior site grading and drainage drawings"
+    },
+    {
+      "id": "water-storage",
+      "section": "5-5(4)",
+      "page": 39,
+      "min_days": 5,
+      "when": "always",
+      "required": "household water demand and tank capacities"
+    },
+    {
+      "id": "light-wells",
+      "section": "5-1-6(1–7)",
+      "page": 29,
+      "when": "light well modeled",
+      "required": "well height, windows orientation, length/width, openness and access for cleaning"
+    },
+    {
+      "id": "roof-annex",
+      "section": "5-1-14(2–4)",
+      "page": 34,
+      "max_floor_area_ratio": 0.7,
+      "when": "roof annex modeled",
+      "required": "upper annex envelope, parent floor and openings on neighbor side"
+    },
+    {
+      "id": "street-projections",
+      "section": "5-1-11(1–3)",
+      "page": 32,
+      "max_projection_m": 1.25,
+      "min_street_width_m": 10,
+      "when": "projection modeled",
+      "required": "street classification, measured facade projections and approved setbacks"
+    },
+    {
+      "id": "corner-cut",
+      "section": "5-1-16(1–2)",
+      "page": 35,
+      "min_leg_m": 3,
+      "when": "corner lot",
+      "required": "approved corner chamfer polygon and driveway geometry"
+    },
+    {
+      "id": "bathroom-mechanical-ventilation",
+      "section": "5-1-6(2);5-1-15(1)",
+      "page": 30,
+      "when": "bathroom lacks natural openings",
+      "required": "mechanical ventilation design and approval before substituting for window"
+    }
+  ]
+}
