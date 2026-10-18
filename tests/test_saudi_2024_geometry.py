@@ -104,3 +104,25 @@ def test_regulatory_models_reject_duplicate_faces_and_conflicting_annex():
         RegulatoryGeometry(roof_annex_absent=True, roof_annex={"area_m2": 100})
     with pytest.raises(ValidationError):
         RegulatoryGeometry(facades=[{"face": "south"}, {"face": "south"}])
+
+
+def test_road_projection_across_property_is_pending_not_automatic_rejection():
+    approved_street_envelope = evaluate({
+        "projections": [{"id": "P3", "face": "south", "kind": "balcony",
+                         "depth_m": 1.1, "within_setback": True,
+                         "crosses_property_line": True}],
+    })
+    assert item(approved_street_envelope, "projection-P3")["status"] == "PENDING"
+
+
+def test_main_street_facade_rejects_services_even_when_concealed():
+    forbidden = evaluate({"facades": [{"face": "south", "faces_main_street": True,
+                                       "visible_ac_or_services": False,
+                                       "ac_or_services_on_facade": True}]})
+    assert item(forbidden, "facade-main-street-south")["status"] == "FAIL"
+    clear = evaluate({"facades": [{"face": "south", "faces_main_street": True,
+                                   "ac_or_services_on_facade": False}]})
+    assert item(clear, "facade-main-street-south")["status"] == "PASS"
+    unknown = evaluate({"facades": [{"face": "south", "faces_main_street": True,
+                                     "visible_ac_or_services": False}]})
+    assert item(unknown, "facade-main-street-south")["status"] == "PENDING"
