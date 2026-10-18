@@ -1,0 +1,287 @@
+{
+  "version": "0.4.0",
+  "bundle_sha256": "7d947bf617a9e7f966c8d94072f03252e5ef98ffaf32db9e3d0bcfe6307fc3a3",
+  "authority_note": "Scope inventory only; neither source historical statuses nor runtime PASS certify complete architectural quality or execution readiness. Proposed criteria are not local regulations.",
+  "checks": [
+    {
+      "check_id": "finite_geometry",
+      "rule_id": "SPEC-IN-02",
+      "scope_ar": "أبعاد وإحداثيات محدودة ومساحات مستطيلات موجبة",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "references",
+      "rule_id": "SPEC-OP-01",
+      "scope_ar": "معرفات فريدة وروابط العناصر في الدور والمراجعة نفسها",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "room_wall_enclosure",
+      "rule_id": "SPEC-OP-01",
+      "scope_ar": "كل جانب غرفة ممثل بجدران مترابطة قبل اقتطاع الفتحات",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "bounds",
+      "rule_id": "SPEC-IN-04",
+      "scope_ar": "حدود الغرف والمبنى داخل حدود الأرض المقترحة",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "overlap",
+      "rule_id": "SPEC-GEN-02",
+      "scope_ar": "لا تداخل بين المساحات الصافية للغرف في الدور نفسه",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "areas",
+      "rule_id": "SPEC-PG-02",
+      "scope_ar": "المساحات الصافية مشتقة من مستطيلات الغرف",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "mandatory_program",
+      "rule_id": "SPEC-PG-01",
+      "scope_ar": "وجود تمثيل مكاني للمتطلبات الإلزامية الأربعة؛ لا يثبت كفاية استعمالها",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "stair_geometry",
+      "rule_id": "SPEC-ST-01",
+      "scope_ar": "غلاف الرحلتين والبسطة داخل حجرة السلم، ومجموع القوائم يساوي الارتفاع المقترح",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "reachability",
+      "rule_id": "SPEC-PR-01",
+      "scope_ar": "كل فراغ متصل بمدخل خارجي عبر أبواب فعلية أو سلم",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "guest_route",
+      "rule_id": "IMG-PAT-003",
+      "scope_ar": "مسار مدخل الرجال إلى خدماتهم داخل نطاق الضيافة فقط",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "opening_fit",
+      "rule_id": "SPEC-OP-01",
+      "scope_ar": "عرض كل فتحة ومركزها داخل الجدار المرتبط",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "door_envelopes",
+      "rule_id": "SPEC-OP-02",
+      "scope_ar": "لا يتقاطع الغلاف المستطيل المحافظ لدوران الأبواب مع الأثاث أو باب آخر",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "physical_windows",
+      "rule_id": "USR-01",
+      "scope_ar": "فتحة نافذة خارجية فعلية لكل غرفة نوم ومطبخ وحمام",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "opening_legality",
+      "rule_id": "SPEC-NV-01",
+      "scope_ar": "كل نافذة على جهة مسموحة حسب بيانات المشروع",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "الواجهات المسموحة للفتحات غير متحققة"
+    },
+    {
+      "check_id": "ventilation_quantity",
+      "rule_id": "SPEC-NV-03",
+      "scope_ar": "كفاية التهوية والإضاءة وفق معيار موثق",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "نسب ومساحات الفتح الفعلية والمعيار المحلي غير متوفرة؛ وجود النافذة لا يثبت الكفاية"
+    },
+    {
+      "check_id": "fixture_presence",
+      "rule_id": "SPEC-FU-03",
+      "scope_ar": "التجهيزات الأساسية المقترحة موجودة للمطابخ والحمامات والتخزين والطعام والغسيل",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "room_furnishing_completeness",
+      "rule_id": "SPEC-FU-02",
+      "scope_ar": "كل غرفة نوم مقترحة مؤثثة بسعة وخزانة، والمعيشة والمجالس بجلوس وطاولة فعلية",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "proposed_use_zones",
+      "rule_id": "SPEC-FU-02",
+      "scope_ar": "خلوص استعمال مقترح للأسرّة والخزائن والحمامات والمطابخ دون عوائق",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "walkable_routes",
+      "rule_id": "SPEC-PR-01",
+      "scope_ar": "وصول فعلي حول الأثاث والجدران من المداخل والسلم إلى نقطة حرة بكل فراغ",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "sampled_entry_privacy",
+      "rule_id": "SPEC-PR-02",
+      "scope_ar": "العينات المباشرة من مركز مدخل العائلة لا تكشف مركز المعيشة أو غرف النوم",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "void_and_terrace_bounds",
+      "rule_id": "SPEC-ST-03",
+      "scope_ar": "الفراغات المزدوجة والأحواش والتراسات داخل حدود المقترح ودون غرف متداخلة",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "outdoor_access",
+      "rule_id": "SPEC-PR-01",
+      "scope_ar": "لكل تراس علوي قابل للاستعمال باب مرتبط به وفرش داخل حدوده",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "furniture_bounds",
+      "rule_id": "SPEC-FU-02",
+      "scope_ar": "الأثاث داخل المساحة الصافية دون تداخل مادي غير مقصود",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "placed_bed_capacity",
+      "rule_id": "SPEC-FU-01",
+      "scope_ar": "عدد أماكن النوم الموضوعة فعليًا يغطي عدد الأفراد",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "household_assignment",
+      "rule_id": "SPEC-IN-03",
+      "scope_ar": "توزيع أفراد الأسرة على الغرف معتمد",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "أعمار الأسرة ومشاركة غرف النوم لم تُحسم؛ عدد غرف الأبناء والأسرّة مقترح"
+    },
+    {
+      "check_id": "furniture_use",
+      "rule_id": "SPEC-FU-02",
+      "scope_ar": "مناطق استعمال الأثاث والفتح والصيانة والوصول كاملة",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "الفحص التفصيلي الشامل للاستعمال والصيانة والوصول غير مكتمل؛ فحوص الخلوص والحركة المقترحة في V0.4 تغطي نطاقًا جزئيًا فقط"
+    },
+    {
+      "check_id": "privacy_sightlines",
+      "rule_id": "SPEC-PR-02",
+      "scope_ar": "عدم كشف المناطق الخاصة من المداخل",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "التحقق البصري الشامل غير مكتمل؛ عينات V0.4 من مركز مدخل العائلة إلى مراكز بعض الغرف لا تغطي جميع مواضع النظر والمداخل"
+    },
+    {
+      "check_id": "core_stacking",
+      "rule_id": "SPEC-ST-03",
+      "scope_ar": "تطابق موضع وحجرة السلم بين الدورين",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "stair_headroom",
+      "rule_id": "SPEC-ST-02",
+      "scope_ar": "الخلوص الرأسي ومطابقة السلم للاشتراطات",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "الارتفاع والأبعاد مقترحة؛ الخلوص الرأسي والاشتراطات والدرابزين غير متحققة"
+    },
+    {
+      "check_id": "parking_envelope",
+      "rule_id": "SPEC-PK-01",
+      "scope_ar": "غلاف الموقف المقترح داخل الأرض ولا يتداخل مع المبنى",
+      "default_status_at_review": "PASS",
+      "implementation_status": "PARTIAL_SCOPE_ONLY; consult per-model evidence",
+      "limitation_ar": "هذا الفحص محدود بالمعيار المعلن؛ ليس تحققًا من كامل القاعدة المرجعية"
+    },
+    {
+      "check_id": "parking_maneuver",
+      "rule_id": "SPEC-PK-01",
+      "scope_ar": "اتصال الموقف بالشارع ومناورة السيارة والبوابة",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "مطلوب بالمشروع: اتجاه الشارع وعرضه والبوابة ومسار المناورة غير معتمدة"
+    },
+    {
+      "check_id": "local_regulations",
+      "rule_id": "SPEC-IN-06",
+      "scope_ar": "حدود الأرض والارتدادات والاشتراطات الرسمية متحققة",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "لا يوجد رفع مساحي أو ارتدادات أو اشتراطات موثقة؛ الفراغ المحيط بالمبنى ليس اعتمادًا للارتدادات"
+    },
+    {
+      "check_id": "services_stacking",
+      "rule_id": "SPEC-SV-01",
+      "scope_ar": "تنسيق الخدمات رأسيًا ومسارات الصرف والتغذية",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "لم تُنمذج شبكة خدمات أو أعمدة أو حسابات دعم؛ بعض مناطق الخدمات متراكبة فقط"
+    },
+    {
+      "check_id": "decisions",
+      "rule_id": "SPEC-PG-01",
+      "scope_ar": "حسم تعارضات المصعد والخادمة ومدخل الخدمة",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "القرارات الثلاثة محفوظة كمعلقة؛ لم يُحوّل التفضيل إلى إلزام أو حذف معتمد"
+    },
+    {
+      "check_id": "dimensions",
+      "rule_id": "SPEC-QC-01",
+      "scope_ar": "سلاسل أبعاد وتفاصيل تنفيذية كاملة",
+      "default_status_at_review": "PENDING",
+      "implementation_status": "PENDING; not certified",
+      "limitation_ar": "تُعرض أبعاد الغرف والمبنى فقط؛ سلاسل الفتحات والمناسيب والتفاصيل التنفيذية غير مكتملة"
+    }
+  ]
+}

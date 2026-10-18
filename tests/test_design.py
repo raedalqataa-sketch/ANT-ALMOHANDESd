@@ -117,7 +117,7 @@ def test_stair_arithmetic_and_core_stacking(candidate):
 
 
 def test_proposed_height_can_trigger_stair_failure():
-    model=generate_candidates(DesignOptions(footprint_width=14,footprint_depth=19.2,floor_height=4))[0]
+    model=generate_candidates(DesignOptions(layout_family="legacy",footprint_width=14,footprint_depth=19.2,floor_height=4))[0]
     assert state(model,'stair_geometry')=='FAIL'
 
 

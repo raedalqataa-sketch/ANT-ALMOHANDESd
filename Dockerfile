@@ -7,6 +7,7 @@ COPY backend ./backend
 COPY frontend ./frontend
 COPY requirements ./requirements
 COPY constitution ./constitution
+COPY references ./references
 RUN useradd --create-home appuser && mkdir outputs && chmod -R a+rX /app && chown appuser:appuser outputs
 USER appuser
 EXPOSE 8000

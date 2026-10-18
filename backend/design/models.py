@@ -39,7 +39,7 @@ class OpeningEntity(BaseModel):
     id: str
     floor_id: str
     wall_id: str
-    kind: Literal['door', 'window']
+    kind: Literal['door', 'window', 'passage']
     center: tuple[float, float]
     width: float
     height: float
@@ -75,8 +75,12 @@ class FloorModel(BaseModel):
 class DesignOptions(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False, extra='forbid')
     candidate_count: int = Field(default=3, ge=1, le=3)
-    footprint_width: float | None = Field(default=None, ge=14, le=17)
-    footprint_depth: float | None = Field(default=None, ge=19.2, le=23)
+    footprint_width: float | None = Field(default=None, ge=12.5, le=17.5)
+    footprint_depth: float | None = Field(default=None, ge=18.5, le=23)
+    layout_family: Literal['reference_search','garden_gallery','social_hub','open_court','legacy'] = 'reference_search'
+    bedroom_count: int = Field(default=3, ge=2, le=4)
+    double_height: bool | None = None
+    output_style: Literal['presentation','monochrome'] = 'presentation'
     floor_height: float = Field(default=3.2, ge=2.8, le=4)
     confirmed_opening_faces: list[Literal['north','south','east','west']] | None = None
     project_profile: dict | None = None
@@ -95,4 +99,4 @@ class CheckResult(BaseModel):
     criterion_source: str
     evidence: dict = Field(default_factory=dict)
     reason: str
-    validator_version: str = '0.3.0'
+    validator_version: str = '0.4.0'

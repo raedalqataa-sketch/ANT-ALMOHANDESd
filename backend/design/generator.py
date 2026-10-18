@@ -237,7 +237,7 @@ def make_candidate(profile, width, depth, floor_height, index):
             ],'approval':{'status':'UNAPPROVED_DRAFT','execution_claim_allowed':False,'engineer_approval':None}}
 
 
-def generate_candidates(options):
+def legacy_generate_candidates(options):
     profile=project_profile()
     if options.project_profile is not None and options.project_profile != profile:
         raise ValueError('النسخة الحالية مرتبطة بمتطلبات المحفد المعتمدة؛ لا تستبدلها بيانات غير معتمدة')
@@ -248,3 +248,10 @@ def generate_candidates(options):
     for i,(w,d) in enumerate(sizes[:options.candidate_count],1):
         candidates.append(make_candidate(profile,w,d,options.floor_height,i))
     return candidates
+
+
+def generate_candidates(options):
+    if options.layout_family=='legacy':
+        return legacy_generate_candidates(options)
+    from .reference_engine import generate_reference_candidates
+    return generate_reference_candidates(options)

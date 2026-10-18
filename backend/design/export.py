@@ -60,7 +60,7 @@ def door_symbol(floor, opening):
     return hinge,leaf,closed,c1,c2
 
 
-def svg(model,floor,site_view=False):
+def legacy_svg(model,floor,site_view=False):
     width,depth=model['site']['width'],model['site']['depth']
     fp=model['footprint']
     viewbox=f'-1.5 -2.5 {width+3} {depth+5}' if site_view else f"{fp['x']-.8} {fp['y']-2.0} {fp['width']+1.6} {fp['depth']+3.3}"
@@ -117,7 +117,7 @@ def draw_pdf_label(c,x,y,label,size=8):
     c.drawCentredString(x,y,get_display(arabic_reshaper.reshape(str(label))))
 
 
-def export_pdf(model,path):
+def legacy_export_pdf(model,path):
     c=canvas.Canvas(str(path),pagesize=(1191,842))
     c.setTitle(model['profile']['project_name'])
     for floor in model['floors']:
@@ -182,7 +182,7 @@ def export_pdf(model,path):
     c.save()
 
 
-def export_dxf(model,path):
+def legacy_export_dxf(model,path):
     doc=ezdxf.new('R2010');doc.header['$INSUNITS']=6
     for layer,color in [('SITE',8),('WALL',7),('ROOM',3),('DOOR',30),('WINDOW',4),('FURNITURE',8),('STAIR',2),('TEXT',7),('PARKING',5)]:
         doc.layers.new(layer,dxfattribs={'color':color})
@@ -226,3 +226,24 @@ def export_dxf(model,path):
     if audit.errors or len(reread.modelspace().query('LWPOLYLINE[layer=="ROOM"]'))!=expected:
         raise ValueError('فشل تدقيق DXF بعد التصدير')
     return {'audit_errors':len(audit.errors),'room_count':expected,'units':reread.header['$INSUNITS'],'model_revision_id':model['model_revision_id']}
+
+
+def svg(model,floor,site_view=False):
+    if model.get('model_schema_version')=='0.4.0':
+        from .presentation import scene_svg
+        return scene_svg(model,floor,site_view)
+    return legacy_svg(model,floor,site_view)
+
+
+def export_pdf(model,path):
+    if model.get('model_schema_version')=='0.4.0':
+        from .presentation import scene_pdf
+        return scene_pdf(model,path)
+    return legacy_export_pdf(model,path)
+
+
+def export_dxf(model,path):
+    if model.get('model_schema_version')=='0.4.0':
+        from .presentation import scene_dxf
+        return scene_dxf(model,path)
+    return legacy_export_dxf(model,path)

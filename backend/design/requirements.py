@@ -20,7 +20,7 @@ def rules_summary():
     return {'schema_id':data['schema_id'], 'schema_version':data['schema_version'],
             'sha256':hashlib.sha256(BUNDLE.read_bytes()).hexdigest(), 'counts':data['counts'],
             'known_gaps':data['known_gaps'], 'runtime_note':'فهرس القواعد مرجع. لا يعني تحميله اجتيازها أو تنفيذها جميعًا.',
-            'active_scope':'مقترحات ثنائية الدور من عائلة توزيع محدودة، وفحوص هندسية معلنة؛ ليست جاهزية تنفيذية'}
+            'active_scope':'ثلاث عائلات ثنائية الدور مستلهمة من المراجع مع فرش وخلوص مقترح وفحوص محددة النطاق؛ ليست جاهزية تنفيذية'}
 
 
 def normalize_number(value):

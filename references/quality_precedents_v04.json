@@ -1,0 +1,90 @@
+{
+  "version": "1.0",
+  "user_intent": "رفع مستوى جودة توليد وإخراج التطبيق وفق المراجع المرفقة",
+  "references": [
+    {
+      "id": "REF-01",
+      "filename": "1-5888790365346058010_121.jpg",
+      "sha256": "bf01620e6628c91adf4900cabbeaf5a4244d6a10767615afa4e123344d208a5d",
+      "title_ar": "أرضي لوحدتين متناظرتين",
+      "observed_design_lessons": "ترتيب الضيافة والخدمات قرب المدخل، ومناطق العائلة في العمق، وفرش وأبواب ومواقف واضحة",
+      "scope_limit_ar": "التماثل والوحدتان ليسا متطلبًا للمحفد",
+      "geometry_measured_from_image": false
+    },
+    {
+      "id": "REF-02",
+      "filename": "2-5888790365346058012_121.jpg",
+      "sha256": "9b5ebfc2ac835ef4482ff591a78280f2e17d3b0fdeab4df6617ff4e7c53b5240",
+      "title_ar": "دور علوي / ثانٍ للوحدتين",
+      "observed_design_lessons": "تطابق موضع السلم بين الأدوار، وتراجع الكتلة ومساحات خارجية علوية",
+      "scope_limit_ar": "اللوحة معنونة SECOND FLOOR؛ لا يُستنتج منها برنامج دور غير ظاهر",
+      "geometry_measured_from_image": false
+    },
+    {
+      "id": "REF-03",
+      "filename": "3-5895458117389503139_121.jpg",
+      "sha256": "121649da5a6980a11384dffe6b05fb3b59fe87db1cb37af8091bd12e5b180baf",
+      "title_ar": "استراحة بحديقة ومسبح",
+      "observed_design_lessons": "ارتباط المعيشة والطعام بالخارج، وتدرج الفراغات والموقف والفرش والمواد",
+      "scope_limit_ar": "المسبح غير مطلوب في Excel ولم يضف إلى المحفد",
+      "geometry_measured_from_image": false
+    },
+    {
+      "id": "REF-04",
+      "filename": "4-5902122411984276678_121.jpg",
+      "sha256": "bbd1ccb4abf286e6610b5769a75ec920bace6a418a35ce2ba67b05aac0dcc854",
+      "title_ar": "أرضي فيلا بحديقة جانبية",
+      "observed_design_lessons": "تقسيم الضيافة والعائلة والخدمات، وعلاقة الحديقة بالمعيشة ومدخلين وتنظيم السلم",
+      "scope_limit_ar": "أرض الصورة 20×25، بينما مشروعنا 20×30؛ المساحة المطبوعة ليست معيارًا إلزاميًا",
+      "geometry_measured_from_image": false
+    },
+    {
+      "id": "REF-05",
+      "filename": "5-5902122411984276679_121.jpg",
+      "sha256": "d7e6ce50b665b63c90f9a36d7e0b0c8fedbc31d4fdabf0299cb0862de2280de2",
+      "title_ar": "أول الفيلا مع بهو مفتوح",
+      "observed_design_lessons": "تماسك السلم رأسيًا، وأجنحة النوم والملابس والحمامات، والفراغ المزدوج وتراجع الكتلة",
+      "scope_limit_ar": "الأعداد والمقاسات والبهو المفتوح مقترحات سياقية، لا قيود عمومية",
+      "geometry_measured_from_image": false
+    }
+  ],
+  "policy": {
+    "project_requirements_source": "requirements/villa-almahfad.json",
+    "official_regulations_inferred": false,
+    "dimensions_traced_or_invented_as_source": false,
+    "branding_copied_to_outputs": false,
+    "pool_or_duplex_added_to_project": false
+  },
+  "acceptance_targets": [
+    {
+      "id": "Q-01",
+      "criterion": "اختلاف التنظيم والعلاقات بين البدائل، لا تغيير الحجم فقط",
+      "evidence": "adjacency signatures and room-centre geometry"
+    },
+    {
+      "id": "Q-02",
+      "criterion": "وصول فعلي حول الفرش إلى الفراغات",
+      "evidence": "walkable_routes, body 0.60m, 0.20m grid; proposed not regulatory"
+    },
+    {
+      "id": "Q-03",
+      "criterion": "فرش يثبت السعة والاستعمال بدل رموز مستطيلات عامة",
+      "evidence": "room_furnishing_completeness, proposed_use_zones"
+    },
+    {
+      "id": "Q-04",
+      "criterion": "علاقات رأسية وفتحات وبهو وتراسات دون تداخل",
+      "evidence": "core_stacking, void_and_terrace_bounds, outdoor_access"
+    },
+    {
+      "id": "Q-05",
+      "criterion": "لوحات مقروءة بمقياس بياني وفرش ومواد وأوزان خطوط وبيانات واضحة",
+      "evidence": "shared scene, visual QA of actual PDF and SVG"
+    },
+    {
+      "id": "Q-06",
+      "criterion": "المخططات المرفقة مرجع للمقارنة البشرية؛ لا نسبة تشابه مزعومة",
+      "evidence": "human comparison artifact, no aesthetic parity certification"
+    }
+  ]
+}
