@@ -281,7 +281,7 @@ def materialize(brief,family,result):
                brief=brief.model_dump(),profile={'project_name':brief.project_name},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(brief.setbacks.west,brief.setbacks.north,result['W'],result['D']),
                search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
-               requirements_resolution=resolve_notes(brief),presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
+               requirements_resolution=resolve_notes(brief),regulatory_geometry=brief.regulatory_geometry.model_dump() if brief.regulatory_geometry else None,presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
     W,D=result['W'],result['D'];a=result['halls'][0]['x']+result['halls'][0]['width']
     if family=='L':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]

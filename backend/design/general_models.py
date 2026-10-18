@@ -25,6 +25,68 @@ class SpaceRequest(Strict):
     capacity: int = Field(default=0, ge=0, le=2)
 
 
+
+# Optional dimensions for preliminary 2024 municipal checks.
+# Missing information remains PENDING, not a fabricated compliance result.
+class LightWell(Strict):
+    id: str = Field(min_length=1, max_length=45)
+    width_m: float = Field(gt=0, le=30)
+    length_m: float = Field(gt=0, le=30)
+    storeys_served: int = Field(ge=1, le=14)
+    opposing_windows: bool
+    open_to_sky: bool | None = None
+    cleaning_door: bool | None = None
+    drains_provided: bool | None = None
+    light_wall_finish: bool | None = None
+
+
+class RoofAnnex(Strict):
+    area_m2: float = Field(gt=0, le=5000)
+    street_setbacks_m: dict[Literal['north','south','east','west'], Annotated[float, Field(ge=0, le=30)]] = Field(default_factory=dict)
+    parapet_height_m: float | None = Field(default=None, ge=0, le=3)
+    independent_unit: bool = False
+    additional_parking_space: bool | None = None
+    neighbor_direct_windows: bool | None = None
+    staircase_continues_to_annex_roof: bool | None = None
+
+
+class Projection(Strict):
+    id: str = Field(min_length=1, max_length=45)
+    face: Literal['north','south','east','west']
+    kind: Literal['facade','balcony','decorative_cornice','stair']
+    depth_m: float = Field(ge=0, le=5)
+    within_setback: bool | None = None
+    crosses_property_line: bool | None = None
+    clearance_m: float | None = Field(default=None, ge=0, le=20)
+    stair_width_m: float | None = Field(default=None, gt=0, le=6)
+
+
+class FacadeSurvey(Strict):
+    face: Literal['north','south','east','west']
+    faces_main_street: bool | None = None
+    visible_ac_or_services: bool | None = None
+    ac_or_services_on_facade: bool | None = None
+
+
+class RegulatoryGeometry(Strict):
+    light_wells: list[LightWell] | None = None
+    roof_annex: RoofAnnex | None = None
+    roof_annex_absent: bool | None = None
+    projections: list[Projection] | None = None
+    facades: list[FacadeSurvey] | None = None
+
+    @model_validator(mode='after')
+    def consistent(self):
+        if self.roof_annex_absent and self.roof_annex is not None:
+            raise ValueError('لا يمكن اختيار عدم وجود ملحق علوي وتقديم قياساته في الوقت نفسه')
+        for group in (self.light_wells, self.projections):
+            if group is not None and len({row.id for row in group}) != len(group):
+                raise ValueError('معرفات العناصر الهندسية يجب أن تكون فريدة')
+        if self.facades is not None and len({row.face for row in self.facades}) != len(self.facades):
+            raise ValueError('لا تكرر جهة الواجهة')
+        return self
+
+
 class VillaBrief(Strict):
     project_name: str = Field(default='فيلا جديدة', min_length=1, max_length=100)
     plot_width: float = Field(ge=8, le=60)
@@ -46,6 +108,7 @@ class VillaBrief(Strict):
     parcel_reference: str = Field(default='',max_length=300)
     boundary_widths: dict[Literal['north','south','east','west'],Annotated[float,Field(ge=0,le=100)]] = Field(default_factory=dict)
     apply_saudi_rules: bool = True
+    regulatory_geometry: RegulatoryGeometry | None = None
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)

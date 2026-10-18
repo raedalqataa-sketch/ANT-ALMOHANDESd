@@ -94,4 +94,6 @@ def checks(model, brief):
         record(item["id"], "PENDING", "2024: عرض مدخل السيارة",
                None, {"min_m": item["min_m"]},
                {"required_action": item["required"]}, item["section"], item["page"])
+    from .saudi_2024_geometry import checks as geometric_checks
+    results.extend(geometric_checks(model, brief))
     return results
