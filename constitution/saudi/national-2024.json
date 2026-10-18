@@ -3,7 +3,7 @@
   "researched_at": "2026-10-18",
   "jurisdiction": "SA",
   "scope": "Detached single-family villa, ground + first floor; national baseline only, local/parcel overrides require verification",
-  "code_edition": "SBC 2024",
+  "code_edition": "SBC 2024 (catalogue only; full regulatory text not transcribed)",
   "complete_code_transcribed": false,
   "sources": [
     {
@@ -122,5 +122,8 @@
     "Full stair headroom against slab/beam sections",
     "Vehicle turning envelopes and final curb-cut approval"
   ],
-  "executive_issue_allowed": false
+  "executive_issue_allowed": false,
+  "municipal_document_edition": 2024,
+  "municipal_document_referenced_sbc_edition": 2018,
+  "extension_registry": "constitution/saudi/residential-2024-extension.json"
 }
