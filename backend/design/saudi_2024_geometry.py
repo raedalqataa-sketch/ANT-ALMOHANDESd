@@ -163,7 +163,13 @@ def checks(model, brief):
             inside = pr.get("within_setback")
             cross = pr.get("crosses_property_line")
             issues, missing = [], []
-            if cross is True:issues.append("crosses_property_line")
+            if cross is True:
+                if pr["kind"] == "stair" or street_width == 0:
+                    issues.append("property_line_stair_or_neighbor_protrusion")
+                else:
+                    # The document allows qualifying street projections; municipal
+                    # encroachment/ownership permission cannot be inferred.
+                    missing.append("street_property_projection_approval")
             elif cross is None:missing.append("crosses_property_line")
             if inside is None:missing.append("within_setback")
             elif inside:
@@ -203,15 +209,20 @@ def checks(model, brief):
         for survey in facades:
             if survey.get("faces_main_street") is False:
                 status = "NOT_APPLICABLE"
-            elif survey.get("faces_main_street") is None or survey.get("visible_ac_or_services") is None:
+            elif survey.get("faces_main_street") is None:
                 status = "PENDING"
+            elif survey.get("ac_or_services_on_facade") is True or survey.get("visible_ac_or_services") is True:
+                status = "FAIL"
+            elif survey.get("ac_or_services_on_facade") is False:
+                status = "PASS"
             else:
-                status = "FAIL" if survey["visible_ac_or_services"] else "PASS"
+                status = "PENDING"
             put("facade-main-street-" + survey["face"], status,
-                "الواجهات: منع المعدات الظاهرة على الشارع الرئيسي - " + survey["face"],
+                "الواجهات: منع وضع وحدات التكييف والتمديدات على الشوارع الرئيسية - " + survey["face"],
                 "5-1-10(4)", 32,
                 {"is_main_street": survey.get("faces_main_street"),
-                 "visible_ac_or_services": survey.get("visible_ac_or_services")})
+                 "visible_ac_or_services": survey.get("visible_ac_or_services"),
+                 "ac_or_services_on_facade": survey.get("ac_or_services_on_facade")})
     put("facade-local-identity", "PENDING",
         "الواجهات: مطابقة الكود العمراني المحلي والمواد والتنسيق العام",
         "5-1-10(1-6)", 32,
