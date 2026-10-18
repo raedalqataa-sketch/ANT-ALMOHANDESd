@@ -65,6 +65,7 @@ class FacadeSurvey(Strict):
     face: Literal['north','south','east','west']
     faces_main_street: bool | None = None
     visible_ac_or_services: bool | None = None
+    ac_or_services_on_facade: bool | None = None
 
 
 class RegulatoryGeometry(Strict):
