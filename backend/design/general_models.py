@@ -26,65 +26,10 @@ class SpaceRequest(Strict):
 
 
 
-# Optional measured geometry for the 2024 municipal preliminary checks.
-# Omitted information is never inferred from a two-dimensional draft.
+# Optional dimensions for preliminary 2024 municipal checks.
+# Missing information remains PENDING, not a fabricated compliance result.
 class LightWell(Strict):
-    id: str = Field(pattern=r'^[a-zA-Z0-9_-]{1,45}
-    project_name: str = Field(default='فيلا جديدة', min_length=1, max_length=100)
-    plot_width: float = Field(ge=8, le=60)
-    plot_depth: float = Field(ge=8, le=80)
-    floors: int = Field(default=2, ge=1, le=2)
-    setbacks: Setbacks
-    entrance_face: Literal['north','south','east','west'] = 'south'
-    wall_thickness: float = Field(default=.2, ge=.15, le=.4)
-    corridor_width: float = Field(default=1.5, ge=1.2, le=2.4)
-    floor_height: float = Field(default=3.2, ge=2.8, le=3.8)
-    rooms: list[SpaceRequest] = Field(min_length=1, max_length=30)
-    country: Literal['SA'] = 'SA'
-    city: str = Field(default='',max_length=100)
-    district: str = Field(default='',max_length=100)
-    plan_number: str = Field(default='',max_length=80)
-    parcel_number: str = Field(default='',max_length=80)
-    dining_seats: Literal[4,6,8,10,12] = 6
-    municipality: str = Field(default='',max_length=140)
-    parcel_reference: str = Field(default='',max_length=300)
-    boundary_widths: dict[Literal['north','south','east','west'],Annotated[float,Field(ge=0,le=100)]] = Field(default_factory=dict)
-    apply_saudi_rules: bool = True
-    regulatory_geometry: RegulatoryGeometry | None = None
-    separate_guest_entry: bool = True
-    flexible_space_policy: Literal['remove','keep'] = 'remove'
-    stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
-    notes: str = Field(default='', max_length=4000)
-
-    @model_validator(mode='after')
-    def coherent(self):
-        if len({r.id for r in self.rooms}) != len(self.rooms):
-            raise ValueError('معرفات صفوف البرنامج يجب أن تكون فريدة')
-        if sum(r.count for r in self.rooms)>36:
-            raise ValueError('هذا الإصدار يدعم حتى 36 فراغًا مطلوبًا')
-        if any(r.floor>=self.floors for r in self.rooms):
-            raise ValueError('أحد الفراغات موضوع في دور غير موجود')
-        if any(not any(r.floor==f for r in self.rooms) for f in range(self.floors)):
-            raise ValueError('أضف برنامجًا لكل دور مطلوب')
-        if self.plot_width-self.setbacks.west-self.setbacks.east<6 or self.plot_depth-self.setbacks.north-self.setbacks.south<6:
-            raise ValueError('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي')
-        if any(r.capacity and r.kind not in ('master','bedroom') for r in self.rooms):
-            raise ValueError('سعة النوم تخص غرف النوم فقط')
-        return self
-
-
-def from_reference_program(rows):
-    """Explicit migration of the reference repo's editable program contract.
-
-    accessVia/private bathrooms cannot silently become corridor-access bathrooms.
-    """
-    kinds={'guest':'majlis','bed':'bedroom','living':'living','dining':'dining',
-           'kitchen':'kitchen','bath':'bathroom','service':'storage'}
-    if any(r.get('accessVia') or r.get('zone','family')!='family' for r in rows):
-        raise ValueError('المداخل المستقلة والحمامات المرتبطة تحتاج ربطًا معماريًا غير مدعوم في البحث العام الحالي')
-    return [SpaceRequest(id=r['id'],name=r['name'],kind=kinds[r['use']],floor=r['floor'],
-                         min_area=r['area'],min_side=r['minWidth'],capacity=r.get('capacity',0)) for r in rows]
-)
+    id: str = Field(min_length=1, max_length=45)
     width_m: float = Field(gt=0, le=30)
     length_m: float = Field(gt=0, le=30)
     storeys_served: int = Field(ge=1, le=14)
@@ -97,7 +42,7 @@ def from_reference_program(rows):
 
 class RoofAnnex(Strict):
     area_m2: float = Field(gt=0, le=5000)
-    street_setbacks_m: dict[Literal['north','south','east','west'], Annotated[float,Field(ge=0,le=30)]] = Field(default_factory=dict)
+    street_setbacks_m: dict[Literal['north','south','east','west'], Annotated[float, Field(ge=0, le=30)]] = Field(default_factory=dict)
     parapet_height_m: float | None = Field(default=None, ge=0, le=3)
     independent_unit: bool = False
     additional_parking_space: bool | None = None
@@ -106,61 +51,7 @@ class RoofAnnex(Strict):
 
 
 class Projection(Strict):
-    id: str = Field(pattern=r'^[a-zA-Z0-9_-]{1,45}
-    project_name: str = Field(default='فيلا جديدة', min_length=1, max_length=100)
-    plot_width: float = Field(ge=8, le=60)
-    plot_depth: float = Field(ge=8, le=80)
-    floors: int = Field(default=2, ge=1, le=2)
-    setbacks: Setbacks
-    entrance_face: Literal['north','south','east','west'] = 'south'
-    wall_thickness: float = Field(default=.2, ge=.15, le=.4)
-    corridor_width: float = Field(default=1.5, ge=1.2, le=2.4)
-    floor_height: float = Field(default=3.2, ge=2.8, le=3.8)
-    rooms: list[SpaceRequest] = Field(min_length=1, max_length=30)
-    country: Literal['SA'] = 'SA'
-    city: str = Field(default='',max_length=100)
-    district: str = Field(default='',max_length=100)
-    plan_number: str = Field(default='',max_length=80)
-    parcel_number: str = Field(default='',max_length=80)
-    dining_seats: Literal[4,6,8,10,12] = 6
-    municipality: str = Field(default='',max_length=140)
-    parcel_reference: str = Field(default='',max_length=300)
-    boundary_widths: dict[Literal['north','south','east','west'],Annotated[float,Field(ge=0,le=100)]] = Field(default_factory=dict)
-    apply_saudi_rules: bool = True
-    separate_guest_entry: bool = True
-    flexible_space_policy: Literal['remove','keep'] = 'remove'
-    stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
-    notes: str = Field(default='', max_length=4000)
-
-    @model_validator(mode='after')
-    def coherent(self):
-        if len({r.id for r in self.rooms}) != len(self.rooms):
-            raise ValueError('معرفات صفوف البرنامج يجب أن تكون فريدة')
-        if sum(r.count for r in self.rooms)>36:
-            raise ValueError('هذا الإصدار يدعم حتى 36 فراغًا مطلوبًا')
-        if any(r.floor>=self.floors for r in self.rooms):
-            raise ValueError('أحد الفراغات موضوع في دور غير موجود')
-        if any(not any(r.floor==f for r in self.rooms) for f in range(self.floors)):
-            raise ValueError('أضف برنامجًا لكل دور مطلوب')
-        if self.plot_width-self.setbacks.west-self.setbacks.east<6 or self.plot_depth-self.setbacks.north-self.setbacks.south<6:
-            raise ValueError('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي')
-        if any(r.capacity and r.kind not in ('master','bedroom') for r in self.rooms):
-            raise ValueError('سعة النوم تخص غرف النوم فقط')
-        return self
-
-
-def from_reference_program(rows):
-    """Explicit migration of the reference repo's editable program contract.
-
-    accessVia/private bathrooms cannot silently become corridor-access bathrooms.
-    """
-    kinds={'guest':'majlis','bed':'bedroom','living':'living','dining':'dining',
-           'kitchen':'kitchen','bath':'bathroom','service':'storage'}
-    if any(r.get('accessVia') or r.get('zone','family')!='family' for r in rows):
-        raise ValueError('المداخل المستقلة والحمامات المرتبطة تحتاج ربطًا معماريًا غير مدعوم في البحث العام الحالي')
-    return [SpaceRequest(id=r['id'],name=r['name'],kind=kinds[r['use']],floor=r['floor'],
-                         min_area=r['area'],min_side=r['minWidth'],capacity=r.get('capacity',0)) for r in rows]
-)
+    id: str = Field(min_length=1, max_length=45)
     face: Literal['north','south','east','west']
     kind: Literal['facade','balcony','decorative_cornice','stair']
     depth_m: float = Field(ge=0, le=5)
@@ -190,7 +81,7 @@ class RegulatoryGeometry(Strict):
         for group in (self.light_wells, self.projections):
             if group is not None and len({row.id for row in group}) != len(group):
                 raise ValueError('معرفات العناصر الهندسية يجب أن تكون فريدة')
-        if self.facades is not None and len({f.face for f in self.facades}) != len(self.facades):
+        if self.facades is not None and len({row.face for row in self.facades}) != len(self.facades):
             raise ValueError('لا تكرر جهة الواجهة')
         return self
 
@@ -216,6 +107,7 @@ class VillaBrief(Strict):
     parcel_reference: str = Field(default='',max_length=300)
     boundary_widths: dict[Literal['north','south','east','west'],Annotated[float,Field(ge=0,le=100)]] = Field(default_factory=dict)
     apply_saudi_rules: bool = True
+    regulatory_geometry: RegulatoryGeometry | None = None
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
