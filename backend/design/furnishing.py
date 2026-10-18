@@ -174,7 +174,7 @@ def kitchen_layouts(r):
 
 
 def bathroom_layouts(r):
-    shower=r['id'].endswith(('family-bath','master-bath','child-bath'))
+    shower=bool(r.get('include_shower')) or r['id'].endswith(('family-bath','master-bath','child-bath'))
     for rotation in (0,90,180,270):
         W,H=(r['depth'],r['width']) if rotation in (90,270) else (r['width'],r['depth'])
         wc=fixture('toilet',.15,.1,.65,.75)
@@ -204,15 +204,15 @@ def simple_layouts(r,kind):
 def dining_layouts(r):
     for rotation in (0,90,180,270):
         W,H=(r['depth'],r['width']) if rotation in (90,270) else (r['width'],r['depth'])
-        for seats in (10,8):
-            tw=2.5 if seats==10 else 2.1;th=1.05
+        for seats in ((r['dining_seats'],) if r.get('dining_seats') else (10,8)):
+            side_count=max(1,(seats-2)//2);tw=(max(1.0,.55+max(0,side_count-1)*.65) if r.get('dining_seats') else 2.5 if seats==10 else 2.1);th=1.05
             for yshift in (0,.4,-.4):
                 x=(W-tw)/2;y=(H-th)/2+yshift
                 items=[fixture('dining_table',x,y,tw,th)]
                 for side in (0,1):
-                    count=4 if seats==10 else 3
+                    count=side_count
                     for i in range(count):
-                        chair=fixture('dining_chair',x+.05+i*(tw-.55)/(count-1),y-.6 if side==0 else y+th+.15,.5,.45)
+                        chair=fixture('dining_chair',x+.05+i*(tw-.55)/max(1,count-1),y-.6 if side==0 else y+th+.15,.5,.45)
                         chair['rotation']=0 if side==0 else 180;chair['seats']=1
                         # Chair withdrawal: the additional strip behind each chair, not the table itself.
                         chair['use_zones']=[dict(x=chair['x'],y=chair['y']-.45 if side==0 else chair['y']+.45,width=.5,depth=.45)]
@@ -223,7 +223,7 @@ def dining_layouts(r):
                 yield [transform(q,r,rotation) for q in items]
 
 
-def furnish_floor(floor,revision):
+def furnish_floor(floor,revision,layout_choices=None):
     for r in floor['rooms']:
         kind=r['kind'];groups=[]
         if kind in ('bedroom','elderly'):
@@ -247,7 +247,9 @@ def furnish_floor(floor,revision):
         accepted=[g for g in groups if valid_group(floor,r,g)]
         if accepted:
             if kind in ('living','majlis'):accepted.sort(key=lambda g:(any(q['kind']=='coffee_table' for q in g),-abs(sum(q['seats'] for q in g)-9)),reverse=True)
-            add(floor,r,accepted[0],revision)
+            if layout_choices is not None:floor.setdefault('furnishing_choice_counts',{})[r['id']]=len(accepted)
+            chosen=accepted[min((layout_choices or {}).get(r['id'],0),len(accepted)-1)]
+            add(floor,r,chosen,revision)
         else:floor.setdefault('furnishing_notes',[]).append(dict(room_id=r['id'],reason='لم توجد تشكيلة فرش تحقق الحدود والفتحات وخلوص الاستعمال المقترح'))
         if kind in ('bedroom','elderly') and not any(q['room_id']==r['id'] and q['kind']=='wardrobe' for q in floor['furniture']):
             for group in wardrobe_layouts(r):

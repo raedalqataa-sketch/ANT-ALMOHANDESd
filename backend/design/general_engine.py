@@ -13,6 +13,9 @@ from uuid import uuid4
 from .general_models import VillaBrief
 from .furnishing import furnish_floor, overlap, inside
 from .furniture_symbols import SYMBOL_VERSION
+from . import saudi_rules
+from .general_geometry import union_polygons,signed_area,annotate
+from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
 FAMILIES={'L':'جناحان على شكل L','U':'فناء مفتوح على شكل U','stepped':'كتلة متدرجة'}
@@ -37,7 +40,8 @@ def topology(family,W,D,c,ratio,top):
     spine=W*.5-c/2
     halls=[box(spine,0,c,D)]
     lanes=[]
-    for lo,hi,x0,x1 in [(0,D*.33,0,W),(D*.33,D*.67,W*.12,W),(D*.67,D,W*.12,W*.80)]:
+    first=D*top;second=D*min(.80,top+.30)
+    for lo,hi,x0,x1 in [(0,first,0,W),(first,second,W*.12,W),(second,D,W*.12,W*.80)]:
         lanes += [box(x0,lo,spine-x0,hi-lo,axis='y',door_side='east'),
                   box(spine+c,lo,x1-spine-c,hi-lo,axis='y',door_side='west')]
     return halls,lanes
@@ -46,6 +50,7 @@ def topology(family,W,D,c,ratio,top):
 def length_for(room,lane,t):
     cross=lane['width' if lane['axis']=='y' else 'depth']-t
     if cross+EPS<room['min_side']:return math.inf
+    if room['kind']=='dining' and cross<3.45-EPS:return math.inf  # proposed furniture + 0.60 m movement clearance, not a legal minimum
     length=max(room['min_side'],room['min_area']/cross,cross/2.8)
     if room['kind']=='bathroom' and cross*length>room['min_area']*2.2:return math.inf
     if max(cross,length)/min(cross,length)>2.8:return math.inf
@@ -56,14 +61,16 @@ def allocate(requests,lanes,t):
     """Bounded beam search, rejecting area/width violations before placement."""
     capacities=[r['depth' if r['axis']=='y' else 'width'] for r in lanes]
     states=[([0.]*len(lanes),[[] for _ in lanes])]
-    ordered=sorted(requests,key=lambda r:(-r['min_side'],-r['min_area'],r['id']))
-    for room in ordered:
+    bundles={}
+    for r in requests:bundles.setdefault(r.get('guest_parent') or r['id'],[]).append(r)
+    ordered=sorted(bundles.values(),key=lambda rs:(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id']))
+    for bundle in ordered:
         expanded=[]
         for used,groups in states:
             for i,lane in enumerate(lanes):
-                length=length_for(room,lane,t)
+                length=sum(length_for(room,lane,t) for room in bundle)
                 if used[i]+length>capacities[i]+EPS:continue
-                u=used.copy();u[i]+=length;g=[row.copy() for row in groups];g[i].append(room)
+                u=used.copy();u[i]+=length;g=[row.copy() for row in groups];g[i].extend(bundle)
                 # Best-fit plus load balance; not an architectural quality score.
                 score=sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2 for j,(cap,v) in enumerate(zip(capacities,u)))
                 expanded.append((score,u,g))
@@ -78,7 +85,7 @@ def allocate(requests,lanes,t):
         extra=capacities[i]-used[i];weights=sum(r['min_area'] for r in groups[i])
         # Functional sequencing along a wing: services then social spaces, bedrooms together.
         order={'bathroom':0,'storage':1,'laundry':2,'kitchen':3,'dining':4,'living':5,'majlis':6,'office':7,'master':8,'bedroom':9}
-        for r in sorted(groups[i],key=lambda q:(order[q['kind']],q['id'])):
+        for r in sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],bool(q.get('guest_parent'))) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id']))):
             length=length_for(r,lane,t)+min(extra*r['min_area']/weights,length_for(r,lane,t)*.15)
             cell=box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else length,length if axis=='y' else lane['depth'],**copy.deepcopy(r),door_side=lane['door_side'])
             cells.append(cell);start+=length
@@ -92,18 +99,26 @@ def allocate(requests,lanes,t):
 
 
 def expanded_program(brief,floor):
-    return [dict(id=f'{r.id}-{n+1}',request_id=r.id,name=r.name+(f' {n+1}' if r.count>1 else ''),kind=r.kind,
-                 min_area=r.min_area,min_side=r.min_side,capacity=r.capacity)
-            for r in brief.rooms if r.floor==floor for n in range(r.count)]
+    resolved=resolve_notes(brief);men={m.get('request_id') for m in resolved['mapped'] if m['action']=='classify_men_majlis'}
+    rows=[dict(id=f'{r.id}-{n+1}',request_id=r.id,name=('مجلس رجال' if r.id in men else r.name)+(f' {n+1}' if r.count>1 else ''),kind=r.kind,
+                 min_area=max(r.min_area,saudi_rules.minimum(r.kind)[0] if brief.apply_saudi_rules else 0),min_side=max(r.min_side,saudi_rules.minimum(r.kind)[1] if brief.apply_saudi_rules else 0),capacity=r.capacity,dining_seats=brief.dining_seats if r.kind=='dining' else 0,
+                 zone='guest' if floor==0 and (r.kind=='majlis' or (any(p.kind=='majlis' and p.floor==0 for p in brief.rooms) and r.kind=='bathroom' and ('ضيف' in r.name or 'ضيوف' in r.name or 'رجال' in r.name))) else 'family')
+          for r in brief.rooms if r.floor==floor for n in range(r.count)]
+    for row in rows:row['include_shower']=row['kind']=='bathroom' and row['zone']!='guest'
+    if brief.separate_guest_entry:
+        parents=[r for r in rows if r['kind']=='majlis' and r['zone']=='guest']
+        for i,r in enumerate(r for r in rows if r['kind']=='bathroom' and r['zone']=='guest'):
+            if parents:r['guest_parent']=parents[min(i,len(parents)-1)]['id']
+    return rows
 
 
 def search(brief,family):
-    aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east
-    ad=brief.plot_depth-brief.setbacks.north-brief.setbacks.south
-    best=None;attempts=0
+    aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness
+    ad=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-brief.wall_thickness
+    best=None;attempts=0;pool=[]
     # Each candidate searches dimensions AND allocation, never just scales a fixed plan.
     variations=[(s,d,r,b) for s in (1.,.85,.70) for d in (1.,.82,.68,.55) for r in (.33,.36,.38,.40,.44,.47) for b in (.30,.36,.40,.44,.48)]
-    if family=='stepped':variations=[(s,d,.4,.4) for s in (1.,.85,.70) for d in (1.,.82,.68,.55)]
+    if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
     for ws,ds,ratio,top in variations:
         W,D=aw*ws,ad*ds
         shape=topology(family,W,D,brief.corridor_width+brief.wall_thickness,ratio,top)
@@ -116,7 +131,7 @@ def search(brief,family):
             # Reserve an identical vertical core on BOTH floors, before packing rooms.
             eligible=[(i,l) for i,l in enumerate(lanes) if l['axis']=='y' and l['width']-brief.wall_thickness>=2.8 and l['depth']>=4.6]
             if not eligible:continue
-            i,l=max(eligible,key=lambda p:p[1]['depth'])
+            i,l=min(eligible,key=lambda p:p[1]['depth'])
             core_depth=4.6 if l['depth']>=7.0 else l['depth']
             stair=box(l['x'],l['y']+l['depth']-core_depth,l['width'],core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
             l['depth']-=core_depth
@@ -125,14 +140,47 @@ def search(brief,family):
         for f in range(brief.floors):
             cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness)
             if cells is None:failed=True;break
+            if brief.flexible_space_policy=='remove':cells=[r for r in cells if r['kind']!='reserve']
             floors.append(cells+([copy.deepcopy(stair)] if stair else []))
         if failed:continue
-        gross=sum(area(l) for l in shape[0]+shape[1])
+        gross=max(sum(area(r) for r in cells)+sum(area(h) for h in halls) for cells in floors)
         spare=sum(area(r) for rooms in floors for r in rooms if r['kind']=='reserve')
         score=gross*brief.floors+spare*.8
-        if best is None or score<best['score']:best=dict(W=W,D=D,halls=halls,floors=floors,score=score,gross=gross)
-    if best:best['attempts']=attempts
+        pool.append(dict(W=W,D=D,halls=halls,floors=floors,score=score,gross=gross,top_fraction=top))
+        if best is None or score<best['score']:best=pool[-1]
+    if best:
+        pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
+        best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
     return best
+
+
+def add_room_door(floor,r,wall,revision,**metadata):
+    t=wall['thickness'];length=math.dist(wall['start'],wall['end']);width=min(.90,length-t-.12)
+    if width<.75:return None
+    center=[(a+b)/2 for a,b in zip(wall['start'],wall['end'])];axis=0 if wall['axis']=='horizontal' else 1
+    center[axis]=wall['start'][axis]+t/2+.18+width/2
+    if center[axis]+width/2>wall['end'][axis]-t/2:center[axis]=(wall['start'][axis]+wall['end'][axis])/2
+    if r['kind']=='bathroom':center[axis]=(wall['start'][axis]+wall['end'][axis])/2
+    if r['kind']=='stair' and axis==1:center[1]=r['y']+t/2+.5
+    x,y=center
+    if axis==0:
+        top=y<r['y']+r['depth']/2;swing=box(x-width/2,y if top else y-width,width,width)
+    else:
+        left=x<r['x']+r['width']/2;swing=box(x if left else x-width,y-width/2,width,width)
+    o=dict(id=f"{floor['id']}-O{len(floor['openings'])+1}",wall_id=wall['id'],floor_id=floor['id'],kind='door',center=center,width=width,height=2.2,sill=0,
+           connects=[r['id']]+[i for i in wall['room_ids'] if i!=r['id']],swing_rect=swing,revision_id=revision,**metadata)
+    floor['openings'].append(o)
+    if r['kind']=='bathroom':
+        from .furnishing import bathroom_layouts,valid_group
+        net=next(room for room in floor['rooms'] if room['id']==r['id'])
+        original=copy.deepcopy(o)
+        for fraction in (.5,.60,.40,.70,.30):
+            proposed=wall['start'][axis]+length*fraction
+            if proposed-width/2<wall['start'][axis]+t/2+.1 or proposed+width/2>wall['end'][axis]-t/2-.1:continue
+            delta=proposed-o['center'][axis];o['center'][axis]=proposed;o['swing_rect']['x' if axis==0 else 'y']+=delta
+            if any(valid_group(floor,net,group,existing=[]) for group in bathroom_layouts(net)):break
+        else:o.clear();o.update(original)
+    return o
 
 
 def make_walls(floor,t,revision):
@@ -151,31 +199,45 @@ def make_walls(floor,t,revision):
             if len(ids)==2 and all(by_id[i]['kind']=='corridor' for i in ids):continue
             a,b=((lo,fixed),(hi,fixed)) if axis=='h' else ((fixed,lo),(fixed,hi))
             floor['walls'].append(dict(id=f"{floor['id']}-W{len(floor['walls'])+1}",floor_id=floor['id'],axis='horizontal' if axis=='h' else 'vertical',start=a,end=b,thickness=t,room_ids=ids,exterior=len(ids)==1,revision_id=revision))
-    # Every requested room receives a real door directly to the connected circulation.
+    # Normal rooms connect to halls; the guest WC connects through its own majlis.
     for r in cells:
         if r['kind']=='corridor':continue
-        hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
-        if not hosts:continue
-        wall=max(hosts,key=lambda w:math.dist(w['start'],w['end']))
-        length=math.dist(wall['start'],wall['end']);width=min(.90,length-t-.12)
-        if width<.75:continue
-        center=[(a+b)/2 for a,b in zip(wall['start'],wall['end'])]
-        # A door toward one end leaves wall space for furniture; inset beyond corner.
-        axis=0 if wall['axis']=='horizontal' else 1
-        center[axis]=wall['start'][axis]+t/2+.18+width/2
-        if center[axis]+width/2>wall['end'][axis]-t/2: center[axis]=(wall['start'][axis]+wall['end'][axis])/2
-        x,y=center
-        if axis==0:
-            top=y<r['y']+r['depth']/2;swing=box(x-width/2,y if top else y-width,width,width)
-        else:
-            left=x<r['x']+r['width']/2;swing=box(x if left else x-width,y-width/2,width,width)
-        floor['openings'].append(dict(id=f"{floor['id']}-O{len(floor['openings'])+1}",wall_id=wall['id'],floor_id=floor['id'],kind='door',center=center,width=width,height=2.2,sill=0,connects=[r['id']]+[i for i in wall['room_ids'] if i!=r['id']],swing_rect=swing,revision_id=revision))
+        if r.get('guest_parent'):
+            parent=floor['id']+'-'+r['guest_parent']
+            hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and parent in w['room_ids']]
+        else:hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
+        if hosts:add_room_door(floor,r,max(hosts,key=lambda w:math.dist(w['start'],w['end'])),revision)
+
+
+def add_windows(floor,brief,revision):
+    # Explicit proposed clear glass and opening fraction; actual facade legality is a separate check.
     for r in floor['rooms']:
-        if r['kind'] in ('corridor','reserve','stair'):continue
-        hosts=[w for w in floor['walls'] if w['exterior'] and r['id'] in w['room_ids'] and math.dist(w['start'],w['end'])>1.25]
-        if not hosts:continue
-        w=max(hosts,key=lambda q:math.dist(q['start'],q['end']));length=math.dist(w['start'],w['end']);width=min(1.5,length-.5)
-        floor['openings'].append(dict(id=f"{floor['id']}-O{len(floor['openings'])+1}",wall_id=w['id'],floor_id=floor['id'],kind='window',center=[(a+b)/2 for a,b in zip(w['start'],w['end'])],width=width,height=.6 if r['kind']=='bathroom' else 1.2,sill=1.5 if r['kind']=='bathroom' else .9,connects=[r['id'],'OUTSIDE'],revision_id=revision))
+        if not r.get('request_id'):continue
+        target=saudi_rules.window_targets(r['kind'],area(r))[0] if brief.apply_saudi_rules else .9
+        sill=1.5 if r['kind']=='bathroom' else .9;height=.8 if r['kind']=='bathroom' else 1.5
+        clear_height=height-.12;left=target
+        walls=[w for w in floor['walls'] if w['exterior'] and r['id'] in w['room_ids']]
+        for wall in sorted(walls,key=lambda w:-math.dist(w['start'],w['end'])):
+            axis=0 if wall['axis']=='horizontal' else 1
+            runs=[(wall['start'][axis]+.22,wall['end'][axis]-.22)]
+            for o in floor['openings']:
+                if o['wall_id']!=wall['id']:continue
+                lo,hi=o['center'][axis]-o['width']/2-.18,o['center'][axis]+o['width']/2+.18
+                following=[]
+                for a,b in runs:
+                    if hi<=a or lo>=b:following.append((a,b));continue
+                    if lo>a:following.append((a,lo))
+                    if hi<b:following.append((hi,b))
+                runs=following
+            for a,b in sorted(runs,key=lambda ab:ab[0]-ab[1]):
+                width=min(b-a,left/clear_height+.12)
+                if width<.5:continue
+                center=[(u+v)/2 for u,v in zip(wall['start'],wall['end'])];center[axis]=(a+b)/2
+                glazing=(width-.12)*clear_height
+                floor['openings'].append(dict(id=f"{floor['id']}-O{len(floor['openings'])+1}",wall_id=wall['id'],floor_id=floor['id'],kind='window',center=center,width=width,height=height,sill=sill,clear_width=width-.12,clear_height=clear_height,operable_fraction=.5,connects=[r['id'],'OUTSIDE'],revision_id=revision,dimensions_status='PROPOSED_NOT_AS_BUILT'))
+                left-=glazing
+                if left<1e-6:break
+            if left<1e-6:break
 
 
 def entrance(floor,face,revision):
@@ -188,37 +250,77 @@ def entrance(floor,face,revision):
     floor['openings'].append(dict(id=f"{floor['id']}-ENTRY",wall_id=w['id'],floor_id=floor['id'],kind='door',center=[(a+b)/2 for a,b in zip(w['start'],w['end'])],width=1.0,height=2.3,sill=0,connects=w['room_ids']+['OUTSIDE'],revision_id=revision,main_entry=True))
 
 
+def separate_guests(floor,brief,revision):
+    if not brief.separate_guest_entry:return
+    for r in floor['rooms']:
+        if r['kind']!='majlis' or r.get('zone')!='guest':continue
+        for o in floor['openings']:
+            if o['kind']=='door' and r['id'] in o['connects'] and any('hall-' in rid for rid in o['connects']):o['access_control']='family_only'
+        hosts=[w for w in floor['walls'] if w['exterior'] and r['id'] in w['room_ids'] and math.dist(w['start'],w['end'])>1.3]
+        def preference(w):
+            axis=0 if w['axis']=='horizontal' else 1
+            face=('north' if w['start'][1]<r['y']+r['depth']/2 else 'south') if axis==0 else ('west' if w['start'][0]<r['x']+r['width']/2 else 'east')
+            return (face!=brief.entrance_face,-math.dist(w['start'],w['end']))
+        for wall in sorted(hosts,key=preference):
+            # Do not overlap an existing window or another door on the host.
+            axis=0 if wall['axis']=='horizontal' else 1
+            for center in (wall['start'][axis]+.75,wall['end'][axis]-.75):
+                if any(o['wall_id']==wall['id'] and abs(o['center'][axis]-center)<(o['width']+.9)/2+.1 for o in floor['openings']):continue
+                nominal=next(c for c in floor['cells'] if c['id']==r['id'])
+                o=add_room_door(floor,nominal,wall,revision,guest_entry=True)
+                if o:
+                    delta=center-o['center'][axis];o['center'][axis]=center;o['swing_rect']['x' if axis==0 else 'y']+=delta
+                    o['connects']=[r['id'],'OUTSIDE'];break
+            else:continue
+            break
+
+
 def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
-    model=dict(schema_version='0.5-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
+    model=dict(schema_version='0.5.1-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
                brief=brief.model_dump(),profile={'project_name':brief.project_name},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(brief.setbacks.west,brief.setbacks.north,result['W'],result['D']),
                search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
-               presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
+               requirements_resolution=resolve_notes(brief),presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
     W,D=result['W'],result['D'];a=result['halls'][0]['x']+result['halls'][0]['width']
     if family=='L':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    else:outline=[(0,0),(W,0),(W,D*.67),(W*.80,D*.67),(W*.80,D),(W*.12,D),(W*.12,D*.33),(0,D*.33)]
+    else:
+        first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
+        outline=[(0,0),(W,0),(W,second),(W*.80,second),(W*.80,D),(W*.12,D),(W*.12,first),(0,first)]
     model['footprint']['polygon']=[(x+brief.setbacks.west,y+brief.setbacks.north) for x,y in outline]
     for fi,cells in enumerate(result['floors']):
         fid=['GF','FF'][fi];f=dict(id=fid,name=['الدور الأرضي','الدور الأول'][fi],level_m=fi*brief.floor_height,rooms=[],walls=[],openings=[],furniture=[],decorations=[],cells=[])
         for n,cell in enumerate(cells+[dict(r,id=f'hall-{i}',kind='corridor',name='موزع الحركة') for i,r in enumerate(result['halls'])]):
             q=copy.deepcopy(cell);q['id']=fid+'-'+q.get('id',f'reserve-{n}');q['floor_id']=fid
-            q['x']+=brief.setbacks.west;q['y']+=brief.setbacks.north
+            q['x']+=brief.setbacks.west+t/2;q['y']+=brief.setbacks.north+t/2
             f['cells'].append(q)
             net=copy.deepcopy(q);net.update(x=q['x']+t/2,y=q['y']+t/2,width=q['width']-t,depth=q['depth']-t,revision_id=revision)
             net['area_m2']=round(area(net),4);f['rooms'].append(net)
         make_walls(f,t,revision)
-        if fi==0:entrance(f,brief.entrance_face,revision)
+        if fi==0:
+            entrance(f,brief.entrance_face,revision)
+            separate_guests(f,brief,revision)
+        add_windows(f,brief,revision)
         # Detailed, original furniture symbols and use-zone placement are shared with V0.4.1.
-        furnish_floor(f,revision)
+        furnish_floor(f,revision,{})
         model['floors'].append(f)
-    model['metrics']={'floor_built_m2':round(result['gross'],2),'requested_spaces':sum(r.count for r in brief.rooms),
+    model['footprint']['polygons_by_floor']={f['id']:union_polygons(f['cells'],t/2) for f in model['floors']}
+    physical_areas={fid:round(sum(signed_area(p) for p in polys),2) for fid,polys in model['footprint']['polygons_by_floor'].items()}
+    model['footprint']['nominal_envelope_polygon']=model['footprint']['polygon']
+    model['footprint']['polygon']=max(model['footprint']['polygons_by_floor']['GF'],key=lambda p:abs(signed_area(p)))
+    model['stairs']=make_stairs(model)
+    repair_furniture_access(model,revision)
+    for f in model['floors']:f['annotations']=annotate(f,model['stairs'])
+    model['parking']=saudi_rules.parking(model,brief)
+    model['regulatory_profile']={'jurisdiction':'SA','ruleset_id':saudi_rules.registry()['id'],'city':brief.city,'municipality':brief.municipality,'local_rules_verified':False,'full_sbc_compliance_verified':False,'sources':saudi_rules.registry()['sources']}
+    model['metrics']={'floor_built_m2':max(physical_areas.values()),'floor_built_by_id':physical_areas,'requested_spaces':sum(r.count for r in brief.rooms),
                       'circulation_m2':round(sum(area(r) for f in model['floors'] for r in f['rooms'] if r['kind']=='corridor'),2),
                       'bed_capacity':sum(q.get('capacity',0) for f in model['floors'] for q in f['furniture']),
                       'proposed_flexible_m2':round(sum(area(r) for f in model['floors'] for r in f['rooms'] if r['kind']=='reserve'),2)}
+    model['footprint']['occupied_cells_by_floor']={f['id']:[{k:r[k] for k in ('x','y','width','depth')} for r in f['cells']] for f in model['floors']}
     canonical={'floors':[{k:v for k,v in f.items() if k not in ('decorations',)} for f in model['floors']]}
     def clean(obj):
         if isinstance(obj,dict):return {k:clean(v) for k,v in obj.items() if k!='revision_id'}
@@ -235,7 +337,7 @@ def validate_general(model,brief):
     for fi,f in enumerate(model['floors']):
         expected={r['id']:r for r in expanded_program(brief,fi)}
         actual={r['id'].removeprefix(f['id']+'-'):r for r in f['rooms'] if r.get('request_id')}
-        add(f'{f["id"]}-program',set(expected)==set(actual),'تغطية جميع الفراغات المطلوبة في دورها',{'expected':len(expected),'actual':len(actual)})
+        add(f'{f["id"]}-program',set(expected)==set(actual) and sum(bool(r.get('request_id')) for r in f['rooms'])==len(expected),'تغطية جميع الفراغات المطلوبة في دورها',{'expected':len(expected),'actual':len(actual)})
         bad=[r['id'] for key,r in actual.items() if area(r)+EPS<expected[key]['min_area'] or min(r['width'],r['depth'])+EPS<expected[key]['min_side']]
         add(f'{f["id"]}-sizes',not bad,'الحد الأدنى للمساحات والأبعاد الصافية',{'invalid':bad})
         rooms=f['rooms'];collisions=[(a['id'],b['id']) for i,a in enumerate(rooms) for b in rooms[i+1:] if overlap(a,b)]
@@ -253,7 +355,7 @@ def validate_general(model,brief):
             changed=False
             for a in halls:
                 if a['id'] not in seen and any(b['id'] in seen and touches(a,b) for b in halls):seen.add(a['id']);changed=True
-        missing=[r['id'] for r in rooms if r['kind']!='corridor' and not any(o['kind']=='door' and r['id'] in o['connects'] and set(o['connects'])&corridors for o in f['openings'])]
+        missing=[r['id'] for r in rooms if r['kind']!='corridor' and not any(o['kind']=='door' and r['id'] in o['connects'] and (set(o['connects'])&corridors or (r.get('guest_parent') and f['id']+'-'+r['guest_parent'] in o['connects'])) for o in f['openings'])]
         add(f'{f["id"]}-doors',not missing and len(seen)==len(halls),'كل فراغ يتصل بباب بممر مترابط',{'missing_doors':missing,'connected_halls':len(seen)})
         missing_windows=[r['id'] for r in rooms if r.get('request_id') and not any(o['kind']=='window' and r['id'] in o['connects'] for o in f['openings'])]
         add(f'{f["id"]}-windows',not missing_windows,'نافذة خارجية فعلية لكل فراغ مطلوب',{'missing':missing_windows})
@@ -263,21 +365,57 @@ def validate_general(model,brief):
         walls={w['id']:w for w in f['walls']}
         for o in f['openings']:
             w=walls.get(o['wall_id']);axis=0 if w and w['axis']=='horizontal' else 1
-            if not w or o['center'][axis]-o['width']/2<w['start'][axis]-EPS or o['center'][axis]+o['width']/2>w['end'][axis]+EPS:short.append(o['id'])
+            if not w or abs(o['center'][1-axis]-w['start'][1-axis])>EPS or o['center'][axis]-o['width']/2<w['start'][axis]-EPS or o['center'][axis]+o['width']/2>w['end'][axis]+EPS or not any(i in w['room_ids'] for i in o['connects']):short.append(o['id'])
+        for wall in f['walls']:
+            ports=sorted([o for o in f['openings'] if o['wall_id']==wall['id']],key=lambda o:o['center'][0 if wall['axis']=='horizontal' else 1])
+            ax=0 if wall['axis']=='horizontal' else 1
+            for a,b in zip(ports,ports[1:]):
+                if a['center'][ax]+a['width']/2>b['center'][ax]-b['width']/2+EPS:short.extend([a['id'],b['id']])
         add(f'{f["id"]}-openings',not short,'تطابق عرض وموقع الفتحات مع الجدار المضيف',{'invalid':short})
         capacities={r['id']:sum(q.get('capacity',0) for q in f['furniture'] if q['room_id']==r['id']) for r in rooms if r.get('capacity',0)}
         add(f'{f["id"]}-beds',all(capacities[r['id']]>=r['capacity'] for r in rooms if r.get('capacity',0)),'سعة الأسرة المرسومة المطلوبة',{'actual':capacities})
+    for f in model['floors']:
+        fixture_missing=[]
+        necessary={'master':{'single_bed','double_bed'},'bedroom':{'single_bed','double_bed'},'living':{'sofa'},'majlis':{'sofa'},'kitchen':{'kitchen_counter'},'bathroom':{'toilet'},'office':{'desk'},'laundry':{'washing_machine'},'storage':{'storage'}}
+        for r in f['rooms']:
+            items=[q for q in f['furniture'] if q['room_id']==r['id']]
+            if r.get('request_id') and r['kind'] in necessary and not {q['kind'] for q in items}&necessary[r['kind']]:fixture_missing.append(r['id'])
+            if r['kind']=='bathroom' and not {'toilet','basin'}<={q['kind'] for q in items}:fixture_missing.append(r['id'])
+            if r.get('include_shower') and not any(q['kind']=='shower' for q in items):fixture_missing.append(r['id'])
+            if r['kind']=='dining' and sum(q.get('seats',0) for q in items if q['kind']=='dining_chair')<brief.dining_seats:fixture_missing.append(r['id'])
+            if any(not inside(r,q) for q in items):fixture_missing.append(r['id'])
+        add(f['id']+'-fixtures',not fixture_missing,'وجود الأثاث الأساسي ومقاعد الطعام المطلوبة داخل الغرف',{'invalid':fixture_missing,'dining_seats_required':brief.dining_seats})
+        evidence=movement_evidence(model,f)
+        add(f['id']+'-walkability',not evidence['access']['unreachable'],'مسارات حركة جسم بعرض 0.60 م — فحص شبكي جزئي',evidence['access'])
+        add(f['id']+'-door-sweeps',not evidence['door_sweep_collisions'],'عدم تعارض أقواس الأبواب مع بعضها والأثاث ومسيري الدرج',{'collisions':evidence['door_sweep_collisions'],'scope':evidence['scope']})
+    if brief.separate_guest_entry and any(r.kind=='majlis' and r.floor==0 for r in brief.rooms):
+        ev=privacy_evidence(model)
+        add('guest-route',bool(ev['guest_entries']) and not ev['missing_guest_access'] and not ev['family_rooms_exposed'],'مسار ضيوف مستقل للمجلس ومرافقه عند إغلاق باب فصل الأسرة',ev)
+    else:checks.append(dict(check_id='guest-route',status='NOT_APPLICABLE',label='فصل مدخل المجلس — لم يطلب أو لا يوجد مجلس أرضي',evidence={}))
     if brief.floors==2:
+        invalid=[]
+        for s in model['stairs']:
+            room=next(r for f in model['floors'] for r in f['rooms'] if r['id']==s['room_id'])
+            if s['required_depth_m']>s['depth']+EPS or s['width']<2*s['flight_width_m']+.1 or not all(inside(room,q) for q in s['flights']+[s['landing'],s['entry_apron']]):invalid.append(s['id'])
+        add('stair-geometry',len(model['stairs'])==2 and not invalid,'هندسة مسيري الدرج والبسطات وعدد القوائم داخل البئر',{'stairs':model['stairs'],'invalid':invalid,'scope':'proposed dimensions only; headroom not verified against beams or floor slabs'})
         cores=[next(r for r in f['rooms'] if r['kind']=='stair') for f in model['floors']]
         add('vertical-core',all(abs(cores[0][k]-cores[1][k])<EPS for k in ('x','y','width','depth')),'تطابق حدود بئر الدرج بين الدورين')
-    for id,label in [('privacy','الخصوصية وفصل الضيوف والمداخل المستقلة'),('walkability','خلوص الحركة التفصيلي وتعارض أقواس الأبواب مع الأثاث'),('local-code','اعتماد الارتدادات والاشتراطات المحلية ومعدلات التهوية'),('structure','الإنشاء والخدمات والتنسيق الرأسي للحمامات'),('stairs-code','مطابقة السلم والارتفاع الصافي للاشتراطات'),('flexible-spaces','اعتماد استعمال المساحات المرنة المقترحة الزائدة عن البرنامج')]:
-        checks.append(dict(check_id=id,status='PENDING',label=label,evidence={}))
-    if brief.notes.strip():checks.append(dict(check_id='free-text',status='PENDING',label='طلبات النص تحتاج تحويلًا واعتمادًا في جدول البرنامج',evidence={'unmapped_notes':brief.notes}))
+    for id,label,reason in [
+        ('visual-privacy','الخصوصية البصرية والصوتية وإطلالات النوافذ','فصل مسار الضيوف مقاس في فحص مستقل؛ الرؤية الكاملة والصوت تحتاج مراجعة تصميم.'),
+        ('local-code','اعتماد الارتدادات والاشتراطات المحلية ومعدلات التهوية','يلزم تحديد الدولة والمدينة ومرجع الاشتراطات الرسمي؛ الأرقام المدخلة ليست اعتمادًا قانونيًا.'),
+        ('structure','التصميم الإنشائي والخدمات والتمديدات','يلزم نموذج إنشائي ومواقع أعمدة وكمرات وتمديدات؛ توافق بئر الدرج وحده لا يثبت المطابقة.'),
+        ('stairs-code','اعتماد السلم والارتفاع الصافي فوق كامل المسار','هندسة السلم محسوبة جزئيًا؛ يلزم المرجع المحلي ومناسيب البلاطات والكمرات للتحقق من الارتفاع الصافي.')]:
+        checks.append(dict(check_id=id,status='PENDING',label=label,evidence={'required_action':reason}))
+    reserves=[r['id'] for f in model['floors'] for r in f['rooms'] if r['kind']=='reserve']
+    checks.append(dict(check_id='flexible-spaces',status='PENDING' if reserves else 'PASS',label='استبعاد الفراغات الاحتياطية غير المطلوبة' if not reserves else 'اعتماد استعمال المساحات المرنة المقترحة',evidence={'reserve_ids':reserves,'policy':brief.flexible_space_policy}))
+    notes=model['requirements_resolution']
+    if brief.notes.strip():checks.append(dict(check_id='free-text',status='PENDING' if notes['unmapped'] else 'PASS',label='ربط الطلبات النصية المحددة بالبرنامج — العبارات الأخرى تحتاج مراجعة',evidence=notes))
+    checks.extend(saudi_rules.checks(model,brief))
     return checks
 
 
 def generate_general(brief:VillaBrief,output_dir=None):
-    from .general_drawing import drawing
+    from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True);candidates=[];unavailable=[]
@@ -285,15 +423,24 @@ def generate_general(brief:VillaBrief,output_dir=None):
         result=search(brief,family)
         if not result:
             unavailable.append({'family':family,'label':label,'reason':'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
-        model=materialize(brief,family,result);model['checks']=validate_general(model,brief)
-        failures=[c for c in model['checks'] if c['status']=='FAIL']
+        alternatives=[result]+result.get('alternatives',[]);model=None;failures=[]
+        for attempt,layout in enumerate(alternatives):
+            trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
+            errors=[c for c in trial['checks'] if c['status']=='FAIL']
+            trial['search']['validated_layouts_tested']=attempt+1
+            if model is None or len(errors)<len(failures):model=trial;failures=errors
+            if not errors:model=trial;failures=[];break
+            if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
         rev=model['model_revision_id'];model['downloads']={'json':f'/api/files/{rev}.json'};model['previews']={}
         if not failures:
             scenes=[drawing(model,f) for f in model['floors']]
             for f,s in zip(model['floors'],scenes):
                 name=f'{rev}-{f["id"]}.svg';(out/name).write_text(scene_svg(model,f,drawing=s),encoding='utf-8');model['previews'][f['id']]=f'/api/files/{name}'
-            scene_pdf(model,out/f'{rev}.pdf',drawings=scenes,include_report=False)
+            (out/f'{rev}-SITE.svg').write_text(scene_svg(model,model['floors'][0],drawing=drawing(model,model['floors'][0],site_view=True)),encoding='utf-8')
+            model['previews']['SITE']=f'/api/files/{rev}-SITE.svg'
+            report_model={**model,'floors':model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
+            scene_pdf(report_model,out/f'{rev}.pdf',drawings=scenes+[review_drawing(model)],include_report=False)
             model['export_audit']=scene_dxf(model,out/f'{rev}.dxf',drawings=scenes)
             model['downloads'].update({ext:f'/api/files/{rev}.{ext}' for ext in ('pdf','dxf')})
         (out/f'{rev}.json').write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8');candidates.append(model)

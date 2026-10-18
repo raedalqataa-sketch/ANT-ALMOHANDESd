@@ -1,5 +1,5 @@
 """Customer-owned villa brief; no adopted-family program is injected."""
-from typing import Literal
+from typing import Literal,Annotated
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -36,6 +36,19 @@ class VillaBrief(Strict):
     corridor_width: float = Field(default=1.5, ge=1.2, le=2.4)
     floor_height: float = Field(default=3.2, ge=2.8, le=3.8)
     rooms: list[SpaceRequest] = Field(min_length=1, max_length=30)
+    country: Literal['SA'] = 'SA'
+    city: str = Field(default='',max_length=100)
+    district: str = Field(default='',max_length=100)
+    plan_number: str = Field(default='',max_length=80)
+    parcel_number: str = Field(default='',max_length=80)
+    dining_seats: Literal[4,6,8,10,12] = 6
+    municipality: str = Field(default='',max_length=140)
+    parcel_reference: str = Field(default='',max_length=300)
+    boundary_widths: dict[Literal['north','south','east','west'],Annotated[float,Field(ge=0,le=100)]] = Field(default_factory=dict)
+    apply_saudi_rules: bool = True
+    separate_guest_entry: bool = True
+    flexible_space_policy: Literal['remove','keep'] = 'remove'
+    stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
     notes: str = Field(default='', max_length=4000)
 
     @model_validator(mode='after')

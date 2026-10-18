@@ -47,3 +47,9 @@ def interpret(request:Interpretation):
                 'note':'اعتمد الجدول يدويًا قبل التوليد. النص الأصلي يبقى محفوظًا ولا يعتبر منفذًا تلقائيًا.'}
     except (ValueError,KeyError,URLError,TimeoutError) as exc:
         raise HTTPException(502,'تعذر تفسير الطلب أو رفض التحقق مخرجات النموذج. لم تتغير المدخلات.') from exc
+
+
+@router.get('/jurisdictions')
+def jurisdictions():
+    from pathlib import Path
+    return json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())

@@ -1,0 +1,2397 @@
+{
+  "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport",
+  "endpoint": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport/GetSubMunicipalities?parentId=",
+  "retrieved_at": "2026-10-18",
+  "scope": "Official public municipality directory; not a database of local building rules",
+  "amanats": [
+    {
+      "id": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+      "name": "أمانة الحدود الشمالية",
+      "municipalities": [
+        {
+          "Id": "781f1b38-f843-75df-aef0-af48299c5ab4",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "أمانة الحدود الشمالية",
+          "Code": "1"
+        },
+        {
+          "Id": "24f1d4cb-0f6b-414a-9df4-b96429af58af",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية رفحاء",
+          "Code": "34"
+        },
+        {
+          "Id": "1f12e057-229f-4eed-9614-d813972c3eb8",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية طريف",
+          "Code": "35"
+        },
+        {
+          "Id": "4cfdd701-45b1-4a25-99b8-99ed0ed4577c",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية ابن شريم",
+          "Code": "70"
+        },
+        {
+          "Id": "d6896bbb-3a72-4141-892a-71213d9e8cde",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية العويقلة",
+          "Code": "71"
+        },
+        {
+          "Id": "d651e506-489f-45be-b968-bb30a6b14918",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية ام خنصر",
+          "Code": "72"
+        },
+        {
+          "Id": "f8e8a9ae-8e04-4301-b481-2c943680cff1",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية روضه هباس",
+          "Code": "73"
+        },
+        {
+          "Id": "26918df2-81c2-46d9-b275-28a24ad9953d",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية شعبة نصاب",
+          "Code": "74"
+        },
+        {
+          "Id": "6413e589-2bca-4c29-a7f3-9d167b2917ab",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية  طلعة التمياط ",
+          "Code": "75"
+        },
+        {
+          "Id": "781f1b38-f843-45df-aef0-af48299c5ab4",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية لينه",
+          "Code": "76"
+        },
+        {
+          "Id": "9e70ac78-8a79-4b38-9d8e-da459afad2fa",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية شرق عرعر",
+          "Code": "554"
+        },
+        {
+          "Id": "6d1ccbab-fde4-4f73-ac4e-cd26073954cf",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية غرب عرعر",
+          "Code": "555"
+        },
+        {
+          "Id": "6d1ccbab-fde4-4f73-ac4e-cd36073954cf",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية جنوب عرعر",
+          "Code": "630"
+        },
+        {
+          "Id": "21c1b6d3-2634-8e47-e063-0b3d500a816b",
+          "AmanaId": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+          "Name": "بلدية عرعر",
+          "Code": "1300"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+      "name": "أمانة منطقة الباحة",
+      "municipalities": [
+        {
+          "Id": "00258e29-7c17-40ef-8264-e53e8a6c905b",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "أمانة منطقة الباحة",
+          "Code": "2"
+        },
+        {
+          "Id": "0cbeebdd-b218-4af8-b2b9-bfd74d6a9e41",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلجرشي",
+          "Code": "18"
+        },
+        {
+          "Id": "cd9b419f-c453-4b0a-beb5-0eec51981e6f",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بني كبير",
+          "Code": "19"
+        },
+        {
+          "Id": "74568c44-fd22-47c4-8ece-c597263f2a47",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية القرى",
+          "Code": "32"
+        },
+        {
+          "Id": "c1940639-6ee8-406b-9c8e-a95ccff3920a",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية معشوقة",
+          "Code": "36"
+        },
+        {
+          "Id": "3180598e-c87f-4d13-88b5-cfaa5a85ddce",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية المندق",
+          "Code": "142"
+        },
+        {
+          "Id": "59d062a7-2f0f-4065-b023-d720b5cf5a56",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية العقيق",
+          "Code": "143"
+        },
+        {
+          "Id": "84cd60c9-5915-4016-be23-fedbe97dbb4c",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية المخواة",
+          "Code": "144"
+        },
+        {
+          "Id": "d5971794-9169-4df7-b6ac-ae03594ccb73",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية قلوة",
+          "Code": "145"
+        },
+        {
+          "Id": "18183cdd-5c15-4791-8dd0-4936bee633fe",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية الحجرة",
+          "Code": "146"
+        },
+        {
+          "Id": "dd23da08-7734-4525-b985-bb75b3f9816c",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية غامد الزناد",
+          "Code": "147"
+        },
+        {
+          "Id": "0229e5b6-42ad-4fd6-97e4-00055812e31e",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية بني حسن",
+          "Code": "148"
+        },
+        {
+          "Id": "781f1b38-f843-75df-aef5-af48299c5ab4",
+          "AmanaId": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+          "Name": "بلدية الباحة الفرعية ",
+          "Code": "631"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+      "name": "أمانة المنطقة الشرقية",
+      "municipalities": [
+        {
+          "Id": "5cf7aaf7-3b7e-4193-9e0c-bf10d7ad38bd",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية محافظة الخبر",
+          "Code": "3"
+        },
+        {
+          "Id": "bce978e0-c140-4ff6-b3cf-ff920867a6aa",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية الظهران",
+          "Code": "4"
+        },
+        {
+          "Id": "bce978e0-c140-4ff6-b3cf-ff120867a6aa",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية وسط الدمام",
+          "Code": "5"
+        },
+        {
+          "Id": "bce978e0-c140-4ff6-b3cf-ff370867a6aa",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية شرق الدمام",
+          "Code": "6"
+        },
+        {
+          "Id": "bce978e0-c140-4ff6-b3cf-ff720867a6aa",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية غرب الدمام",
+          "Code": "7"
+        },
+        {
+          "Id": "79bb36b5-d2a4-4ad2-ba9c-f5910467ba76",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "أمانة المنطقة الشرقية",
+          "Code": "8"
+        },
+        {
+          "Id": "65c747d0-1db8-48bc-9687-9e63e603b9f2",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "القطيف",
+          "Code": "96"
+        },
+        {
+          "Id": "ebc5c34c-394e-49d3-9249-320001ade42c",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "صفوى",
+          "Code": "97"
+        },
+        {
+          "Id": "258619a7-7169-4f44-8d76-8e03ca28cf39",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "عنك",
+          "Code": "98"
+        },
+        {
+          "Id": "27b60c85-bcc2-4b7a-946f-ad1d78576b3b",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية القديح",
+          "Code": "99"
+        },
+        {
+          "Id": "ba242fc8-e6c8-470a-a081-ebcdea59eb47",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "سيهات",
+          "Code": "100"
+        },
+        {
+          "Id": "a76a70eb-330f-41fa-a3ac-20b2c530b919",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "جزيرة دارين وتاروت",
+          "Code": "101"
+        },
+        {
+          "Id": "bce978e0-c140-4ff6-b3cf-ff320867a6aa",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بقيق",
+          "Code": "401"
+        },
+        {
+          "Id": "86b719cb-94d6-48aa-abd8-d2434fbb5624",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية الرفيعة",
+          "Code": "402"
+        },
+        {
+          "Id": "2ca5a57d-58b6-47cb-a8ee-966691f5aa32",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية الصرار",
+          "Code": "403"
+        },
+        {
+          "Id": "59e89639-35f5-48ea-bbb1-f7f29aa957f0",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية القليب",
+          "Code": "405"
+        },
+        {
+          "Id": "6603b491-612e-4a73-8664-f8332a1eba63",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية اللهابة",
+          "Code": "406"
+        },
+        {
+          "Id": "34b0a112-ff00-4cd5-bd3e-e5cdecbef3ba",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية مليجة",
+          "Code": "412"
+        },
+        {
+          "Id": "ed741ac4-0ad8-4fbe-a062-efa6f339d3f0",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية الجبيل",
+          "Code": "470"
+        },
+        {
+          "Id": "8e13afaa-5da7-4ef3-b192-ca7e96a8604b",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية الخفجي",
+          "Code": "471"
+        },
+        {
+          "Id": "d4b01814-2fde-41d6-a09b-2236cbc83b99",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية النعيرية",
+          "Code": "476"
+        },
+        {
+          "Id": "aa5860f7-7f65-4dde-9ed3-507dfbd5ae40",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "جوف بني هاجر",
+          "Code": "477"
+        },
+        {
+          "Id": "b734f9cb-3021-4888-a9a4-ded95b471bee",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية رأس تنورة",
+          "Code": "478"
+        },
+        {
+          "Id": "15877396-8299-4064-8571-2060eb86c998",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية عين دار",
+          "Code": "480"
+        },
+        {
+          "Id": "e2d33514-2095-45e5-90fb-c870a64f80af",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية قرية العليا",
+          "Code": "481"
+        },
+        {
+          "Id": "1001C157-554B-7D75-E063-0B3D500A8D94",
+          "AmanaId": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+          "Name": "بلدية البيضاء",
+          "Code": "1294"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+      "name": "أمانة منطقة نجران",
+      "municipalities": [
+        {
+          "Id": "cc7eccbf-cfc0-4cd3-bdc8-74229127b081",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "أمانة منطقة نجران",
+          "Code": "9"
+        },
+        {
+          "Id": "62f7b0a0-63ba-4bef-ac4f-0eb2db67faef",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية الحصينية",
+          "Code": "10"
+        },
+        {
+          "Id": "a11df71e-1214-47a7-a4c0-db028819479a",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية محافظة خباش",
+          "Code": "11"
+        },
+        {
+          "Id": "a4a5bcdf-2de4-4574-a466-ef9d1d26808b",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية شرورة",
+          "Code": "12"
+        },
+        {
+          "Id": "172cd80a-4a92-4104-ae80-0728b3e5ece4",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية بئر عسكر",
+          "Code": "17"
+        },
+        {
+          "Id": "8dfb57e2-122a-416a-95ff-65624ea29b1d",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية حبونا",
+          "Code": "149"
+        },
+        {
+          "Id": "f804e9b5-d25b-4b66-b3e7-8a00d2eb5239",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية ثار",
+          "Code": "150"
+        },
+        {
+          "Id": "13c8f5a2-51d8-4a50-bf65-321a3a5328a0",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية بدر الجنوب",
+          "Code": "233"
+        },
+        {
+          "Id": "e759dff7-5f60-4d89-8355-0e09f7f10fb9",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية يدمة",
+          "Code": "234"
+        },
+        {
+          "Id": "38ef7ae2-e89f-4cc8-bdac-b43df2a8bcee",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية سلطانة",
+          "Code": "235"
+        },
+        {
+          "Id": "65a1af4a-9f0a-46a2-a518-d011f879c175",
+          "AmanaId": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+          "Name": "بلدية الوديعة",
+          "Code": "236"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+      "name": "أمانة منطقة عسير",
+      "municipalities": [
+        {
+          "Id": "0dd79d23-b06e-476a-9fb5-8705b897e5d2",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "أمانة منطقة عسير",
+          "Code": "13"
+        },
+        {
+          "Id": "0d91cce0-a043-4f53-9235-de4002de72b5",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية خميس مشيط",
+          "Code": "14"
+        },
+        {
+          "Id": "27158861-470c-4d53-b6da-89c21ccd071f",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية احد رفيدة",
+          "Code": "15"
+        },
+        {
+          "Id": "b984c7b3-2029-4cb1-962a-5b0b3a023c17",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "فرع السوده",
+          "Code": "23"
+        },
+        {
+          "Id": "2fa0e326-d09b-4816-92fb-f3ca06434eff",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "فرع الشعف",
+          "Code": "24"
+        },
+        {
+          "Id": "54760671-c5b9-4c31-a12e-8e0ba57d3572",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "فرع طبب",
+          "Code": "25"
+        },
+        {
+          "Id": "6dadb6df-0eee-461f-b318-01f065679f96",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "فرع مدينة سلطان",
+          "Code": "26"
+        },
+        {
+          "Id": "3ce23405-4b03-4c56-84fd-05911cdf0248",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "فرع مربه",
+          "Code": "27"
+        },
+        {
+          "Id": "eb0917f5-ebaf-4520-8ad5-6e3c93aa04e3",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية النماص",
+          "Code": "29"
+        },
+        {
+          "Id": "e384f5f1-e52e-458a-a985-26f737f43755",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية بني عمرو",
+          "Code": "30"
+        },
+        {
+          "Id": "9d993d35-ca73-4318-8a0c-3926e855d596",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية صمخ",
+          "Code": "69"
+        },
+        {
+          "Id": "c6986ecd-0e57-47f5-8fa5-ab08d517eac8",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية البشائر",
+          "Code": "77"
+        },
+        {
+          "Id": "2635280f-7ae8-46fa-8865-6e1ed3990b9a",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بللحمر",
+          "Code": "79"
+        },
+        {
+          "Id": "8f604b71-139d-43b0-916c-8fd9859c632c",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية تثليث",
+          "Code": "80"
+        },
+        {
+          "Id": "d3a336d5-0470-43be-b8ef-7d5b7e76cb3b",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية رجال المع",
+          "Code": "81"
+        },
+        {
+          "Id": "6e9d84fe-57e8-4697-a490-c4316c15d20a",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية ظهران الجنوب",
+          "Code": "82"
+        },
+        {
+          "Id": "bcff7ffe-1d2a-4046-88b9-d9efd9818dd5",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية محايل عسير",
+          "Code": "83"
+        },
+        {
+          "Id": "580053a2-8d14-47c4-a1fe-e0ca0f7e5a86",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية تنومه",
+          "Code": "89"
+        },
+        {
+          "Id": "3df4dd7c-e34e-4576-bf7f-456fff9d1b7b",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية سراة عبيده",
+          "Code": "90"
+        },
+        {
+          "Id": "3970759d-83ba-411c-b398-4e5867244a67",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الواديين",
+          "Code": "92"
+        },
+        {
+          "Id": "a574332e-829d-42c2-95cd-fb0091f452e2",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية وادي هشبل",
+          "Code": "93"
+        },
+        {
+          "Id": "f13cab6f-16aa-4a58-bbda-5413ef21ce90",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية المجاردة",
+          "Code": "94"
+        },
+        {
+          "Id": "407a5325-864c-4451-8eb9-a1c4cb7f6a66",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الحرجة",
+          "Code": "95"
+        },
+        {
+          "Id": "2c2040f0-bb67-4797-bf25-5e9c04de3717",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "نطاق خدمة مدينة أبها",
+          "Code": "104"
+        },
+        {
+          "Id": "f86693e5-d08c-414f-b3ef-78e36ed9c46f",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بللقرن",
+          "Code": "114"
+        },
+        {
+          "Id": "db31d0d1-0bb8-4982-a2c0-cf6d0e42966e",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بحر ابو سكينة",
+          "Code": "137"
+        },
+        {
+          "Id": "d777c346-9a51-4725-99a3-494302945e76",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الصبيخة",
+          "Code": "140"
+        },
+        {
+          "Id": "728b2090-d967-4eba-80cf-1be87b99d851",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الامواه",
+          "Code": "141"
+        },
+        {
+          "Id": "6baa5a24-5c25-4655-bf45-524fa8bfdbf5",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية البرك",
+          "Code": "164"
+        },
+        {
+          "Id": "b0e5add8-d5b7-425e-91ea-076eb1df404e",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الحازمي",
+          "Code": "165"
+        },
+        {
+          "Id": "35f387f9-805c-4728-84f1-f75b90fbe2d7",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الربوعة",
+          "Code": "166"
+        },
+        {
+          "Id": "1729ffee-0ad8-4b98-ac87-4778de830bca",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الساحل",
+          "Code": "167"
+        },
+        {
+          "Id": "a3dc2b5b-0a70-4c7d-9d24-1189ceb3ac72",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية الفرشة",
+          "Code": "168"
+        },
+        {
+          "Id": "5df514ba-de4f-49bc-be4b-da3ca67d22f4",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية النقيع",
+          "Code": "169"
+        },
+        {
+          "Id": "6e27e6b5-d9c2-4dfb-8e06-f0026e838877",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية بارق",
+          "Code": "170"
+        },
+        {
+          "Id": "bc5cfe07-70c9-4bdb-b5f9-a98631dbfa3b",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية بللسمر",
+          "Code": "171"
+        },
+        {
+          "Id": "db2c4fb8-da0c-4a9b-b6cd-d8d45675ce6b",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية بيشة",
+          "Code": "172"
+        },
+        {
+          "Id": "33db3791-ea27-40d6-9174-7b861e90eca0",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية ثنية وتباله",
+          "Code": "173"
+        },
+        {
+          "Id": "85688141-5880-433a-a156-631acc7cba72",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية طريب",
+          "Code": "174"
+        },
+        {
+          "Id": "7580850a-4280-4acf-9049-e28a59942108",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية قنا",
+          "Code": "175"
+        },
+        {
+          "Id": "2fa0e326-d09b-4820-92fb-f3ca06453eff",
+          "AmanaId": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+          "Name": "بلدية العرين الفرعية",
+          "Code": "641"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+      "name": "أمانة منطقة جازان",
+      "municipalities": [
+        {
+          "Id": "e51617fc-d614-4b32-9b23-7bf0e12bcee2",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "أمانة منطقة جازان",
+          "Code": "20"
+        },
+        {
+          "Id": "9f41eb2c-8aaa-4d3e-9f3c-192b6b19eceb",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الحقوا",
+          "Code": "33"
+        },
+        {
+          "Id": "a4b52443-5eaa-4de8-92e4-bf245bf8f9bb",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية صبيا",
+          "Code": "41"
+        },
+        {
+          "Id": "69631081-14a1-48c9-a691-0f1d23e9be41",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية فيفا",
+          "Code": "42"
+        },
+        {
+          "Id": "738763e7-7902-48d0-b867-d9db99e6e4c1",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية أبي عريش",
+          "Code": "43"
+        },
+        {
+          "Id": "9cdabaab-4c49-4a52-9feb-4689805e5dab",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية بيش",
+          "Code": "44"
+        },
+        {
+          "Id": "e7ab3d2b-cb5e-4854-b291-c01d4d5fd960",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية صامطة",
+          "Code": "45"
+        },
+        {
+          "Id": "eabf1d2f-1577-4464-a8c0-37c2a48f598a",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية احد المسارحة",
+          "Code": "46"
+        },
+        {
+          "Id": "74bb1db9-810a-4dc8-9651-02d069da2f3a",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الطوال",
+          "Code": "47"
+        },
+        {
+          "Id": "d196f727-31d1-42c6-b7ab-1de2761d460e",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية فرسان",
+          "Code": "48"
+        },
+        {
+          "Id": "01d2898e-f62c-45f5-9d40-1d468ec63bd1",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية وادي جازان",
+          "Code": "49"
+        },
+        {
+          "Id": "478170b5-9d91-4275-a6b0-d409ede26040",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الموسم",
+          "Code": "50"
+        },
+        {
+          "Id": "724eadfc-8013-4304-b6a8-9e91ab5fdff9",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية ضمد",
+          "Code": "51"
+        },
+        {
+          "Id": "75228c10-0455-4ccd-ad3b-ea36e28ca75e",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية العارضة",
+          "Code": "52"
+        },
+        {
+          "Id": "25458918-2710-4fc2-8bf9-424103208537",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الدرب",
+          "Code": "53"
+        },
+        {
+          "Id": "d96a8f86-20c2-4029-9de9-cd6bbfc9cbaa",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية محافظة الحرث",
+          "Code": "54"
+        },
+        {
+          "Id": "208f5701-3f65-41eb-9de3-eab5225b7ea7",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الداير (بني مالك)",
+          "Code": "55"
+        },
+        {
+          "Id": "20f3e0f5-3f58-470f-8ef4-1c4410c2119b",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الشقيق",
+          "Code": "56"
+        },
+        {
+          "Id": "ae78b5c0-ad6f-45a5-ba11-305223d4beca",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية العيدابي",
+          "Code": "57"
+        },
+        {
+          "Id": "6ab089a0-c937-4eed-8797-1d9f08f9e35d",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية هروب",
+          "Code": "58"
+        },
+        {
+          "Id": "272b46ed-72a9-442d-adad-7fe238d638d9",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية السهي",
+          "Code": "59"
+        },
+        {
+          "Id": "0553b70e-1664-4164-be9f-298cfa3681cb",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية الريث",
+          "Code": "60"
+        },
+        {
+          "Id": "4caa23dc-2bc1-4915-b7aa-32d4cd57447f",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية المضايا",
+          "Code": "61"
+        },
+        {
+          "Id": "a13ac2dc-6ce7-45e7-8081-d72f88109d0a",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية العالية",
+          "Code": "62"
+        },
+        {
+          "Id": "e6930d7d-2bb0-4423-9cae-f230e1763364",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية قوز الجعافرة",
+          "Code": "64"
+        },
+        {
+          "Id": "f25b0f20-d452-477d-bfcb-1fcd3dd7be0e",
+          "AmanaId": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+          "Name": "بلدية القفل",
+          "Code": "65"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+      "name": "أمانة محافظة جدة",
+      "municipalities": [
+        {
+          "Id": "626c457d-0540-4e37-b6fd-b511c13ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية رابغ",
+          "Code": "16"
+        },
+        {
+          "Id": "2e9de37c-ac51-4b29-b3c7-7aa16eb828e6",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "أمانة محافظة جدة",
+          "Code": "21"
+        },
+        {
+          "Id": "e72cf90d-75b3-4c9d-8a4f-43e50ab8bd6b",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية القوز",
+          "Code": "22"
+        },
+        {
+          "Id": "e8a7a450-76db-4aa1-bc03-45f2019791c3",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية أضم",
+          "Code": "85"
+        },
+        {
+          "Id": "0bc8dbde-ac72-4e25-915b-72194964700d",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية الليث",
+          "Code": "86"
+        },
+        {
+          "Id": "e43a2bc8-5d72-45f5-ac75-6bbb6806cd3d",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية حلي",
+          "Code": "87"
+        },
+        {
+          "Id": "5655baaa-1601-402f-8aa7-baf499a38c8e",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية المظيلف",
+          "Code": "103"
+        },
+        {
+          "Id": "f064de0a-1a91-4327-8b20-ce488f60dfc5",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية القنفذة",
+          "Code": "131"
+        },
+        {
+          "Id": "82335dfc-60b3-4fba-a12c-0a316a4a47cf",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية سبت الجارة",
+          "Code": "132"
+        },
+        {
+          "Id": "0cf89ecc-0173-42e0-9e5f-f303c468161c",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية غميقة",
+          "Code": "133"
+        },
+        {
+          "Id": "4b60cba1-89d1-4961-9085-a3fe9b875ee7",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية الشواق",
+          "Code": "205"
+        },
+        {
+          "Id": "6781a356-c8bf-46be-b291-2485fc1e25e6",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية العرضية الشمالية",
+          "Code": "231"
+        },
+        {
+          "Id": "dc361cfa-b24a-4662-9cce-fdab7a8f39cf",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية العرضية الجنوبية ",
+          "Code": "232"
+        },
+        {
+          "Id": "626c457d-0540-4837-b6fd-b511c73ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية أبحر",
+          "Code": "414"
+        },
+        {
+          "Id": "626c457d-0540-4827-b6fd-b511c73ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية أم السلم",
+          "Code": "415"
+        },
+        {
+          "Id": "626c457d-0540-4837-b6fd-b511c139cced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية الجامعة",
+          "Code": "417"
+        },
+        {
+          "Id": "626c457d-0140-4837-b6fd-b511c73ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية الجنوب",
+          "Code": "418"
+        },
+        {
+          "Id": "626c457d-0540-4837-b6fd-b511c13ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية العزيزية",
+          "Code": "420"
+        },
+        {
+          "Id": "626c457d-0540-4837-b6fd-1511c13ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية المطار",
+          "Code": "421"
+        },
+        {
+          "Id": "626c457d-0540-4337-b6fd-b511c73ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية بريمان",
+          "Code": "423"
+        },
+        {
+          "Id": "626c457d-0570-4837-b6fd-b511c13ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية ثول",
+          "Code": "424"
+        },
+        {
+          "Id": "626c457d-0540-2837-b6fd-b511c13ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية جدة الجديدة",
+          "Code": "426"
+        },
+        {
+          "Id": "627c457d-0540-4837-b6fd-b511c73ecced",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية ذهبان",
+          "Code": "427"
+        },
+        {
+          "Id": "d8aef083-8fa8-4aa1-8a52-aaab86d5dae6",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية طيبة",
+          "Code": "428"
+        },
+        {
+          "Id": "6f84e48e-bfd9-48e9-aea4-da37507e8792",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية الكامل",
+          "Code": "486"
+        },
+        {
+          "Id": "d8f93c39-c48d-41ec-85ac-57372605e9bd",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية حجر",
+          "Code": "488"
+        },
+        {
+          "Id": "99a936c9-f378-4078-abe6-82cf245b2ae8",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية خليص",
+          "Code": "489"
+        },
+        {
+          "Id": "ebb42fcb-4912-470a-bafb-5bbceeb64b18",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "المسلخ المركزي",
+          "Code": "545"
+        },
+        {
+          "Id": "bf28388d-eff9-48fe-b404-eeadeff32742",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "سوق الأنعام المركزي",
+          "Code": "546"
+        },
+        {
+          "Id": "f3e4e6ea-dc59-4249-99f7-8db3fdf3e6a3",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "سوق الخضار والفواكه المركزي",
+          "Code": "547"
+        },
+        {
+          "Id": "54565ed3-b3fb-408a-9032-0a104cd0f743",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "سوق السمك المركزي",
+          "Code": "548"
+        },
+        {
+          "Id": "3862d4bd-e3f1-1776-e063-073d500a89d5",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "بلدية وسط جدة",
+          "Code": "1309"
+        },
+        {
+          "Id": "44e331ed-22b5-62a4-e063-073d500affcd",
+          "AmanaId": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+          "Name": "برنامج مشروع جدة التاريخية  - أمانة منطقة جدة",
+          "Code": "1322"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+      "name": "أمانة منطقة حائل",
+      "municipalities": [
+        {
+          "Id": "04fb1bed-91de-47d4-8f84-2d868bd79253",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "أمانة منطقة حائل",
+          "Code": "37"
+        },
+        {
+          "Id": "ca2d988f-93a2-4c5f-a1ac-f21d3aaf529b",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الجنوب",
+          "Code": "38"
+        },
+        {
+          "Id": "ca2d988f-a3a2-4c5f-a1ac-f21d3aaf529b",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الشمال",
+          "Code": "39"
+        },
+        {
+          "Id": "ca2d988f-a342-4c5f-a1ac-f21d3aaf529b",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الوسط",
+          "Code": "40"
+        },
+        {
+          "Id": "63298bdf-b943-46e6-90b4-242863601797",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية فيد",
+          "Code": "84"
+        },
+        {
+          "Id": "3c04b65e-9baa-4019-8d08-b8551814a454",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية محافظة الشنان",
+          "Code": "134"
+        },
+        {
+          "Id": "44df2fe2-6e9f-428b-ad47-5717bea8ae8e",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية محافظة الغزالة",
+          "Code": "135"
+        },
+        {
+          "Id": "d0a6c609-6baf-4ee5-b1b3-5e8212b6cfb7",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الخطة",
+          "Code": "136"
+        },
+        {
+          "Id": "d22d0bdb-ebec-49bb-9080-0c31b058a682",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية بقعاء",
+          "Code": "153"
+        },
+        {
+          "Id": "8ef630b9-9bc6-4d88-9b62-2b74e406723e",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية محافظة الشملي",
+          "Code": "154"
+        },
+        {
+          "Id": "246164ab-033e-4621-9e17-5e02d46052b6",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية محافظة السليمي",
+          "Code": "155"
+        },
+        {
+          "Id": "511656ee-2133-4ca7-81b9-1c0cc745e5fc",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية محافظة الحائط",
+          "Code": "156"
+        },
+        {
+          "Id": "aaf9d591-b257-44de-9b90-a75633f52dcf",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الروضة",
+          "Code": "157"
+        },
+        {
+          "Id": "24fa13cd-7630-4e3c-9b64-9274328a9249",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية جبة",
+          "Code": "158"
+        },
+        {
+          "Id": "ca2d988f-a3a2-4c5f-a1ac-f21d7aaf529b",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية موقق",
+          "Code": "159"
+        },
+        {
+          "Id": "4b6a1e64-fdd2-4df7-82a0-bebab8427501",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الحليفة",
+          "Code": "160"
+        },
+        {
+          "Id": "d8a2a3e2-df69-4580-ae9b-36826151dfce",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية تربة",
+          "Code": "161"
+        },
+        {
+          "Id": "58beb488-5b87-4159-9396-77271622cf54",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الكهفة",
+          "Code": "162"
+        },
+        {
+          "Id": "40030c04-809c-48e0-853d-fb8a88c2eac6",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية سميراء",
+          "Code": "163"
+        },
+        {
+          "Id": "8bd3dbfa-15aa-4420-9c85-3aa33c9ad609",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية انبوان  ",
+          "Code": "227"
+        },
+        {
+          "Id": "11f6fde6-551e-48b4-9ebd-f2a73b1c7be9",
+          "AmanaId": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+          "Name": "بلدية الاجفر",
+          "Code": "228"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+      "name": "أمانة منطقة القصيم",
+      "municipalities": [
+        {
+          "Id": "32361390-e181-4ef7-8237-039daa0dce24",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "أمانة منطقة القصيم",
+          "Code": "66"
+        },
+        {
+          "Id": "688f27d6-40a5-434c-85c7-05c99aa795ec",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الديرة الفرعية",
+          "Code": "67"
+        },
+        {
+          "Id": "8aea75ab-21c7-4952-b3b7-221b34d7fc00",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية البصر",
+          "Code": "102"
+        },
+        {
+          "Id": "39ba3167-c007-4e3a-a676-b3976fb6ea42",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الدليمية",
+          "Code": "105"
+        },
+        {
+          "Id": "bbf435b0-0e4c-4645-b4c6-c02428467a26",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الرس",
+          "Code": "106"
+        },
+        {
+          "Id": "9b3feb44-2ad5-40c3-bb4e-7dd61bcc20ce",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية محافظة الشماسية",
+          "Code": "107"
+        },
+        {
+          "Id": "1ab67c26-625c-436b-bde6-61b9b4051686",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية العمار",
+          "Code": "108"
+        },
+        {
+          "Id": "c8b1197d-3e9d-4434-8b25-8db861314a26",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الفوارة",
+          "Code": "109"
+        },
+        {
+          "Id": "ac4faabe-b80e-4124-9354-0dfb98782063",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الفويلق",
+          "Code": "110"
+        },
+        {
+          "Id": "e7a773c9-c879-4939-80d8-539f7a2ba4e5",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية محافظة ضرية",
+          "Code": "111"
+        },
+        {
+          "Id": "142fb8b7-98de-4f71-bc83-3fece6447752",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية عقلة الصقور",
+          "Code": "112"
+        },
+        {
+          "Id": "caaf1c73-8930-481b-a912-ffeec1396566",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية عيون الجواء",
+          "Code": "113"
+        },
+        {
+          "Id": "df5b1d19-935b-4c1f-bcbe-d8781daae12b",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية عنيزة",
+          "Code": "115"
+        },
+        {
+          "Id": "ec8dd38d-bd3e-44ab-9556-724ae9cc03ff",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الخبراء",
+          "Code": "116"
+        },
+        {
+          "Id": "f5c764c3-cbe4-4425-ae65-44e3f0bd14e6",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية البكيرية",
+          "Code": "117"
+        },
+        {
+          "Id": "e8f8634a-7231-46fe-bb73-f7f03898f429",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية المذنب",
+          "Code": "118"
+        },
+        {
+          "Id": "4ed583a0-9dc3-4924-802e-e38976b4272b",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية البدائع",
+          "Code": "119"
+        },
+        {
+          "Id": "1669143d-694a-4ebd-9b21-7607229fb9f6",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية ابانات",
+          "Code": "120"
+        },
+        {
+          "Id": "1d8de53e-023a-4eba-8911-28e8afa23c84",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية رياض الخبراء",
+          "Code": "121"
+        },
+        {
+          "Id": "bf537e37-36e8-4854-aec4-e822445f93f0",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الأسياح",
+          "Code": "122"
+        },
+        {
+          "Id": "f6dc64a7-9f7f-4208-8e06-3b9677d9f748",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية محافظة النبهانية",
+          "Code": "123"
+        },
+        {
+          "Id": "2b93af26-c489-4ffe-bda7-d78774413e2a",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية دخنة",
+          "Code": "124"
+        },
+        {
+          "Id": "74e753fa-515b-485a-a95e-a8efd3f1927d",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية قصر بن عقيل",
+          "Code": "125"
+        },
+        {
+          "Id": "502b5810-7ad9-4a02-9b44-29db533af065",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية قبة",
+          "Code": "126"
+        },
+        {
+          "Id": "d622bbf3-3f65-4676-a9c5-2ddea21344b6",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية قصيباء",
+          "Code": "127"
+        },
+        {
+          "Id": "1062fa08-23cc-47e4-a861-93995faef4d8",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية البطين",
+          "Code": "128"
+        },
+        {
+          "Id": "063015b0-da26-4028-9638-02588087dd7a",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية شري",
+          "Code": "129"
+        },
+        {
+          "Id": "d3423691-48b7-4f63-b406-586efcaf8fde",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الظاهرية",
+          "Code": "130"
+        },
+        {
+          "Id": "70b8f2ff-349a-45d1-ac24-f99ff9c936db",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية القوارة ",
+          "Code": "151"
+        },
+        {
+          "Id": "eefcc31a-b39d-47b4-ac72-8b1850d6bbf6",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية الصفراء الفرعية",
+          "Code": "450"
+        },
+        {
+          "Id": "8bfcebce-7c1d-427f-a6a2-0919fd5ac1b1",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية شمال بريدة",
+          "Code": "537"
+        },
+        {
+          "Id": "094e01f7-73e5-4880-bcdb-b2cc71c4cf09",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية شرق بريدة",
+          "Code": "562"
+        },
+        {
+          "Id": "f3f1f7f9-6715-c0fa-e053-0b3d500a3dfd",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية غرب بريدة",
+          "Code": "653"
+        },
+        {
+          "Id": "0E6C95BB-C4BF-A9D2-E063-0D3D500A0EBA",
+          "AmanaId": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+          "Name": "بلدية جنوب بريدة",
+          "Code": "1293"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+      "name": "أمانة منطقة تبوك",
+      "municipalities": [
+        {
+          "Id": "93e08423-df03-4362-832e-914de84bb227",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "أمانة منطقة تبوك",
+          "Code": "88"
+        },
+        {
+          "Id": "958bba88-f111-42bb-90ab-c86bed87d2a9",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية بئر بن هرماس",
+          "Code": "152"
+        },
+        {
+          "Id": "051279a2-ef2e-4f4d-b883-07c348ec7559",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية حقل",
+          "Code": "176"
+        },
+        {
+          "Id": "f4b73218-2988-4280-9cd8-65acaca6d0c0",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية ضباء",
+          "Code": "177"
+        },
+        {
+          "Id": "c9ae5b9e-c31b-4fae-a5fe-89b7050910c1",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية الوجه",
+          "Code": "200"
+        },
+        {
+          "Id": "12544891-3fab-456d-9054-62aabfbb687b",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية محافظة  القليبه ",
+          "Code": "202"
+        },
+        {
+          "Id": "13b5ad3c-5aec-4405-ba7f-38389747db81",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية الشبحة ",
+          "Code": "203"
+        },
+        {
+          "Id": "c06a5479-77f7-4bee-9610-edaa575b8b76",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية أبو راكه ",
+          "Code": "206"
+        },
+        {
+          "Id": "c1fe78e5-4686-40b4-897b-1af0c12e3442",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية المنجور ",
+          "Code": "207"
+        },
+        {
+          "Id": "03b4a899-3d7e-4d56-9bd5-4f0f22791435",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية بداء ",
+          "Code": "208"
+        },
+        {
+          "Id": "d9c136d6-07ed-4523-b5a6-b3e561b7fd6b",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية املج  ",
+          "Code": "211"
+        },
+        {
+          "Id": "46e12aa7-9dd4-4b42-9b6e-fe91e6e2c4b8",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية أشواق ",
+          "Code": "212"
+        },
+        {
+          "Id": "aa3ff7ac-927a-492b-98f9-0acc9816f396",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية تيماء",
+          "Code": "230"
+        },
+        {
+          "Id": "3ac63348-07cc-4526-807f-74d3399c7acd",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية الجنوب",
+          "Code": "564"
+        },
+        {
+          "Id": "e67d43c1-3cb0-4f9f-949b-453e26a3a841",
+          "AmanaId": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+          "Name": "بلدية الشمال",
+          "Code": "567"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+      "name": "أمانة العاصمة المقدسة",
+      "municipalities": [
+        {
+          "Id": "4b5d23e9-3bf8-4a88-b081-4724516fa0f1",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "أمانة العاصمة المقدسة",
+          "Code": "178"
+        },
+        {
+          "Id": "671eaa48-dfc7-440a-b73e-c38eaf65050a",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية الشرائع الفرعية",
+          "Code": "179"
+        },
+        {
+          "Id": "4a27ad28-e594-497e-84f1-4c853b8600bb",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية العمرة الفرعية",
+          "Code": "180"
+        },
+        {
+          "Id": "1da7e962-e447-4326-b12f-0695338222d9",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية العتيبية الفرعية",
+          "Code": "181"
+        },
+        {
+          "Id": "612e2951-dbd5-4ef3-ae9b-90adf328b87e",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية المعابدة الفرعية",
+          "Code": "182"
+        },
+        {
+          "Id": "ea5a14fb-c60d-48bb-8cd5-b46d617fc29c",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية بحرة الفرعية",
+          "Code": "186"
+        },
+        {
+          "Id": "11100b04-27a9-4352-a221-58381c08a068",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية الشوقية الفرعية",
+          "Code": "187"
+        },
+        {
+          "Id": "fb5331a9-181d-4aae-b2c5-aa572f405c92",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية العزيزية الفرعية",
+          "Code": "188"
+        },
+        {
+          "Id": "d8ac692e-d05b-46f1-a4aa-50e39671c8d0",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية مدركة",
+          "Code": "189"
+        },
+        {
+          "Id": "a5dea7a9-1adb-4656-9e18-4dddd8b27f54",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية عسفان الفرعية",
+          "Code": "190"
+        },
+        {
+          "Id": "420e959e-8190-4994-8f8a-a63ff0ae7ee0",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية محافظة الجموم",
+          "Code": "191"
+        },
+        {
+          "Id": "5841b6a8-4094-4ce2-b9c9-82b1e8087d79",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية المشاعر المقدسة",
+          "Code": "192"
+        },
+        {
+          "Id": "c99e8df6-0fbf-48b4-9ebf-f7f10c587b2d",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية جنوب مكة",
+          "Code": "492"
+        },
+        {
+          "Id": "02107077-41b4-44fb-b880-a6cf55071382",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "المنطقة المركزية",
+          "Code": "642"
+        },
+        {
+          "Id": "cb9a7acc-aed4-4a85-855d-4405fdcaff88",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية الحديبية",
+          "Code": "644"
+        },
+        {
+          "Id": "62fe6e02-5f45-45a8-a498-eefdabf3bed7",
+          "AmanaId": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+          "Name": "بلدية الشعيبة",
+          "Code": "645"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+      "name": "أمانة منطقة الاحساء",
+      "municipalities": [
+        {
+          "Id": "edc4d290-1615-41d8-833f-fdac4160ca5a",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "أمانة منطقة الاحساء",
+          "Code": "193"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd2d5b470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية الجفر",
+          "Code": "194"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd2db3470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية العمران",
+          "Code": "195"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd24bb470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية العيون",
+          "Code": "196"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cb72dbb470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية المبرز",
+          "Code": "197"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd21bb470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية الهفوف",
+          "Code": "198"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d8cbd24bb470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية جواثى",
+          "Code": "199"
+        },
+        {
+          "Id": "616a558d-11c8-4fe0-ac19-1e3f1ce2e90f",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية البطحاء ",
+          "Code": "237"
+        },
+        {
+          "Id": "7ef5b71c-7816-4bd8-96d5-2c56e72c308b",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية سلوى ",
+          "Code": "238"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd29bb470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية الغوار",
+          "Code": "239"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd2dbb470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية يبرين",
+          "Code": "398"
+        },
+        {
+          "Id": "da0d4b9a-6844-4b64-b518-d7cbd2d7b470",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "بلدية العقير",
+          "Code": "399"
+        },
+        {
+          "Id": "cdd46aa7-0b6b-4b2f-92e1-987547ff7e84",
+          "AmanaId": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+          "Name": "عريعرة",
+          "Code": "479"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+      "name": "أمانة منطقة المدينة المنورة",
+      "municipalities": [
+        {
+          "Id": "8fc66110-990f-4bdd-8198-aa8892c6162e",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "أمانة منطقة المدينة المنورة",
+          "Code": "213"
+        },
+        {
+          "Id": "dfdb20f7-da5e-4e78-949c-e8fdfc2dd510",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "قطاع المركزية",
+          "Code": "214"
+        },
+        {
+          "Id": "85978f1b-7966-4e87-b352-12e342c2c92f",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "قطاع الجنوب",
+          "Code": "215"
+        },
+        {
+          "Id": "8bbe3886-3670-43ea-aa9c-64de62af098c",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "قطاع الشمال",
+          "Code": "216"
+        },
+        {
+          "Id": "23a3c9c8-61d5-4f7c-952c-69ee49607d84",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "قطاع الشرق",
+          "Code": "217"
+        },
+        {
+          "Id": "5eac9431-1557-411e-a744-9a701cec0407",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "قطاع الغرب",
+          "Code": "218"
+        },
+        {
+          "Id": "58290dbd-bd4a-4644-a0f1-4689c3adf3dc",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "بلدية المليليح",
+          "Code": "223"
+        },
+        {
+          "Id": "4fed2382-34e9-4e1f-a2d9-eb592891ff68",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "الحسو",
+          "Code": "453"
+        },
+        {
+          "Id": "e8030b5c-d971-4583-8e0a-5aa4b9b37200",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "الحناكيه",
+          "Code": "454"
+        },
+        {
+          "Id": "7d8a552b-2861-4d78-b157-35f00a6fda7d",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "السويرقية",
+          "Code": "455"
+        },
+        {
+          "Id": "cdf29573-ac2d-4fdd-ba3c-6dc93a1ad915",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "الصلصلة",
+          "Code": "456"
+        },
+        {
+          "Id": "ee4ba9ea-ed8a-4d45-994f-99a0f64a824e",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "العشاش",
+          "Code": "457"
+        },
+        {
+          "Id": "c7b0caf0-43f4-4bb1-b77f-1d1a85e8630b",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "العلا",
+          "Code": "458"
+        },
+        {
+          "Id": "81daa523-baa1-4670-8e42-ac0ff91f2c36",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "العيص",
+          "Code": "459"
+        },
+        {
+          "Id": "c2ae913c-2db6-47bf-b680-e828ea4f2607",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "المسيجيد والقاحه",
+          "Code": "460"
+        },
+        {
+          "Id": "56106634-72da-487e-b494-3096e8269951",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "المهد",
+          "Code": "461"
+        },
+        {
+          "Id": "eb5d34e5-e3c6-404c-b929-334e7a8db06f",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "النخيل",
+          "Code": "462"
+        },
+        {
+          "Id": "dea433d2-7c6e-48c8-89f4-fdad96386969",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "بدر",
+          "Code": "463"
+        },
+        {
+          "Id": "d2dca81a-af1a-4b49-9f83-f819fa8c5911",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "ثرب",
+          "Code": "464"
+        },
+        {
+          "Id": "5263c7ab-4d82-48e1-b75b-ab2d06626b13",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "خيبر",
+          "Code": "465"
+        },
+        {
+          "Id": "774fe767-ae05-4073-9043-cc05474f3b99",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "سليلة جهينة والمربع",
+          "Code": "466"
+        },
+        {
+          "Id": "daa56c52-674e-46d5-bf03-292d9f0d4055",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "وادي الفرع",
+          "Code": "467"
+        },
+        {
+          "Id": "5eb88201-1b74-49e1-8f5f-12d283df2883",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "ينبع",
+          "Code": "468"
+        },
+        {
+          "Id": "6f0aa328-be5c-4f8f-8063-f297bf9f2416",
+          "AmanaId": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+          "Name": "ينبع النخل",
+          "Code": "469"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "b65ec706-882f-492b-9eda-2e00b894cb11",
+      "name": "أمانة محافظة الطائف",
+      "municipalities": [
+        {
+          "Id": "778d00f0-96db-494c-a3e9-4281de9e8a5e",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "أمانة محافظة الطائف",
+          "Code": "300"
+        },
+        {
+          "Id": "a2ca62ff-2314-4852-843f-85c39dff66a4",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية ظلم",
+          "Code": "301"
+        },
+        {
+          "Id": "6d62b0ba-f478-47f3-aa10-76560036a615",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية المحاني",
+          "Code": "302"
+        },
+        {
+          "Id": "a1f1eb4a-93c5-4d5a-96c9-4a1bfb192ab0",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية شرق الطائف الفرعية",
+          "Code": "305"
+        },
+        {
+          "Id": "584a9ac6-eeda-4c32-8e57-343dd036d58d",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية غرب الطائف الفرعية",
+          "Code": "307"
+        },
+        {
+          "Id": "1c395c00-1b90-466f-b1e2-41a936bd1100",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية رنية",
+          "Code": "309"
+        },
+        {
+          "Id": "6635fe1f-5dc2-4d2d-afa7-0617d524ae3b",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية جنوب الطائف الفرعية",
+          "Code": "311"
+        },
+        {
+          "Id": "0d5dbe55-78f2-41fb-9177-9cfab65cee3b",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية القريع بني مالك",
+          "Code": "314"
+        },
+        {
+          "Id": "3d8e578c-f308-4b17-8af2-a5504af9604b",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية قيا",
+          "Code": "316"
+        },
+        {
+          "Id": "1f89e13e-2cab-4794-ae57-d6b45d9877d4",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية ميسان",
+          "Code": "319"
+        },
+        {
+          "Id": "f2914dc4-2800-4d9d-a931-fcd98472873c",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية الموية",
+          "Code": "320"
+        },
+        {
+          "Id": "ac7771b6-a009-4f7a-8ee8-5a2cb5da9ae6",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية بني سعد",
+          "Code": "441"
+        },
+        {
+          "Id": "7a11a9cb-b5e1-4313-8c71-92cd36577a84",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية الخرمة",
+          "Code": "442"
+        },
+        {
+          "Id": "aa708fd3-95d9-4d78-bec4-b42939e7c938",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية محافظة تربة",
+          "Code": "443"
+        },
+        {
+          "Id": "2DDD2E3F-6196-20A2-E063-093D500A4587",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية السيل الفرعية",
+          "Code": "1306"
+        },
+        {
+          "Id": "2ddd2e3f-6195-20a2-e063-093d500a4587",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "بلدية شمال الطائف الفرعية",
+          "Code": "1307"
+        },
+        {
+          "Id": "59E0C968-9E43-6D03-E063-2F3D500AD0E3",
+          "AmanaId": "b65ec706-882f-492b-9eda-2e00b894cb11",
+          "Name": "الإدارة المركزية للبلد",
+          "Code": "1330"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+      "name": "أمانة منطقة الرياض",
+      "municipalities": [
+        {
+          "Id": "976e1e5d-02a5-4a1d-bb18-8b68c40705bc",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "أمانة منطقة الرياض",
+          "Code": "321"
+        },
+        {
+          "Id": "2bec15d9-8e69-4fc6-9ea3-30ee3b6be77b",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الحلوه",
+          "Code": "323"
+        },
+        {
+          "Id": "a80582bd-ace3-4361-9da3-40a44ddb8069",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية شقراء",
+          "Code": "325"
+        },
+        {
+          "Id": "35a42db9-e8a1-442f-9a44-3bcb97424439",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية بدائع العضيان",
+          "Code": "327"
+        },
+        {
+          "Id": "3203928d-8da5-49da-8120-438b9a1fb06b",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية عفيف",
+          "Code": "329"
+        },
+        {
+          "Id": "7b164382-73c0-4afb-b125-43d8985e08b0",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية مرات",
+          "Code": "330"
+        },
+        {
+          "Id": "dcac335e-1c11-480d-b15a-021b0453759d",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية نفي",
+          "Code": "331"
+        },
+        {
+          "Id": "517e9ede-7219-439d-ba59-13d458c858a1",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية حلبان",
+          "Code": "332"
+        },
+        {
+          "Id": "997eb6cb-4c99-4384-b090-1b2110a697a8",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الأرطاويه",
+          "Code": "333"
+        },
+        {
+          "Id": "17eab758-5b94-46a4-92c2-230aec3c6125",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية جلاجل",
+          "Code": "334"
+        },
+        {
+          "Id": "20083c54-caa0-4ca1-86ba-152426cd1f45",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية ضرماء",
+          "Code": "335"
+        },
+        {
+          "Id": "d6cd46c4-c3ae-4fef-beff-750e00e5b7f4",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الدوادمي",
+          "Code": "337"
+        },
+        {
+          "Id": "a22cd237-9083-4690-a4fc-757a5cb0adf7",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية السر",
+          "Code": "338"
+        },
+        {
+          "Id": "5d8a60f8-6b8d-4bcb-9fab-722293178347",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية روضة سدير",
+          "Code": "339"
+        },
+        {
+          "Id": "eb619d21-7fa1-48fd-bfee-69fb52c98d53",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الجله وتبراك",
+          "Code": "340"
+        },
+        {
+          "Id": "b0f5b74f-b0a4-425b-b760-6ff5e375b278",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية حوطة بني تميم",
+          "Code": "341"
+        },
+        {
+          "Id": "e2244e5d-c1fe-4515-b32a-7f43e8294226",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية السليل",
+          "Code": "342"
+        },
+        {
+          "Id": "74760772-3b54-44db-8ddf-86103f63b4a5",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية القويعية",
+          "Code": "343"
+        },
+        {
+          "Id": "d9693444-184e-44c3-a4e3-7cc63c70cae0",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الزلفي",
+          "Code": "344"
+        },
+        {
+          "Id": "dede6fe1-3152-4822-9d54-7aff43db3fa3",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الدلم",
+          "Code": "345"
+        },
+        {
+          "Id": "7dbbe3c5-4233-4c3f-903b-7b20eefd65fc",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية أشيقر",
+          "Code": "346"
+        },
+        {
+          "Id": "2386cb9f-4648-40f3-90f9-7b290314ea4a",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الرين",
+          "Code": "347"
+        },
+        {
+          "Id": "cfc5f9a4-2c9a-42d7-acef-596f227ae57c",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية ساجر",
+          "Code": "349"
+        },
+        {
+          "Id": "878b8203-7e8e-4744-adf0-5c9fb20e8143",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية القصب",
+          "Code": "350"
+        },
+        {
+          "Id": "80c6f079-ddd0-44a5-8e4f-51098de9460c",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الرويضه",
+          "Code": "352"
+        },
+        {
+          "Id": "6ac4855b-81f3-4b80-838c-ef2d373bc997",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الأحمر",
+          "Code": "357"
+        },
+        {
+          "Id": "d9ddde80-62e3-49f8-bdc3-e5604eb4ea0e",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية محافظة حريملاء",
+          "Code": "358"
+        },
+        {
+          "Id": "d9ddde80-62e3-49f8-bdc3-e5604eb4ea0f",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "الحيانية والبرك",
+          "Code": "359"
+        },
+        {
+          "Id": "b49b18c1-2a69-45cf-bf7f-f39d1d6a484c",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية المزاحمية",
+          "Code": "360"
+        },
+        {
+          "Id": "e2f14371-0f60-43c0-b6a8-c62b049d4e4a",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية البجادية",
+          "Code": "361"
+        },
+        {
+          "Id": "efb8f691-613f-4089-85bf-c08375fc8adf",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية حوطة سدير",
+          "Code": "362"
+        },
+        {
+          "Id": "9f1a287c-4da4-46bf-8ba6-cb7cfb797b18",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الخرج",
+          "Code": "363"
+        },
+        {
+          "Id": "072270e4-a8d6-40af-8730-d58410c2b041",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية رماح",
+          "Code": "364"
+        },
+        {
+          "Id": "23975d48-cf69-46a5-a372-d8b129c8bee8",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الغاط",
+          "Code": "365"
+        },
+        {
+          "Id": "122575b4-20ea-4741-9805-9572ec081fbb",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الأفلاج",
+          "Code": "367"
+        },
+        {
+          "Id": "81066072-f357-4f38-8a8d-90df956ac1f2",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الجمش",
+          "Code": "368"
+        },
+        {
+          "Id": "5e21190c-4442-4cb3-93eb-a58f722f7572",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية المجمعة",
+          "Code": "369"
+        },
+        {
+          "Id": "926adadf-fd6d-4fc8-bc97-983b4a935831",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الحريق",
+          "Code": "370"
+        },
+        {
+          "Id": "35a8ee80-9f38-48d8-ad3b-9ccb3217db8f",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية البديع",
+          "Code": "372"
+        },
+        {
+          "Id": "60bcfa13-f798-4970-a5a3-a98a38b5c6a4",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية تمير",
+          "Code": "373"
+        },
+        {
+          "Id": "b0fe1b75-1b6a-49c3-aac1-bf6d985995b9",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية ثادق",
+          "Code": "376"
+        },
+        {
+          "Id": "5d242706-7f5c-45bc-a695-bac3b3350176",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية العيينه والجبيله",
+          "Code": "377"
+        },
+        {
+          "Id": "5198580b-e6a7-4c69-b28f-b47e7782bc9b",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية وادي الدواسر",
+          "Code": "378"
+        },
+        {
+          "Id": "0ca5f2db-fdcf-4930-be3f-ff7ad06b903c",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الهياثم",
+          "Code": "379"
+        },
+        {
+          "Id": "b323a25d-271e-432c-ba69-fe0b82441ed8",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الهدار",
+          "Code": "380"
+        },
+        {
+          "Id": "34806fcb-bcd1-4757-a76c-f77584a20247",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الدرعية",
+          "Code": "381"
+        },
+        {
+          "Id": "1ebf5707-3916-4aa6-8770-fa628b479ee7",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية الحصاة",
+          "Code": "382"
+        },
+        {
+          "Id": "49cd6f53-da09-4bf9-94a6-2ba9ddfdb299",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "بلدية عروى",
+          "Code": "538"
+        },
+        {
+          "Id": "20BDE053-1756-E7E3-E063-98A0500A2169",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "قطاع جنوب مدينة الرياض",
+          "Code": "1299"
+        },
+        {
+          "Id": "28FC8C10-4B99-CB1F-E063-98A0500AB471",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "قطاع شمال مدينة الرياض",
+          "Code": "1302"
+        },
+        {
+          "Id": "28FC8C10-4B9A-CB1F-E063-98A0500AB471",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "قطاع غرب مدينة الرياض",
+          "Code": "1303"
+        },
+        {
+          "Id": "28FC8C10-4B9B-CB1F-E063-98A0500AB471",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "قطاع شرق مدينة الرياض",
+          "Code": "1304"
+        },
+        {
+          "Id": "28FC8C10-4B9C-CB1F-E063-98A0500AB471",
+          "AmanaId": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+          "Name": "قطاع وسط مدينة الرياض",
+          "Code": "1305"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "7e324d33-c281-4830-867e-2c652ec7e029",
+      "name": "أمانة منطقة الجوف",
+      "municipalities": [
+        {
+          "Id": "f06734df-93a9-453e-adb4-da45f412db0c",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "أمانة منطقة الجوف",
+          "Code": "383"
+        },
+        {
+          "Id": "6ebce308-2290-4086-af19-bfc9126a0308",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "الحديثة",
+          "Code": "384"
+        },
+        {
+          "Id": "f3011f3f-8387-44e5-bc61-c7db1ff6faff",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية أبوعجرم",
+          "Code": "385"
+        },
+        {
+          "Id": "00bdf1a5-8cd5-4274-9848-c7e3a225f752",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية دومة الجندل",
+          "Code": "386"
+        },
+        {
+          "Id": "f06734df-93a9-453e-adb1-da45f412db0c",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية طبرجل",
+          "Code": "387"
+        },
+        {
+          "Id": "8a00ff23-6bd8-404c-9fd1-b58774c87c60",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية الناصفه",
+          "Code": "389"
+        },
+        {
+          "Id": "a1711a12-e591-4840-be0a-45bb66d39211",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية العيساويه",
+          "Code": "390"
+        },
+        {
+          "Id": "572881c0-590c-4011-bb99-7c4233a65647",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية زلوم",
+          "Code": "391"
+        },
+        {
+          "Id": "a2ee3ebd-804c-4d32-a86a-7e8f034e88a7",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية صوير",
+          "Code": "392"
+        },
+        {
+          "Id": "51852abd-ad07-423d-936d-7fd70764e380",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية القريات",
+          "Code": "393"
+        },
+        {
+          "Id": "2BC8E962-67D1-41F1-BF38-E6C89F370CCD",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية شمال سكاكا",
+          "Code": "568"
+        },
+        {
+          "Id": "DEA777B9-849F-4E31-896B-F675C8A64EF6",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية وسط سكاكا",
+          "Code": "569"
+        },
+        {
+          "Id": "5B301620-4C01-4DD4-B809-2A5647120E85",
+          "AmanaId": "7e324d33-c281-4830-867e-2c652ec7e029",
+          "Name": "بلدية جنوب سكاكا - قارا",
+          "Code": "570"
+        }
+      ],
+      "downloaded": true
+    },
+    {
+      "id": "c0196183-0748-43a8-b910-dae34ef30a33",
+      "name": "أمانة حفر الباطن",
+      "municipalities": [
+        {
+          "Id": "e84837e3-49e4-4de9-952a-3a20bd1cdce9",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "أمانة حفر الباطن",
+          "Code": "408"
+        },
+        {
+          "Id": "b57a8c98-4f70-482e-a6e2-7584723eac50",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية الذيبيه",
+          "Code": "472"
+        },
+        {
+          "Id": "c518ddb3-0590-4170-afd8-fca132395379",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية السعيرة",
+          "Code": "473"
+        },
+        {
+          "Id": "f245447e-5321-4e49-856a-bc0425741b41",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية الصداوي",
+          "Code": "474"
+        },
+        {
+          "Id": "c280d031-622b-4b95-8a3a-7d4aab121338",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية القيصومة",
+          "Code": "475"
+        },
+        {
+          "Id": "db905e2d-3a0c-4d23-909c-b436c8c5d68c",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية غرب حفر الباطن",
+          "Code": "539"
+        },
+        {
+          "Id": "42552ee0-1799-4b32-843b-bb4123bc64dc",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية شرق حفر الباطن",
+          "Code": "540"
+        },
+        {
+          "Id": "f679b378-a91e-4bd8-9c95-7b1afcbca615",
+          "AmanaId": "c0196183-0748-43a8-b910-dae34ef30a33",
+          "Name": "بلدية جنوب حفر الباطن",
+          "Code": "541"
+        }
+      ],
+      "downloaded": true
+    }
+  ],
+  "all_local_rules_downloaded": false,
+  "directory_sha256": "a301fe44e4aa22bff252dffc0b86b682f58678a46aaeb889cde972c72f8ba100"
+}

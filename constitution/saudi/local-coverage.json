@@ -1,0 +1,144 @@
+{
+  "researched_at": "2026-10-18",
+  "national_ruleset": "SA-VILLA-DRAFT-1",
+  "all_municipal_rules_verified": false,
+  "verified_city_rule_overrides": [],
+  "coverage": [
+    {
+      "amanah_id": "4cfdd701-45b1-4a25-99b8-99ed0ed4588c",
+      "amanah": "أمانة الحدود الشمالية",
+      "municipality_count": 14,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "3f6b6c49-af7e-4b46-9e6c-ddcb15d062e2",
+      "amanah": "أمانة منطقة الباحة",
+      "municipality_count": 13,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "9753822b-f759-4f7a-8d79-b388224dc1eb",
+      "amanah": "أمانة المنطقة الشرقية",
+      "municipality_count": 26,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "209f48c5-e258-4fe1-94b6-e2e0c749d9e6",
+      "amanah": "أمانة منطقة نجران",
+      "municipality_count": 11,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "066bd4bb-7af2-40b4-abd5-788059a5f6f5",
+      "amanah": "أمانة منطقة عسير",
+      "municipality_count": 41,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "6fbf11dc-2620-4f9a-acfc-f9413cc48174",
+      "amanah": "أمانة منطقة جازان",
+      "municipality_count": 26,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "957a3362-fdf1-4103-aae2-2fb6366d2db5",
+      "amanah": "أمانة محافظة جدة",
+      "municipality_count": 33,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "f5bbf80f-1b10-497c-a69c-5c6337ecdd57",
+      "amanah": "أمانة منطقة حائل",
+      "municipality_count": 21,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "ed748dc1-4713-4b41-b27a-adab264c88c1",
+      "amanah": "أمانة منطقة القصيم",
+      "municipality_count": 34,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "ad079e2d-7577-409e-ba03-e7baa1bb41d6",
+      "amanah": "أمانة منطقة تبوك",
+      "municipality_count": 15,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "7861fcdd-4c80-410a-8f18-6d28e029dc21",
+      "amanah": "أمانة العاصمة المقدسة",
+      "municipality_count": 16,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "fbe6dd4a-8dd3-4b38-a652-1d16c4944b51",
+      "amanah": "أمانة منطقة الاحساء",
+      "municipality_count": 13,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "48f81bf1-5c74-4ffc-aec2-b18b341de73f",
+      "amanah": "أمانة منطقة المدينة المنورة",
+      "municipality_count": 24,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "b65ec706-882f-492b-9eda-2e00b894cb11",
+      "amanah": "أمانة محافظة الطائف",
+      "municipality_count": 17,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "c0f04fe0-84d1-47f2-842d-e3261b44ded6",
+      "amanah": "أمانة منطقة الرياض",
+      "municipality_count": 53,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "7e324d33-c281-4830-867e-2c652ec7e029",
+      "amanah": "أمانة منطقة الجوف",
+      "municipality_count": 13,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    },
+    {
+      "amanah_id": "c0196183-0748-43a8-b910-dae34ef30a33",
+      "amanah": "أمانة حفر الباطن",
+      "municipality_count": 8,
+      "directory_downloaded": true,
+      "local_rule_status": "NOT_VERIFIED",
+      "source": "https://apps.balady.gov.sa/Eservices/Inquiries/InquerySurveyReport"
+    }
+  ]
+}

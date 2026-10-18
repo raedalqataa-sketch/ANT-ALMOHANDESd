@@ -71,7 +71,7 @@ def rgb(hexcolor):return tuple(int(hexcolor[i:i+2],16)/255 for i in (1,3,5))
 
 def scene_pdf(model,path,drawings=None,include_report=True):
     pw,ph=1190.55,1683.78 # A2 portrait; the metric scale bar survives printing/viewer resizing.
-    c=canvas.Canvas(str(path),pagesize=(pw,ph));c.setTitle(model['profile']['project_name']+' — مراجعة معمارية V0.4.1')
+    c=canvas.Canvas(str(path),pagesize=(pw,ph));c.setTitle(model['profile']['project_name']+(' — مراجعة سعودية 0.5.1' if model.get('schema_version','').startswith('0.5') else ' — مراجعة معمارية V0.4.1'))
     mono=model.get('presentation',{}).get('style')=='monochrome'
     for index,floor in enumerate(model['floors']):
         scene=drawings[index] if drawings is not None else architectural_scene(model,floor);vx,vy,vw,vh=scene.viewbox
@@ -180,7 +180,9 @@ def scene_dxf(model,path,drawings=None):
             if p['layer'] in ('PAPER','SHADOW','UNDERLAY','FINISH_GRID','DECORATION'):continue
             a=attrs(p)
             if p['type']=='text':
-                m.add_text(p['text'],dxfattribs={'insert':pt((p['x'],p['y'])),'height':p['size'],'style':'ANT_ARABIC','layer':layer(p['layer']),'true_color':int(color(p['color'],mono)[1:],16)})
+                from ezdxf.enums import TextEntityAlignment
+                align={'center':TextEntityAlignment.MIDDLE_CENTER,'left':TextEntityAlignment.MIDDLE_LEFT,'right':TextEntityAlignment.MIDDLE_RIGHT}[p['align']]
+                m.add_text(p['text'],dxfattribs={'height':p['size'],'style':'ANT_ARABIC','layer':layer(p['layer']),'true_color':int(color(p['color'],mono)[1:],16)}).set_placement(pt((p['x'],p['y'])),align=align)
             elif p['type']=='line':
                 if p['layer']=='WALL':m.add_lwpolyline([pt(p['a']),pt(p['b'])],dxfattribs=dict(a,const_width=p['lw']))
                 else:m.add_line(pt(p['a']),pt(p['b']),dxfattribs=a)

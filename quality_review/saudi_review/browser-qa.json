@@ -1,0 +1,23 @@
+{
+  "submitted_report_import": true,
+  "city_directory": {
+    "amanats": 17,
+    "municipality_records": 378
+  },
+  "three_reviewable_alternatives": true,
+  "guest_separation": true,
+  "modeled_staircases": true,
+  "movement_and_door_sweeps": true,
+  "daylight_numeric_checks": true,
+  "no_unrequested_reserve_rooms": true,
+  "two_parking_stalls": true,
+  "floor_and_site_previews": true,
+  "pdf_dxf_json_downloads": true,
+  "cache_reload_and_selection": true,
+  "city_change_marks_stale": true,
+  "wide_street_baseline": true,
+  "full_code_or_local_approval_claimed": false,
+  "mobile_outer_overflow": false,
+  "page_errors": [],
+  "external_runtime_requests": []
+}

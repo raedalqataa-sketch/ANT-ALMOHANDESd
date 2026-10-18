@@ -1,0 +1,99 @@
+{
+  "project_name": "فيلتي الجديدة",
+  "plot_width": 20.0,
+  "plot_depth": 30.0,
+  "floors": 2,
+  "setbacks": {
+    "north": 2.0,
+    "south": 3.0,
+    "east": 2.0,
+    "west": 2.0
+  },
+  "entrance_face": "south",
+  "wall_thickness": 0.2,
+  "corridor_width": 1.5,
+  "floor_height": 3.2,
+  "rooms": [
+    {
+      "id": "r8f48d0f48e374e3da9fb8ab64777a",
+      "name": "مجلس",
+      "kind": "majlis",
+      "floor": 0,
+      "count": 1,
+      "min_area": 24.0,
+      "min_side": 3.5,
+      "capacity": 0
+    },
+    {
+      "id": "r0e7580e6b0a344909834f5034fecc",
+      "name": "معيشة عائلية",
+      "kind": "living",
+      "floor": 0,
+      "count": 1,
+      "min_area": 24.0,
+      "min_side": 3.5,
+      "capacity": 0
+    },
+    {
+      "id": "re9adc36a3de141f0ab35554a56c83",
+      "name": "مطبخ",
+      "kind": "kitchen",
+      "floor": 0,
+      "count": 1,
+      "min_area": 16.0,
+      "min_side": 3.0,
+      "capacity": 0
+    },
+    {
+      "id": "rf385d48e47c949698ca15784cd00c",
+      "name": "غرفة طعام",
+      "kind": "dining",
+      "floor": 0,
+      "count": 1,
+      "min_area": 16.0,
+      "min_side": 3.0,
+      "capacity": 0
+    },
+    {
+      "id": "r96a11a51aeb847d58ca8239b302ae",
+      "name": "حمام ضيوف",
+      "kind": "bathroom",
+      "floor": 0,
+      "count": 1,
+      "min_area": 4.0,
+      "min_side": 1.6,
+      "capacity": 0
+    },
+    {
+      "id": "rc3afe4d2599c426da52c027751ac8",
+      "name": "نوم رئيسية",
+      "kind": "master",
+      "floor": 1,
+      "count": 1,
+      "min_area": 20.0,
+      "min_side": 3.5,
+      "capacity": 2
+    },
+    {
+      "id": "r14dc51f5f05a484cb7b3df2c4b3d2",
+      "name": "غرف الأبناء",
+      "kind": "bedroom",
+      "floor": 1,
+      "count": 2,
+      "min_area": 16.0,
+      "min_side": 3.2,
+      "capacity": 2
+    },
+    {
+      "id": "rf6d266aaa8c8495ea0a42cd882c85",
+      "name": "حمام عائلي",
+      "kind": "bathroom",
+      "floor": 1,
+      "count": 1,
+      "min_area": 5.0,
+      "min_side": 1.6,
+      "capacity": 0
+    }
+  ],
+  "notes": "مجلس رجال "
+}

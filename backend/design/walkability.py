@@ -6,6 +6,7 @@ from collections import deque
 
 
 def stair_flights(stair):
+    if 'flights' in stair:return stair['flights']
     y=stair['y']+stair['landing_depth_m'];depth=stair['depth']-stair['landing_depth_m']
     return [dict(x=stair['x'],y=y,width=stair['flight_width_m'],depth=depth),
             dict(x=stair['x']+stair['width']-stair['flight_width_m'],y=y,width=stair['flight_width_m'],depth=depth)]
@@ -22,6 +23,8 @@ def floor_access(model,floor,step=.20,body_width=.60):
         for j in range(y0,y1):
             for i in range(x0,x1):free[j][i]=value
     for r in floor['rooms']:raster(r,True)
+    for r in floor.get('cells',[]):
+        if r['kind']=='corridor':raster(r,True)
     walls={w['id']:w for w in floor['walls']}
     for o in floor['openings']:
         if o['kind'] not in ('door','passage'):continue
@@ -37,6 +40,7 @@ def floor_access(model,floor,step=.20,body_width=.60):
     for q in floor['furniture']:
         if q.get('physical',True):raster(q,False,radius)
     for s in model['stairs']:
+        if s.get('floor_id',floor['id'])!=floor['id']:continue
         for q in stair_flights(s):raster(q,False,radius)
     def point(i,j):return [round(ox+(i+.5)*step,3),round(oy+(j+.5)*step,3)]
     def nearest(x,y,room):
@@ -52,7 +56,7 @@ def floor_access(model,floor,step=.20,body_width=.60):
     seeds=[]
     if floor['id']=='GF':
         for o in floor['openings']:
-            if o['kind']=='door' and 'EXTERIOR' in o['connects']:
+            if o['kind']=='door' and ('EXTERIOR' in o['connects'] or 'OUTSIDE' in o['connects']):
                 r=rooms.get(o['connects'][0])
                 if r is None:continue
                 x,y=o['center'];cx=r['x']+r['width']/2;cy=r['y']+r['depth']/2
@@ -63,8 +67,10 @@ def floor_access(model,floor,step=.20,body_width=.60):
                 if node:seeds.append(node)
     else:
         for r in floor['rooms']:
-            if r['kind']=='stairs':
-                node=nearest(r['x']+r['width']-.45,r['y']+r['depth']-.5,r)
+            if r['kind'] in ('stairs','stair'):
+                generic=next((s for s in model['stairs'] if s.get('room_id')==r['id']),None)
+                apron=generic['entry_apron'] if generic else r
+                node=nearest(apron['x']+apron['width']/2,apron['y']+(apron['depth']/2 if generic else apron['depth']-.5),r)
                 if node:seeds.append(node)
     parent={s:None for s in seeds};queue=deque(seeds)
     while queue:
@@ -94,7 +100,7 @@ def entry_sightlines(model,floor):
     """Sampled centre-to-centre rays through open doors. Does not certify full privacy."""
     from .export import wall_runs
     rooms={r['id']:r for r in floor['rooms']};exposed=[];rays=[]
-    openings=[o for o in floor['openings'] if o['kind']=='door' and 'EXTERIOR' in o['connects'] and o['connects'][0].endswith('-hall')]
+    openings=[o for o in floor['openings'] if o['kind']=='door' and ('EXTERIOR' in o['connects'] or 'OUTSIDE' in o['connects']) and o['connects'][0].endswith('-hall')]
     for o in openings:
         a=o['center']
         for r in floor['rooms']:

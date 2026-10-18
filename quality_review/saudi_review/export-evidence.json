@@ -1,0 +1,19 @@
+{
+  "python_tests_passed": 63,
+  "legacy_js_suites_passed": 6,
+  "native_browser_geometry_parity": [
+    "rooms",
+    "walls",
+    "openings",
+    "furniture",
+    "stairs",
+    "parking"
+  ],
+  "dxf_version": "AC1024",
+  "dxf_audit_errors": 0,
+  "HATCH_SOLID_count": 0,
+  "pdf_pages": 3,
+  "case": "submitted-b4a690-brief",
+  "full_saudi_compliance": false,
+  "local_rules_verified": false
+}

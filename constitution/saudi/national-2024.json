@@ -1,0 +1,126 @@
+{
+  "id": "SA-VILLA-DRAFT-1",
+  "researched_at": "2026-10-18",
+  "jurisdiction": "SA",
+  "scope": "Detached single-family villa, ground + first floor; national baseline only, local/parcel overrides require verification",
+  "code_edition": "SBC 2024",
+  "complete_code_transcribed": false,
+  "sources": [
+    {
+      "id": "MOMAH-RES-2024",
+      "title": "اشتراطات إنشاء المباني السكنية؛ القرار 4500943139/1",
+      "url": "https://momah.gov.sa/ar/node/15715",
+      "public_pdf": "https://momah.gov.sa/sites/default/files/2025-11/ashtratat%20ansha%20almbany%20alsknyt9%20ywlyh%202024.pdf",
+      "alternate_official_pdf": "https://momah.gov.sa/sites/default/files/2024-07/ashtratat%20a%27nsha%20almbany%20alsknyt%20almnshwrt%20%60ly%20mwq%60%20alwzart%20.pdf",
+      "status": "official published municipal baseline; provisions visually checked in official PDF",
+      "download_sha256": "628328697d8c0576a5313ffec97e65033949056b63b32851dcc09e35799e1f54",
+      "download_bytes": 27970165
+    },
+    {
+      "id": "SBC-2024-CATALOG",
+      "title": "فهرس كود البناء السعودي إصدار 2024",
+      "url": "https://sbc.gov.sa/ar/BC/Pages/BuildingCode/BC.aspx?year=2024",
+      "status": "catalog verified; full paid/protected requirements not transcribed"
+    },
+    {
+      "id": "SBC-1101-2024",
+      "title": "الكود السعودي للمباني السكنية SBC 1101–1102",
+      "url": "https://sbc.gov.sa/ar/bc/pages/buildingcode/BCDetails.aspx?codeId=1101&year=2024",
+      "status": "scope verified; protected full viewer unavailable to research tool"
+    },
+    {
+      "id": "BALADY-GEO",
+      "title": "بلدي — خدمات معلومات الأراضي والمستكشف الجغرافي",
+      "url": "https://balady.gov.sa/",
+      "status": "parcel conditions are not inferred from city name"
+    }
+  ],
+  "rules": {
+    "coverage": {
+      "source": "MOMAH-RES-2024",
+      "section": "4-1 (1–2)",
+      "max_ratio": 0.75
+    },
+    "parking_count": {
+      "source": "MOMAH-RES-2024",
+      "section": "4-1 (14)",
+      "area_threshold_m2": 400,
+      "up_to_threshold": 1,
+      "above_threshold": 2
+    },
+    "setbacks": {
+      "source": "MOMAH-RES-2024",
+      "section": "4-1 (4–5)",
+      "front_street_ratio": 0.2,
+      "front_min_m": 3,
+      "front_wide_street_from_m": 30,
+      "front_wide_street_min_m": 6,
+      "other_street_ratio": 0.2,
+      "other_street_min_m": 2,
+      "neighbor_min_m": 1.5,
+      "scope_note": "Street widths and frontage classification required; exceptions/local plans not auto-approved"
+    },
+    "rooms": {
+      "source": "MOMAH-RES-2024",
+      "section": "5-1-4",
+      "minimums": {
+        "majlis": [
+          11.2,
+          2.8
+        ],
+        "living": [
+          11.2,
+          2.8
+        ],
+        "dining": [
+          11.2,
+          2.8
+        ],
+        "master": [
+          6.5,
+          2.1
+        ],
+        "bedroom": [
+          6.5,
+          2.1
+        ],
+        "kitchen": [
+          5,
+          1.8
+        ],
+        "bathroom": [
+          2.8,
+          1.4
+        ]
+      },
+      "corridor_min_m": 0.9
+    },
+    "stairs": {
+      "source": "MOMAH-RES-2024",
+      "section": "5-1-12 (2)",
+      "flight_min_m": 0.9,
+      "landing_min_m": 0.9,
+      "landing_at_least_flight": true,
+      "scope_note": "Riser/tread/headroom/full SBC clauses require separate verification; no certification from this check"
+    },
+    "daylight": {
+      "source": "MOMAH-RES-2024",
+      "section": "5-1-15 (1–4)",
+      "glazing_ratio": 0.08,
+      "openable_ratio": 0.04,
+      "bathroom_glazing_m2": 0.3,
+      "bathroom_openable_fraction": 0.5,
+      "scope_note": "Geometric proposed clear opening area only; actual product, unobstructed outdoor air and legal facade access remain pending"
+    }
+  },
+  "unimplemented_scopes": [
+    "SBC 1101 full fire/escape/guards/safety glazing",
+    "Structural loads, foundations, soil and seismic/wind design",
+    "SBC 1102 electrical and plumbing; mechanical design",
+    "SBC 602 envelope and climate-specific energy calculations",
+    "Local urban codes, subdivision parcel conditions and street/corner approvals",
+    "Full stair headroom against slab/beam sections",
+    "Vehicle turning envelopes and final curb-cut approval"
+  ],
+  "executive_issue_allowed": false
+}
