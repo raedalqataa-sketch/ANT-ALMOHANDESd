@@ -1,0 +1,20 @@
+{
+  "source_revision": "4aa57f266367bd2ac530f1ea5fb6cc9955379d01",
+  "build_run": 39136607362,
+  "artifact_id": 12140250833,
+  "artifact_expires_at": "2026-11-17T14:36:05Z",
+  "artifact_url": "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39136607362/artifacts/12140250833",
+  "package": "com.antalmohandes.probe",
+  "version": "0.1-probe",
+  "min_sdk": 24,
+  "target_sdk": 35,
+  "bytes": 24332932,
+  "sha256": "773293665d3def9228aaf2ab5c5aed2973d66cdbc5b06ada425d480442f0097f",
+  "apk_zip_integrity": "PASS",
+  "local_engine_assets_and_licenses": "PASS",
+  "signature_v2": "PASS debug signing",
+  "internet_permission": false,
+  "device_install_and_execution_tested": false,
+  "device_export_file_picker_tested": false,
+  "artifact_download_verified_via": "Connected GitHub app; direct runner storage download was denied in this workspace"
+}

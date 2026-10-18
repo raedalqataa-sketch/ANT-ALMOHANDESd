@@ -93,8 +93,11 @@
     }
   ],
   "android_device_tested": false,
-  "android_apk_built": false,
+  "android_apk_built": true,
   "android_sdk_minimum_configured": 24,
   "webview_minimum_version_tested": null,
-  "local_apk_build_limitation": "Initial local build lacks full JDK (jlink); CI build uses complete JDK 21."
+  "local_apk_build_limitation": "Initial local build lacks full JDK (jlink); CI build uses complete JDK 21.",
+  "desktop_physical_geometry_json_equivalence": "PASS social_hub; revision IDs excluded; tuples normalized to arrays",
+  "downloaded_dxf_desktop_reaudit": "PASS AC1024, metre units, no ezdxf audit errors",
+  "android_apk_verification": "android-apk.json"
 }
