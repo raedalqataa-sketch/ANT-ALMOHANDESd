@@ -77,15 +77,20 @@ def checks(model,brief):
         add(f['id']+'-room-minima','FAIL' if bad else 'PASS','السعودية: الحدود الدنيا لمساحات وأبعاد الفراغات',{'invalid':bad},'rooms')
         measured=model['metrics']['floor_built_by_id'][f['id']]/(brief.plot_width*brief.plot_depth)
         add(f['id']+'-coverage','PASS' if measured<=rules['coverage']['max_ratio']+1e-6 else 'FAIL','السعودية: نسبة بناء الدور ضمن الحد العام 75٪',{'measured_ratio':round(measured,5),'limit':rules['coverage']['max_ratio'],'scope':'national baseline, detached villa; approved local/parcel limits may be stricter'},'coverage')
-        failures=[];observations=[]
+        failures=[];bathrooms_needing_mechanical_review=[];observations=[]
         for r in rooms:
             windows=[o for o in f['openings'] if o['kind']=='window' and r['id'] in o['connects']]
             glazing=sum(o.get('clear_width',0)*o.get('clear_height',0) for o in windows)
             opening=sum(o.get('clear_width',0)*o.get('clear_height',0)*o.get('operable_fraction',0) for o in windows)
             required,air=window_targets(r['kind'],r['width']*r['depth'])
             observations.append({'room_id':r['id'],'clear_glazing_m2':round(glazing,4),'openable_m2':round(opening,4),'required_glazing_m2':round(required,4),'required_openable_m2':round(air,4)})
-            if glazing+1e-6<required or opening+1e-6<air:failures.append(r['id'])
-        add(f['id']+'-daylight','FAIL' if failures else 'PASS','السعودية: مساحة الزجاج والجزء القابل للفتح — قياس هندسي للمقترح',{'invalid':failures,'rooms':observations,'scope':rules['daylight']['scope_note']},'daylight')
+            if glazing+1e-6<required or opening+1e-6<air:
+                if r['kind']=='bathroom':
+                    # The 2024 municipal document allows mechanical bathroom ventilation.
+                    # No mechanical system is certified in a 2D draft: flag PENDING.
+                    bathrooms_needing_mechanical_review.append(r['id'])
+                else:failures.append(r['id'])
+        add(f['id']+'-daylight','FAIL' if failures else 'PENDING' if bathrooms_needing_mechanical_review else 'PASS','السعودية: مساحة الزجاج والجزء القابل للفتح — قياس هندسي للمقترح',{'invalid':failures,'bathrooms_needing_mechanical_review':bathrooms_needing_mechanical_review,'rooms':observations,'scope':rules['daylight']['scope_note']+'; 2024 municipal section 5-1-6(2) allows bathroom mechanical ventilation subject to design verification'},'daylight')
     count=parking_count(brief)
     valid=[q for q in model.get('parking',[]) if inside(dict(x=0,y=0,width=brief.plot_width,depth=brief.plot_depth),q)]
     add('parking-count','PASS' if len(valid)>=count else 'FAIL','السعودية: عدد المواقف داخل حدود الملكية',{'required':count,'actual':len(valid),'stall_geometry':'proposed 2.8 x 5.5 m, turning and gates require approval'},'parking_count')
@@ -110,4 +115,6 @@ def checks(model,brief):
         ('facades','اتصال فتحات الإضاءة والتهوية بهواء خارجي متاح نظاميًا','أبعاد الفتحات المقترحة محسوبة؛ يلزم اعتماد إتاحة الواجهات والمناور والعوائق الخارجية ونوع النافذة الفعلي.'),
         ('vehicle-access','مناورة المركبات واعتماد بوابات المواقف','المواقف المرسومة تحقق العدد والاحتواء هندسيًا؛ يلزم مسار دوران فعلي واعتماد المداخل والشطفات.')]:
         results.append(dict(check_id='SA-'+key,status='PENDING',label=label,evidence={'city':brief.city,'municipality':brief.municipality,'parcel_reference':brief.parcel_reference,'required_action':action},source={'id':'MOMAH-RES-2024 / SBC-2024-CATALOG','url':data['sources'][0]['url']}))
+    from .saudi_2024_extension import checks as extended_2024_checks
+    results.extend(extended_2024_checks(model,brief))
     return results
