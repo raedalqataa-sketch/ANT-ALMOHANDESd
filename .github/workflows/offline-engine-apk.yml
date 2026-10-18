@@ -1,0 +1,41 @@
+name: Build offline engine Android probe
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Package local Python runtime and engine
+        run: python -m mobile_probe.build_bundle
+      - name: Build debug feasibility APK
+        working-directory: mobile_probe/android
+        run: gradle --no-daemon --console=plain :app:assembleDebug
+      - name: Check packaged local engine
+        run: |
+          python - <<'PYCODE'
+          import zipfile
+          from pathlib import Path
+          apk = Path('mobile_probe/android/app/build/outputs/apk/debug/app-debug.apk')
+          with zipfile.ZipFile(apk) as archive:
+              assert archive.testzip() is None
+              for name in ('assets/index.html', 'assets/worker.js', 'assets/engine.zip', 'assets/runtime/pyodide.asm.wasm', 'assets/manifest.json'):
+                  assert name in archive.namelist(), name
+          print('APK bytes:', apk.stat().st_size)
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ant-engine-probe-debug
+          path: mobile_probe/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30

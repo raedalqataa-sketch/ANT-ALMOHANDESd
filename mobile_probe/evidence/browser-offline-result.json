@@ -1,0 +1,100 @@
+{
+  "test_environment": "Desktop Linux x86_64 Chromium; not Android or mobile emulation",
+  "pyodide": "0.29.3",
+  "python": "3.13.2 (main, Jan 28 2026, 03:36:02) [Clang 21.0.0git (https:/github.com/llvm/llvm-project 2f05451198e2f222ec66cec489",
+  "startup_seconds": 4.833,
+  "engine_seconds": 9.1,
+  "generation_seconds": 0.983,
+  "wasm_linear_heap_bytes": 90439680,
+  "memory_scope": "WASM_LINEAR_HEAP_ONLY_NOT_TOTAL_PROCESS_MEMORY",
+  "bundle_bytes": 24102266,
+  "remote_requests": [],
+  "requests_during_generation": [],
+  "context_offline_during_generation": true,
+  "ui_timer_advanced_during_generation": true,
+  "downloaded_outputs": [
+    "SVG preview",
+    "PDF",
+    "DXF",
+    "JSON"
+  ],
+  "candidates": [
+    {
+      "family": "garden_gallery",
+      "revision": "95cdb33ed7804526817bcdd04295b245",
+      "passed": 24,
+      "pending": 11,
+      "failed": 0,
+      "dxf_audit": {
+        "audit_errors": 0,
+        "room_count": 31,
+        "units": 6,
+        "dxf_version": "AC1024",
+        "format": "AutoCAD 2010 DXF",
+        "model_revision_id": "95cdb33ed7804526817bcdd04295b245",
+        "graphic_source": "shared metric architectural scene",
+        "independent_cad_application_verified": false
+      },
+      "files": [
+        "garden_gallery-GF.svg",
+        "garden_gallery-FF.svg",
+        "garden_gallery.pdf",
+        "garden_gallery.dxf",
+        "garden_gallery.json"
+      ]
+    },
+    {
+      "family": "social_hub",
+      "revision": "bf9acfa6af2f414cafdf391329759155",
+      "passed": 24,
+      "pending": 11,
+      "failed": 0,
+      "dxf_audit": {
+        "audit_errors": 0,
+        "room_count": 29,
+        "units": 6,
+        "dxf_version": "AC1024",
+        "format": "AutoCAD 2010 DXF",
+        "model_revision_id": "bf9acfa6af2f414cafdf391329759155",
+        "graphic_source": "shared metric architectural scene",
+        "independent_cad_application_verified": false
+      },
+      "files": [
+        "social_hub-GF.svg",
+        "social_hub-FF.svg",
+        "social_hub.pdf",
+        "social_hub.dxf",
+        "social_hub.json"
+      ]
+    },
+    {
+      "family": "open_court",
+      "revision": "46c0c47821ab4c899f642d820c63f418",
+      "passed": 24,
+      "pending": 11,
+      "failed": 0,
+      "dxf_audit": {
+        "audit_errors": 0,
+        "room_count": 28,
+        "units": 6,
+        "dxf_version": "AC1024",
+        "format": "AutoCAD 2010 DXF",
+        "model_revision_id": "46c0c47821ab4c899f642d820c63f418",
+        "graphic_source": "shared metric architectural scene",
+        "independent_cad_application_verified": false
+      },
+      "files": [
+        "open_court-GF.svg",
+        "open_court-FF.svg",
+        "open_court.pdf",
+        "open_court.dxf",
+        "open_court.json"
+      ]
+    }
+  ],
+  "android_device_tested": false,
+  "android_apk_built": false,
+  "android_sdk_minimum_configured": 24,
+  "webview_minimum_version_tested": null,
+  "local_apk_build_limitation": "Initial local build lacks full JDK (jlink); CI build uses complete JDK 21."
+}

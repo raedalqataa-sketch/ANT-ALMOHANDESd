@@ -1,0 +1,29 @@
+<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>اختبار تشغيل المحرك محليًا</title>
+<style>body{font-family:Tahoma,sans-serif;background:#f4f1e9;color:#403a30;margin:0;padding:30px}main{max-width:1000px;margin:auto}h1{font-size:26px}p{line-height:1.9}button,a{background:#68563b;color:white;border:0;border-radius:7px;padding:12px 18px;margin:4px;cursor:pointer;display:inline-block;text-decoration:none}button:disabled{opacity:.45}section{background:#fffdf7;padding:20px;margin:18px 0;border-radius:12px}pre{direction:ltr;text-align:left;overflow:auto;white-space:pre-wrap;font-size:12px}#preview{max-width:100%;max-height:800px}small{color:#8a785f}#pulse{display:inline-block;width:9px;height:9px;background:#8f9d6b;border-radius:50%}</style>
+<main><h1>اختبار المحرك دون خادم توليد</h1><p>تجربة جدوى لتشغيل المحرك نفسه داخل متصفح حديث. ملفات Python والخطوط والمكتبات محلية. هذه الصفحة ليست تطبيق أندرويد مكتملًا.</p><section><p><span id="pulse"></span> <span id="status">بانتظار تهيئة المحرك</span></p><button id="initialize">تهيئة المحرك المحلي</button><button id="run" disabled>توليد التنظيمات الثلاثة</button><button id="single" disabled>توليد تنظيم واحد</button><small id="timing"></small></section><section id="results" hidden><h2>نتائج التشغيل الفعلية</h2><pre id="summary"></pre><div id="files"></div><img id="preview" alt="المسقط الناتج من المحرك المحلي"></section><section><h2>نطاق التجربة</h2><p>التوليد والفحص والتصدير داخل Web Worker، للمحافظة على استجابة الواجهة. نجاح التجربة هنا لا يثبت الأداء أو التثبيت على هاتف أندرويد. لا ترسل الصفحة المتطلبات أو المخططات لخدمة خارجية.</p></section></main>
+<script>
+const $=id=>document.getElementById(id);const worker=new Worker('./worker.js');let started;
+window.probe={ready:false,result:null,error:null,ui_ticks:0};setInterval(()=>{window.probe.ui_ticks++;$('pulse').style.opacity=window.probe.ui_ticks%2?'1':'.3'},250);
+function status(text){$('status').textContent=text}
+$('initialize').onclick=()=>{started=performance.now();$('initialize').disabled=true;worker.postMessage({type:'initialize'})};
+function run(options){$('run').disabled=$('single').disabled=true;worker.postMessage({type:'run',options})}
+$('run').onclick=()=>run({});$('single').onclick=()=>run({layout_family:'social_hub'});
+worker.onmessage=({data})=>{
+ if(data.type==='progress')status(data.text);
+ if(data.type==='ready'){window.probe.ready=true;window.probe.startup=data;$('run').disabled=$('single').disabled=false;status('المحرك جاهز محليًا');$('timing').textContent=`تهيئة: ${(data.startup_ms/1000).toFixed(1)} ثانية`}
+ if(data.type==='error'){window.probe.error=data.message;status('تعذر التشغيل: '+data.message);console.error(data)}
+ if(data.type==='result'){
+   window.probe.result=data.result;$('run').disabled=$('single').disabled=false;$('results').hidden=false;status('اكتمل التوليد والفحص والتصدير محليًا');$('summary').textContent=JSON.stringify(data.result,null,2);$('files').replaceChildren();
+   for(const candidate of data.result.candidates){for(const name of candidate.files){const b=document.createElement('button');b.textContent=name;b.onclick=()=>worker.postMessage({type:'file',name});$('files').append(b)}}
+   const first=data.result.candidates.find(c=>c.failed===0);if(first)worker.postMessage({type:'file',name:first.files.find(n=>n.endsWith('-GF.svg')),preview:true});
+ }
+ if(data.type==='file'){
+   const type=data.name.endsWith('.svg')?'image/svg+xml':data.name.endsWith('.pdf')?'application/pdf':'application/octet-stream';const url=URL.createObjectURL(new Blob([data.bytes],{type}));
+   if(data.name.endsWith('.svg')){const previous=$('preview').src;$('preview').src=url;if(previous.startsWith('blob:'))URL.revokeObjectURL(previous)}
+   else if(window.AndroidFiles){
+     let binary='';for(let i=0;i<data.bytes.length;i+=8192)binary+=String.fromCharCode(...data.bytes.subarray(i,i+8192));
+     window.AndroidFiles.save(data.name,btoa(binary));URL.revokeObjectURL(url);
+   }else{const a=document.createElement('a');a.href=url;a.download=data.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+ }
+};
+</script></html>
