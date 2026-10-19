@@ -49,20 +49,25 @@ def topology(family,W,D,c,ratio,top):
 
 def length_for(room,lane,t):
     cross=lane['width' if lane['axis']=='y' else 'depth']-t
+    if room.get('guest_distributor'):return room['min_side']+t
     if cross+EPS<room['min_side']:return math.inf
     if room['kind']=='dining' and cross<3.45-EPS:return math.inf  # proposed furniture + 0.60 m movement clearance, not a legal minimum
     length=max(room['min_side'],room['min_area']/cross,cross/2.8)
-    if room['kind']=='bathroom' and cross*length>room['min_area']*2.2:return math.inf
     if max(cross,length)/min(cross,length)>2.8:return math.inf
     return length+t
 
 
-def allocate(requests,lanes,t):
+def allocate(requests,lanes,t,guest_clear_width=1.6):
     """Bounded beam search, rejecting area/width violations before placement."""
     capacities=[r['depth' if r['axis']=='y' else 'width'] for r in lanes]
     states=[([0.]*len(lanes),[[] for _ in lanes])]
     bundles={}
     for r in requests:bundles.setdefault(r.get('guest_parent') or r['id'],[]).append(r)
+    for key,bundle in bundles.items():
+        if any(r.get('guest_parent') or (r['kind']=='majlis' and r.get('zone')=='guest' and r.get('separate_guest_entry')) for r in bundle):
+            distributor=dict(id='guest-dist-'+key,kind='corridor',name='موزع ضيوف مستقل',zone='guest',guest_distributor=True,guest_parent=key,min_side=max(1.6,guest_clear_width),min_area=0)
+            for r in bundle:r['guest_vestibule']=distributor['id']
+            bundle.append(distributor)
     ordered=sorted(bundles.values(),key=lambda rs:(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id']))
     for bundle in ordered:
         expanded=[]
@@ -85,7 +90,7 @@ def allocate(requests,lanes,t):
         extra=capacities[i]-used[i];weights=sum(r['min_area'] for r in groups[i])
         # Functional sequencing along a wing: services then social spaces, bedrooms together.
         order={'bathroom':0,'storage':1,'laundry':2,'kitchen':3,'dining':4,'living':5,'majlis':6,'office':7,'master':8,'bedroom':9}
-        for r in sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],bool(q.get('guest_parent'))) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id']))):
+        for r in sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],(1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id']))):
             length=length_for(r,lane,t)+min(extra*r['min_area']/weights,length_for(r,lane,t)*.15)
             cell=box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else length,length if axis=='y' else lane['depth'],**copy.deepcopy(r),door_side=lane['door_side'])
             cells.append(cell);start+=length
@@ -104,6 +109,7 @@ def expanded_program(brief,floor):
                  min_area=max(r.min_area,saudi_rules.minimum(r.kind)[0] if brief.apply_saudi_rules else 0),min_side=max(r.min_side,saudi_rules.minimum(r.kind)[1] if brief.apply_saudi_rules else 0),capacity=r.capacity,dining_seats=brief.dining_seats if r.kind=='dining' else 0,
                  zone='guest' if floor==0 and (r.kind=='majlis' or (any(p.kind=='majlis' and p.floor==0 for p in brief.rooms) and r.kind=='bathroom' and ('ضيف' in r.name or 'ضيوف' in r.name or 'رجال' in r.name))) else 'family')
           for r in brief.rooms if r.floor==floor for n in range(r.count)]
+    for row in rows:row['separate_guest_entry']=brief.separate_guest_entry
     for row in rows:row['include_shower']=row['kind']=='bathroom' and row['zone']!='guest'
     if brief.separate_guest_entry:
         parents=[r for r in rows if r['kind']=='majlis' and r['zone']=='guest']
@@ -150,7 +156,7 @@ def search(brief,family):
         lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
-            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness)
+            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width)
             if cells is None:failed=True;break
             if brief.automatic_features.roof_annex:
                 # Only retain the strip supporting the annex lounge immediately
@@ -220,16 +226,22 @@ def make_walls(floor,t,revision):
         for lo,hi in zip(cuts,cuts[1:]):
             ids=sorted({rid for a,b,rid in spans if a< (lo+hi)/2 <b})
             if not ids:continue
-            if len(ids)==2 and all(by_id[i]['kind']=='corridor' for i in ids):continue
+            if len(ids)==2 and all(by_id[i]['kind']=='corridor' and not by_id[i].get('guest_distributor') for i in ids):continue
             a,b=((lo,fixed),(hi,fixed)) if axis=='h' else ((fixed,lo),(fixed,hi))
             floor['walls'].append(dict(id=f"{floor['id']}-W{len(floor['walls'])+1}",floor_id=floor['id'],axis='horizontal' if axis=='h' else 'vertical',start=a,end=b,thickness=t,room_ids=ids,exterior=len(ids)==1,revision_id=revision))
-    # Normal rooms connect to halls; the guest WC connects through its own majlis.
+    # Guest rooms open onto their allocated vestibule; ordinary rooms onto family halls.
     for r in cells:
         if r['kind']=='corridor':continue
         # Guest bathrooms must open onto a guest distributor, never through the majlis.
-        # Until a dedicated guest distributor exists, do not silently draw an invalid door.
+        # Keep the vestibule/family seam as a real wall, with no shared passage.
         hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
+        if r.get('guest_vestibule'):
+            vestibule=floor['id']+'-'+r['guest_vestibule']
+            hosts=[w for w in hosts if vestibule in w['room_ids']]
         if hosts:add_room_door(floor,r,max(hosts,key=lambda w:math.dist(w['start'],w['end'])),revision)
+        if r['kind']=='majlis' and r.get('guest_vestibule'):
+            family_hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' and not by_id[i].get('guest_distributor') for i in w['room_ids'])]
+            if family_hosts:add_room_door(floor,r,max(family_hosts,key=lambda w:math.dist(w['start'],w['end'])),revision,access_control='family_only')
 
 
 def add_windows(floor,brief,revision):
@@ -265,7 +277,7 @@ def add_windows(floor,brief,revision):
 
 
 def entrance(floor,face,revision):
-    halls={r['id'] for r in floor['rooms'] if r['kind']=='corridor'}
+    halls={r['id'] for r in floor['rooms'] if r['kind']=='corridor' and not r.get('guest_distributor')}
     horizontal=face in ('north','south');coordinate=1 if horizontal else 0
     walls=[w for w in floor['walls'] if w['exterior'] and set(w['room_ids'])&halls and (w['axis']=='horizontal')==horizontal and math.dist(w['start'],w['end'])>1.2]
     if not walls:return
@@ -280,6 +292,8 @@ def separate_guests(floor,brief,revision):
         if r['kind']!='majlis' or r.get('zone')!='guest':continue
         for o in floor['openings']:
             if o['kind']=='door' and r['id'] in o['connects'] and any('hall-' in rid for rid in o['connects']):o['access_control']='family_only'
+        if r.get('guest_vestibule'):
+            r=next(q for q in floor['rooms'] if q['id']==floor['id']+'-'+r['guest_vestibule'])
         hosts=[w for w in floor['walls'] if w['exterior'] and r['id'] in w['room_ids'] and math.dist(w['start'],w['end'])>1.3]
         def preference(w):
             axis=0 if w['axis']=='horizontal' else 1
@@ -307,20 +321,57 @@ def make_guest_distributor(floor,brief,revision):
     """
     if not brief.separate_guest_entry:return True
     majlis=[r for r in floor['rooms'] if r['kind']=='majlis' and r.get('zone')=='guest']
-    baths=[r for r in floor['rooms'] if r.get('guest_parent')]
-    if not majlis or not baths:return True
-    # The existing circulation spine can act as the guest distributor only
-    # after its boundaries and doors are separated from family circulation.
-    # A dedicated vestibule polygon must be created by the allocator; this
-    # conservative gate prevents a shared family corridor being mislabeled.
+    baths=[r for r in floor['rooms'] if r.get('guest_parent') and r['kind']=='bathroom']
+    if not majlis:return True
     distributors=[r for r in floor['rooms'] if r.get('guest_distributor')]
     if not distributors:return False
     doors=[o for o in floor['openings'] if o['kind']=='door']
-    for bath in baths:
-        if not any(bath['id'] in o['connects'] and any(h['id'] in o['connects'] for h in distributors) for o in doors):return False
-    for maj in majlis:
-        if not any(maj['id'] in o['connects'] and any(h['id'] in o['connects'] for h in distributors) for o in doors):return False
-    return any(o.get('guest_entry') and any(h['id'] in o['connects'] for h in distributors) for o in doors)
+    physical='cells' in floor or 'walls' in floor
+    by_id={r['id']:r for r in floor['rooms']}
+    cells={r['id']:r for r in floor.get('cells',[])}
+    walls={w['id']:w for w in floor.get('walls',[])}
+    def valid_door(o):
+        if not physical:return True  # adjacency-only contract fixtures
+        wall=walls.get(o.get('wall_id'))
+        if not wall:return False
+        expected=set(wall['room_ids'])|({'OUTSIDE'} if wall['exterior'] else set())
+        if set(o['connects'])!=expected:return False
+        axis=0 if wall['axis']=='horizontal' else 1
+        c=o['center'];lo,hi=sorted((wall['start'][axis],wall['end'][axis]))
+        return (abs(c[1-axis]-wall['start'][1-axis])<EPS and
+                c[axis]-o['width']/2>=lo-EPS and c[axis]+o['width']/2<=hi+EPS)
+    for dist in distributors:
+        did=dist['id']
+        if physical:
+            cell=cells.get(did)
+            if not cell or dist.get('zone')!='guest' or dist['kind']!='corridor':return False
+            if min(dist['width'],dist['depth'])+EPS<getattr(brief,'corridor_width',1.2):return False
+            t=next((w['thickness'] for w in walls.values() if did in w['room_ids']),None)
+            if t is None:return False
+            if any(abs(dist[k]-(cell[k]+(t/2 if k in ('x','y') else -t)))>EPS for k in ('x','y','width','depth')):return False
+            for axis,fixed,lo,hi in [('horizontal',cell['y'],cell['x'],cell['x']+cell['width']),
+                                     ('horizontal',cell['y']+cell['depth'],cell['x'],cell['x']+cell['width']),
+                                     ('vertical',cell['x'],cell['y'],cell['y']+cell['depth']),
+                                     ('vertical',cell['x']+cell['width'],cell['y'],cell['y']+cell['depth'])]:
+                ax=0 if axis=='horizontal' else 1
+                spans=sorted((w['start'][ax],w['end'][ax]) for w in walls.values()
+                             if did in w['room_ids'] and w['axis']==axis and abs(w['start'][1-ax]-fixed)<EPS)
+                cursor=lo
+                for start,end in spans:
+                    if abs(start-cursor)>EPS or end<=start:return False
+                    cursor=end
+                if abs(cursor-hi)>EPS:return False
+            if any(did in o['connects'] and any(rid in by_id and by_id[rid].get('zone')!='guest' for rid in o['connects'] if rid!=did) for o in doors):return False
+        associated=[r for r in majlis+baths if not physical or r.get('guest_vestibule')==did.removeprefix(floor['id']+'-')]
+        if not associated:return False
+        for room in associated:
+            if not any(set(o['connects'])=={room['id'],did} and valid_door(o) for o in doors):return False
+        if not any(o.get('guest_entry') and set(o['connects'])=={did,'OUTSIDE'} and valid_door(o) for o in doors):return False
+    if any(not any(set(o['connects'])=={bath['id'],h['id']} and valid_door(o) for h in distributors for o in doors) for bath in majlis+baths):return False
+    if any(o.get('guest_entry') and not any(set(o['connects'])=={h['id'],'OUTSIDE'} and valid_door(o) for h in distributors) for o in doors):return False
+    if physical and privacy_evidence({'floors':[floor]})['family_rooms_exposed']:return False
+    if any(any(m['id'] in o['connects'] and bath['id'] in o['connects'] for m in majlis for bath in baths) for o in doors):return False
+    return True
 
 
 def materialize(brief,family,result):
@@ -390,6 +441,14 @@ def validate_general(model,brief):
     """Recalculate constraints from emitted geometry, independent of allocator state."""
     checks=[]
     def add(id,ok,label,evidence=None):checks.append(dict(check_id=id,status='PASS' if ok else 'FAIL',label=label,evidence=evidence or {}))
+    missing_hosts=[]
+    for f in model['floors']:
+        walls={w['id'] for w in f['walls']}
+        missing_hosts.extend(o.get('id','UNIDENTIFIED') for o in f['openings'] if o.get('wall_id') not in walls)
+    if missing_hosts:
+        add('opening-host-integrity',False,'فتحات بلا جدران مضيفة؛ توقفت الفحوص التابعة',{'invalid':missing_hosts})
+        add('guest-distributor-geometry',make_guest_distributor(model['floors'][0],brief,model['model_revision_id']),'هندسة موزع الضيوف وأبوابه')
+        return checks
     for fi,f in enumerate(model['floors']):
         expected={r['id']:r for r in expanded_program(brief,fi)}
         actual={r['id'].removeprefix(f['id']+'-'):r for r in f['rooms'] if r.get('request_id')}
@@ -402,7 +461,7 @@ def validate_general(model,brief):
         add(f'{f["id"]}-site',all(inside(bounds,r) for r in rooms),'الالتزام بحدود الأرض والارتدادات المدخلة')
         corridors={r['id'] for r in rooms if r['kind']=='corridor'}
         # Connectivity uses touching gross hall cells, not near-by room centers.
-        halls=[r for r in f['cells'] if r['kind']=='corridor'];seen={halls[0]['id']};changed=True
+        halls=[r for r in f['cells'] if r['kind']=='corridor' and not r.get('guest_distributor')];seen={halls[0]['id']};changed=True
         def touches(a,b):
             dx=min(a['x']+a['width'],b['x']+b['width'])-max(a['x'],b['x'])
             dy=min(a['y']+a['depth'],b['y']+b['depth'])-max(a['y'],b['y'])
@@ -448,8 +507,8 @@ def validate_general(model,brief):
     # not via the majlis. The distributor must also serve the majlis.
     if brief.separate_guest_entry:
         gf=model['floors'][0]
-        add('guest-distributor-geometry',bool(gf.get('guest_distributor_constructed')),'موزع ضيوف هندسي مستقل متصل بمدخل خارجي والمجلس والحمام',{'constructed':bool(gf.get('guest_distributor_constructed')),'scope':'hard failure until dedicated geometry exists'})
-        guest_baths=[r for r in gf['rooms'] if r.get('guest_parent')]
+        add('guest-distributor-geometry',make_guest_distributor(gf,brief,model['model_revision_id']),'موزع ضيوف هندسي مستقل متصل بمدخل خارجي والمجلس والحمام',{'constructed':bool(gf.get('guest_distributor_constructed')),'scope':'recomputed net/gross bounds, closed walls, hosted doors and separated guest route'})
+        guest_baths=[r for r in gf['rooms'] if r.get('guest_parent') and r['kind']=='bathroom']
         guest_majlis=[r for r in gf['rooms'] if r.get('zone')=='guest' and r['kind']=='majlis']
         invalid=[]
         for bath in guest_baths:

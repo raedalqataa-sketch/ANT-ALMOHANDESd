@@ -11,8 +11,12 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
       - uses: actions/setup-node@v4
+        if: always()
         with:
           node-version: '22'
-      - run: node --check frontend/app.js
-      - run: node --check frontend/studio.js
-      - run: node --check web_generator/app.js
+      - if: always()
+        run: node --check frontend/app.js
+      - if: always()
+        run: node --check frontend/studio.js
+      - if: always()
+        run: node --check web_generator/app.js
