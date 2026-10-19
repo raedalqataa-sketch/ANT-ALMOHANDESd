@@ -189,6 +189,24 @@ def bathroom_layouts(r):
                 q['use_zones']=[dict(x=sx,y=sy-.65,width=1,depth=.65)]
                 items=items+[q]
             yield [transform(q,r,rotation) for q in items]
+        # A long, shallow bathroom can place fixtures on one service wall.
+        # Keep full fixture dimensions/use zones; valid_group still rejects
+        # collisions with the door sweep and its approach clearance.
+        if shower and W>=3.5 and H>=1.65:
+            for shift in (0,.2,.4):
+                for mirror in (False,True):
+                    tray=fixture('shower',.05+shift,.05,1,1)
+                    tray['use_zones']=[dict(x=tray['x'],y=1.05,width=1,depth=.65)]
+                    wc=fixture('toilet',1.15+shift,.1,.65,.75)
+                    wc['use_zones']=[front_zone(wc,.65)]
+                    basin=fixture('basin',1.95+shift,.05,.65,.5)
+                    basin['use_zones']=[front_zone(basin,.65)]
+                    items=[tray,wc,basin]
+                    if mirror:
+                        for q in items:
+                            q['x']=W-q['x']-q['width']
+                            for z in q['use_zones']:z['x']=W-z['x']-z['width']
+                    yield [transform(q,r,rotation) for q in items]
 
 
 def simple_layouts(r,kind):
