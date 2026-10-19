@@ -377,7 +377,7 @@ def make_guest_distributor(floor,brief,revision):
 def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
     origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
-    model=dict(schema_version='0.6.0-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
+    model=dict(schema_version='0.6.1-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
                brief=brief.model_dump(),profile={'project_name':brief.project_name},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(origin_x,origin_y,result['W'],result['D']),
                search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
