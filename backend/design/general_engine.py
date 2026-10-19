@@ -226,10 +226,9 @@ def make_walls(floor,t,revision):
     # Normal rooms connect to halls; the guest WC connects through its own majlis.
     for r in cells:
         if r['kind']=='corridor':continue
-        if r.get('guest_parent'):
-            parent=floor['id']+'-'+r['guest_parent']
-            hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and parent in w['room_ids']]
-        else:hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
+        # Guest bathrooms must open onto a guest distributor, never through the majlis.
+        # Until a dedicated guest distributor exists, do not silently draw an invalid door.
+        hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
         if hosts:add_room_door(floor,r,max(hosts,key=lambda w:math.dist(w['start'],w['end'])),revision)
 
 
@@ -420,6 +419,21 @@ def validate_general(model,brief):
         evidence=movement_evidence(model,f)
         add(f['id']+'-walkability',not evidence['access']['unreachable'],'مسارات حركة جسم بعرض 0.60 م — فحص شبكي جزئي',evidence['access'])
         add(f['id']+'-door-sweeps',not evidence['door_sweep_collisions'],'عدم تعارض أقواس الأبواب مع بعضها والأثاث ومسيري الدرج',{'collisions':evidence['door_sweep_collisions'],'scope':evidence['scope']})
+    # Architectural intelligence V1: verify guest bathroom access from a corridor,
+    # not via the majlis. The distributor must also serve the majlis.
+    if brief.separate_guest_entry:
+        gf=model['floors'][0]
+        guest_baths=[r for r in gf['rooms'] if r.get('guest_parent')]
+        guest_majlis=[r for r in gf['rooms'] if r.get('zone')=='guest' and r['kind']=='majlis']
+        invalid=[]
+        for bath in guest_baths:
+            doors=[o for o in gf['openings'] if o['kind']=='door' and bath['id'] in o['connects']]
+            halls={rid for o in doors for rid in o['connects'] if any(q['id']==rid and q['kind']=='corridor' for q in gf['rooms'])}
+            if not halls or any(any(m['id'] in o['connects'] for m in guest_majlis) for o in doors):
+                invalid.append(bath['id']);continue
+            if not any(o['kind']=='door' and any(m['id'] in o['connects'] for m in guest_majlis) and halls.intersection(o['connects']) for o in gf['openings']):
+                invalid.append(bath['id'])
+        add('guest-distributor-access',not invalid,'حمام الضيوف والمجلس من موزع مشترك مستقل، وليس الحمام من المجلس',{'invalid_guest_bathrooms':invalid,'scope':'door adjacency; visual privacy remains PENDING'})
     if brief.separate_guest_entry and any(r.kind=='majlis' and r.floor==0 for r in brief.rooms):
         ev=privacy_evidence(model)
         add('guest-route',bool(ev['guest_entries']) and not ev['missing_guest_access'] and not ev['family_rooms_exposed'],'مسار ضيوف مستقل للمجلس ومرافقه عند إغلاق باب فصل الأسرة',ev)
