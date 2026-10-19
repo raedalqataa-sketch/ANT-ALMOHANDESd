@@ -127,7 +127,7 @@ def evaluate(model, brief):
     def emit(key,status,detail,source_page,**evidence):
         overlays.append(dict(check_id='SA-2024-'+key,status=status,label=detail,
                              evidence={**evidence,'scope':'مطابقة هندسية أولية للمسقط المقترح، لا اعتماد تنفيذي'},
-                             source={'id':'MOMAH-RES-2024','pdf_page':source_page,'document_year':2024,'sbc_full_text_verified':False}))
+                             source={'id':'MOMAH-RES-2024','url':'https://momah.gov.sa/ar/node/15715','pdf_page':source_page,'document_year':2024,'sbc_full_text_verified':False}))
     site=model.get('site',{})
     sw,sd=site.get('width'),site.get('depth')
     site_ready=isinstance(sw,(int,float)) and isinstance(sd,(int,float))
@@ -171,7 +171,7 @@ def evaluate(model, brief):
                     invalid.append({'window':ident,'reason':'نافذة غير موجودة بالدور'});continue
                 o,f=found
                 host=next((w for w in f.get('walls',[]) if w['id']==o.get('wall_id')),None)
-                if o.get('kind')!='window' or not host or not host.get('exterior') or not on_edge(o['center'],p):
+                if o.get('kind')!='window' or not host or not host.get('exterior') or not (on_edge(o['center'],p) or any(on_edge([o['center'][0]+dx,o['center'][1]+dy],p) for dx,dy in ((host.get('thickness',0)/2,0),(-host.get('thickness',0)/2,0),(0,host.get('thickness',0)/2),(0,-host.get('thickness',0)/2)))):
                     invalid.append({'window':ident,'reason':'الفتحة ليست نافذة على حد المنور الفعلي'})
             if invalid:bad.append({'id':well['id'],'windows':invalid})
             else:ok.append({'id':well['id'],'linked_windows':ids})

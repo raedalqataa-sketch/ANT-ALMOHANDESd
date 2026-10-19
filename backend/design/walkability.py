@@ -42,6 +42,8 @@ def floor_access(model,floor,step=.20,body_width=.60):
     for s in model['stairs']:
         if s.get('floor_id',floor['id'])!=floor['id']:continue
         for q in stair_flights(s):raster(q,False,radius)
+    for arrival in model.get('stair_arrivals',[]):
+        if arrival['floor_id']==floor['id']:raster(arrival['void'],False,radius)
     def point(i,j):return [round(ox+(i+.5)*step,3),round(oy+(j+.5)*step,3)]
     def nearest(x,y,room):
         choices=[]
@@ -68,7 +70,7 @@ def floor_access(model,floor,step=.20,body_width=.60):
     else:
         for r in floor['rooms']:
             if r['kind'] in ('stairs','stair'):
-                generic=next((s for s in model['stairs'] if s.get('room_id')==r['id']),None)
+                generic=next((s for s in model['stairs']+model.get('stair_arrivals',[]) if s.get('room_id')==r['id']),None)
                 apron=generic['entry_apron'] if generic else r
                 node=nearest(apron['x']+apron['width']/2,apron['y']+(apron['depth']/2 if generic else apron['depth']-.5),r)
                 if node:seeds.append(node)

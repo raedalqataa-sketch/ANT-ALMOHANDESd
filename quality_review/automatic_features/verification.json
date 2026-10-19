@@ -1,0 +1,11 @@
+{
+  "engine_version": "0.6.0-general",
+  "python_tests_total": 91,
+  "legacy_js_suites_passed": 6,
+  "browser_qa": "passed",
+  "export_geometry_parity": "passed at 1e-6 m",
+  "pdf_pages_for_two_storeys_plus_annex": 5,
+  "DXF": "AC1024; audit 0 errors; no HATCH/SOLID",
+  "source_bundle_matches_python_modules": true,
+  "full_code_or_permit_approval": false
+}

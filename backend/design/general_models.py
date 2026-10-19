@@ -103,6 +103,18 @@ class RegulatoryGeometry(Strict):
         return self
 
 
+class AutomaticFeatures(Strict):
+    lightwell: bool = False
+    lightwell_length_m: float = Field(default=2.0, ge=1.8, le=4)
+    roof_annex: bool = False
+    annex_lounge_min_m2: float = Field(default=14, ge=11.2, le=40)
+    balcony: bool = False
+    balcony_depth_m: float = Field(default=1.0, ge=.6, le=1.25)
+    balcony_face: Literal['auto','north','south','east','west'] = 'auto'
+    service_yard: bool = False
+    main_street_faces: list[Literal['north','south','east','west']] | None = None
+
+
 class VillaBrief(Strict):
     project_name: str = Field(default='فيلا جديدة', min_length=1, max_length=100)
     plot_width: float = Field(ge=8, le=60)
@@ -125,6 +137,7 @@ class VillaBrief(Strict):
     boundary_widths: dict[Literal['north','south','east','west'],Annotated[float,Field(ge=0,le=100)]] = Field(default_factory=dict)
     apply_saudi_rules: bool = True
     regulatory_geometry: RegulatoryGeometry | None = None
+    automatic_features: AutomaticFeatures = Field(default_factory=AutomaticFeatures)
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
@@ -132,6 +145,15 @@ class VillaBrief(Strict):
 
     @model_validator(mode='after')
     def coherent(self):
+        if self.automatic_features.balcony and self.floors < 2:
+            raise ValueError('الشرفة العلوية تتطلب دورًا أول؛ اختر أرضي + أول')
+        if self.regulatory_geometry:
+            a=self.automatic_features;g=self.regulatory_geometry
+            if ((a.lightwell and g.light_wells is not None) or
+                (a.roof_annex and (g.roof_annex is not None or g.roof_annex_absent)) or
+                (a.balcony and g.projections is not None) or
+                (a.service_yard and g.facades is not None)):
+                raise ValueError('اختر التوليد التلقائي أو القياسات اليدوية للعنصر نفسه، ولا تجمعهما')
         if len({r.id for r in self.rooms}) != len(self.rooms):
             raise ValueError('معرفات صفوف البرنامج يجب أن تكون فريدة')
         if sum(r.count for r in self.rooms)>36:

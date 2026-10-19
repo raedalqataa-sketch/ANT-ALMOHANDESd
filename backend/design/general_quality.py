@@ -50,7 +50,7 @@ def make_stairs(model):
     half=risers//2;tread=.28;run=(half-1)*tread
     for f in model['floors']:
         for room in f['rooms']:
-            if room['kind']!='stair':continue
+            if room['kind']!='stair' or f.get('roof_annex'):continue
             x,y,w,d=[room[k] for k in ('x','y','width','depth')]
             apron=1.0;landing=1.1;flight=1.1
             flights=[dict(x=sx,y=y+apron,width=flight,depth=run) for sx in (x,x+w-flight)]
@@ -85,7 +85,7 @@ def movement_evidence(model,floor):
     access=floor_access(model,floor,step=.15,body_width=.60)
     collisions=[]
     for o in floor['openings']:
-        if o['kind']!='door':continue
+        if o['kind']!='door' or o.get('door_style')=='sliding':continue
         g=door_geometry(floor,o)
         for q in floor['furniture']:
             if q.get('physical',True) and sweep_hits_box(g,q):collisions.append({'door':o['id'],'fixture':q['id']})
@@ -93,7 +93,11 @@ def movement_evidence(model,floor):
             if s['floor_id']==floor['id']:
                 for i,q in enumerate(s['flights']):
                     if sweep_hits_box(g,q):collisions.append({'door':o['id'],'stair_flight':i})
-    doors=[o for o in floor['openings'] if o['kind']=='door']
+    for arrival in model.get('stair_arrivals',[]):
+        if arrival['floor_id']!=floor['id']:continue
+        for o in floor['openings']:
+            if o['kind']=='door' and o.get('door_style')!='sliding' and sweep_hits_box(door_geometry(floor,o),arrival['void']):collisions.append({'door':o['id'],'stair_void':arrival['room_id']})
+    doors=[o for o in floor['openings'] if o['kind']=='door' and o.get('door_style')!='sliding']
     for i,a in enumerate(doors):
         for b in doors[i+1:]:
             # Broad phase avoids polygon tests for distant doors. Main entries have no precomputed swing box.

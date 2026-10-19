@@ -113,40 +113,64 @@ def expanded_program(brief,floor):
 
 
 def search(brief,family):
-    aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness
-    ad=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-brief.wall_thickness
+    # Reserve clearance outside the mass for a balcony on a non-street facade.
+    margin={face:(brief.automatic_features.balcony_depth_m+.15 if brief.automatic_features.balcony and brief.boundary_widths.get(face,0)<10 else 0) for face in ('north','south','east','west')}
+    aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness-margin['west']-margin['east']
+    ad=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-brief.wall_thickness-margin['north']-margin['south']
+    origin_x=brief.setbacks.west+margin['west'];origin_y=brief.setbacks.north+margin['north']
     best=None;attempts=0;pool=[]
     # Each candidate searches dimensions AND allocation, never just scales a fixed plan.
     variations=[(s,d,r,b) for s in (1.,.85,.70) for d in (1.,.82,.68,.55) for r in (.33,.36,.38,.40,.44,.47) for b in (.30,.36,.40,.44,.48)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
     for ws,ds,ratio,top in variations:
         W,D=aw*ws,ad*ds
-        shape=topology(family,W,D,brief.corridor_width+brief.wall_thickness,ratio,top)
+        shape=topology(family,W,D,max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0),ratio,top)
         attempts+=1
         if not shape:continue
         halls,lanes=copy.deepcopy(shape)
         if min(min(l['width'],l['depth']) for l in lanes)<1.6:continue
         stair=None
-        if brief.floors==2:
+        if brief.floors==2 or brief.automatic_features.roof_annex:
             # Reserve an identical vertical core on BOTH floors, before packing rooms.
             eligible=[(i,l) for i,l in enumerate(lanes) if l['axis']=='y' and l['width']-brief.wall_thickness>=2.8 and l['depth']>=4.6]
             if not eligible:continue
+            if brief.automatic_features.roof_annex:
+                # Keep the roof stair inside a recessed annex, not on the front edge.
+                eligible=[(i,l) for i,l in eligible if l['depth']>=9.5]
+                if not eligible:continue
             i,l=min(eligible,key=lambda p:p[1]['depth'])
             core_depth=4.6 if l['depth']>=7.0 else l['depth']
-            stair=box(l['x'],l['y']+l['depth']-core_depth,l['width'],core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
-            l['depth']-=core_depth
+            retreat=1.6 if brief.automatic_features.roof_annex else 0
+            stair=box(l['x'],l['y']+l['depth']-core_depth-retreat,l['width'],core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
+            l['depth']-=core_depth+retreat
             if l['depth']<EPS:lanes.pop(i)
+        from .automatic_features import reserve_lightwell
+        reserved=reserve_lightwell(lanes,brief)
+        if reserved is None:continue
+        lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
             cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness)
             if cells is None:failed=True;break
+            if brief.automatic_features.roof_annex:
+                # Only retain the strip supporting the annex lounge immediately
+                # before the stair. Unrelated spare lanes remain removable.
+                extension=max(3.6,brief.automatic_features.annex_lounge_min_m2/(stair['width']-brief.wall_thickness)+brief.wall_thickness)
+                for r in cells:
+                    if r['kind']!='reserve' or abs(r['x']-stair['x'])>EPS or abs(r['width']-stair['width'])>EPS or abs(r['y']+r['depth']-stair['y'])>EPS:continue
+                    start=max(r['y'],stair['y']-extension);depth=stair['y']-start
+                    previous=next((p for p in cells if p.get('request_id') and abs(p['x']-r['x'])<EPS and abs(p['y']+p['depth']-r['y'])<EPS),None)
+                    if depth<brief.wall_thickness+.9 and previous:
+                        previous['depth']=stair['y']-previous['y']
+                    else:r.update(y=start,depth=depth,kind='corridor',name='بهو وصول الملحق')
             if brief.flexible_space_policy=='remove':cells=[r for r in cells if r['kind']!='reserve']
             floors.append(cells+([copy.deepcopy(stair)] if stair else []))
         if failed:continue
+        if wells and any(not any(r.get('request_id') and (abs(r['y']+r['depth']-(w['y']-brief.wall_thickness/2))<EPS or abs(r['y']-(w['y']+w['depth']+brief.wall_thickness/2))<EPS) and min(r['x']+r['width'],w['x']+w['width'])-max(r['x'],w['x'])>.7 for r in cells for w in wells) for cells in floors):continue
         gross=max(sum(area(r) for r in cells)+sum(area(h) for h in halls) for cells in floors)
         spare=sum(area(r) for rooms in floors for r in rooms if r['kind']=='reserve')
         score=gross*brief.floors+spare*.8
-        pool.append(dict(W=W,D=D,halls=halls,floors=floors,score=score,gross=gross,top_fraction=top))
+        pool.append(dict(W=W,D=D,halls=halls,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y))
         if best is None or score<best['score']:best=pool[-1]
     if best:
         pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
@@ -212,10 +236,11 @@ def make_walls(floor,t,revision):
 def add_windows(floor,brief,revision):
     # Explicit proposed clear glass and opening fraction; actual facade legality is a separate check.
     for r in floor['rooms']:
-        if not r.get('request_id'):continue
+        if not r.get('request_id') and not r.get('generated_feature_room'):continue
         target=saudi_rules.window_targets(r['kind'],area(r))[0] if brief.apply_saudi_rules else .9
         sill=1.5 if r['kind']=='bathroom' else .9;height=.8 if r['kind']=='bathroom' else 1.5
-        clear_height=height-.12;left=target
+        clear_height=height-.12;left=target-sum(o.get('clear_width',0)*o.get('clear_height',0) for o in floor['openings'] if o['kind']=='window' and r['id'] in o['connects'])
+        if left<EPS:continue
         walls=[w for w in floor['walls'] if w['exterior'] and r['id'] in w['room_ids']]
         for wall in sorted(walls,key=lambda w:-math.dist(w['start'],w['end'])):
             axis=0 if wall['axis']=='horizontal' else 1
@@ -277,9 +302,10 @@ def separate_guests(floor,brief,revision):
 
 def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
-    model=dict(schema_version='0.5.1-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
+    origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
+    model=dict(schema_version='0.6.0-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
                brief=brief.model_dump(),profile={'project_name':brief.project_name},site={'width':brief.plot_width,'depth':brief.plot_depth},
-               footprint=box(brief.setbacks.west,brief.setbacks.north,result['W'],result['D']),
+               footprint=box(origin_x,origin_y,result['W'],result['D']),
                search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
                requirements_resolution=resolve_notes(brief),regulatory_geometry=brief.regulatory_geometry.model_dump() if brief.regulatory_geometry else None,presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
     W,D=result['W'],result['D'];a=result['halls'][0]['x']+result['halls'][0]['width']
@@ -290,12 +316,12 @@ def materialize(brief,family,result):
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
         outline=[(0,0),(W,0),(W,second),(W*.80,second),(W*.80,D),(W*.12,D),(W*.12,first),(0,first)]
-    model['footprint']['polygon']=[(x+brief.setbacks.west,y+brief.setbacks.north) for x,y in outline]
+    model['footprint']['polygon']=[(x+origin_x,y+origin_y) for x,y in outline]
     for fi,cells in enumerate(result['floors']):
         fid=['GF','FF'][fi];f=dict(id=fid,name=['الدور الأرضي','الدور الأول'][fi],level_m=fi*brief.floor_height,rooms=[],walls=[],openings=[],furniture=[],decorations=[],cells=[])
         for n,cell in enumerate(cells+[dict(r,id=f'hall-{i}',kind='corridor',name='موزع الحركة') for i,r in enumerate(result['halls'])]):
             q=copy.deepcopy(cell);q['id']=fid+'-'+q.get('id',f'reserve-{n}');q['floor_id']=fid
-            q['x']+=brief.setbacks.west+t/2;q['y']+=brief.setbacks.north+t/2
+            q['x']+=origin_x+t/2;q['y']+=origin_y+t/2
             f['cells'].append(q)
             net=copy.deepcopy(q);net.update(x=q['x']+t/2,y=q['y']+t/2,width=q['width']-t,depth=q['depth']-t,revision_id=revision)
             net['area_m2']=round(area(net),4);f['rooms'].append(net)
@@ -311,17 +337,23 @@ def materialize(brief,family,result):
     physical_areas={fid:round(sum(signed_area(p) for p in polys),2) for fid,polys in model['footprint']['polygons_by_floor'].items()}
     model['footprint']['nominal_envelope_polygon']=model['footprint']['polygon']
     model['footprint']['polygon']=max(model['footprint']['polygons_by_floor']['GF'],key=lambda p:abs(signed_area(p)))
+    from .automatic_features import build_features
+    build_features(model,brief,result)
     model['stairs']=make_stairs(model)
     repair_furniture_access(model,revision)
     for f in model['floors']:f['annotations']=annotate(f,model['stairs'])
     model['parking']=saudi_rules.parking(model,brief)
+    from .automatic_features import place_services
+    place_services(model,brief)
     model['regulatory_profile']={'jurisdiction':'SA','ruleset_id':saudi_rules.registry()['id'],'city':brief.city,'municipality':brief.municipality,'local_rules_verified':False,'full_sbc_compliance_verified':False,'sources':saudi_rules.registry()['sources']}
     model['metrics']={'floor_built_m2':max(physical_areas.values()),'floor_built_by_id':physical_areas,'requested_spaces':sum(r.count for r in brief.rooms),
                       'circulation_m2':round(sum(area(r) for f in model['floors'] for r in f['rooms'] if r['kind']=='corridor'),2),
                       'bed_capacity':sum(q.get('capacity',0) for f in model['floors'] for q in f['furniture']),
                       'proposed_flexible_m2':round(sum(area(r) for f in model['floors'] for r in f['rooms'] if r['kind']=='reserve'),2)}
+    from .automatic_features import finalize_features
+    finalize_features(model,brief)
     model['footprint']['occupied_cells_by_floor']={f['id']:[{k:r[k] for k in ('x','y','width','depth')} for r in f['cells']] for f in model['floors']}
-    canonical={'floors':[{k:v for k,v in f.items() if k not in ('decorations',)} for f in model['floors']]}
+    canonical={'floors':[{k:v for k,v in f.items() if k not in ('decorations',)} for f in model['floors']],**{k:model.get(k) for k in ('stairs','stair_arrivals','parking','service_yard','regulatory_geometry')}}
     def clean(obj):
         if isinstance(obj,dict):return {k:clean(v) for k,v in obj.items() if k!='revision_id'}
         if isinstance(obj,list):return [clean(v) for v in obj]
@@ -379,7 +411,7 @@ def validate_general(model,brief):
         necessary={'master':{'single_bed','double_bed'},'bedroom':{'single_bed','double_bed'},'living':{'sofa'},'majlis':{'sofa'},'kitchen':{'kitchen_counter'},'bathroom':{'toilet'},'office':{'desk'},'laundry':{'washing_machine'},'storage':{'storage'}}
         for r in f['rooms']:
             items=[q for q in f['furniture'] if q['room_id']==r['id']]
-            if r.get('request_id') and r['kind'] in necessary and not {q['kind'] for q in items}&necessary[r['kind']]:fixture_missing.append(r['id'])
+            if (r.get('request_id') or r.get('generated_feature_room')) and r['kind'] in necessary and not {q['kind'] for q in items}&necessary[r['kind']]:fixture_missing.append(r['id'])
             if r['kind']=='bathroom' and not {'toilet','basin'}<={q['kind'] for q in items}:fixture_missing.append(r['id'])
             if r.get('include_shower') and not any(q['kind']=='shower' for q in items):fixture_missing.append(r['id'])
             if r['kind']=='dining' and sum(q.get('seats',0) for q in items if q['kind']=='dining_chair')<brief.dining_seats:fixture_missing.append(r['id'])
@@ -392,14 +424,14 @@ def validate_general(model,brief):
         ev=privacy_evidence(model)
         add('guest-route',bool(ev['guest_entries']) and not ev['missing_guest_access'] and not ev['family_rooms_exposed'],'مسار ضيوف مستقل للمجلس ومرافقه عند إغلاق باب فصل الأسرة',ev)
     else:checks.append(dict(check_id='guest-route',status='NOT_APPLICABLE',label='فصل مدخل المجلس — لم يطلب أو لا يوجد مجلس أرضي',evidence={}))
-    if brief.floors==2:
+    if brief.floors==2 or brief.automatic_features.roof_annex:
         invalid=[]
         for s in model['stairs']:
             room=next(r for f in model['floors'] for r in f['rooms'] if r['id']==s['room_id'])
             if s['required_depth_m']>s['depth']+EPS or s['width']<2*s['flight_width_m']+.1 or not all(inside(room,q) for q in s['flights']+[s['landing'],s['entry_apron']]):invalid.append(s['id'])
-        add('stair-geometry',len(model['stairs'])==2 and not invalid,'هندسة مسيري الدرج والبسطات وعدد القوائم داخل البئر',{'stairs':model['stairs'],'invalid':invalid,'scope':'proposed dimensions only; headroom not verified against beams or floor slabs'})
-        cores=[next(r for r in f['rooms'] if r['kind']=='stair') for f in model['floors']]
-        add('vertical-core',all(abs(cores[0][k]-cores[1][k])<EPS for k in ('x','y','width','depth')),'تطابق حدود بئر الدرج بين الدورين')
+        add('stair-geometry',len(model['stairs'])==brief.floors and not invalid,'هندسة مسيري الدرج والبسطات وعدد القوائم داخل البئر',{'stairs':model['stairs'],'invalid':invalid,'scope':'proposed dimensions only; headroom not verified against beams or floor slabs'})
+        cores=[r for f in model['floors'] for r in f['rooms'] if r['kind']=='stair']
+        add('vertical-core',len(cores)==brief.floors+int(brief.automatic_features.roof_annex) and all(abs(cores[0][k]-c[k])<EPS for c in cores[1:] for k in ('x','y','width','depth')),'تطابق حدود بئر الدرج بين الدورين')
     for id,label,reason in [
         ('visual-privacy','الخصوصية البصرية والصوتية وإطلالات النوافذ','فصل مسار الضيوف مقاس في فحص مستقل؛ الرؤية الكاملة والصوت تحتاج مراجعة تصميم.'),
         ('local-code','اعتماد الارتدادات والاشتراطات المحلية ومعدلات التهوية','يلزم تحديد الدولة والمدينة ومرجع الاشتراطات الرسمي؛ الأرقام المدخلة ليست اعتمادًا قانونيًا.'),
@@ -410,6 +442,8 @@ def validate_general(model,brief):
     checks.append(dict(check_id='flexible-spaces',status='PENDING' if reserves else 'PASS',label='استبعاد الفراغات الاحتياطية غير المطلوبة' if not reserves else 'اعتماد استعمال المساحات المرنة المقترحة',evidence={'reserve_ids':reserves,'policy':brief.flexible_space_policy}))
     notes=model['requirements_resolution']
     if brief.notes.strip():checks.append(dict(check_id='free-text',status='PENDING' if notes['unmapped'] else 'PASS',label='ربط الطلبات النصية المحددة بالبرنامج — العبارات الأخرى تحتاج مراجعة',evidence=notes))
+    from .automatic_features import feature_checks
+    checks.extend(feature_checks(model,brief))
     checks.extend(saudi_rules.checks(model,brief))
     return checks
 
@@ -422,7 +456,7 @@ def generate_general(brief:VillaBrief,output_dir=None):
     for family,label in FAMILIES.items():
         result=search(brief,family)
         if not result:
-            unavailable.append({'family':family,'label':label,'reason':'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
+            unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
         alternatives=[result]+result.get('alternatives',[]);model=None;failures=[]
         for attempt,layout in enumerate(alternatives):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
@@ -439,11 +473,15 @@ def generate_general(brief:VillaBrief,output_dir=None):
                 name=f'{rev}-{f["id"]}.svg';(out/name).write_text(scene_svg(model,f,drawing=s),encoding='utf-8');model['previews'][f['id']]=f'/api/files/{name}'
             (out/f'{rev}-SITE.svg').write_text(scene_svg(model,model['floors'][0],drawing=drawing(model,model['floors'][0],site_view=True)),encoding='utf-8')
             model['previews']['SITE']=f'/api/files/{rev}-SITE.svg'
-            report_model={**model,'floors':model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
-            scene_pdf(report_model,out/f'{rev}.pdf',drawings=scenes+[review_drawing(model)],include_report=False)
-            model['export_audit']=scene_dxf(model,out/f'{rev}.dxf',drawings=scenes)
+            export_model=model;export_scenes=scenes
+            if model.get('feature_generation') or brief.regulatory_geometry:
+                export_model={**model,'floors':model['floors']+[{'id':'SITE','name':'الموقع والخدمات','rooms':[]}]}
+                export_scenes=scenes+[drawing(model,model['floors'][0],site_view=True)]
+            report_model={**export_model,'floors':export_model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
+            scene_pdf(report_model,out/f'{rev}.pdf',drawings=export_scenes+[review_drawing(model)],include_report=False)
+            model['export_audit']=scene_dxf(export_model,out/f'{rev}.dxf',drawings=export_scenes)
             model['downloads'].update({ext:f'/api/files/{rev}.{ext}' for ext in ('pdf','dxf')})
         (out/f'{rev}.json').write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8');candidates.append(model)
     return {'status':'DRAFT_REVIEW','candidates':candidates,'unavailable':unavailable,
-            'scope':'أرض مستطيلة، دور أو دوران، برنامج صريح، بحث محدود L/U/متدرج؛ لا ضمان لإيجاد كل حل ممكن.',
+            'scope':'أرض مستطيلة، دور أو دوران وملحق اختياري؛ إضافات مولدة حسب الطلب وبحث محدود L/U/متدرج؛ لا ضمان لإيجاد كل حل ممكن.',
             'ai':{'mode':'geometric_search','language_model_connected':False}}

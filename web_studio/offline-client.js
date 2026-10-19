@@ -6,7 +6,7 @@
   const CACHE='ant-villa-studio-files-041';
   const mime=path=>path.endsWith('.svg')?'image/svg+xml':path.endsWith('.pdf')?'application/pdf':path.endsWith('.json')?'application/json':'application/dxf';
   const key=path=>new URL('./local-files/'+path.split('/').pop(),location.href).href;
-  const valid=path=>/^\/api\/files\/[a-f0-9]{32}(?:-(?:GF|FF|SITE))?\.(?:pdf|dxf|json|svg)$/.test(path);
+  const valid=path=>/^\/api\/files\/[a-f0-9]{32}(?:-(?:GF|FF|RF|SITE))?\.(?:pdf|dxf|json|svg)$/.test(path);
   function call(operation,extra={}){
     return new Promise((resolve,reject)=>{
       const id=++seq;pending.set(id,{resolve,reject});

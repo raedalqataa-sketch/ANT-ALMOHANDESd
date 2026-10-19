@@ -43,6 +43,8 @@ def drawing(model,floor,site_view=False):
         cells=floor['cells'];t=model['brief']['wall_thickness']
         x0=min(r['x'] for r in cells)-t/2;y0=min(r['y'] for r in cells)-t/2
         W=max(r['x']+r['width'] for r in cells)+t/2-x0;D=max(r['y']+r['depth'] for r in cells)+t/2-y0
+        for b in floor.get('balconies',[]):
+            xx=min(x0,b['x']-.2);yy=min(y0,b['y']-.2);W=max(x0+W,b['x']+b['width']+.2)-xx;D=max(y0+D,b['y']+b['depth']+.2)-yy;x0,y0=xx,yy
     scene=Scene((x0-2,y0-3,W+4,D+7));scene.linework_only=True
     if site_view:
         scene.rect(0,0,siteW,siteD,stroke='#777777',lw=.012,layer='SITE')
@@ -58,11 +60,11 @@ def drawing(model,floor,site_view=False):
     geo=model.get('regulatory_geometry') or {}
     if site_view:
         overlay=[]
-        for well in geo.get('light_wells') or []:
+        for well in (geo.get('light_wells') or []) if not any(r['feature']=='lightwell' and r['status']=='GENERATED' for r in model.get('feature_generation',[])) else []:
             if well.get('polygon'):overlay.append(('منور '+well['id'],well['polygon']))
         ann=geo.get('roof_annex')
-        if ann and ann.get('polygon'):overlay.append(('ملحق علوي',ann['polygon']))
-        for proj in geo.get('projections') or []:
+        if ann and ann.get('polygon') and not any(r['feature']=='roof_annex' and r['status']=='GENERATED' for r in model.get('feature_generation',[])):overlay.append(('ملحق علوي',ann['polygon']))
+        for proj in (geo.get('projections') or []) if not any(r['feature']=='balcony' and r['status']=='GENERATED' for r in model.get('feature_generation',[])) else []:
             if proj.get('polygon'):overlay.append(('بروز '+proj['id'],proj['polygon']))
         for label,poly in overlay:
             scene.poly(poly,stroke='#666666',lw=.018,layer='REGULATORY_PROPOSED_GEOMETRY',closed=True)
@@ -94,6 +96,10 @@ def drawing(model,floor,site_view=False):
             if o['kind']=='window':
                 for delta in (-t*.27,t*.27):scene.line(pt(lo,fixed+delta),pt(hi,fixed+delta),'#333333',.011,'WINDOW')
                 for edge in (lo,hi):scene.line(pt(edge,fixed-t/2),pt(edge,fixed+t/2),'#111111',.016,'WINDOW')
+            elif o.get('door_style')=='sliding':
+                scene.line(pt(lo,fixed-t*.2),pt(hi,fixed-t*.2),'#333333',.014,'SLIDING_DOOR')
+                scene.line(pt(lo,fixed+t*.2),pt(hi,fixed+t*.2),'#333333',.014,'SLIDING_DOOR')
+                scene.line(pt(center,fixed-t/2),pt(center,fixed+t/2),'#333333',.014,'SLIDING_DOOR')
             else:
                 room=next((r for r in floor['rooms'] if r['id']==o['connects'][0]),None)
                 if room:
@@ -115,6 +121,26 @@ def drawing(model,floor,site_view=False):
             scene.line((x+w/2,y+.1),(x+w/2,y+d-.1),'#333333',.014,'STAIR')
         landing=stair['landing'];scene.rect(landing['x'],landing['y'],landing['width'],landing['depth'],stroke='#333333',lw=.014,layer='STAIR')
         f=stair['flights'][0];scene.poly([(f['x']+f['width']/2-.12,f['y']+f['depth']-.3),(f['x']+f['width']/2,f['y']+f['depth']-.1),(f['x']+f['width']/2+.12,f['y']+f['depth']-.3)],stroke='#333333',lw=.012,layer='STAIR',closed=False)
+    for well in floor.get('lightwells',[]):
+        scene.rect(well['x'],well['y'],well['width'],well['depth'],stroke='#666666',lw=.012,layer='LIGHTWELL')
+        scene.text(well['x']+well['width']/2,well['y']+well['depth']/2,'منور مفتوح',.20,layer='LIGHTWELL_LABEL')
+    for b in floor.get('balconies',[]):
+        scene.poly(b['polygon'],stroke='#333333',lw=.020,layer='BALCONY_SLAB',closed=True)
+        xx,yy,ww,dd=b['x']+.07,b['y']+.07,b['width']-.14,b['depth']-.14
+        edges={'north':[(xx,yy+dd),(xx,yy),(xx+ww,yy),(xx+ww,yy+dd)],'south':[(xx,yy),(xx,yy+dd),(xx+ww,yy+dd),(xx+ww,yy)],'west':[(xx+ww,yy),(xx,yy),(xx,yy+dd),(xx+ww,yy+dd)],'east':[(xx,yy),(xx+ww,yy),(xx+ww,yy+dd),(xx,yy+dd)]}
+        scene.poly(edges[b['face']],stroke='#555555',lw=.012,layer='BALCONY_GUARD',closed=False)
+        scene.text(b['x']+b['width']/2,b['y']+b['depth']/2,'شرفة',.17,layer='BALCONY_LABEL')
+    if floor.get('roof_annex'):
+        core=next(a['void'] for a in model['stair_arrivals'] if a['floor_id']==floor['id'])
+        scene.rect(core['x'],core['y'],core['width'],core['depth'],stroke='#666666',lw=.009,dash=[.12,.1],layer='STAIR_VOID')
+        scene.text(core['x']+core['width']/2,core['y']+core['depth']*.65,'بئر الدرج · وصول من أسفل',.17,layer='STAIR_VOID')
+    yard=model.get('service_yard')
+    if site_view and yard:
+        scene.rect(yard['x'],yard['y'],yard['width'],yard['depth'],stroke='#333333',lw=.016,layer='SERVICE_YARD')
+        for q in yard['equipment']:
+            scene.rect(q['x'],q['y'],q['width'],q['depth'],stroke='#333333',lw=.014,layer='HVAC_EQUIPMENT')
+            scene.ellipse(q['x']+q['width']/2-.13,q['y']+q['depth']/2-.13,.26,.26,stroke='#555555',lw=.009,layer='HVAC_EQUIPMENT')
+        scene.text(yard['x']+yard['width']/2,yard['y']+yard['depth']+.25,'خدمات وتكييف',.17,layer='SERVICE_LABEL')
     legends=[]
     for label in floor.get('annotations',[]) or annotate(floor,model.get('stairs',[])):
         cx=label['x']+label['width']/2;yy=label['y']+label['size']

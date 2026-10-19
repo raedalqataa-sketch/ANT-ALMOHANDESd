@@ -3,3 +3,5 @@
 .workspace>*{min-width:0}.table-scroll{max-width:100%}.cols>*{min-width:0}fieldset{min-width:0}
 
 .check-label{display:flex;gap:8px;align-items:center;line-height:1.8}.check-label input{width:auto;margin:0}.regulatory-notice{background:#faf4e8;border:1px solid #e8d8b8;color:#8e713f;font-size:12px;padding:16px;border-radius:6px;margin:10px 0 20px;line-height:1.9}.rule-source{display:block;color:#527d55;font-size:11px;margin-top:9px;text-decoration:underline}
+
+.features{border-color:#b5c8ab;background:#f7faf3}.face-choices{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.feature-result{padding:10px 12px;border:1px solid #dce6d5;border-radius:6px;font-size:12px;line-height:1.9;margin-bottom:8px}.feature-result.generated{background:#f0f6eb;color:#416339}#regulatory-json{font:11px monospace;min-height:120px}.features .check-label{font-size:12px;color:#284c38}

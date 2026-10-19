@@ -1,0 +1,26 @@
+{
+  "actual_features_generated": 4,
+  "reviewable_families": [
+    "L",
+    "U"
+  ],
+  "floor_tabs": [
+    "GF",
+    "FF",
+    "RF",
+    "SITE"
+  ],
+  "manual_geometry_roundtrip": true,
+  "manual_geometry_sent_to_engine": true,
+  "feature_change_marks_stale": true,
+  "cache_reload": true,
+  "mobile_overflow": false,
+  "downloads": [
+    "pdf",
+    "dxf",
+    "json"
+  ],
+  "page_errors": [],
+  "external_runtime_requests": [],
+  "full_code_approval": false
+}

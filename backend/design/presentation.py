@@ -71,7 +71,7 @@ def rgb(hexcolor):return tuple(int(hexcolor[i:i+2],16)/255 for i in (1,3,5))
 
 def scene_pdf(model,path,drawings=None,include_report=True):
     pw,ph=1190.55,1683.78 # A2 portrait; the metric scale bar survives printing/viewer resizing.
-    c=canvas.Canvas(str(path),pagesize=(pw,ph));c.setTitle(model['profile']['project_name']+(' — مراجعة سعودية 0.5.1' if model.get('schema_version','').startswith('0.5') else ' — مراجعة معمارية V0.4.1'))
+    c=canvas.Canvas(str(path),pagesize=(pw,ph));c.setTitle(model['profile']['project_name']+(' — مراجعة معمارية 0.6' if model.get('schema_version','').startswith('0.6') else ' — مراجعة سعودية 0.5.1' if model.get('schema_version','').startswith('0.5') else ' — مراجعة معمارية V0.4.1'))
     mono=model.get('presentation',{}).get('style')=='monochrome'
     for index,floor in enumerate(model['floors']):
         scene=drawings[index] if drawings is not None else architectural_scene(model,floor);vx,vy,vw,vh=scene.viewbox
