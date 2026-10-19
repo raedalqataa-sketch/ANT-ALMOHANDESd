@@ -13,19 +13,22 @@ def union_polygons(rectangles,pad=0):
             edges[(axis,round(fixed,6))].append((round(a,6),round(b,6),direction))
     xs=sorted({round(r['x']+v,6) for r in rectangles for v in (-pad,r['width']+pad)})
     ys=sorted({round(r['y']+v,6) for r in rectangles for v in (-pad,r['depth']+pad)})
-    # Remove any edge intervals inside the union, including overlapping padded strips.
+    # Scan each elementary interval, rather than using a large fixed epsilon.
+    # Narrow leftover strips may otherwise be misclassified as both occupied
+    # and empty, producing open boundaries for balconies or recesses.
     oriented=[]
     for (axis,fixed),spans in edges.items():
         lo=min(a for a,b,_ in spans);hi=max(b for a,b,_ in spans)
         cuts=[v for v in (xs if axis=='h' else ys) if lo<=v<=hi]
         for a,b in zip(cuts,cuts[1:]):
+            if b-a<1e-8:continue
             mid=(a+b)/2
-            if not any(lo-EPS<mid<hi+EPS for lo,hi,_ in spans):continue
-            # Sample just to either side to determine occupancy; boundary direction follows interior on right.
+            if not any(start-1e-8<=mid<=end+1e-8 for start,end,_ in spans):continue
             def occupied(delta):
                 x,y=(mid,fixed+delta) if axis=='h' else (fixed+delta,mid)
-                return any(r['x']-pad-EPS/10<x<r['x']+r['width']+pad+EPS/10 and r['y']-pad-EPS/10<y<r['y']+r['depth']+pad+EPS/10 for r in rectangles)
-            neg,pos=occupied(-1e-5),occupied(1e-5)
+                return any(r['x']-pad<x<r['x']+r['width']+pad and
+                           r['y']-pad<y<r['y']+r['depth']+pad for r in rectangles)
+            neg,pos=occupied(-1e-7),occupied(1e-7)
             if neg==pos:continue
             start,end=((a,fixed),(b,fixed)) if axis=='h' else ((fixed,a),(fixed,b))
             forward=pos if axis=='h' else neg
