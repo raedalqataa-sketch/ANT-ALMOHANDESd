@@ -226,10 +226,9 @@ def make_walls(floor,t,revision):
     # Normal rooms connect to halls; the guest WC connects through its own majlis.
     for r in cells:
         if r['kind']=='corridor':continue
-        if r.get('guest_parent'):
-            parent=floor['id']+'-'+r['guest_parent']
-            hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and parent in w['room_ids']]
-        else:hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
+        # Guest bathrooms must open onto a guest distributor, never through the majlis.
+        # Until a dedicated guest distributor exists, do not silently draw an invalid door.
+        hosts=[w for w in floor['walls'] if r['id'] in w['room_ids'] and any(by_id[i]['kind']=='corridor' for i in w['room_ids'])]
         if hosts:add_room_door(floor,r,max(hosts,key=lambda w:math.dist(w['start'],w['end'])),revision)
 
 
@@ -300,6 +299,30 @@ def separate_guests(floor,brief,revision):
             break
 
 
+def make_guest_distributor(floor,brief,revision):
+    """Create a physically bounded guest vestibule when the geometry permits it.
+
+    Never fabricate a pass: return False when an exterior entrance, both
+    interior doors, and a separated family route cannot be constructed.
+    """
+    if not brief.separate_guest_entry:return True
+    majlis=[r for r in floor['rooms'] if r['kind']=='majlis' and r.get('zone')=='guest']
+    baths=[r for r in floor['rooms'] if r.get('guest_parent')]
+    if not majlis or not baths:return True
+    # The existing circulation spine can act as the guest distributor only
+    # after its boundaries and doors are separated from family circulation.
+    # A dedicated vestibule polygon must be created by the allocator; this
+    # conservative gate prevents a shared family corridor being mislabeled.
+    distributors=[r for r in floor['rooms'] if r.get('guest_distributor')]
+    if not distributors:return False
+    doors=[o for o in floor['openings'] if o['kind']=='door']
+    for bath in baths:
+        if not any(bath['id'] in o['connects'] and any(h['id'] in o['connects'] for h in distributors) for o in doors):return False
+    for maj in majlis:
+        if not any(maj['id'] in o['connects'] and any(h['id'] in o['connects'] for h in distributors) for o in doors):return False
+    return any(o.get('guest_entry') and any(h['id'] in o['connects'] for h in distributors) for o in doors)
+
+
 def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
     origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
@@ -329,6 +352,7 @@ def materialize(brief,family,result):
         if fi==0:
             entrance(f,brief.entrance_face,revision)
             separate_guests(f,brief,revision)
+            f['guest_distributor_constructed']=make_guest_distributor(f,brief,revision)
         add_windows(f,brief,revision)
         # Detailed, original furniture symbols and use-zone placement are shared with V0.4.1.
         furnish_floor(f,revision,{})
@@ -420,6 +444,22 @@ def validate_general(model,brief):
         evidence=movement_evidence(model,f)
         add(f['id']+'-walkability',not evidence['access']['unreachable'],'مسارات حركة جسم بعرض 0.60 م — فحص شبكي جزئي',evidence['access'])
         add(f['id']+'-door-sweeps',not evidence['door_sweep_collisions'],'عدم تعارض أقواس الأبواب مع بعضها والأثاث ومسيري الدرج',{'collisions':evidence['door_sweep_collisions'],'scope':evidence['scope']})
+    # Architectural intelligence V1: verify guest bathroom access from a corridor,
+    # not via the majlis. The distributor must also serve the majlis.
+    if brief.separate_guest_entry:
+        gf=model['floors'][0]
+        add('guest-distributor-geometry',bool(gf.get('guest_distributor_constructed')),'موزع ضيوف هندسي مستقل متصل بمدخل خارجي والمجلس والحمام',{'constructed':bool(gf.get('guest_distributor_constructed')),'scope':'hard failure until dedicated geometry exists'})
+        guest_baths=[r for r in gf['rooms'] if r.get('guest_parent')]
+        guest_majlis=[r for r in gf['rooms'] if r.get('zone')=='guest' and r['kind']=='majlis']
+        invalid=[]
+        for bath in guest_baths:
+            doors=[o for o in gf['openings'] if o['kind']=='door' and bath['id'] in o['connects']]
+            halls={rid for o in doors for rid in o['connects'] if any(q['id']==rid and q['kind']=='corridor' for q in gf['rooms'])}
+            if not halls or any(any(m['id'] in o['connects'] for m in guest_majlis) for o in doors):
+                invalid.append(bath['id']);continue
+            if not any(o['kind']=='door' and any(m['id'] in o['connects'] for m in guest_majlis) and halls.intersection(o['connects']) for o in gf['openings']):
+                invalid.append(bath['id'])
+        add('guest-distributor-access',not invalid,'حمام الضيوف والمجلس من موزع مشترك مستقل، وليس الحمام من المجلس',{'invalid_guest_bathrooms':invalid,'scope':'door adjacency; visual privacy remains PENDING'})
     if brief.separate_guest_entry and any(r.kind=='majlis' and r.floor==0 for r in brief.rooms):
         ev=privacy_evidence(model)
         add('guest-route',bool(ev['guest_entries']) and not ev['missing_guest_access'] and not ev['family_rooms_exposed'],'مسار ضيوف مستقل للمجلس ومرافقه عند إغلاق باب فصل الأسرة',ev)
@@ -462,7 +502,21 @@ def generate_general(brief:VillaBrief,output_dir=None):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
             trial['search']['validated_layouts_tested']=attempt+1
-            if model is None or len(errors)<len(failures):model=trial;failures=errors
+            # Feedback-driven candidate selection: favor fewer critical architectural
+            # violations rather than treating every failed check as equally severe.
+            # Only valid candidates may be exported; PENDING remains unresolved.
+            def violation_cost(items):
+                critical={'guest-distributor-access':100,'guest-route':100,'entrance':100,
+                          'GF-doors':80,'GF-program':80,'GF-overlap':80,'GF-site':80}
+                return sum(critical.get(c['check_id'],20) for c in items)
+            trial['search']['architectural_feedback']={
+                'failed_checks':[c['check_id'] for c in errors],
+                'violation_cost':violation_cost(errors),
+                'pending_checks':[c['check_id'] for c in trial['checks'] if c['status']=='PENDING'],
+                'candidate_selection':'minimum_weighted_violation_cost',
+            }
+            if model is None or (violation_cost(errors),len(errors)) < (violation_cost(failures),len(failures)):
+                model=trial;failures=errors
             if not errors:model=trial;failures=[];break
             if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
