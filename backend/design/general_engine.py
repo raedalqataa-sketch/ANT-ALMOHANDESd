@@ -299,6 +299,30 @@ def separate_guests(floor,brief,revision):
             break
 
 
+def make_guest_distributor(floor,brief,revision):
+    """Create a physically bounded guest vestibule when the geometry permits it.
+
+    Never fabricate a pass: return False when an exterior entrance, both
+    interior doors, and a separated family route cannot be constructed.
+    """
+    if not brief.separate_guest_entry:return True
+    majlis=[r for r in floor['rooms'] if r['kind']=='majlis' and r.get('zone')=='guest']
+    baths=[r for r in floor['rooms'] if r.get('guest_parent')]
+    if not majlis or not baths:return True
+    # The existing circulation spine can act as the guest distributor only
+    # after its boundaries and doors are separated from family circulation.
+    # A dedicated vestibule polygon must be created by the allocator; this
+    # conservative gate prevents a shared family corridor being mislabeled.
+    distributors=[r for r in floor['rooms'] if r.get('guest_distributor')]
+    if not distributors:return False
+    doors=[o for o in floor['openings'] if o['kind']=='door']
+    for bath in baths:
+        if not any(bath['id'] in o['connects'] and any(h['id'] in o['connects'] for h in distributors) for o in doors):return False
+    for maj in majlis:
+        if not any(maj['id'] in o['connects'] and any(h['id'] in o['connects'] for h in distributors) for o in doors):return False
+    return any(o.get('guest_entry') and any(h['id'] in o['connects'] for h in distributors) for o in doors)
+
+
 def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
     origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
@@ -328,6 +352,7 @@ def materialize(brief,family,result):
         if fi==0:
             entrance(f,brief.entrance_face,revision)
             separate_guests(f,brief,revision)
+            f['guest_distributor_constructed']=make_guest_distributor(f,brief,revision)
         add_windows(f,brief,revision)
         # Detailed, original furniture symbols and use-zone placement are shared with V0.4.1.
         furnish_floor(f,revision,{})
@@ -423,6 +448,7 @@ def validate_general(model,brief):
     # not via the majlis. The distributor must also serve the majlis.
     if brief.separate_guest_entry:
         gf=model['floors'][0]
+        add('guest-distributor-geometry',bool(gf.get('guest_distributor_constructed')),'موزع ضيوف هندسي مستقل متصل بمدخل خارجي والمجلس والحمام',{'constructed':bool(gf.get('guest_distributor_constructed')),'scope':'hard failure until dedicated geometry exists'})
         guest_baths=[r for r in gf['rooms'] if r.get('guest_parent')]
         guest_majlis=[r for r in gf['rooms'] if r.get('zone')=='guest' and r['kind']=='majlis']
         invalid=[]
