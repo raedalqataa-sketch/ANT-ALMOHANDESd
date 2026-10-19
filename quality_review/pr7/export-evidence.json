@@ -1,0 +1,17 @@
+{
+  "native_wasm_geometry_parity": [
+    "floors including cells/rooms/walls/openings/furniture/annotations",
+    "stairs",
+    "stair_arrivals",
+    "parking",
+    "service_yard",
+    "footprint",
+    "regulatory_geometry",
+    "metrics"
+  ],
+  "float_tolerance_m": 1e-06,
+  "dxf_version": "AC1024",
+  "dxf_audit_errors": 0,
+  "HATCH_SOLID_count": 0,
+  "executive_approval": false
+}
