@@ -476,7 +476,21 @@ def generate_general(brief:VillaBrief,output_dir=None):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
             trial['search']['validated_layouts_tested']=attempt+1
-            if model is None or len(errors)<len(failures):model=trial;failures=errors
+            # Feedback-driven candidate selection: favor fewer critical architectural
+            # violations rather than treating every failed check as equally severe.
+            # Only valid candidates may be exported; PENDING remains unresolved.
+            def violation_cost(items):
+                critical={'guest-distributor-access':100,'guest-route':100,'entrance':100,
+                          'GF-doors':80,'GF-program':80,'GF-overlap':80,'GF-site':80}
+                return sum(critical.get(c['check_id'],20) for c in items)
+            trial['search']['architectural_feedback']={
+                'failed_checks':[c['check_id'] for c in errors],
+                'violation_cost':violation_cost(errors),
+                'pending_checks':[c['check_id'] for c in trial['checks'] if c['status']=='PENDING'],
+                'candidate_selection':'minimum_weighted_violation_cost',
+            }
+            if model is None or (violation_cost(errors),len(errors)) < (violation_cost(failures),len(failures)):
+                model=trial;failures=errors
             if not errors:model=trial;failures=[];break
             if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
