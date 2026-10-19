@@ -338,6 +338,20 @@ def make_guest_distributor(floor,brief,revision):
         if set(o['connects'])!=expected:return False
         axis=0 if wall['axis']=='horizontal' else 1
         c=o['center'];lo,hi=sorted((wall['start'][axis],wall['end'][axis]))
+        sides=[]
+        for rid in wall['room_ids']:
+            cell=cells.get(rid);net=by_id.get(rid)
+            if not cell or not net:return False
+            t=wall['thickness']
+            if any(abs(net[k]-(cell[k]+(t/2 if k in ('x','y') else -t)))>EPS for k in ('x','y','width','depth')):return False
+            start=cell['x' if axis==0 else 'y'];extent=cell['width' if axis==0 else 'depth']
+            fixed=cell['y' if axis==0 else 'x'];cross=cell['depth' if axis==0 else 'width']
+            edge=wall['start'][1-axis]
+            if lo<start-EPS or hi>start+extent+EPS:return False
+            if abs(edge-fixed)<EPS:sides.append(1)
+            elif abs(edge-fixed-cross)<EPS:sides.append(-1)
+            else:return False
+        if len(sides)==2 and sides[0]==sides[1]:return False
         return (abs(c[1-axis]-wall['start'][1-axis])<EPS and
                 c[axis]-o['width']/2>=lo-EPS and c[axis]+o['width']/2<=hi+EPS)
     for dist in distributors:
@@ -377,7 +391,7 @@ def make_guest_distributor(floor,brief,revision):
 def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
     origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
-    model=dict(schema_version='0.6.1-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
+    model=dict(schema_version='0.6.2-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
                brief=brief.model_dump(),profile={'project_name':brief.project_name},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(origin_x,origin_y,result['W'],result['D']),
                search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},

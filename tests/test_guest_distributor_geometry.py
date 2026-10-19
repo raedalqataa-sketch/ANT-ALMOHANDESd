@@ -24,7 +24,7 @@ def test_real_distributor_has_closed_walls_and_three_hosted_doors(generated):
     assert all(r.get('guest_vestibule') for r in f['rooms'] if r.get('request_id') and r.get('zone')=='guest')
 
 
-@pytest.mark.parametrize('tamper',['wall','off_wall','wrong_host','direct_wc','family_door','net_geometry'])
+@pytest.mark.parametrize('tamper',['wall','off_wall','wrong_host','direct_wc','family_door','net_geometry','wc_net_position','wc_cell_position'])
 def test_broken_geometry_is_rejected_even_with_cached_success(generated,tamper):
     b,source=generated;m=copy.deepcopy(source);f=m['floors'][0]
     dist=next(r for r in f['rooms'] if r.get('guest_distributor'))
@@ -36,6 +36,8 @@ def test_broken_geometry_is_rejected_even_with_cached_success(generated,tamper):
     elif tamper=='wrong_host':entry['wall_id']=next(w['id'] for w in f['walls'] if dist['id'] not in w['room_ids'])
     elif tamper=='direct_wc':next(o for o in f['openings'] if o['kind']=='door' and wc['id'] in o['connects'])['connects']=[wc['id'],maj['id']]
     elif tamper=='family_door':f['openings'].append(dict(kind='door',connects=[dist['id'],next(r['id'] for r in f['rooms'] if r['kind']=='corridor' and not r.get('guest_distributor'))]))
+    elif tamper=='wc_net_position':wc['x']+=.2
+    elif tamper=='wc_cell_position':next(c for c in f['cells'] if c['id']==wc['id'])['x']+=.2
     else:dist['width']+=.2
     assert f['guest_distributor_constructed'] is True
     assert make_guest_distributor(f,b,m['model_revision_id']) is False
