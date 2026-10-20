@@ -70,4 +70,3 @@ export function VillaGenerator({ draft }: { draft: ClientDraft }) {
     {session && <iframe key={session} ref={frame} title="إعداد وتوليد المقترحات بواسطة محرك التوليد" src={enginePath} sandbox="allow-scripts allow-same-origin allow-downloads" className="block w-full min-w-0 rounded-md border bg-card" style={{ height, maxWidth: '100%' }} onLoad={() => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin)} />}
   </section>;
 }
-

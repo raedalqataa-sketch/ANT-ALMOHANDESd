@@ -55,4 +55,3 @@ describe('Python frame handoff', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 });
-

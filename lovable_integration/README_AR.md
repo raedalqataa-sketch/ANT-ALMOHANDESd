@@ -12,7 +12,7 @@ node --test tests/lovable_bridge.test.cjs
 
 مصدر runtime يجب أن يكون من نسخة المحرك 0.6.2 المعتمدة؛ يتحقق البناء من التطابق البايتي لملف `general_engine.py` مع المصدر الحالي. يبني الأمر الأول runtime من المكتبات المجانية، أو يمكن تمرير runtime منشور سابقًا. لا يحمّل أمر ربط Lovable مكتبات إضافية. احتفظ بتراخيص Pyodide وPython والخطوط وENGINE_LICENSE.
 
-انقل محتويات مجلد الحزمة إلى مصدر Lovable كما هي؛ تضيف `public/villa-engine` و`src/components/villa-generator.tsx` واختباره، وتعدل معالج `src/routes/projects.new.tsx` عند المراجعة. أساس تعديل المعالج هو تحديث Lovable `e1a82a0ae56a898228e4f7de915e246a907dd651`. لا تستبدل ملف المعالج إن تغير من طرف المستخدم دون دمج تعديلاته.
+انقل محتويات مجلد الحزمة إلى مصدر Lovable كما هي؛ تضيف `public/villa-engine` و`src/components/villa-generator.tsx` واختباره، وتعدل معالج `src/routes/projects.new.tsx` عند المراجعة. بدأ تطبيق الحزمة من تحديث Lovable `e1a82a0ae56a898228e4f7de915e246a907dd651`؛ ونسخة مصدر الواجهة الحالية هنا تحافظ على تعديلات التطبيق `0534539568b6818e52ebe072ca780dc6afe9b5e1` مع إصلاح المسار الجاهز. لا تستبدل ملف المعالج إن تغير من طرف المستخدم دون دمج تعديلاته.
 
 ## البيانات والقيود
 
@@ -27,7 +27,7 @@ node --test tests/lovable_bridge.test.cjs
 
 ## التحقق المنفذ محليًا
 
-6 اختبارات لتحويل البرنامج، و4 اختبارات React لقناة الرسائل والفشل وانتهاء المهلة، واختبار Chromium فعلي داخل iframe للهاتف والكمبيوتر: انتقال 9 فراغات، عدم اختلاق القيم، تشغيل Python، L/U/متدرج، إيقاف وإعادة المحرك، PDF/JSON/DXF حقيقية، عدم التخزين الدائم، وحجب التنزيل بعد تعديل المدخلات. تدقيق DXF بـ ezdxf: AC1024، بلا أخطاء أو HATCH/SOLID. نتائج معاينة Lovable الفعلية توثق بعد التطبيق؛ لا تمثل هذه الاختبارات ادعاءً بأنها عُدلت مسبقًا.
+6 اختبارات لتحويل البرنامج، و4 اختبارات React لقناة الرسائل والفشل وانتهاء المهلة، واختبار Chromium فعلي داخل iframe للهاتف والكمبيوتر: انتقال 9 فراغات، عدم اختلاق القيم، تشغيل Python، L/U/متدرج، إيقاف وإعادة المحرك، PDF/JSON/DXF حقيقية، عدم التخزين الدائم، وحجب التنزيل بعد تعديل المدخلات. تدقيق DXF بـ ezdxf: AC1024، بلا أخطاء أو HATCH/SOLID. حالة التطبيق البعيد ونفاد رصيد أداة Lovable موثقة في `quality_review/lovable_integration/STATUS_AR.md`؛ إصلاح المسار مختبر وجاهز لكنه لم يصل إلى Lovable بعد.
 
 
 لتكرار اختبار المتصفح: انسخ `quality_review/lovable_integration/harness.html` إلى جذر `public` في حزمة الاختبار فقط، وشغّل `python -m http.server 8031 --directory .build/lovable/public` ثم `python quality_review/lovable_integration/browser_qa.py`. لا تضع صفحة الاختبار ضمن حزمة الإنتاج. تتطلب بيئة الاختبار Playwright/Chromium.

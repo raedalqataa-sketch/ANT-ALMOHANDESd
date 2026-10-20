@@ -68,5 +68,3 @@ function NewProject() {
     {step === 4 && showGenerator && <VillaGenerator key={JSON.stringify(draft)} draft={draft} />}
   </div>;
 }
-
-
