@@ -20,3 +20,5 @@ jobs:
         run: node --check frontend/studio.js
       - if: always()
         run: node --check web_generator/app.js
+      - if: always()
+        run: node --test tests/lovable_bridge.test.cjs
