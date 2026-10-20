@@ -1,0 +1,30 @@
+{
+  "five_step_rtl_intake": true,
+  "xlsx_fields_preserved": 12,
+  "invalid_xlsx_error": true,
+  "import_does_not_overwrite_existing_values": true,
+  "draft_survives_reload": true,
+  "unknown_toggle_preserves_value": true,
+  "real_requested_spaces": 9,
+  "real_python_patterns": [
+    "L",
+    "U",
+    "stepped"
+  ],
+  "real_downloads": [
+    "pdf",
+    "dxf",
+    "json",
+    "original-client-requirements"
+  ],
+  "real_worker_cancel_retry": false,
+  "production_scope": "normal full generation; cancel/retry verified separately with aborted runtime-load console diagnostic",
+  "stale_exports_blocked": true,
+  "edit_unmounts_engine": true,
+  "engine_has_no_persistent_customer_files": true,
+  "mobile_overflow": false,
+  "external_requests": [],
+  "page_errors": [],
+  "lovable_project_sync_verified": false,
+  "executive_approval": false
+}

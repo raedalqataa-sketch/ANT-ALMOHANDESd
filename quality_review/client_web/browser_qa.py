@@ -1,9 +1,11 @@
 """Full public five-step intake -> real Python -> actual CAD/PDF downloads."""
 from pathlib import Path
 import json,os
+from urllib.parse import urlsplit,parse_qs
 from playwright.sync_api import sync_playwright
 OUT=Path(os.environ.get('ANT_CLIENT_QA_OUTPUT','/workspace/ant-client-web-qa'));OUT.mkdir(exist_ok=True)
 BASE=os.environ.get('ANT_CLIENT_QA_BASE','http://127.0.0.1:8041')
+CANCEL_TEST=os.environ.get('ANT_CLIENT_QA_CANCEL','1')!='0'
 FIXTURE=OUT/'client-test.xlsx'
 from openpyxl import Workbook
 wb=Workbook();sheet=wb.active;sheet.title='متطلبات';sheet.append(['الحقل','القيمة','إرشادات'])
@@ -60,7 +62,10 @@ with sync_playwright() as p:
  iframe=page.locator('iframe');iframe.wait_for(state='visible')
  frame=page.frames[1]
  frame.locator('#client-transfer-notice').wait_for(state='visible',timeout=45000)
- assert frame.url==BASE+'/client/villa-engine/generate/index.html?embedded=1'
+ # Static Sites canonicalizes index.html to its directory; Vite needs the explicit source URL.
+ assert urlsplit(frame.url).netloc==urlsplit(BASE).netloc
+ assert urlsplit(frame.url).path in ('/client/villa-engine/generate/index.html','/client/villa-engine/generate/')
+ assert parse_qs(urlsplit(frame.url).query).get('embedded')==['1']
  assert frame.evaluate('AntGeneral.rooms.reduce((n,r)=>n+r.count,0)')==9
  assert frame.locator('#project_name').input_value()=='فيلا اختبار العميل'
  assert frame.locator('#plot_width').input_value()=='24'
@@ -78,10 +83,12 @@ with sync_playwright() as p:
  frame.locator('#generate').click()
  if not frame.evaluate('AntGeneral.busy'):
   print('PRE_GENERATION_DIAGNOSTIC',frame.locator('#error').inner_text(),frame.locator('#brief-form :invalid').evaluate_all('(nodes)=>nodes.map(n=>({id:n.id,value:n.value,message:n.validationMessage}))'),frame.evaluate('AntGeneral.rooms'),flush=True)
- frame.wait_for_function('AntGeneral.busy')
- frame.get_by_role('button',name='إيقاف / إعادة تشغيل المحرك',exact=True).click()
- frame.wait_for_function('!AntGeneral.busy');assert frame.evaluate('AntGeneral.result') is None
- frame.locator('#generate').click();frame.wait_for_function('!AntGeneral.busy && AntGeneral.result!==null',timeout=240000)
+ if CANCEL_TEST:
+  frame.wait_for_function('AntGeneral.busy')
+  frame.get_by_role('button',name='إيقاف / إعادة تشغيل المحرك',exact=True).click()
+  frame.wait_for_function('!AntGeneral.busy');assert frame.evaluate('AntGeneral.result') is None
+  frame.locator('#generate').click()
+ frame.wait_for_function('!AntGeneral.busy && AntGeneral.result!==null',timeout=240000)
  assert frame.locator('#error').is_hidden(),frame.locator('#error').inner_text()
  models=frame.evaluate('AntGeneral.result.candidates.filter(m=>m.release.drawing_export_allowed)');assert len(models)>=2
  assert page.get_by_role('region',name='محرك توليد مساقط الفلل').get_by_role('status').inner_text().startswith('اكتمل البحث')
@@ -109,6 +116,6 @@ with sync_playwright() as p:
  assert page.get_by_label('عدد أفراد الأسرة',exact=True).input_value()=='6'
  assert not errors,errors
  external=[u for u in requests if not u.startswith((BASE+'/','blob:','data:'))];assert not external,external
- evidence={'five_step_rtl_intake':True,'xlsx_fields_preserved':12,'invalid_xlsx_error':True,'import_does_not_overwrite_existing_values':True,'draft_survives_reload':True,'unknown_toggle_preserves_value':True,'real_requested_spaces':9,'real_python_patterns':[m['candidate_id'] for m in models],'real_downloads':['pdf','dxf','json','original-client-requirements'],'real_worker_cancel_retry':True,'stale_exports_blocked':True,'edit_unmounts_engine':True,'engine_has_no_persistent_customer_files':True,'mobile_overflow':False,'external_requests':external,'page_errors':errors,'lovable_project_sync_verified':False,'executive_approval':False}
+ evidence={'five_step_rtl_intake':True,'xlsx_fields_preserved':12,'invalid_xlsx_error':True,'import_does_not_overwrite_existing_values':True,'draft_survives_reload':True,'unknown_toggle_preserves_value':True,'real_requested_spaces':9,'real_python_patterns':[m['candidate_id'] for m in models],'real_downloads':['pdf','dxf','json','original-client-requirements'],'real_worker_cancel_retry':CANCEL_TEST,'stale_exports_blocked':True,'edit_unmounts_engine':True,'engine_has_no_persistent_customer_files':True,'mobile_overflow':False,'external_requests':external,'page_errors':errors,'lovable_project_sync_verified':False,'executive_approval':False}
  (OUT/'browser-qa.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2));print(json.dumps(evidence,ensure_ascii=False))
  browser.close()
