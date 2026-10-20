@@ -1,6 +1,6 @@
 'use strict';
 if(window.AntEmbedded){
- let nonce='';let accepted=false;
+ let nonce='';let accepted=false;let importing=false;
  const send=(type,data={})=>{if(nonce)parent.postMessage({channel:'ANT_VILLA_V1',nonce,type,...data},location.origin);};
  window.AntEmbeddedNotify=result=>send('RESULT',{candidates:result.candidates.map(m=>({family:m.candidate_id,revision:m.model_revision_id,reviewable:m.release.drawing_export_allowed,executive:false})),unavailable:result.unavailable});
  addEventListener('message',async event=>{
@@ -12,7 +12,8 @@ if(window.AntEmbedded){
    try{await window.AntEmbeddedReady;send('READY',{engineVersion:'0.6.2-general'});}catch{send('ERROR',{error:'تعذر تجهيز واجهة المحرك. أعد المحاولة.'});}
    return;
   }
-  if(message.nonce!==nonce||message.type!=='DRAFT'||accepted)return;
+  if(message.nonce!==nonce||message.type!=='DRAFT'||accepted||importing)return;
+  importing=true;
   try{
    const converted=AntClientBridge.convert(message.draft);
    await window.AntEmbeddedReady;
@@ -27,5 +28,7 @@ if(window.AntEmbedded){
    send('IMPORTED',{roomRows:converted.brief.rooms.length,roomCount:converted.brief.rooms.reduce((n,r)=>n+r.count,0),warnings:converted.warnings});
    new ResizeObserver(()=>send('RESIZE',{height:Math.min(16000,Math.max(900,document.documentElement.scrollHeight))})).observe(document.body);
   }catch(error){send('ERROR',{error:error.message||'تعذر نقل المتطلبات.'});}
+  finally{importing=false;}
  });
 }
+

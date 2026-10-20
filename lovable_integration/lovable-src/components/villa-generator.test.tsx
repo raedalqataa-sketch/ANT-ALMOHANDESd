@@ -5,11 +5,14 @@ import { newClientDraft } from '@/lib/client-requirements';
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.useRealTimers(); });
 function mount() {
-  const draft = newClientDraft(); draft.data.title = 'متطلبات عميل حقيقية'; draft.counts.bedroom = 3;
+  const draft = newClientDraft(); draft.data.title = 'متطلبات عميل حقيقية'; draft.counts['bedroom'] = 3;
   const view = render(<VillaGenerator draft={draft} />);
-  const frame = view.container.querySelector('iframe')!;
-  const post = vi.spyOn(frame.contentWindow!, 'postMessage'); fireEvent.load(frame);
-  const nonce = post.mock.calls.at(-1)![0].nonce;
+  const frame = view.container.querySelector('iframe');
+  if (!frame?.contentWindow) throw new Error('Engine iframe not mounted');
+  const post = vi.spyOn(frame.contentWindow, 'postMessage'); fireEvent.load(frame);
+  const lastCall = post.mock.calls.at(-1);
+  if (!lastCall) throw new Error('No handshake sent');
+  const nonce = lastCall[0].nonce;
   const send = (type: string, extra = {}, origin = location.origin, source = frame.contentWindow) => act(() => {
     window.dispatchEvent(new MessageEvent('message', { origin, source, data: { channel: 'ANT_VILLA_V1', nonce, type, ...extra } }));
   });
@@ -52,3 +55,4 @@ describe('Python frame handoff', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 });
+

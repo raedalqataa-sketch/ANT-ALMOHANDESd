@@ -11,15 +11,16 @@ const enginePath = '/villa-engine/generate/index.html?embedded=1';
 export function VillaGenerator({ draft }: { draft: ClientDraft }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const imported = useRef(false);
-  const [session, setSession] = useState(() => crypto.randomUUID());
+  const [session, setSession] = useState('');
   const [height, setHeight] = useState(1000);
   const [error, setError] = useState('');
-  const [status, setStatus] = useState('جارٍ فتح إعدادات مولد المقترحات…');
+  const [status, setStatus] = useState('جارٍ فتح إعدادات محرك التوليد…');
 
   useEffect(() => {
+    if (!session) { setSession(crypto.randomUUID()); return; }
     imported.current = false;
     setError('');
-    setStatus('جارٍ فتح إعدادات مولد المقترحات…');
+    setStatus('جارٍ فتح إعدادات محرك التوليد…');
     const hello = () => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin);
     const retry = window.setInterval(() => { if (!imported.current) hello(); }, 1000);
     const timeout = window.setTimeout(() => {
@@ -59,13 +60,14 @@ export function VillaGenerator({ draft }: { draft: ClientDraft }) {
   };
   return <section aria-label="محرك توليد مساقط الفلل" className="mt-8 min-w-0 space-y-4 border-t pt-6">
     <h3 className="font-display text-xl">من متطلباتك إلى المقترحات</h3>
-    <p className="text-sm leading-7 text-muted-foreground">يعمل مولد المقترحات في متصفحك. لا تُحفظ هذه العملية كمشروع في الخادم، ولا تمنح المخطط اعتمادًا. الرجوع لتعديل المتطلبات يغلق المحرك ويلغي العملية الجارية؛ أعد نقل المتطلبات بعد التعديل.</p>
+    <p className="text-sm leading-7 text-muted-foreground">يعمل محرك التوليد في متصفحك. لا تُحفظ هذه العملية كمشروع في الخادم، ولا تمنح المخطط اعتمادًا. الرجوع لتعديل المتطلبات يغلق المحرك ويلغي العملية الجارية؛ أعد نقل المتطلبات بعد التعديل.</p>
     <p role="status" className="border-r-2 border-accent pr-3 text-sm leading-7">{status}</p>
     {error && <p role="alert" className="border-r-2 border-destructive pr-3 text-sm text-destructive">{error}</p>}
     <div className="flex flex-wrap gap-3">
       <Button type="button" variant="outline" onClick={downloadSource}>تنزيل متطلبات العميل كاملة</Button>
       <Button type="button" variant="outline" onClick={() => { setHeight(1000); setSession(crypto.randomUUID()); }}>إعادة فتح المحرك</Button>
     </div>
-    <iframe key={session} ref={frame} title="إعداد وتوليد المقترحات بواسطة مولد المقترحات" src={enginePath} sandbox="allow-scripts allow-same-origin allow-downloads" className="block w-full min-w-0 rounded-md border bg-white" style={{ height, maxWidth: '100%' }} onLoad={() => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin)} />
+    {session && <iframe key={session} ref={frame} title="إعداد وتوليد المقترحات بواسطة محرك التوليد" src={enginePath} sandbox="allow-scripts allow-same-origin allow-downloads" className="block w-full min-w-0 rounded-md border bg-card" style={{ height, maxWidth: '100%' }} onLoad={() => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin)} />}
   </section>;
 }
+

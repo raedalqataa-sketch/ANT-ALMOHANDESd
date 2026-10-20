@@ -1,0 +1,23 @@
+{
+  "same_origin_parent_handshake": true,
+  "real_client_room_count": 9,
+  "missing_values_remain_missing": true,
+  "missing_values_block_generation": true,
+  "actual_worker_cancel_and_retry": true,
+  "python_candidates": [
+    "L",
+    "U",
+    "stepped"
+  ],
+  "real_downloads": [
+    "pdf",
+    "dxf",
+    "json"
+  ],
+  "no_persistent_client_files": true,
+  "changed_inputs_block_old_downloads": true,
+  "mobile_overflow": false,
+  "external_requests": [],
+  "page_errors": [],
+  "executive_approval": false
+}
