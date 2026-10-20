@@ -1,0 +1,5 @@
+<!doctype html><html dir="rtl" lang="ar"><meta charset="utf-8"><title>اختبار نقل المتطلبات</title><style>body{margin:0}iframe{width:100%;height:2000px;border:0}</style><iframe id="engine" src="/villa-engine/generate/index.html?embedded=1"></iframe><script>
+window.events=[];window.nonce=crypto.randomUUID();window.draft=null;
+addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==engine.contentWindow)return;events.push(event.data);if(event.data.type==='READY'&&draft)engine.contentWindow.postMessage({channel:'ANT_VILLA_V1',nonce,type:'DRAFT',draft},location.origin)});
+window.connect=d=>{draft=d;engine.contentWindow.postMessage({channel:'ANT_VILLA_V1',nonce,type:'HELLO'},location.origin)};
+</script></html>
