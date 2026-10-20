@@ -24,7 +24,7 @@ describe('Python frame handoff', () => {
     expect(m.post.mock.calls.filter(call => call[0].type === 'DRAFT')).toHaveLength(0);
     m.send('READY', { engineVersion: '0.6.2-general' });
     expect(m.post).toHaveBeenLastCalledWith({ channel: 'ANT_VILLA_V1', nonce: m.nonce, type: 'DRAFT', draft: m.draft }, location.origin);
-    expect(m.frame.getAttribute('src')).toBe('/villa-engine/generate/?embedded=1');
+    expect(m.frame.getAttribute('src')).toBe('/villa-engine/generate/index.html?embedded=1');
   });
   it('does not label transfer as generation and reports blocked results accurately', () => {
     const m = mount(); m.send('IMPORTED', { roomCount: 3 });

@@ -3,7 +3,7 @@ import type { ClientDraft } from '@/lib/client-requirements';
 import { Button } from '@/components/ui/button';
 
 const channel = 'ANT_VILLA_V1';
-const enginePath = '/villa-engine/generate/?embedded=1';
+const enginePath = '/villa-engine/generate/index.html?embedded=1';
 
 /** Same-origin bridge to the unchanged Python geometric engine in a Web Worker.
  * No project/database save, credentials, cloud compute, or engineering approval.
