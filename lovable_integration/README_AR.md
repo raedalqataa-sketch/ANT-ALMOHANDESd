@@ -5,11 +5,12 @@
 ## البناء
 
 ```
-python -m lovable_integration.build --output /workspace/ant-lovable-bundle --runtime-source /workspace/sites/ant-pr7-publication/dist/studio
+python -m mobile_probe.build_bundle --output .build/engine-runtime
+python -m lovable_integration.build --output .build/lovable --runtime-source .build/engine-runtime
 node --test tests/lovable_bridge.test.cjs
 ```
 
-مصدر runtime يجب أن يكون من نسخة المحرك 0.6.2 المعتمدة؛ يتحقق البناء من التطابق البايتي لملف `general_engine.py` مع المصدر الحالي. لا يحمّل البناء مكتبات جديدة. احتفظ بتراخيص Pyodide وPython والخطوط وENGINE_LICENSE.
+مصدر runtime يجب أن يكون من نسخة المحرك 0.6.2 المعتمدة؛ يتحقق البناء من التطابق البايتي لملف `general_engine.py` مع المصدر الحالي. يبني الأمر الأول runtime من المكتبات المجانية، أو يمكن تمرير runtime منشور سابقًا. لا يحمّل أمر ربط Lovable مكتبات إضافية. احتفظ بتراخيص Pyodide وPython والخطوط وENGINE_LICENSE.
 
 انقل محتويات مجلد الحزمة إلى مصدر Lovable كما هي؛ تضيف `public/villa-engine` و`src/components/villa-generator.tsx` واختباره، وتعدل معالج `src/routes/projects.new.tsx` عند المراجعة. أساس تعديل المعالج هو تحديث Lovable `e1a82a0ae56a898228e4f7de915e246a907dd651`. لا تستبدل ملف المعالج إن تغير من طرف المستخدم دون دمج تعديلاته.
 
@@ -27,3 +28,6 @@ node --test tests/lovable_bridge.test.cjs
 ## التحقق المنفذ محليًا
 
 6 اختبارات لتحويل البرنامج، و4 اختبارات React لقناة الرسائل والفشل وانتهاء المهلة، واختبار Chromium فعلي داخل iframe للهاتف والكمبيوتر: انتقال 9 فراغات، عدم اختلاق القيم، تشغيل Python، L/U/متدرج، إيقاف وإعادة المحرك، PDF/JSON/DXF حقيقية، عدم التخزين الدائم، وحجب التنزيل بعد تعديل المدخلات. تدقيق DXF بـ ezdxf: AC1024، بلا أخطاء أو HATCH/SOLID. نتائج معاينة Lovable الفعلية توثق بعد التطبيق؛ لا تمثل هذه الاختبارات ادعاءً بأنها عُدلت مسبقًا.
+
+
+لتكرار اختبار المتصفح: انسخ `quality_review/lovable_integration/harness.html` إلى جذر `public` في حزمة الاختبار فقط، وشغّل `python -m http.server 8031 --directory .build/lovable/public` ثم `python quality_review/lovable_integration/browser_qa.py`. لا تضع صفحة الاختبار ضمن حزمة الإنتاج. تتطلب بيئة الاختبار Playwright/Chromium.
