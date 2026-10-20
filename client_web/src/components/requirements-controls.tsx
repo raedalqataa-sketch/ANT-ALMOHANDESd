@@ -1,0 +1,12 @@
+import { useId } from 'react';
+import { Minus, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+export function RequirementField({ label, value, onChange, numeric = false, integer = false, error, unknown, onUnknown }: { label: string; value: string; onChange: (value: string) => void; numeric?: boolean; integer?: boolean; error?: string | undefined; unknown?: boolean | undefined; onUnknown?: ((value: boolean) => void) | undefined }) {
+  const id = useId();
+  return <div className="min-w-0 space-y-2"><div className="flex flex-wrap items-center justify-between gap-2"><label htmlFor={id} className="text-sm font-medium">{label}</label>{onUnknown && <label className="flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><input type="checkbox" className="size-5 accent-accent" checked={unknown ?? false} onChange={e => onUnknown(e.target.checked)} aria-label={`لا أعرف ${label}`} />لا أعرف</label>}</div><Input id={id} className="h-12 bg-card text-base" value={unknown ? '' : value} disabled={unknown} type={numeric ? 'number' : 'text'} inputMode={numeric ? integer ? 'numeric' : 'decimal' : undefined} min={numeric ? integer ? 1 : 0.01 : undefined} step={numeric ? integer ? 1 : 'any' : undefined} onChange={e => onChange(e.target.value)} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} placeholder={unknown ? 'غير معروف حاليًا' : undefined} />{error && <p id={`${id}-error`} role="alert" className="text-sm text-destructive">{error}</p>}</div>;
+}
+export function Counter({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return <div className="flex min-h-20 items-center justify-between gap-3 border-b py-4"><span className="font-medium">{label}</span><div className="flex shrink-0 items-center gap-2"><Button type="button" variant="outline" className="size-12" aria-label={`إنقاص ${label}`} title={`إنقاص ${label}`} disabled={value === 0} onClick={() => onChange(value - 1)}><Minus /></Button><Input type="number" min="0" step="1" inputMode="numeric" aria-label={`عدد ${label}`} value={value} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= 0) onChange(n); }} className="h-12 w-16 bg-card text-center text-base" /><Button type="button" variant="outline" className="size-12" aria-label={`زيادة ${label}`} title={`زيادة ${label}`} onClick={() => onChange(value + 1)}><Plus /></Button></div></div>;
+}

@@ -67,6 +67,6 @@ export function VillaGenerator({ draft }: { draft: ClientDraft }) {
       <Button type="button" variant="outline" onClick={downloadSource}>تنزيل متطلبات العميل كاملة</Button>
       <Button type="button" variant="outline" onClick={() => { setHeight(1000); setSession(crypto.randomUUID()); }}>إعادة فتح المحرك</Button>
     </div>
-    {session && <iframe key={session} ref={frame} title="إعداد وتوليد المقترحات بواسطة محرك التوليد" src={enginePath} sandbox="allow-scripts allow-same-origin allow-downloads" className="block w-full min-w-0 rounded-md border bg-card" style={{ height, maxWidth: '100%' }} onLoad={() => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin)} />}
+    {session && <iframe key={session} ref={frame} title="إعداد وتوليد المقترحات بواسطة محرك التوليد" src={enginePath} sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups" className="block w-full min-w-0 rounded-md border bg-card" style={{ height, maxWidth: '100%' }} onLoad={() => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin)} />}
   </section>;
 }
