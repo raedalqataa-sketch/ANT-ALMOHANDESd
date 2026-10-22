@@ -101,3 +101,15 @@ def test_generator_requires_opt_in():
     from backend.design.general_api import auto_design
     assert inspect.signature(generate_automatic).parameters["constitution_v2"].default is False
     assert inspect.signature(auto_design).parameters["constitution_v2"].default is False
+
+
+def test_public_browser_builder_embeds_policy_and_enables_audit():
+    """Static integration contract: browser Pyodide builds must carry policy JSON."""
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    builder = (root / "lovable_integration" / "build.py").read_text(encoding="utf-8")
+    runtime = (root / "lovable_integration" / "automatic-runtime.js").read_text(encoding="utf-8")
+    assert "constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json" in builder
+    assert "constitution_v2=True" in builder
+    assert "candidate.constitution_v2" in runtime
+    assert "تنفيذ" in runtime or "تدقيق" in runtime
