@@ -80,6 +80,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
     def bundle_order(rs):
         size=(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id'])
         if policy=='legacy':return size
+        if policy=='service_aligned':return (0 if all(r['kind'] in ('bathroom','kitchen','laundry') for r in rs) else 1,*size)
         rank={'majlis':0,'living':1,'dining':2,'kitchen':3,'office':4,'master':5,'bedroom':6,'bathroom':7,'laundry':8,'storage':9}
         return (min(rank.get(r['kind'],10) for r in rs),*size)
     ordered=sorted(bundles.values(),key=bundle_order)
@@ -636,6 +637,8 @@ def validate_general(model,brief):
     checks.extend(saudi_rules.checks(model,brief))
     from .jurisdiction import checks as local_checks
     checks.extend(local_checks(model,brief))
+    from .reference_patterns import checks as reference_checks
+    checks.extend(reference_checks(model,brief))
     from .site_placement import recheck as placement_check
     placement=placement_check(model,brief)
     if placement:checks.append(placement)
@@ -653,7 +656,7 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
     options=search_options or [{'family':family,'policy':'legacy','core_position':'rear'} for family in families]
     for option in options:
         family=option['family'];policy=option.get('policy','legacy');core_position=option.get('core_position','rear')
-        if family not in FAMILIES or policy not in ('legacy','social_front','family_front') or core_position not in ('rear','front'):
+        if family not in FAMILIES or policy not in ('legacy','social_front','family_front','service_aligned') or core_position not in ('rear','front'):
             raise ValueError('سياسة البحث غير مدعومة')
         label=FAMILIES[family]
         result=search(brief,family,policy,core_position)

@@ -55,6 +55,8 @@ with sync_playwright() as p:
  frame.wait_for_function('AntGeneral.result!==null',timeout=600000)
  assert frame.locator('#auto-program').is_visible();result=frame.evaluate('AntGeneral.result')
  assert frame.evaluate('AntGeneral.floor')=='SITE'
+ assert result['planning']['reference_design']['project_count']==8
+ assert result['planning']['reference_design']['legal_rules_extracted']==0
  assert result['planning']['sleeping_capacity']==6
  assert result['planning']['setbacks']['unknown_street_faces']==['south']
  assert result['planning']['original_intent']['street_widths']=={}
@@ -70,6 +72,9 @@ with sync_playwright() as p:
   assert 'south' not in m['site_placement']['anchor_faces']
   assert all(value+1e-5>=m['brief']['setbacks'][face] for face,value in m['site_placement']['actual_clearances_m'].items())
   assert not m['release']['executive_issue_allowed']
+  assert next(c for c in m['checks'] if c['check_id']=='REF-functional-route')['status']=='PASS'
+  assert m['design_evaluation']['reference_patterns']['revision']=='reference-principles-1'
+  assert m['design_evaluation']['reference_patterns']['legal_rule'] is False
   if COUNTRY=='YE':assert not any(c['check_id'].startswith('SA-') for c in m['checks'])
   folder=OUT/'candidates'/m['candidate_id'];folder.mkdir(parents=True,exist_ok=True)
   for key,path in {**m['downloads'],**m['previews']}.items():

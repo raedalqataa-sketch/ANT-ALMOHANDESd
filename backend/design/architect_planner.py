@@ -121,10 +121,10 @@ def propose(intent:ClientIntent):
         corridor_width=corridor,
         entrance_face=entry,rooms=rows,city=intent.city or intent.region,municipality=municipality,boundary_widths=known,
         dining_seats=next((n for n in (4,6,8,10,12) if n>=intent.family),12),separate_guest_entry=intent.majlis,
-        notes=intent.notes,adaptive_search=True,massing_strategy='coherent',site_placement='auto_rear_corner')
+        notes=intent.notes,reference_strategy='design-principles-v1',adaptive_search=True,massing_strategy='coherent',site_placement='auto_rear_corner')
     reasoning.append('سكن خاص: برنامج عائلي مدمج وخدمات متقاربة وممرات أقل اتساعًا مع بقاء فصل الضيوف.' if intent.building=='house' else 'فيلا: فصل الاستقبال عن الأسرة مع رحابة حركة مناسبة للمستوى المختار.')
     reasoning.append('مستوى المخرجات: '+{'economy':'اقتصادي','standard':'متوسط','luxury':'فاخر'}[intent.output_level]+'؛ أولوية التصميم: '+{'efficiency':'ترشيد المساحة','usability':'سهولة الاستخدام','prestige':'الرحابة والفخامة'}[intent.design_priority]+'.')
-    planning={'version':'architect-program-3','method':'household program synthesis + constrained geometric search; no language model connected',
+    planning={'version':'architect-program-4','method':'household program synthesis + constrained geometric search; no language model connected',
         'original_intent':intent.model_dump(),'site_evidence':intent.site_evidence.model_dump() if intent.site_evidence else None,'orientation':{'north_up':True,'edge_mapping':mapping},
         'recommended_floors':floors,'sleeping_capacity':sum(r.count*r.capacity for r in rows),
         'program':[r.model_dump() for r in rows],'reasoning':reasoning,'warnings':warnings,
@@ -143,6 +143,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None):
     b,planning=propose(intent)
     primary=[{'family':f,'policy':'legacy','core_position':'rear'} for f in ('spine','L','U','stepped','cross')]
     primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
+    primary.append({'family':'spine','policy':'service_aligned','core_position':'rear'})
     pool=[];unavailable=[];examined=[]
     def explore(options):
         batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
@@ -168,12 +169,17 @@ def generate_automatic(intent:ClientIntent,output_dir=None):
                 f"متوسط مسارات العلاقات الوظيفية المقاسة {metrics['mean_functional_route_m']:.1f} م",
                 f"مسطح إجمالي للأدوار {metrics['total_built_m2']:.1f} م²"],
             'selection_reason':'اجتياز الفحوص ثم ترتيب الهدف المختار، مع اختلاف مواقع/ترتيب الفراغات هندسيًا ووظيفيًا عن البدائل السابقة.'}
+        reference=m['design_evaluation'].get('reference_patterns')
+        if reference and reference['wet_alignment']['ratio'] is not None:
+            m['design_option']['advantages'].append(f"تراكب الخدمات رأسيًا {100*reference['wet_alignment']['ratio']:.0f}٪ · مؤشر تنسيق مبدئي")
         m['search']['family_label_ar']=titles[i]
     diagnostics=[{'candidate_id':m['candidate_id'],'revision_id':m['model_revision_id'],
         'accepted':m in chosen,'geometry_valid':m['release']['drawing_export_allowed'],
         'score':m['design_evaluation']['heuristic_score'],'failed_checks':m['design_evaluation']['failed_checks'],
         'reason':('اختير بعد تقييم الأولوية والتنوع' if m in chosen else 'فشل هندسي؛ الرسم محجوب' if not m['release']['drawing_export_allowed'] else 'لم يفضل في الترتيب أو لم يحقق اختلافًا كافيًا')}
         for m in pool]
+    planning['reference_design']={'revision':'reference-principles-1','project_count':8,'unique_images':23,'legal_rules_extracted':0,'status':'visual design preferences; not surveyed or code-certified','unsupported_reference_features':['basements','general double-height slabs','arbitrary four-level programs','chamfered plots']}
+    planning['reasoning'].append('تُقارن خدمة المطبخ للطعام دون عبور الغرف الخاصة، وتراكب الخدمات بين الأدوار، وفسحة نوافذ المعيشة داخل الأرض؛ مؤشرات تصميمية مستخلصة من المراجع وليست قوانين.')
     planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
     planning['design_selection']={'strategy':'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
