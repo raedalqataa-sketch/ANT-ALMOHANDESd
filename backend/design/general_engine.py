@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'L':'جناحان على شكل L','U':'فناء مفتوح على شكل U','stepped':'كتلة متدرجة'}
+FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -28,6 +28,9 @@ def area(r):return r['width']*r['depth']
 def topology(family,W,D,c,ratio,top):
     """Disjoint cells tile a nonrectangular mass; lanes abut connected halls."""
     a=W*ratio;b=D*top
+    if family=='spine':
+        # Additional compact rectangular search family; no mandatory L/U/recessed shape.
+        return [box(a-c/2,0,c,D)],[box(0,0,a-c/2,D,axis='y',door_side='east'),box(a+c/2,0,W-a-c/2,D,axis='y',door_side='west')]
     if family in ('L','U'):
         halls=[box(a-c,0,c,D),box(a,b-c,W-a,c)]
         lanes=[box(0,0,a-c,D,axis='y',door_side='east'),box(a,0,W-a,b-c,axis='x',door_side='south')]
@@ -132,6 +135,7 @@ def search(brief,family):
     best=None;attempts=0;pool=[]
     # Each candidate searches dimensions AND allocation, never just scales a fixed plan.
     variations=[(s,d,r,b) for s in (1.,.85,.70) for d in (1.,.82,.68,.55) for r in (.33,.36,.38,.40,.44,.47) for b in (.30,.36,.40,.44,.48)]
+    if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
     for ws,ds,ratio,top in variations:
         W,D=aw*ws,ad*ds
@@ -427,6 +431,8 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
+    elif family=='spine':
+        outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
         outline=[(0,0),(W,0),(W,second),(W*.80,second),(W*.80,D),(W*.12,D),(W*.12,first),(0,first)]
@@ -460,7 +466,7 @@ def materialize(brief,family,result):
     model['parking']=saudi_rules.parking(model,brief)
     from .automatic_features import place_services
     place_services(model,brief)
-    model['regulatory_profile']={'jurisdiction':'SA','ruleset_id':saudi_rules.registry()['id'],'city':brief.city,'municipality':brief.municipality,'local_rules_verified':False,'full_sbc_compliance_verified':False,'sources':saudi_rules.registry()['sources']}
+    model['regulatory_profile']=({'jurisdiction':'SA','ruleset_id':saudi_rules.registry()['id'],'city':brief.city,'region':brief.region,'municipality':brief.municipality,'local_rules_verified':False,'full_sbc_compliance_verified':False,'sources':saudi_rules.registry()['sources']} if brief.country=='SA' else {'jurisdiction':'YE','ruleset_id':None,'city':brief.city,'region':brief.region,'local_rules_verified':False,'national_building_code_verified':False,'sources':[],'required_action':'تقديم اشتراطات الجهة المحلية للموقع قبل أي اعتماد'})
     model['metrics']={'floor_built_m2':max(physical_areas.values()),'floor_built_by_id':physical_areas,'requested_spaces':sum(r.count for r in brief.rooms),
                       'circulation_m2':round(sum(area(r) for f in model['floors'] for r in f['rooms'] if r['kind']=='corridor'),2),
                       'bed_capacity':sum(q.get('capacity',0) for f in model['floors'] for q in f['furniture']),
@@ -600,12 +606,16 @@ def validate_general(model,brief):
     return checks
 
 
-def generate_general(brief:VillaBrief,output_dir=None):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None):
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True);candidates=[];unavailable=[]
-    for family,label in FAMILIES.items():
+    families=tuple(candidate_families) if candidate_families is not None else ('L','U','stepped')
+    if not families or any(f not in FAMILIES for f in families) or len(set(families))!=len(families):
+        raise ValueError('عائلات البحث الهندسي غير معروفة أو مكررة')
+    for family in families:
+        label=FAMILIES[family]
         result=search(brief,family)
         if not result:
             unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
