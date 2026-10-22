@@ -188,6 +188,11 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                        ('cross','relationship_aware','front')]
             if reasons.get('guest_circulation'):
                 preferred.insert(0,('cross','social_front','rear'))
+            if reasons.get('food_service_detour'):
+                preferred.insert(0,('adaptive','service_aligned','front'))
+                preferred.insert(0,('spine','service_aligned','front'))
+            if reasons.get('family_movement'):
+                preferred.insert(0,('adaptive','relationship_aware','front'))
             if reasons.get('vertical_core') or reasons.get('furnishing'):
                 preferred.insert(0,('spine','family_front','rear'))
             preferred.extend([('adaptive','service_aligned','rear'),
