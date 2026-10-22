@@ -47,6 +47,10 @@ def inspect(model):
                                    route_m=round(distance,3),
                                    detour_ratio=round(distance/max(straight,.1),3),
                                    weight=weight))
+    # Measure kitchen-to-dining detours separately from guest/family circulation.
+    # A large detour is a preference warning, not proof of a regulatory failure.
+    service_detours=[r for r in routes if r["id"]=="FOOD_SERVICE" and
+                     r["status"]=="MEASURED" and r["detour_ratio"]>2.5]
     private = privacy_evidence(model) if model.get("floors") else {
         "family_rooms_exposed":[], "missing_guest_access":[]}
     failures=[item for item in routes if item["status"]=="UNREACHABLE"]
@@ -64,6 +68,7 @@ def inspect(model):
         "unreachable":failures,"long_detours":excessive,
         "guest_family_exposure":list(exposure),
         "guest_access_unreachable":private.get("missing_guest_access",[]),
+        "food_service_detours":service_detours,
         "soft_penalty":round(min(cost/(weight*4),1),6),
         "scope":"Hosted door graph only; acoustic, visual sightline and fire egress remain unverified",
     }
@@ -84,5 +89,12 @@ def repair_reasons(model):
         ("vertical_core", {"stair-geometry","vertical-core"}),
     ):
         if bad & codes:suggestions.append(group)
+    evidence=inspect(model)
+    if evidence["unreachable"] and "family_movement" not in suggestions:
+        suggestions.append("family_movement")
+    if evidence["food_service_detours"]:
+        suggestions.append("food_service_detour")
+    if evidence["guest_family_exposure"] and "guest_circulation" not in suggestions:
+        suggestions.append("guest_circulation")
     if not suggestions and bad:suggestions.append("other_existing_validation")
     return suggestions
