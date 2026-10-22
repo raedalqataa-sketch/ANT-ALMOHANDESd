@@ -1,6 +1,6 @@
 """Deterministic architectural V2 policy tests (no fabricated code approval)."""
 from backend.design.constitution_v2 import (
-    GATE_IDS, MANUS_CROSSWALK, WEIGHTS, assess_candidate, public_manifest
+    GATE_IDS, MANUS_CROSSWALK, WEIGHTS, assess_candidate, public_manifest, policy_bundle
 )
 
 
@@ -26,6 +26,9 @@ def test_manifest_is_explicitly_partial_and_scoring_uncalibrated():
     report = assess_candidate(sample_model())
     assert len(GATE_IDS) == report["gate_count"] == 16
     assert len(MANUS_CROSSWALK) == 12
+    assert len(policy_bundle()['prior_visual_extraction_143_rules']) == 143
+    assert len(policy_bundle()['functional_relationships']) == 28
+    assert public_manifest()['visual_rules_total'] == 143
     assert sum(WEIGHTS.values()) == 100
     assert report["score_100"] is None
     assert not report["executive_approval"]
