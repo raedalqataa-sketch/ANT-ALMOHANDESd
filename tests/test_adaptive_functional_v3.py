@@ -119,3 +119,28 @@ def test_freeform_topology_has_no_overlap_between_room_lanes():
             width=min(a["x"]+a["width"],b["x"]+b["width"])-max(a["x"],b["x"])
             depth=min(a["y"]+a["depth"],b["y"]+b["depth"])-max(a["y"],b["y"])
             assert width<=1e-7 or depth<=1e-7
+
+
+
+def test_proportional_freeform_rooms_keep_clearances_and_hall_connections():
+    from backend.design.adaptive_geometry import moderate_room_expansion
+    t=.2
+    left={"id":"bath","kind":"bathroom","request_id":"bath",
+          "x":0.0,"y":0.0,"width":7.0,"depth":4.0,"min_area":5.0,
+          "min_side":1.6,"door_side":"east"}
+    right={"id":"dining","kind":"dining","request_id":"dining",
+           "x":9.0,"y":0.0,"width":7.0,"depth":5.0,"min_area":16.0,
+           "min_side":3.0,"door_side":"west"}
+    unchanged={"id":"hall","kind":"corridor","x":7.0,"y":0.0,
+               "width":2.0,"depth":20.0,"door_side":"none"}
+    output=moderate_room_expansion([left,right,unchanged],t)
+    bath,dining,hall=output
+    assert left["width"]==7.0 and right["width"]==7.0  # no mutation
+    assert bath["width"]<left["width"] and dining["width"]<right["width"]
+    assert abs(bath["x"]+bath["width"]-7)<1e-7  # east hall edge preserved
+    assert dining["x"]==9.0  # west hall edge preserved
+    assert hall==unchanged
+    for cell in (bath,dining):
+        assert (cell["width"]-t)*(cell["depth"]-t)>=cell["min_area"]-1e-7
+        assert min(cell["width"]-t,cell["depth"]-t)>=cell["min_side"]-1e-7
+        assert max(cell["width"]-t,cell["depth"]-t)/min(cell["width"]-t,cell["depth"]-t)<=2.8+1e-7
