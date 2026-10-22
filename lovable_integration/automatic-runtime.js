@@ -20,6 +20,6 @@ window.AntStartAutomatic=async(draft,send)=>{
  const assumptions=document.createElement('details'),summary=document.createElement('summary');summary.textContent='كيف حُسبت الارتدادات؟ وما الافتراضات التي تحتاج مراجعة؟';assumptions.append(summary);
  for(const warning of result.planning.warnings){const p=document.createElement('p');p.textContent=warning;assumptions.append(p);}
  const numbers=document.createElement('p');numbers.textContent='الارتدادات المقترحة بالمتر: '+Object.entries(result.planning.setbacks.values).map(([k,v])=>({north:'شمال',south:'جنوب',east:'شرق',west:'غرب'}[k])+': '+v).join('، ');assumptions.append(numbers);
- const source=document.createElement('a');source.href='https://momah.gov.sa/ar/node/15715';source.target='_blank';source.rel='noopener';source.textContent='المرجع الوطني للارتدادات · اشتراطات إنشاء المباني السكنية';assumptions.append(source);program.append(assumptions);box.append(program);
+ if(draft.intent.country==='SA'){const source=document.createElement('a');source.href='https://momah.gov.sa/ar/node/15715';source.target='_blank';source.rel='noopener';source.textContent='المرجع السعودي المتاح للارتدادات · يلزم اعتماد البلدية';assumptions.append(source);}else{const caution=document.createElement('p');caution.textContent='اليمن: الارتدادات قيم تصميمية افتراضية؛ لم تُتحقق اشتراطات المحافظة والسلطة المختصة.';assumptions.append(caution);}program.append(assumptions);box.append(program);
  window.AntEmbeddedNotify(result);
 };
