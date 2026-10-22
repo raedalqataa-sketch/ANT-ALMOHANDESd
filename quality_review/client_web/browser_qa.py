@@ -18,7 +18,7 @@ with sync_playwright() as p:
  page.on('pageerror',lambda e:errors.append(str(e)))
  page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
  page.on('request',lambda r:requests.append(r.url))
- page.goto(BASE+'/client/');page.get_by_role('button',name='التالي',exact=True).wait_for(state='visible')
+ page.goto(BASE+'/client/?mode=advanced');page.get_by_role('button',name='التالي',exact=True).wait_for(state='visible')
  page.get_by_role('button',name='التالي',exact=True).click()
  assert page.get_by_role('alert').count()>0
  page.get_by_label('عرض الأرض (م)',exact=True).fill('23')

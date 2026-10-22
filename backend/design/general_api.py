@@ -53,3 +53,10 @@ def interpret(request:Interpretation):
 def jurisdictions():
     from pathlib import Path
     return json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())
+
+
+from .architect_planner import ClientIntent,generate_automatic
+@router.post('/auto-design')
+def auto_design(intent:ClientIntent):
+    try:return generate_automatic(intent)
+    except ValueError as exc:raise HTTPException(422,str(exc))
