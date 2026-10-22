@@ -19,13 +19,21 @@ class SiteEvidence(Strict):
 class ClientIntent(Strict):
     width: float = Field(ge=8,le=60)
     depth: float = Field(ge=8,le=80)
-    city: str = Field(min_length=1,max_length=100)
+    country: Literal['SA','YE']='SA'
+    region: str = Field(default='',max_length=100)
+    city: str = Field(default='',max_length=100)
+    district: str = Field(default='',max_length=100)
+    neighborhood: str = Field(default='',max_length=100)
+    investment_units: int = Field(default=4,ge=2,le=40)
+    investment_unit_area: float = Field(default=100,ge=30,le=400)
     north_edge: Literal['top','right','bottom','left']='top'
     street_edges: list[Literal['top','right','bottom','left']]=Field(min_length=1,max_length=4)
     main_street: Literal['top','right','bottom','left']='bottom'
     street_widths: dict[str,float]=Field(default_factory=dict)
     family: int = Field(ge=1,le=12)
-    building: Literal['villa','house']='villa'
+    building: Literal['villa','house','investment']='villa'
+    output_level: Literal['economy','standard','luxury']='standard'
+    design_priority: Literal['efficiency','usability','prestige']='usability'
     floors: Literal['auto','one','two']='auto'
     comfort: Literal['compact','balanced','generous']='balanced'
     majlis: bool=True
@@ -36,6 +44,8 @@ class ClientIntent(Strict):
 
     @model_validator(mode='after')
     def consistent(self):
+        if not (self.city.strip() or self.region.strip()):
+            raise ValueError('حدد المحافظة أو المنطقة، أو اكتب اسم الموقع يدويًا')
         if len(set(self.street_edges))!=len(self.street_edges) or self.main_street not in self.street_edges:
             raise ValueError('حدد الشارع الرئيسي ضمن جهات الشوارع دون تكرار')
         if any(k not in self.street_edges or not 1<=v<=100 for k,v in self.street_widths.items()):
@@ -45,6 +55,8 @@ class ClientIntent(Strict):
         return self
 
 def propose(intent:ClientIntent):
+    if intent.building=='investment':
+        raise ValueError('المبنى السكني الاستثماري يحتاج محرك وحدات مستقلة ومداخل وسلالم مشتركة؛ لا يجوز توليد فيلا وتسميتها مبنى استثماريًا. هذا النوع متاح لإدخال البيانات فقط حتى اكتمال محرك الوحدات.')
     edges=['top','right','bottom','left'];directions=['north','east','south','west']
     rotation=edges.index(intent.north_edge)
     mapping={edge:directions[(i-rotation)%4] for i,edge in enumerate(edges)}
@@ -56,13 +68,17 @@ def propose(intent:ClientIntent):
     known={mapping[e]:(intent.street_widths[e] if e in intent.street_widths else 0) for e in edges if e not in intent.street_edges or e in intent.street_widths}
     # Calculate known boundaries through the existing, source-bound rule engine.
     from types import SimpleNamespace
-    calculated=required_setbacks(SimpleNamespace(boundary_widths=known,entrance_face=entry))
+    calculated=required_setbacks(SimpleNamespace(boundary_widths=known,entrance_face=entry)) if intent.country=='SA' else {}
+    # Yemen: indicative design clearances only; never mislabel as Yemen legal setbacks.
     unknown=[mapping[e] for e in intent.street_edges if e not in intent.street_widths]
-    setbacks={face:calculated.get(face,6.0 if face==entry else 3.0) for face in directions}
+    setbacks={face:calculated.get(face,(6.0 if face==entry else 3.0) if intent.country=='SA' else (4.0 if face==entry else 2.0)) for face in directions}
     rows=[];reasoning=[]
-    scale={'compact':.92,'balanced':1.,'generous':1.15}[intent.comfort]
+    scale={'compact':.92,'balanced':1.,'generous':1.15}[intent.comfort]*{'economy':.92,'standard':1.,'luxury':1.12}[intent.output_level]
+    if intent.building=='house':scale*=.95
+    corridor={'economy':1.3,'standard':1.5,'luxury':1.65}[intent.output_level]
+    if intent.building=='house':corridor=max(1.2,corridor-.1)
     def add(id,name,kind,floor,count,area,side,capacity=0):
-        minimum=registry()['rules']['rooms']['minimums'].get(kind,[0,0])
+        minimum=registry()['rules']['rooms']['minimums'].get(kind,[0,0]) if intent.country=='SA' else [0,0]
         rows.append(SpaceRequest(id=id,name=name,kind=kind,floor=floor,count=count,min_area=round(max(area*scale,minimum[0]),2),min_side=max(side,minimum[1]),capacity=capacity))
     sleeping=floors-1
     master_floor=0 if intent.accessible_bedroom else sleeping
@@ -89,45 +105,90 @@ def propose(intent:ClientIntent):
         'المساحات والأبعاد توصيات تصميمية قابلة للتعديل، وليست حدودًا قانونية إلا حيث يحدد مرجع القاعدة ذلك.',
     ])
     if intent.accessible_bedroom:reasoning.append('غرفة رئيسية وحمام في الأرضي لتقليل استخدام الدرج؛ لا يعني ذلك اعتماد إتاحة الوصول.')
-    warnings=['اختيار المدينة لا يستبدل اشتراطات المخطط وقطعة الأرض؛ التطبيق يستخدم المرجع الوطني المتاح وتبقى المراجعة المحلية معلقة.']
-    if unknown:warnings.append('عروض بعض الشوارع غير معروفة: اقتُرحت ارتدادات أولية 6 م للواجهة الرئيسية و3 م لبقية الشوارع؛ مطابقتها النظامية غير محسومة.')
+    warnings=(['اختيار المنطقة والمدينة لا يستبدل اشتراطات قطعة الأرض؛ تُستخدم مراجع السعودية المتاحة جزئيًا وتبقى المطابقة المحلية معلقة.'] if intent.country=='SA' else ['اليمن: لا تتوفر اشتراطات تنظيمية محلية موثقة في هذا الإصدار؛ الارتدادات 4م أمامي و2م جانبي/خلفي افتراضات تصميمية غير قانونية، ويجب اعتمادها من الجهة المختصة قبل أي إصدار تنفيذي.'])
+    if unknown:warnings.append('عروض بعض الشوارع غير معروفة: جميع الارتدادات أمام الشوارع غير المتحقق منها افتراضية، ويجب مراجعتها محليًا.')
     if rotation:warnings.append('رُتبت الأبعاد والجهات لعرض المسقط والشمال إلى الأعلى؛ بيانات الأرض الأصلية محفوظة دون تغيير.')
     if intent.notes.strip():warnings.append('الرغبات النصية محفوظة كاملة؛ لا يُعد النص غير المحوّل إلى فراغ أو قيد منفذًا تلقائيًا.')
     if intent.site_evidence:
         warnings.append('أبعاد الأرض مستخلصة من زوايا مُدخلة أو صورة مُعايرة؛ ليست إثباتًا مساحيًا أو سند ملكية ولا تحدد الشوارع تلقائيًا.')
     municipality=''
-    directory=json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())
-    for amanat in directory['amanats']:
-        if intent.city==amanat['name'] or any(intent.city==r['Name'] for r in amanat['municipalities']):municipality=amanat['name'];break
+    if intent.country=='SA':
+        directory=json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())
+        for amanat in directory['amanats']:
+            if intent.city==amanat['name'] or any(intent.city==r['Name'] for r in amanat['municipalities']):municipality=amanat['name'];break
     b=VillaBrief(project_name='تصور مسكن الأسرة',plot_width=width,plot_depth=depth,floors=floors,setbacks=setbacks,
-        entrance_face=entry,rooms=rows,city=intent.city,municipality=municipality,boundary_widths=known,
+        country=intent.country,apply_saudi_rules=intent.country=='SA',region=intent.region,district=intent.district,neighborhood=intent.neighborhood,building_type=intent.building,
+        corridor_width=corridor,
+        entrance_face=entry,rooms=rows,city=intent.city or intent.region,municipality=municipality,boundary_widths=known,
         dining_seats=next((n for n in (4,6,8,10,12) if n>=intent.family),12),separate_guest_entry=intent.majlis,
-        notes=intent.notes,massing_strategy='coherent',site_placement='auto_rear_corner')
-    planning={'version':'architect-program-1','method':'household program synthesis + constrained geometric search; no language model connected',
+        notes=intent.notes,adaptive_search=True,massing_strategy='coherent',site_placement='auto_rear_corner')
+    reasoning.append('سكن خاص: برنامج عائلي مدمج وخدمات متقاربة وممرات أقل اتساعًا مع بقاء فصل الضيوف.' if intent.building=='house' else 'فيلا: فصل الاستقبال عن الأسرة مع رحابة حركة مناسبة للمستوى المختار.')
+    reasoning.append('مستوى المخرجات: '+{'economy':'اقتصادي','standard':'متوسط','luxury':'فاخر'}[intent.output_level]+'؛ أولوية التصميم: '+{'efficiency':'ترشيد المساحة','usability':'سهولة الاستخدام','prestige':'الرحابة والفخامة'}[intent.design_priority]+'.')
+    planning={'version':'architect-program-3','method':'household program synthesis + constrained geometric search; no language model connected',
         'original_intent':intent.model_dump(),'site_evidence':intent.site_evidence.model_dump() if intent.site_evidence else None,'orientation':{'north_up':True,'edge_mapping':mapping},
         'recommended_floors':floors,'sleeping_capacity':sum(r.count*r.capacity for r in rows),
         'program':[r.model_dump() for r in rows],'reasoning':reasoning,'warnings':warnings,
-        'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'],'unknown_street_faces':unknown,'local_parcel_verified':False}}
+        'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'] if intent.country=='SA' else {'jurisdiction':'YE','status':'UNVERIFIED_DESIGN_ASSUMPTION'},'unknown_street_faces':unknown,'local_parcel_verified':False}}
     return b,planning
 
 def generate_automatic(intent:ClientIntent,output_dir=None):
-    from .general_engine import generate_general
-    b,planning=propose(intent)
-    result=generate_general(b,output_dir)
-    def rank(model):
-        if not model['release']['drawing_export_allowed']:return (1,float('inf'))
-        metrics=list(model.get('massing_quality',{}).get('floors',{}).values())
-        cost=sum(m['normalized_perimeter']+(1-m['envelope_fill'])+m['circulation_ratio'] for m in metrics)/len(metrics) if metrics else float('inf')
-        return (0,cost)
-    result['candidates'].sort(key=rank)
-    planning['massing_strategy']='coherent-1'
-    planning['recommended_pattern']=next((m['candidate_id'] for m in result['candidates'] if m['release']['drawing_export_allowed']),None)
-    planning['reasoning'].append('أُعطيت الأولوية لكتلة متصلة ومنتظمة نسبيًا، مع تقليل النتوءات والممرات غير الخادمة؛ يُعرض البديل الأفضل في هذا القياس أولًا.')
-    planning['placement_strategy']='auto-rear-corner-1'
-    planning['reasoning'].append('عندما تسمح المساحة، يُجمع المبنى في أحد الركنين الخلفيين بعيدًا عن المدخل، بمحاذاة حدين متعامدين من نطاق البناء، لتبقى فسحة أمامية متصلة. تبقى الارتدادات النظامية محفوظة.')
-    result['planning']=planning
+    """Search physical allocations and core positions, validate, diversify, then export.
+
+    No failed drawings or near-duplicate plans fill a missing third alternative.
+    """
+    from .general_engine import generate_general,export_general_model
+    from .design_selection import evaluate,select
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
-    for model in result['candidates']:
-        model['planning']=planning
-        (out/(model['model_revision_id']+'.json')).write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8')
-    return result
+    out.mkdir(parents=True,exist_ok=True)
+    b,planning=propose(intent)
+    primary=[{'family':f,'policy':'legacy','core_position':'rear'} for f in ('spine','L','U','stepped','cross')]
+    primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
+    pool=[];unavailable=[];examined=[]
+    def explore(options):
+        batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
+        unavailable.extend(batch['unavailable']);examined.extend(options)
+        for m in batch['candidates']:
+            m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))
+            m['design_evaluation']=evaluate(m,intent);pool.append(m)
+    explore(primary)
+    chosen=select(pool)
+    expanded=False
+    if len(chosen)<3:
+        expanded=True
+        explore([{'family':f,'policy':p,'core_position':c} for f,p,c in (
+            ('spine','family_front','rear'),('cross','social_front','rear'),('stepped','social_front','front'),
+            ('U','social_front','front'),('L','family_front','front'))])
+        chosen=select(pool)
+    titles=['المقترح الأنسب لاحتياجاتك','بديل وظيفي للمقارنة','بديل ثالث للمقارنة']
+    for i,m in enumerate(chosen):
+        metrics=m['design_evaluation']['metrics']
+        m['design_option']={'order':i+1,'title':titles[i],'profile':intent.output_level,'priority':intent.design_priority,
+            'validated':True,'method':'diversified physical allocations and vertical cores after geometric validation',
+            'advantages':[f"نسبة الممرات {metrics['circulation_ratio']*100:.1f}٪ من المسطح الكلي",
+                f"متوسط مسارات العلاقات الوظيفية المقاسة {metrics['mean_functional_route_m']:.1f} م",
+                f"مسطح إجمالي للأدوار {metrics['total_built_m2']:.1f} م²"],
+            'selection_reason':'اجتياز الفحوص ثم ترتيب الهدف المختار، مع اختلاف مواقع/ترتيب الفراغات هندسيًا ووظيفيًا عن البدائل السابقة.'}
+        m['search']['family_label_ar']=titles[i]
+    diagnostics=[{'candidate_id':m['candidate_id'],'revision_id':m['model_revision_id'],
+        'accepted':m in chosen,'geometry_valid':m['release']['drawing_export_allowed'],
+        'score':m['design_evaluation']['heuristic_score'],'failed_checks':m['design_evaluation']['failed_checks'],
+        'reason':('اختير بعد تقييم الأولوية والتنوع' if m in chosen else 'فشل هندسي؛ الرسم محجوب' if not m['release']['drawing_export_allowed'] else 'لم يفضل في الترتيب أو لم يحقق اختلافًا كافيًا')}
+        for m in pool]
+    planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
+    planning['design_selection']={'strategy':'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
+        'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
+        'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),
+        'library_limited':True,'diversity_rule':'normalized room displacement >= 0.065 plus changed functional order/quadrant',
+        'executive_approval':False,'diagnostics':diagnostics}
+    planning['reasoning'].append('البحث يغير عنقود الغرف وترتيب الاستقبال والأسرة وموضع الدرج، ويقارن مسارات الأبواب والمسطحات والكتلة. لا يفرض ثلاثة أشكال خارجية.')
+    planning['reasoning'].append('الدرجات وعتبات التنوع مؤشرات تصميمية معلنة، وليست تكلفة محسوبة أو اعتمادًا قانونيًا أو ضمانًا للحل الأمثل.')
+    if len(chosen)<3:
+        unavailable.append({'family':'adaptive','label':'بدائل لم تتحقق','reason':f'بعد توسيع البحث في {len(examined)} توزيعات، تحقق {len(chosen)} حلول مختلفة مجتازة فقط؛ لم تُحذف غرف أو تُخفف فحوص لملء البدائل.'})
+    # Only selected valid plans get drawing files. Diagnostics retain JSON only.
+    for m in pool:
+        m['planning']=planning
+        if m in chosen:export_general_model(m,b,out)
+        (out/(m['model_revision_id']+'.json')).write_text(json.dumps(m,ensure_ascii=False,indent=2,allow_nan=False),encoding='utf-8')
+    return {'status':'DRAFT_REVIEW' if chosen else 'BLOCKED','candidates':chosen,'unavailable':unavailable,
+        'planning':planning,'scope':'بحث هندسي محدود قابل للتوسعة؛ أراض مستطيلة ودور أو دوران؛ لا اعتماد تنفيذي',
+        'ai':{'mode':'geometric_search','language_model_connected':False}}

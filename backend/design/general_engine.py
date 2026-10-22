@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'L':'جناحان على شكل L','U':'فناء مفتوح على شكل U','stepped':'كتلة متدرجة'}
+FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -28,6 +28,15 @@ def area(r):return r['width']*r['depth']
 def topology(family,W,D,c,ratio,top):
     """Disjoint cells tile a nonrectangular mass; lanes abut connected halls."""
     a=W*ratio;b=D*top
+    if family=='cross':
+        # Four independently allocated clusters around a connected circulation node.
+        return [box(a-c/2,0,c,D),box(0,b-c/2,a-c/2,c),box(a+c/2,b-c/2,W-a-c/2,c)],[
+            box(x,y,w,d,axis='y',door_side=side)
+            for x,w,side in ((0,a-c/2,'east'),(a+c/2,W-a-c/2,'west'))
+            for y,d in ((0,b-c/2),(b+c/2,D-b-c/2))]
+    if family=='spine':
+        # Additional compact rectangular search family; no mandatory L/U/recessed shape.
+        return [box(a-c/2,0,c,D)],[box(0,0,a-c/2,D,axis='y',door_side='east'),box(a+c/2,0,W-a-c/2,D,axis='y',door_side='west')]
     if family in ('L','U'):
         halls=[box(a-c,0,c,D),box(a,b-c,W-a,c)]
         lanes=[box(0,0,a-c,D,axis='y',door_side='east'),box(a,0,W-a,b-c,axis='x',door_side='south')]
@@ -57,7 +66,7 @@ def length_for(room,lane,t):
     return length+t
 
 
-def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False):
+def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south'):
     """Bounded beam search, rejecting area/width violations before placement."""
     capacities=[r['depth' if r['axis']=='y' else 'width'] for r in lanes]
     states=[([0.]*len(lanes),[[] for _ in lanes])]
@@ -68,7 +77,12 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False):
             distributor=dict(id='guest-dist-'+key,kind='corridor',name='موزع ضيوف مستقل',zone='guest',guest_distributor=True,guest_parent=key,min_side=max(1.6,guest_clear_width),min_area=0)
             for r in bundle:r['guest_vestibule']=distributor['id']
             bundle.append(distributor)
-    ordered=sorted(bundles.values(),key=lambda rs:(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id']))
+    def bundle_order(rs):
+        size=(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id'])
+        if policy=='legacy':return size
+        rank={'majlis':0,'living':1,'dining':2,'kitchen':3,'office':4,'master':5,'bedroom':6,'bathroom':7,'laundry':8,'storage':9}
+        return (min(rank.get(r['kind'],10) for r in rs),*size)
+    ordered=sorted(bundles.values(),key=bundle_order)
     for bundle in ordered:
         expanded=[]
         for used,groups in states:
@@ -90,7 +104,13 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False):
         extra=capacities[i]-used[i];weights=sum(r['min_area'] for r in groups[i])
         # Functional sequencing along a wing: services then social spaces, bedrooms together.
         order={'bathroom':0,'storage':1,'laundry':2,'kitchen':3,'dining':4,'living':5,'majlis':6,'office':7,'master':8,'bedroom':9}
-        for r in sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],(1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id']))):
+        sequence=sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],(1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id'])))
+        if policy=='social_front':
+            # Guests stay a contiguous majlis/distributor/WC bundle when reversed.
+            if (axis=='y' and entry_face=='south') or (axis=='x' and entry_face=='east'):sequence=list(reversed(sequence))
+        elif policy=='family_front':
+            sequence=sorted(sequence,key=lambda q:q.get('zone')=='guest')
+        for r in sequence:
             base=length_for(r,lane,t)
             growth=min(extra*r['min_area']/weights,base*(.75 if coherent else .15))
             if coherent:
@@ -123,7 +143,7 @@ def expanded_program(brief,floor):
     return rows
 
 
-def search(brief,family):
+def search(brief,family,policy='legacy',core_position='rear'):
     # Reserve clearance outside the mass for a balcony on a non-street facade.
     margin={face:(brief.automatic_features.balcony_depth_m+.15 if brief.automatic_features.balcony and brief.boundary_widths.get(face,0)<10 else 0) for face in ('north','south','east','west')}
     aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness-margin['west']-margin['east']
@@ -132,7 +152,15 @@ def search(brief,family):
     best=None;attempts=0;pool=[]
     # Each candidate searches dimensions AND allocation, never just scales a fixed plan.
     variations=[(s,d,r,b) for s in (1.,.85,.70) for d in (1.,.82,.68,.55) for r in (.33,.36,.38,.40,.44,.47) for b in (.30,.36,.40,.44,.48)]
+    if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
+    if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
+    if brief.adaptive_search and family=='spine':
+        # Program-sized wings on large plots; never enlarge a house just to fill land.
+        wing=max(r.min_side for r in brief.rooms)+brief.wall_thickness
+        nominal=2*wing+brief.corridor_width+brief.wall_thickness
+        scales=sorted({round(min(aw,w)/aw,6) for w in (nominal,nominal+1.5,nominal+3,aw*.7,aw*.85,aw)})
+        variations=[(s,d,r,.4) for s in scales for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     for ws,ds,ratio,top in variations:
         W,D=aw*ws,ad*ds
         shape=topology(family,W,D,max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0),ratio,top)
@@ -153,6 +181,8 @@ def search(brief,family):
             core_depth=4.6 if l['depth']>=7.0 else l['depth']
             retreat=1.6 if brief.automatic_features.roof_annex else 0
             stair=box(l['x'],l['y']+l['depth']-core_depth-retreat,l['width'],core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
+            if core_position=='front' and not brief.automatic_features.roof_annex:
+                stair['y']=l['y'];l['y']+=core_depth
             l['depth']-=core_depth+retreat
             if l['depth']<EPS:lanes.pop(i)
         from .automatic_features import reserve_lightwell
@@ -161,7 +191,7 @@ def search(brief,family):
         lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
-            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent')
+            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face)
             if cells is None:failed=True;break
             if brief.automatic_features.roof_annex:
                 # Only retain the strip supporting the annex lounge immediately
@@ -198,7 +228,7 @@ def search(brief,family):
         pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
         if brief.massing_strategy=='coherent':
-            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family)
+            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position)
             if fallback:
                 backups=[{k:v for k,v in fallback.items() if k!='alternatives'}]+fallback.get('alternatives',[])
                 best['alternatives'].extend({**r,'massing_fallback':True} for r in backups)
@@ -427,6 +457,8 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
+    elif family in ('spine','cross'):
+        outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
         outline=[(0,0),(W,0),(W,second),(W*.80,second),(W*.80,D),(W*.12,D),(W*.12,first),(0,first)]
@@ -457,10 +489,11 @@ def materialize(brief,family,result):
     model['stairs']=make_stairs(model)
     repair_furniture_access(model,revision)
     for f in model['floors']:f['annotations']=annotate(f,model['stairs'])
-    model['parking']=saudi_rules.parking(model,brief)
+    model['parking']=saudi_rules.parking(model,brief,requested_count=brief.design_parking_count if brief.country=='YE' else None)
+    model['parking_basis']={'jurisdiction':brief.country,'status':'documented Saudi count; stall and access provisional' if brief.apply_saudi_rules else 'design assumption only; Yemeni legal count unknown'}
     from .automatic_features import place_services
     place_services(model,brief)
-    model['regulatory_profile']={'jurisdiction':'SA','ruleset_id':saudi_rules.registry()['id'],'city':brief.city,'municipality':brief.municipality,'local_rules_verified':False,'full_sbc_compliance_verified':False,'sources':saudi_rules.registry()['sources']}
+    model['regulatory_profile']=({'jurisdiction':'SA','ruleset_id':saudi_rules.registry()['id'],'city':brief.city,'region':brief.region,'municipality':brief.municipality,'local_rules_verified':False,'full_sbc_compliance_verified':False,'sources':saudi_rules.registry()['sources']} if brief.country=='SA' else {'jurisdiction':'YE','ruleset_id':None,'city':brief.city,'region':brief.region,'local_rules_verified':False,'national_building_code_verified':False,'sources':[],'required_action':'تقديم اشتراطات الجهة المحلية للموقع قبل أي اعتماد'})
     model['metrics']={'floor_built_m2':max(physical_areas.values()),'floor_built_by_id':physical_areas,'requested_spaces':sum(r.count for r in brief.rooms),
                       'circulation_m2':round(sum(area(r) for f in model['floors'] for r in f['rooms'] if r['kind']=='corridor'),2),
                       'bed_capacity':sum(q.get('capacity',0) for f in model['floors'] for q in f['furniture']),
@@ -591,22 +624,39 @@ def validate_general(model,brief):
     checks.append(dict(check_id='flexible-spaces',status='PENDING' if reserves else 'PASS',label='استبعاد الفراغات الاحتياطية غير المطلوبة' if not reserves else 'اعتماد استعمال المساحات المرنة المقترحة',evidence={'reserve_ids':reserves,'policy':brief.flexible_space_policy}))
     notes=model['requirements_resolution']
     if brief.notes.strip():checks.append(dict(check_id='free-text',status='PENDING' if notes['unmapped'] else 'PASS',label='ربط الطلبات النصية المحددة بالبرنامج — العبارات الأخرى تحتاج مراجعة',evidence=notes))
+    parking=model.get('parking',[])
+    parked=[dict(x=p['x'],y=p['y'],width=p['width'],depth=p['depth']) for p in parking]
+    invalid_parking=[]
+    for i,p in enumerate(parked):
+        if not inside(box(0,0,brief.plot_width,brief.plot_depth),p) or any(overlap(p,q) for q in parked[i+1:]):invalid_parking.append(i)
+        if any(overlap(p,box(c['x']-brief.wall_thickness/2,c['y']-brief.wall_thickness/2,c['width']+brief.wall_thickness,c['depth']+brief.wall_thickness)) for c in model['floors'][0]['cells']):invalid_parking.append(i)
+    add('parking-geometry',not invalid_parking,'احتواء المواقف وعدم تداخلها مع المبنى أو بعضها',{'invalid':invalid_parking,'scope':'stall geometry only; turning and gates remain PENDING'})
     from .automatic_features import feature_checks
     checks.extend(feature_checks(model,brief))
     checks.extend(saudi_rules.checks(model,brief))
+    from .jurisdiction import checks as local_checks
+    checks.extend(local_checks(model,brief))
     from .site_placement import recheck as placement_check
     placement=placement_check(model,brief)
     if placement:checks.append(placement)
     return checks
 
 
-def generate_general(brief:VillaBrief,output_dir=None):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True):
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True);candidates=[];unavailable=[]
-    for family,label in FAMILIES.items():
-        result=search(brief,family)
+    families=tuple(candidate_families) if candidate_families is not None else ('L','U','stepped')
+    if not families or any(f not in FAMILIES for f in families) or len(set(families))!=len(families):
+        raise ValueError('عائلات البحث الهندسي غير معروفة أو مكررة')
+    options=search_options or [{'family':family,'policy':'legacy','core_position':'rear'} for family in families]
+    for option in options:
+        family=option['family'];policy=option.get('policy','legacy');core_position=option.get('core_position','rear')
+        if family not in FAMILIES or policy not in ('legacy','social_front','family_front') or core_position not in ('rear','front'):
+            raise ValueError('سياسة البحث غير مدعومة')
+        label=FAMILIES[family]
+        result=search(brief,family,policy,core_position)
         if not result:
             unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
         alternatives=[result]+result.get('alternatives',[]);model=None;failures=[]
@@ -638,24 +688,33 @@ def generate_general(brief:VillaBrief,output_dir=None):
             same_group=(attempt+1<len(alternatives) and layout.get('site_placement',{}).get('active') and alternatives[attempt+1].get('placement_group')==layout.get('placement_group'))
             if not failures and not same_group:break
             if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
-        model['search']['validated_layouts_tested']=attempt+1
+        model['search'].update(allocation_policy=policy,core_position=core_position,validated_layouts_tested=attempt+1)
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
         rev=model['model_revision_id'];model['downloads']={'json':f'/api/files/{rev}.json'};model['previews']={}
-        if not failures:
-            scenes=[drawing(model,f) for f in model['floors']]
-            for f,s in zip(model['floors'],scenes):
-                name=f'{rev}-{f["id"]}.svg';(out/name).write_text(scene_svg(model,f,drawing=s),encoding='utf-8');model['previews'][f['id']]=f'/api/files/{name}'
-            (out/f'{rev}-SITE.svg').write_text(scene_svg(model,model['floors'][0],drawing=drawing(model,model['floors'][0],site_view=True)),encoding='utf-8')
-            model['previews']['SITE']=f'/api/files/{rev}-SITE.svg'
-            export_model=model;export_scenes=scenes
-            if model.get('feature_generation') or brief.regulatory_geometry or model.get('site_placement',{}).get('active'):
-                export_model={**model,'floors':model['floors']+[{'id':'SITE','name':'الموقع والخدمات','rooms':[]}]}
-                export_scenes=scenes+[drawing(model,model['floors'][0],site_view=True)]
-            report_model={**export_model,'floors':export_model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
-            scene_pdf(report_model,out/f'{rev}.pdf',drawings=export_scenes+[review_drawing(model)],include_report=False)
-            model['export_audit']=scene_dxf(export_model,out/f'{rev}.dxf',drawings=export_scenes)
-            model['downloads'].update({ext:f'/api/files/{rev}.{ext}' for ext in ('pdf','dxf')})
+        if not failures and emit_drawings:
+            export_general_model(model,brief,out)
         (out/f'{rev}.json').write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8');candidates.append(model)
     return {'status':'DRAFT_REVIEW','candidates':candidates,'unavailable':unavailable,
-            'scope':'أرض مستطيلة، دور أو دوران وملحق اختياري؛ إضافات مولدة حسب الطلب وبحث محدود L/U/متدرج؛ لا ضمان لإيجاد كل حل ممكن.',
+            'scope':('أرض مستطيلة، دور أو دوران؛ بحث هندسي ضمن مكتبة حلول متاحة، دون ضمان الحل الأمثل أو الاعتماد التنفيذي.' if candidate_families is not None else 'أرض مستطيلة، دور أو دوران وملحق اختياري؛ بحث محدود L/U/متدرج؛ لا ضمان لإيجاد كل حل ممكن.'),
             'ai':{'mode':'geometric_search','language_model_connected':False}}
+
+
+def export_general_model(model,brief,out):
+    from .general_drawing import drawing,review_drawing
+    from .presentation import scene_svg,scene_pdf,scene_dxf
+    rev=model['model_revision_id']
+    if not model['release']['drawing_export_allowed']:
+        raise ValueError('لا يجوز تصدير رسم أخفق في فحص هندسي')
+    scenes=[drawing(model,f) for f in model['floors']]
+    for f,s in zip(model['floors'],scenes):
+        name=f'{rev}-{f["id"]}.svg';(out/name).write_text(scene_svg(model,f,drawing=s),encoding='utf-8');model['previews'][f['id']]=f'/api/files/{name}'
+    (out/f'{rev}-SITE.svg').write_text(scene_svg(model,model['floors'][0],drawing=drawing(model,model['floors'][0],site_view=True)),encoding='utf-8')
+    model['previews']['SITE']=f'/api/files/{rev}-SITE.svg'
+    export_model=model;export_scenes=scenes
+    if model.get('design_option') or model.get('feature_generation') or brief.regulatory_geometry or model.get('site_placement',{}).get('active'):
+        export_model={**model,'floors':model['floors']+[{'id':'SITE','name':'الموقع والخدمات','rooms':[]}]}
+        export_scenes=scenes+[drawing(model,model['floors'][0],site_view=True)]
+    report_model={**export_model,'floors':export_model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
+    scene_pdf(report_model,out/f'{rev}.pdf',drawings=export_scenes+[review_drawing(model)],include_report=False)
+    model['export_audit']=scene_dxf(export_model,out/f'{rev}.dxf',drawings=export_scenes)
+    model['downloads'].update({ext:f'/api/files/{rev}.{ext}' for ext in ('pdf','dxf')})

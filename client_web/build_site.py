@@ -25,7 +25,7 @@ def main():
   bundle_digest=hashlib.sha256()
   for p in sorted(public.rglob('*')):
    if p.is_file():bundle_digest.update(str(p.relative_to(public)).encode());bundle_digest.update(p.read_bytes())
-  provenance={'embedded_bundle_sha256':bundle_digest.hexdigest(),'application':'ant-client-intake','path':'/client/','source_sha256':digest.hexdigest(),'source_reference':'Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only','site_placement_revision':'rear-corner-1','massing_revision':'coherent-massing-1','planner_version':'architect-program-1','engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((public.parent/'engine.zip').read_bytes()).hexdigest(),'runtime_shared_at':'/studio/','client_persistence':'temporary tab-scoped sessionStorage; engine files memory only','lovable_sync_verified':False,'executive_approval':False}
+  provenance={'embedded_bundle_sha256':bundle_digest.hexdigest(),'application':'ant-client-intake','path':'/client/','source_sha256':digest.hexdigest(),'source_reference':'Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only','site_placement_revision':'rear-corner-1','massing_revision':'coherent-massing-1','planner_version':'architect-program-3','selection_revision':'objective_ranked_geometry_v2','supported_countries':['SA','YE'],'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((public.parent/'engine.zip').read_bytes()).hexdigest(),'runtime_shared_at':'/studio/','client_persistence':'temporary tab-scoped sessionStorage; engine files memory only','lovable_sync_verified':False,'executive_approval':False}
   (built/'client-source.json').write_text(json.dumps(provenance,indent=2)+'\n')
   if target.exists():shutil.rmtree(target)
   shutil.copytree(built,target)

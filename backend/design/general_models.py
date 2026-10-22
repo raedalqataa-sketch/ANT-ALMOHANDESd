@@ -126,11 +126,15 @@ class VillaBrief(Strict):
     corridor_width: float = Field(default=1.5, ge=1.2, le=2.4)
     floor_height: float = Field(default=3.2, ge=2.8, le=3.8)
     rooms: list[SpaceRequest] = Field(min_length=1, max_length=30)
-    country: Literal['SA'] = 'SA'
+    country: Literal['SA','YE'] = 'SA'
     city: str = Field(default='',max_length=100)
+    region: str = Field(default='',max_length=100)
+    neighborhood: str = Field(default='',max_length=100)
+    building_type: Literal['villa','house']='villa'
     district: str = Field(default='',max_length=100)
     plan_number: str = Field(default='',max_length=80)
     parcel_number: str = Field(default='',max_length=80)
+    design_parking_count: int = Field(default=1,ge=0,le=4)
     dining_seats: Literal[4,6,8,10,12] = 6
     municipality: str = Field(default='',max_length=140)
     parcel_reference: str = Field(default='',max_length=300)
@@ -140,6 +144,7 @@ class VillaBrief(Strict):
     automatic_features: AutomaticFeatures = Field(default_factory=AutomaticFeatures)
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
+    adaptive_search: bool = False
     massing_strategy: Literal['legacy','coherent'] = 'legacy'
     site_placement: Literal['legacy','auto_rear_corner'] = 'legacy'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
@@ -147,6 +152,8 @@ class VillaBrief(Strict):
 
     @model_validator(mode='after')
     def coherent(self):
+        if self.country=='YE' and self.apply_saudi_rules:
+            raise ValueError('لا يجوز تطبيق اشتراطات المملكة العربية السعودية على أرض داخل اليمن')
         if self.automatic_features.balcony and self.floors < 2:
             raise ValueError('الشرفة العلوية تتطلب دورًا أول؛ اختر أرضي + أول')
         if self.regulatory_geometry:
