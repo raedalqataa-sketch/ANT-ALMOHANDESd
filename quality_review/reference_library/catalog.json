@@ -1,0 +1,464 @@
+{
+  "version": "reference-library-8-v1",
+  "method": "human visual reading; no automatic tracing, survey, legal certification or model retraining",
+  "projects": [
+    {
+      "id": "P01",
+      "image_count": 3,
+      "images": [
+        {
+          "id": "P01-GF",
+          "file_name": "1-6046133266714573014_121.jpg",
+          "sha256": "8d4dba8af08c5f295798c16bef8ac56bbfd03111b89f9e7f81861d1f0961a407",
+          "pixel_size": [
+            1226,
+            1280
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P01-FF",
+          "file_name": "2-6046133266714573015_121.jpg",
+          "sha256": "266af7727b7b0d5fa4bc2ba539d774dc5e464c76fd3326b68284cfb1d8935dd0",
+          "pixel_size": [
+            1280,
+            1277
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P01-ROOF",
+          "file_name": "3-6046133266714573016_121.jpg",
+          "sha256": "09925cd632c65d896e46ec6539d192d15b2f7e881a07c836e95c9a5d673460fb",
+          "pixel_size": [
+            1274,
+            1280
+          ],
+          "floor_classification": "ROOF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "استقبال الرجال في الواجهة بمدخل مستقل ومعيشة الأسرة في عمق الأرض",
+        "تجمع المعيشة والطعام والمطبخ حول فضاء خارجي مركزي ومسبح",
+        "الدرج والمصعد والخدمات في جانب واحد وفتحة علوية في الدور الأول",
+        "الملحق العلوي متراجع وتظهر غرفة خدمة ومخزن وشرفة"
+      ],
+      "uncertainties_ar": [
+        "دقة بعض الأبعاد والكتابات ضعيفة؛ لا تستخرج قيم ارتداد ملزمة من الصورة",
+        "وظائف الفضاءات واضحة بصريًا؛ لا توجد وثيقة اعتماد بلدي"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P02",
+      "image_count": 2,
+      "images": [
+        {
+          "id": "P02-LABEL_FIRST",
+          "file_name": "1-5866267805953934995_121.jpg",
+          "sha256": "ededea287f21a2505fe868be502861c366028fcf34a0db5559241d9f9176fd07",
+          "pixel_size": [
+            647,
+            1280
+          ],
+          "floor_classification": "LABEL_FIRST",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P02-LABEL_SECOND",
+          "file_name": "2-5866267805953934996_121.jpg",
+          "sha256": "5afb9e4d7b181701fd81dfb2b71b61a6c6d5e5a077cc29a1d975af3b4f5bf021",
+          "pixel_size": [
+            671,
+            1280
+          ],
+          "floor_classification": "LABEL_SECOND",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "تجميع غرف النوم في الخلف والاستقبال والمعيشة والطعام في المقدمة",
+        "المطبخ والخادمة والغسيل والخدمات في شريط جانبي",
+        "درج ومصعد في موضع متقارب بين الصورتين",
+        "اختلاف الشرفات ومساحة الجزء المبني بين المستويين"
+      ],
+      "uncertainties_ar": [
+        "لا يوجد دور أرضي ضمن الإرسال",
+        "العنوان العربي الثاني يتعارض مع تذييل ROOF FLOOR؛ لا يجزم بنظام الوحدات أو الأدوار",
+        "قد تكون برامج مستقلة أو متصلة؛ لا تفرض استنتاجًا دون دليل"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P03",
+      "image_count": 4,
+      "images": [
+        {
+          "id": "P03-ROOF",
+          "file_name": "1-IMG_20261019_023008_793.jpg",
+          "sha256": "ea372a616f8c6357923de5a6aeb855dd2b3491d983f05c1900f166a5f03d69f0",
+          "pixel_size": [
+            678,
+            1280
+          ],
+          "floor_classification": "ROOF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P03-BASEMENT",
+          "file_name": "2-IMG_20261019_023009_121.jpg",
+          "sha256": "44a762582f18e99e2d806dd6213bfbdbe738f6a7bc55021363284e9b59ab75c1",
+          "pixel_size": [
+            813,
+            1280
+          ],
+          "floor_classification": "BASEMENT",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P03-FF",
+          "file_name": "3-IMG_20261019_023008_931.jpg",
+          "sha256": "b139d3f09ecc4aab5828d217cbb2e07f334a3d003ec6d2dd6b90018f65577f4b",
+          "pixel_size": [
+            721,
+            1280
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P03-GF",
+          "file_name": "4-IMG_20261019_023008_638.jpg",
+          "sha256": "17f6a8d34751878ec3cbb893d87f1b21f78a0d9afbf26a8e51bf04f09fa34ccb",
+          "pixel_size": [
+            720,
+            1280
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "قطعة طويلة مع سلم داخلي ومصعد ومسار درج آخر ظاهر",
+        "معيشة رئيسية بفراغ علوي ظاهر في صورة الدور الأول",
+        "قبو للأنشطة الاجتماعية والترفيه مع أحواش غائرة ومسبح ظاهر",
+        "غرف النوم والخدمات موزعة على الأول والملحق، مع تراسات واسعة"
+      ],
+      "uncertainties_ar": [
+        "لا توجد أبعاد قطعة مقروءة كافية ولا مناسيب مقاطع للتحقق من القبو أو الارتفاع المزدوج",
+        "المحرك التلقائي لا يدعم القبو أو جميع أدوار هذا المشروع"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P04",
+      "image_count": 2,
+      "images": [
+        {
+          "id": "P04-FF",
+          "file_name": "1-IMG_20261019_022935_008.jpg",
+          "sha256": "07f2a7fa04267099891ac1189ce252ee3659ea7c2bccece74fdda29c1271fce4",
+          "pixel_size": [
+            995,
+            1280
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P04-GF",
+          "file_name": "2-IMG_20261019_022935_282.jpg",
+          "sha256": "9bb9b62574a9397909d178d7f9ab03e9159adfb025c0a6b8bfc6093f713658e2",
+          "pixel_size": [
+            981,
+            1280
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "فناء جانبي يواجه الطعام والمعيشة ويفصل بعض الأجنحة",
+        "مجلس في المقدمة وصالة الأسرة والمطبخ في الخلف",
+        "غرفة خدمة ومخزن في شريط جانبي",
+        "الدرج والحمامات في مواضع متقاربة بين الأرضي والأول"
+      ],
+      "uncertainties_ar": [
+        "لا تظهر أبعاد إجمالية موثوقة للأرض أو اتجاه شمال مقروء",
+        "الفناء حل تصميمي؛ لا يثبت نسب إنارة أو تهوية قانونية"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P05",
+      "image_count": 2,
+      "images": [
+        {
+          "id": "P05-FF",
+          "file_name": "1-IMG_20261019_022439_242.jpg",
+          "sha256": "e68f0b194b82a512d3fe32f6853ed3ea1367ff1a2e6666d9caf54bb5b697d584",
+          "pixel_size": [
+            945,
+            1280
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P05-GF",
+          "file_name": "2-IMG_20261019_022439_170.jpg",
+          "sha256": "e4b15dfa095e531e400b25951eabbedc835c87272187d6343deffc4fa36fb9a3",
+          "pixel_size": [
+            942,
+            1280
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "كتلة رئيسية جانبية وخلفية تحتضن ساحة خارجية متصلة",
+        "فصل مجلس الضيوف الأمامي عن معيشة الأسرة الخلفية",
+        "مطبخ ومخزن وخدمة في آخر كتلة المبنى",
+        "نواة درج ومصعد ثابتة تقريبًا وتجميع النوم والخدمة في الأعلى"
+      ],
+      "uncertainties_ar": [
+        "العناوين الإنجليزية تسمي اللوحتين GROUND FLOOR؛ يعتمد التصنيف العربي مع تسجيل التعارض",
+        "لا توجد أبعاد إجمالية مقروءة كافية للقطعة"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P06",
+      "image_count": 4,
+      "images": [
+        {
+          "id": "P06-BASEMENT",
+          "file_name": "1-IMG_20261019_022417_775.jpg",
+          "sha256": "617aa4e08e78b8039153d3d94df96acb1d6e0a47284fb004d2ff6dcf9b18dc1c",
+          "pixel_size": [
+            1280,
+            1204
+          ],
+          "floor_classification": "BASEMENT",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P06-ROOF",
+          "file_name": "2-IMG_20261019_022418_116.jpg",
+          "sha256": "f041ae696b741a68bafbc2cd11b8d32b64a86918be2c4f176f42742126e2de91",
+          "pixel_size": [
+            1280,
+            1200
+          ],
+          "floor_classification": "ROOF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P06-GF",
+          "file_name": "3-IMG_20261019_022418_190.jpg",
+          "sha256": "2f0f7c428cf40b23d75544d0e81da5642472fd63d75f6af7d3b5c604cc532341",
+          "pixel_size": [
+            1280,
+            1200
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P06-FF",
+          "file_name": "4-IMG_20261019_022417_867.jpg",
+          "sha256": "a3bbda07b9b801262c4c6e52db394af484fc0a7646297eaeab08d518d031b4f6",
+          "pixel_size": [
+            1280,
+            1200
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "توزيع الاستقبال الرسمي والأسرة حول حديقة وجلسة وفناء",
+        "قبو وأنشطة عائلية متعددة مع نواة حركة مركزية",
+        "غرف نوم بخدمات خاصة وصالة مشتركة في الأول",
+        "ملحق متراجع بمجلس عائلي وغرف وتراسات وفراغ مفتوح ظاهر"
+      ],
+      "uncertainties_ar": [
+        "أبعاد ومساحات وأعداد عناصر السلامة لا يمكن اعتمادها قانونيًا من هذه اللوحات",
+        "قبو وأربعة مستويات وفراغات مفتوحة خارج نطاق التوليد الآلي الحالي"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P07",
+      "image_count": 3,
+      "images": [
+        {
+          "id": "P07-ROOF",
+          "file_name": "1-IMG_20261019_022308_685.jpg",
+          "sha256": "1c5b2c6188f2e00d518408391a2e642dc275c79de03be1dbf817b864edca82b4",
+          "pixel_size": [
+            961,
+            1280
+          ],
+          "floor_classification": "ROOF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P07-FF",
+          "file_name": "2-IMG_20261019_022308_908.jpg",
+          "sha256": "7d1cf0371391eecc78df0f136e83c7d927362926efdbf91e600b15aaa806941d",
+          "pixel_size": [
+            980,
+            1280
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P07-GF",
+          "file_name": "3-IMG_20261019_022308_718.jpg",
+          "sha256": "fb1a22ecaf73ec0fb558a7dfac0a353bd305424c0bdaad361b2e8ff725542739",
+          "pixel_size": [
+            959,
+            1280
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "أرض مبينة بالأبعاد 12.5×20 م، شارع في المقدمة وجاران جانبيان",
+        "مجلس أمامي بمدخل ومرافق منفصلة وصالة الأسرة في الداخل",
+        "مطبخ ومخزن في الخلف ونواة درج ومصعد في الجانب الآخر",
+        "غرف النوم في الأول وخدمة وصالة وتراسات في الملحق"
+      ],
+      "uncertainties_ar": [
+        "الأبعاد والمساحات المكتوبة بيانات مرجعية غير مرفقة باعتماد نظامي",
+        "الملحق الظاهر ليس نموذجًا عامًا يصلح لكل قطعة"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    },
+    {
+      "id": "P08",
+      "image_count": 3,
+      "images": [
+        {
+          "id": "P08-ROOF",
+          "file_name": "1-IMG_20261018_165056_106.jpg",
+          "sha256": "4c9b0e5267c1f35c80e4d4c1e2d86016f6891d8a6f9fdc7710be66887db94e3a",
+          "pixel_size": [
+            1024,
+            1280
+          ],
+          "floor_classification": "ROOF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P08-GF",
+          "file_name": "2-IMG_20261018_165056_346.jpg",
+          "sha256": "083bba2c1d610bd4f7536e6bb5b44a4ce80c523f40cabe0a30260ad04ef0eafc",
+          "pixel_size": [
+            1024,
+            1280
+          ],
+          "floor_classification": "GF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        },
+        {
+          "id": "P08-FF",
+          "file_name": "3-IMG_20261018_165056_173.jpg",
+          "sha256": "056f5e68049d88f54367ecda9dbaf214f3d221408eb00f3b2ac215650a328abe",
+          "pixel_size": [
+            1024,
+            1280
+          ],
+          "floor_classification": "FF",
+          "dimension_status": "visually_reported_not_surveyed",
+          "personal_data_extracted": false
+        }
+      ],
+      "observed_patterns_ar": [
+        "قطعة زاوية مع شارع جانبي 15 م كما هو مكتوب وشطفة ظاهرة",
+        "ضيافة الرجال في المقدمة والنساء في الخلف والمعيشة بينهما",
+        "تجميع المطبخ والخادمة والمخزن قرب النواة الرأسية",
+        "غرف النوم وصالة الأسرة في الأول وكتلة أصغر للملحق وتراسات"
+      ],
+      "uncertainties_ar": [
+        "القراءة 18×30 م مرجحة من خطوط 18000/30000؛ ليست رفعًا مساحيًا",
+        "الشطفة خارج نموذج الأرض المستطيلة الحالي",
+        "الصورة المعادة لاحقًا تكرار مطابق للملحق وليست مرجعًا مستقلًا"
+      ],
+      "country_verified": false,
+      "city_verified": false,
+      "legal_compliance_verified": false,
+      "design_reading_confidence": "medium",
+      "raw_images_published": false
+    }
+  ],
+  "unique_images": 23,
+  "uploads_including_duplicate": 24,
+  "duplicates": [
+    {
+      "sha256": "4c9b0e5267c1f35c80e4d4c1e2d86016f6891d8a6f9fdc7710be66887db94e3a",
+      "duplicate_of": "P08-ROOF",
+      "counted_as_new_reference": false
+    }
+  ],
+  "numerical_design_thresholds": "Engineering heuristics must be disclosed; no numerical legal limits are inferred from images",
+  "legal_rules_extracted": 0,
+  "personal_data_extracted": false
+}

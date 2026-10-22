@@ -93,7 +93,14 @@ def difference(a,b):
 def evaluate(model,intent):
     metrics=measure(model);score,components,weights=objective_score(metrics,intent.design_priority)
     failed=[c['check_id'] for c in model['checks'] if c['status']=='FAIL']
-    return {'metrics':metrics,'heuristic_score':score,'objective':intent.design_priority,'output_level':intent.output_level,
+    reference=None
+    if model['brief'].get('reference_strategy','none')!='none':
+        from .reference_patterns import measure as reference_measure
+        reference=reference_measure(model)
+        weight={'efficiency':.15,'usability':.25,'prestige':.20}[intent.design_priority]
+        components['reference_patterns']=reference['design_penalty'];weights={**weights,'reference_patterns':weight}
+        score=round(score+weight*reference['design_penalty'],6)
+    return {'reference_patterns':reference,'metrics':metrics,'heuristic_score':score,'objective':intent.design_priority,'output_level':intent.output_level,
         'score_components':components,'weights':weights,'failed_checks':failed,
         'pending_checks':[c['check_id'] for c in model['checks'] if c['status']=='PENDING'],
         'acceptance_reason':'اجتاز الفحوص الهندسية المتاحة؛ الاشتراطات المعلقة لا تمثل اعتمادًا' if not failed else 'حجب الرسم بسبب فشل فحوص هندسية',
