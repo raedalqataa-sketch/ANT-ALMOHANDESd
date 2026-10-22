@@ -56,7 +56,13 @@ def jurisdictions():
 
 
 from .architect_planner import ClientIntent,generate_automatic
+@router.get('/constitution-v2')
+def constitution_manifest_v2():
+    from .constitution_v2 import public_manifest
+    return public_manifest()
+
+
 @router.post('/auto-design')
-def auto_design(intent:ClientIntent):
-    try:return generate_automatic(intent)
+def auto_design(intent:ClientIntent, constitution_v2:bool=False):
+    try:return generate_automatic(intent,constitution_v2=constitution_v2)
     except ValueError as exc:raise HTTPException(422,str(exc))
