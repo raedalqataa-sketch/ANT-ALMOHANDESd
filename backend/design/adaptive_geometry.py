@@ -42,3 +42,39 @@ def adaptive_topology(width, depth, corridor, center_fraction, split_fraction):
                  axis="y", door_side="west"),
         ])
     return hall, lanes
+
+
+def freeform_topology(width, depth, corridor, center_fraction, split_fraction):
+    """Three independently recessed room bands around a continuous central hall.
+
+    The section depths and setbacks vary parametrically. This is an orthogonal,
+    bounded massing candidate, not a claim to unconstrained arbitrary geometry.
+    All cells have positive dimensions, do not overlap and meet the shared hall.
+    """
+    if min(width, depth, corridor) <= 0:
+        return None
+    spine_x = width * center_fraction - corridor / 2
+    spine_right = spine_x + corridor
+    if spine_x < 3.2 or width - spine_right < 3.2:
+        return None
+    first = depth * split_fraction
+    second = first + (depth-first) * (.43 + .12*center_fraction)
+    stops = (0.0, first, second, depth)
+    if min(b-a for a,b in zip(stops,stops[1:])) < 5.0:
+        return None
+    hall = [dict(x=spine_x,y=0.0,width=corridor,depth=depth)]
+    lanes=[]
+    for band,(a,b) in enumerate(zip(stops,stops[1:])):
+        for side in (0,1):
+            available = spine_x if side==0 else width-spine_right
+            # Deterministic continuous offsets: each wing can recess independently.
+            phase = (center_fraction*7.13 + split_fraction*4.77 +
+                     band*1.63 + side*2.41)*math.pi
+            recess = min(1.8,.22*available)*(.18+.82*(1+math.sin(phase))/2)
+            cross = available-recess
+            if cross < 2.8:
+                return None
+            x = recess if side==0 else spine_right
+            lanes.append(dict(x=x,y=a,width=cross,depth=b-a,
+                              axis="y",door_side="east" if side==0 else "west"))
+    return hall,lanes
