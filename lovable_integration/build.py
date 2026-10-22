@@ -77,7 +77,7 @@ def main():
  worker=worker.replace(marker,marker+"\n    if(data.operation==='initialize'){postMessage({id:data.id,ready:true});return;}")
  worker=worker.replace('from backend.design.general_engine import generate_general','from backend.design.general_engine import generate_general\nfrom backend.design.architect_planner import ClientIntent,generate_automatic')
  worker=worker.replace("data.operation==='general'", "(data.operation==='general'||data.operation==='automatic')")
- worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
+ worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True,generation_v3=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
  (generate/'worker.js').write_text(worker)
  (generate/'static-client.js').write_text(client)
  for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
