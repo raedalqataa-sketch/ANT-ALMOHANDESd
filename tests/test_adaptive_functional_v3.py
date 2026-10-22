@@ -1,6 +1,6 @@
 """V3 adaptive functional layout search: geometry, graph, bounded repair."""
 from itertools import combinations
-from backend.design.adaptive_geometry import adaptive_topology
+from backend.design.adaptive_geometry import adaptive_topology, freeform_topology
 from backend.design.functional_intelligence import inspect, repair_reasons
 
 
@@ -64,7 +64,7 @@ def test_real_v3_designs_are_measured_and_not_preset_l_u_stepped(tmp_path):
                         family=6,street_edges=["bottom"],main_street="bottom")
     result=generate_automatic(intent,tmp_path,constitution_v2=True,generation_v3=True)
     planning=result["planning"]
-    assert planning["generation_v3"]["revision"]=="adaptive-functional-search-1"
+    assert planning["generation_v3"]["revision"]=="adaptive-functional-search-2"
     assert planning["generation_v3"]["legacy_shapes_in_default_v3_search"] is False
     assert planning["design_selection"]["search_variants_examined"]>=5
     assert all(x["candidate_id"].split("-")[0] not in {"L","U","stepped"} for x in planning["design_selection"]["diagnostics"])
@@ -79,3 +79,43 @@ def test_real_v3_designs_are_measured_and_not_preset_l_u_stepped(tmp_path):
         assert not [c for c in validate_general(m,VillaBrief(**m["brief"])) if c["status"]=="FAIL"]
         doc=ezdxf.readfile(tmp_path/(m["model_revision_id"]+".dxf"))
         assert doc.dxfversion=="AC1024" and not doc.audit().errors
+
+
+
+def test_freeform_massing_has_six_independently_recessed_rooms_bands():
+    """The three bands have continuous access to the core and varying setbacks."""
+    geometries=[]
+    for fraction,split in ((.38,.36),(.48,.43),(.58,.50)):
+        result=freeform_topology(20,30,1.6,fraction,split)
+        assert result is not None
+        halls,lanes=result
+        assert len(halls)==1 and len(lanes)==6
+        hall=halls[0]
+        assert hall["depth"]==30 and hall["width"]==1.6
+        assert all(min(q["width"],q["depth"])>=2.8 for q in lanes)
+        assert all(abs(q["x"]+q["width"]-hall["x"])<1e-7
+                   if q["door_side"]=="east"
+                   else abs(q["x"]-(hall["x"]+hall["width"]))<1e-7
+                   for q in lanes)
+        for side in ("east","west"):
+            strips=sorted((q for q in lanes if q["door_side"]==side),
+                          key=lambda q:q["y"])
+            assert strips[0]["y"]==0
+            assert all(abs(a["y"]+a["depth"]-b["y"])<1e-7
+                       for a,b in zip(strips,strips[1:]))
+            assert abs(strips[-1]["y"]+strips[-1]["depth"]-30)<1e-7
+        geometries.append(tuple(round(q["x"],3) for q in lanes))
+    assert len(set(geometries))==3
+    assert freeform_topology(6,10,1.6,.5,.4) is None
+
+
+def test_freeform_topology_has_no_overlap_between_room_lanes():
+    from itertools import combinations
+    for f in (.38,.46,.54,.62):
+        result=freeform_topology(24,32,1.8,f,.43)
+        assert result is not None
+        hall,lanes=result
+        for a,b in combinations(hall+lanes,2):
+            width=min(a["x"]+a["width"],b["x"]+b["width"])-max(a["x"],b["x"])
+            depth=min(a["y"]+a["depth"],b["y"]+b["depth"])-max(a["y"],b["y"])
+            assert width<=1e-7 or depth<=1e-7
