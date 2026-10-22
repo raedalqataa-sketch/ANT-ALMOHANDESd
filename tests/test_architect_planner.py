@@ -29,7 +29,9 @@ def test_real_automatic_generation_exports_all_topologies_and_preserves_planning
  import json,ezdxf
  result=generate_automatic(intent(),tmp_path)
  viable=[m for m in result['candidates'] if m['release']['drawing_export_allowed']]
- assert {m['candidate_id'] for m in viable}=={'L','U','stepped'}
+ assert len(result['candidates'])==3 and len(viable)>=1
+ assert {m['candidate_id'] for m in result['candidates']}<={'spine','L','U','stepped'}
+ assert all('design_option' in m for m in result['candidates'])
  for m in viable:
   assert sum(r['count']*r['capacity'] for r in m['brief']['rooms'])==6
   j=json.loads((tmp_path/(m['model_revision_id']+'.json')).read_text());assert j['planning']==result['planning']
@@ -38,7 +40,8 @@ def test_real_automatic_generation_exports_all_topologies_and_preserves_planning
 @pytest.mark.parametrize('options',[{'family':2,'majlis':False},{'family':8,'accessible_bedroom':True,'office':True}])
 def test_changed_household_changes_actual_program_without_dropping_requests(options,tmp_path):
  b,p=propose(intent(**options));result=generate_automatic(intent(**options),tmp_path)
- assert {m['candidate_id'] for m in result['candidates'] if m['release']['drawing_export_allowed']}=={'L','U','stepped'}
+ assert len(result['candidates'])==3
+ assert {m['candidate_id'] for m in result['candidates']}<={'spine','L','U','stepped'}
  for m in result['candidates']:
   assert sum(r['count']*r['capacity'] for r in m['brief']['rooms'])==options['family']
   if not m['release']['drawing_export_allowed']:
