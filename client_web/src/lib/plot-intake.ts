@@ -84,7 +84,7 @@ export function measureGeoCorners(corners:GeoCorner[]):PlotMeasurement{
   const unitR={x:right.x/rightLength,y:right.y/rightLength};
   const unitD={x:down.x/downLength,y:down.y/downLength};
   const scores:[Edge,number][]=[
-    ['top',-unitD.y],['right',unitR.y*-1],['bottom',unitD.y],['left',unitR.y]
+    ['top',unitD.y],['right',-unitR.y],['bottom',-unitD.y],['left',unitR.y]
   ];
   scores.sort((x,y)=>y[1]-x[1]);
   if(scores[0][1]<Math.cos(12*RAD))
