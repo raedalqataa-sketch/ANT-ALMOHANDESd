@@ -1,0 +1,76 @@
+{
+  "candidates": [
+    {
+      "pattern": "stepped",
+      "before": {
+        "area": 188.43459694024313,
+        "perimeter": 91.1976,
+        "envelope_fill": 0.6494999800782234,
+        "envelope_aspect": 1.3685439560439563,
+        "normalized_perimeter": 1.6608985139572587,
+        "components": 1,
+        "circulation_ratio": 0.2411881933465363
+      },
+      "after": {
+        "area": 194.79253247999998,
+        "perimeter": 57.17191999999999,
+        "envelope_fill": 0.9538461538461539,
+        "envelope_aspect": 1.038075112149186,
+        "normalized_perimeter": 1.024086483453471,
+        "components": 1,
+        "circulation_ratio": 0.18182489620661665
+      },
+      "setbacks_unchanged": true,
+      "program_unchanged": true,
+      "massing_fallback": false
+    },
+    {
+      "pattern": "U",
+      "before": {
+        "area": 185.78727712,
+        "perimeter": 86.38839999999999,
+        "envelope_fill": 0.7862574002129556,
+        "envelope_aspect": 1.3228582117471004,
+        "normalized_perimeter": 1.584482526795001,
+        "components": 1,
+        "circulation_ratio": 0.33950903946592054
+      },
+      "after": {
+        "area": 206.80380864000003,
+        "perimeter": 75.9896,
+        "envelope_fill": 0.8752,
+        "envelope_aspect": 1.3228582117471004,
+        "normalized_perimeter": 1.321036753920545,
+        "components": 1,
+        "circulation_ratio": 0.3007826616398625
+      },
+      "setbacks_unchanged": true,
+      "program_unchanged": true,
+      "massing_fallback": false
+    },
+    {
+      "pattern": "L",
+      "before": {
+        "area": 175.00192819199995,
+        "perimeter": 68.97199999999992,
+        "envelope_fill": 0.6032000000000001,
+        "envelope_aspect": 1.3685439560439563,
+        "normalized_perimeter": 1.3034411008259623,
+        "components": 1,
+        "circulation_ratio": 0.32067920953664925
+      },
+      "after": {
+        "area": 182.531771136,
+        "perimeter": 68.40799999999999,
+        "envelope_fill": 0.6248,
+        "envelope_aspect": 1.0699588477366255,
+        "normalized_perimeter": 1.2658366571254014,
+        "components": 1,
+        "circulation_ratio": 0.3191517160954701
+      },
+      "setbacks_unchanged": true,
+      "program_unchanged": true,
+      "massing_fallback": false
+    }
+  ]
+}

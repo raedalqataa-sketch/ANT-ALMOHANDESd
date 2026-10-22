@@ -140,6 +140,7 @@ class VillaBrief(Strict):
     automatic_features: AutomaticFeatures = Field(default_factory=AutomaticFeatures)
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
+    massing_strategy: Literal['legacy','coherent'] = 'legacy'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
     notes: str = Field(default='', max_length=4000)
 

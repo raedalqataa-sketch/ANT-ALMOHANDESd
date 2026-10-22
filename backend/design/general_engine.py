@@ -57,7 +57,7 @@ def length_for(room,lane,t):
     return length+t
 
 
-def allocate(requests,lanes,t,guest_clear_width=1.6):
+def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False):
     """Bounded beam search, rejecting area/width violations before placement."""
     capacities=[r['depth' if r['axis']=='y' else 'width'] for r in lanes]
     states=[([0.]*len(lanes),[[] for _ in lanes])]
@@ -91,7 +91,12 @@ def allocate(requests,lanes,t,guest_clear_width=1.6):
         # Functional sequencing along a wing: services then social spaces, bedrooms together.
         order={'bathroom':0,'storage':1,'laundry':2,'kitchen':3,'dining':4,'living':5,'majlis':6,'office':7,'master':8,'bedroom':9}
         for r in sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],(1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id']))):
-            length=length_for(r,lane,t)+min(extra*r['min_area']/weights,length_for(r,lane,t)*.15)
+            base=length_for(r,lane,t)
+            growth=min(extra*r['min_area']/weights,base*(.75 if coherent else .15))
+            if coherent:
+                cross=lane['width' if axis=='y' else 'depth']-t
+                growth=min(growth,max(0,2.8*cross+t-base))
+            length=base+growth
             cell=box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else length,length if axis=='y' else lane['depth'],**copy.deepcopy(r),door_side=lane['door_side'])
             cells.append(cell);start+=length
         remaining=lane['y' if axis=='y' else 'x']+capacities[i]-start
@@ -156,7 +161,7 @@ def search(brief,family):
         lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
-            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width)
+            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent')
             if cells is None:failed=True;break
             if brief.automatic_features.roof_annex:
                 # Only retain the strip supporting the annex lounge immediately
@@ -173,14 +178,30 @@ def search(brief,family):
             floors.append(cells+([copy.deepcopy(stair)] if stair else []))
         if failed:continue
         if wells and any(not any(r.get('request_id') and (abs(r['y']+r['depth']-(w['y']-brief.wall_thickness/2))<EPS or abs(r['y']-(w['y']+w['depth']+brief.wall_thickness/2))<EPS) and min(r['x']+r['width'],w['x']+w['width'])-max(r['x'],w['x'])>.7 for r in cells for w in wells) for cells in floors):continue
-        gross=max(sum(area(r) for r in cells)+sum(area(h) for h in halls) for cells in floors)
+        halls_by_floor=[halls for _ in floors]
+        if brief.massing_strategy=='coherent':
+            from .massing_quality import trim_corridor_tails
+            halls_by_floor=[trim_corridor_tails(halls,cells) for cells in floors]
+        gross=max(sum(area(r) for r in cells)+sum(area(h) for h in floor_halls) for cells,floor_halls in zip(floors,halls_by_floor))
         spare=sum(area(r) for rooms in floors for r in rooms if r['kind']=='reserve')
         score=gross*brief.floors+spare*.8
-        pool.append(dict(W=W,D=D,halls=halls,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y))
+        massing=None
+        if brief.massing_strategy=='coherent':
+            from .massing_quality import penalty
+            massing=[];massing_cost=0
+            for cells,floor_halls in zip(floors,halls_by_floor):
+                cost,metrics=penalty([cells],floor_halls);massing_cost+=cost/len(floors);massing.extend(metrics)
+            score*=1+massing_cost
+        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing))
         if best is None or score<best['score']:best=pool[-1]
     if best:
         pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
+        if brief.massing_strategy=='coherent':
+            fallback=search(brief.model_copy(update={'massing_strategy':'legacy'}),family)
+            if fallback:
+                backups=[{k:v for k,v in fallback.items() if k!='alternatives'}]+fallback.get('alternatives',[])
+                best['alternatives'].extend({**r,'massing_fallback':True} for r in backups)
     return best
 
 
@@ -392,7 +413,7 @@ def materialize(brief,family,result):
     revision=uuid4().hex;t=brief.wall_thickness
     origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
     model=dict(schema_version='0.6.2-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
-               brief=brief.model_dump(),profile={'project_name':brief.project_name},site={'width':brief.plot_width,'depth':brief.plot_depth},
+               brief=brief.model_dump(),profile={'project_name':brief.project_name,'massing_strategy':brief.massing_strategy,'massing_revision':'coherent-1' if brief.massing_strategy=='coherent' else 'legacy','massing_fallback':bool(result.get('massing_fallback'))},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(origin_x,origin_y,result['W'],result['D']),
                search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
                requirements_resolution=resolve_notes(brief),regulatory_geometry=brief.regulatory_geometry.model_dump() if brief.regulatory_geometry else None,presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
@@ -407,7 +428,7 @@ def materialize(brief,family,result):
     model['footprint']['polygon']=[(x+origin_x,y+origin_y) for x,y in outline]
     for fi,cells in enumerate(result['floors']):
         fid=['GF','FF'][fi];f=dict(id=fid,name=['الدور الأرضي','الدور الأول'][fi],level_m=fi*brief.floor_height,rooms=[],walls=[],openings=[],furniture=[],decorations=[],cells=[])
-        for n,cell in enumerate(cells+[dict(r,id=f'hall-{i}',kind='corridor',name='موزع الحركة') for i,r in enumerate(result['halls'])]):
+        for n,cell in enumerate(cells+[dict(r,id=f'hall-{i}',kind='corridor',name='موزع الحركة') for i,r in enumerate(result.get('halls_by_floor',[result['halls']]*brief.floors)[fi])]):
             q=copy.deepcopy(cell);q['id']=fid+'-'+q.get('id',f'reserve-{n}');q['floor_id']=fid
             q['x']+=origin_x+t/2;q['y']+=origin_y+t/2
             f['cells'].append(q)
@@ -447,6 +468,9 @@ def materialize(brief,family,result):
         if isinstance(obj,dict):return {k:clean(v) for k,v in obj.items() if k!='revision_id'}
         if isinstance(obj,list):return [clean(v) for v in obj]
         return obj
+    if brief.massing_strategy=='coherent':
+        from .massing_quality import measures
+        model['massing_quality']={'revision':'coherent-1','floors':{f['id']:measures(f['cells']) for f in model['floors']}}
     model['geometry_sha256']=hashlib.sha256(json.dumps(clean(canonical),sort_keys=True).encode()).hexdigest()
     return model
 
@@ -464,6 +488,10 @@ def validate_general(model,brief):
         add('guest-distributor-geometry',make_guest_distributor(model['floors'][0],brief,model['model_revision_id']),'هندسة موزع الضيوف وأبوابه')
         return checks
     for fi,f in enumerate(model['floors']):
+        if brief.massing_strategy=='coherent':
+            from .massing_quality import measures
+            quality=measures(f['cells'])
+            add(f['id']+'-massing-connected',quality['components']==1,'اتصال كتلة المبنى هندسيًا',quality)
         expected={r['id']:r for r in expanded_program(brief,fi)}
         actual={r['id'].removeprefix(f['id']+'-'):r for r in f['rooms'] if r.get('request_id')}
         add(f'{f["id"]}-program',set(expected)==set(actual) and sum(bool(r.get('request_id')) for r in f['rooms'])==len(expected),'تغطية جميع الفراغات المطلوبة في دورها',{'expected':len(expected),'actual':len(actual)})
