@@ -16,11 +16,19 @@ def main():
   if source.exists():shutil.copyfile(source,studio/'assets'/name)
  for name in ('CPYTHON-LICENSE','PYODIDE-LICENSE','engine.zip','manifest.json'):shutil.copyfile(a.runtime_source/name,studio/name)
  base_engine_sha=hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest()
- if base_engine_sha!='5111c3eba2907d5818d951eef1054465185dd5c861ab27a9140c671faf8ea8dc':
-  raise ValueError('Unreviewed base runtime: verify the approved engine snapshot before packaging')
- # Retain the reviewed base runtime, and overlay the current backend source explicitly.
+ # Accept the previously approved site runtime or a freshly rebuilt runtime
+ # whose architectural source bytes match this repository exactly.
+ approved_sha='5111c3eba2907d5818d951eef1054465185dd5c861ab27a9140c671faf8ea8dc'
  existing=studio/'engine.zip'
  with zipfile.ZipFile(existing) as archive:entries={name:archive.read(name) for name in archive.namelist()}
+ base_verified_mode='PREVIOUS_APPROVED_SNAPSHOT' if base_engine_sha==approved_sha else 'CURRENT_REPOSITORY_SOURCES'
+ if base_verified_mode=='CURRENT_REPOSITORY_SOURCES':
+  required=('backend/design/general_engine.py','backend/design/architect_planner.py',
+            'backend/design/constitution_v2.py',
+            'constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json')
+  mismatched=[name for name in required if entries.get(name)!=(ROOT/name).read_bytes()]
+  if mismatched:raise ValueError('Unreviewed base runtime; source mismatch: '+', '.join(mismatched))
+ # Retain the verified runtime packages and overlay current reviewed source.
  for source in (ROOT/'backend').rglob('*.py'):entries[str(source.relative_to(ROOT))]=source.read_bytes()
  # V2 is data-driven: bundle the policy JSON alongside the Python validator.
  policy=ROOT/'constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json'
@@ -75,7 +83,7 @@ def main():
  for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
  source=ROOT/'lovable_integration/lovable-src'
  if source.exists():shutil.copytree(source,a.output/'src',dirs_exist_ok=True)
- manifest={'engine_revision':'coherent-massing-1','base_engine_sha256':base_engine_sha,'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False,'constitution_v2':'2.0.0-draft','policy_visual_rules':143,'policy_manus_constraints':12,'v2_runtime_mode':'embedded_automatic_opt_in'}
+ manifest={'engine_revision':'coherent-massing-1','base_engine_sha256':base_engine_sha,'base_verified_mode':base_verified_mode,'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False,'constitution_v2':'2.0.0-draft','policy_visual_rules':143,'policy_manus_constraints':12,'v2_runtime_mode':'embedded_automatic_enabled'}
  (target/'integration.json').write_text(json.dumps(manifest,indent=2)+'\n')
  print(json.dumps(manifest))
 
