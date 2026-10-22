@@ -55,12 +55,14 @@ function finish(width:number,depth:number,area:number,source:SiteEvidence['sourc
   return {width:w,depth:d,area:round(area),north_edge,
     evidence:{source,area_m2:round(area),point_count:4,review_required:true}};
 }
-export function measureImageCorners(points:Point[],knownTopWidthM:number):PlotMeasurement{
+export function measureImageCorners(points:Point[],knownTopWidthM:number,imageAspectRatio=1):PlotMeasurement{
   if(!Number.isFinite(knownTopWidthM)||knownTopWidthM<=0)
     throw new Error('أدخل الطول الحقيقي للضلع A-B من مخطط موثوق لمعايرة الصورة.');
   if(points.some(p=>p.x<0||p.x>1||p.y<0||p.y>1))
     throw new Error('كل نقطة يجب أن تكون داخل الصورة.');
-  const sides=inspectQuadrilateral(points);
+  if(!Number.isFinite(imageAspectRatio)||imageAspectRatio<=0)
+    throw new Error('نسبة أبعاد الصورة غير صالحة.');
+  const sides=inspectQuadrilateral(points.map(p=>({x:p.x*imageAspectRatio,y:p.y})));
   const scale=knownTopWidthM/sides.top;
   const width=(sides.top+sides.bottom)/2*scale;
   const depth=(sides.right+sides.left)/2*scale;
