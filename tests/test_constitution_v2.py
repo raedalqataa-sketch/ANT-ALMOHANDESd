@@ -113,3 +113,20 @@ def test_public_browser_builder_embeds_policy_and_enables_audit():
     assert "constitution_v2=True" in builder
     assert "candidate.constitution_v2" in runtime
     assert "تنفيذ" in runtime or "تدقيق" in runtime
+
+
+def test_real_v2_generation_carries_audit_and_keeps_exports_nonexecutive(tmp_path):
+    from backend.design.architect_planner import ClientIntent, generate_automatic
+    intent = ClientIntent(width=24, depth=32, city="الرياض", family=6,
+                          street_edges=["bottom"], main_street="bottom",
+                          street_widths={"bottom": 15})
+    result = generate_automatic(intent, tmp_path, constitution_v2=True)
+    assert result["planning"]["architecture_constitution_v2"]["mode"] == "EXPERIMENTAL_OPT_IN_PARTIAL"
+    assert result["planning"]["architecture_constitution_v2"]["audited_count"] >= len(result["candidates"])
+    for candidate in result["candidates"]:
+        audit = candidate["constitution_v2"]
+        assert audit["gate_count"] == 16
+        assert audit["hard_failures"] == []
+        assert audit["release_decision"] == "DRAFT_REVIEW"
+        assert audit["executive_approval"] is False
+        assert candidate["release"]["executive_issue_allowed"] is False
