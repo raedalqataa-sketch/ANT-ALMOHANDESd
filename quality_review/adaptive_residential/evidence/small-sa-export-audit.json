@@ -1,0 +1,41 @@
+{
+  "all_actual_exports_audited": true,
+  "candidates": [
+    {
+      "pattern": "spine-family_front-rear",
+      "dxf": "AC1024",
+      "units": "metres",
+      "dxf_audit_errors": 0,
+      "fills": false,
+      "pdf_pages": 3,
+      "actual_requested_spaces": 5,
+      "native_independent_recheck_failures": [],
+      "pending_checks": 24,
+      "executive_approved": false
+    },
+    {
+      "pattern": "cross-social_front-rear",
+      "dxf": "AC1024",
+      "units": "metres",
+      "dxf_audit_errors": 0,
+      "fills": false,
+      "pdf_pages": 3,
+      "actual_requested_spaces": 5,
+      "native_independent_recheck_failures": [],
+      "pending_checks": 24,
+      "executive_approved": false
+    },
+    {
+      "pattern": "cross-legacy-rear",
+      "dxf": "AC1024",
+      "units": "metres",
+      "dxf_audit_errors": 0,
+      "fills": false,
+      "pdf_pages": 3,
+      "actual_requested_spaces": 5,
+      "native_independent_recheck_failures": [],
+      "pending_checks": 24,
+      "executive_approved": false
+    }
+  ]
+}

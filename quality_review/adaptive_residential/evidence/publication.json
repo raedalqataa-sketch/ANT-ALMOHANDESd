@@ -1,0 +1,24 @@
+{
+  "project_id": "appgprj_6ad2972fcff881919ea4894cc4f51c22",
+  "version_number": 27,
+  "saved_version_id": "appgprj_6ad2972fcff881919ea4894cc4f51c22~appgver_39b94770e58481918160c99909dc4980",
+  "deployment_id": "appgdep_6ada5537645c8191acc98f14dab5a96d",
+  "deployment_status": "succeeded",
+  "published_at": "2026-10-22T18:26:25.881532+00:00",
+  "url": "https://ant-villa-personal.woollybat9.chatgpt.site/client/",
+  "audience_preserved": "public",
+  "site_source_sha": "d6205663ad074704b4502539874708e3a041fc02",
+  "engine_merged_sha": "e4843dc72f88f4d0bf7482a42438656a06758436",
+  "engine_sha256": "0aea8cffc6b2148b5a355cf8dee3286ca8ba52b26e17d987082fe2abe775491b",
+  "planner_version": "architect-program-3",
+  "selection_revision": "objective_ranked_geometry_v2",
+  "main_ci_url": "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39819259071",
+  "executive_approved": false,
+  "production_browser_passed": [
+    "SA",
+    "YE"
+  ],
+  "production_all_exports_audited": true,
+  "production_page_errors": [],
+  "production_request_failures": []
+}

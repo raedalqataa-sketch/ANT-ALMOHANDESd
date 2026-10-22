@@ -1,0 +1,70 @@
+{
+  "small-sa": {
+    "efficiency": [
+      "spine-family_front-rear",
+      "cross-legacy-rear",
+      "cross-social_front-rear"
+    ],
+    "usability": [
+      "spine-family_front-rear",
+      "cross-social_front-rear",
+      "cross-legacy-rear"
+    ],
+    "prestige": [
+      "spine-family_front-rear",
+      "cross-social_front-rear",
+      "cross-legacy-rear"
+    ]
+  },
+  "medium-sa": {
+    "efficiency": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "stepped-legacy-rear"
+    ],
+    "usability": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "stepped-legacy-rear"
+    ],
+    "prestige": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "stepped-legacy-rear"
+    ]
+  },
+  "large-sa": {
+    "efficiency": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "L-legacy-rear"
+    ],
+    "usability": [
+      "spine-social_front-front",
+      "L-legacy-rear",
+      "spine-legacy-rear"
+    ],
+    "prestige": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "L-legacy-rear"
+    ]
+  },
+  "medium-ye": {
+    "efficiency": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "L-social_front-front"
+    ],
+    "usability": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "L-social_front-front"
+    ],
+    "prestige": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "cross-legacy-rear"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "live_source_metadata": {
+    "embedded_bundle_sha256": "03d99cf36ba344495387c4ee2fda06b9708ea79d52d2b36d72fc55241f66dcf8",
+    "application": "ant-client-intake",
+    "path": "/client/",
+    "source_sha256": "ee7173dfd381c1633126e21dc38b63b7ba08f5d451382faf2c05b131e963183b",
+    "source_reference": "Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only",
+    "site_placement_revision": "rear-corner-1",
+    "massing_revision": "coherent-massing-1",
+    "planner_version": "architect-program-3",
+    "selection_revision": "objective_ranked_geometry_v2",
+    "supported_countries": [
+      "SA",
+      "YE"
+    ],
+    "engine_version": "0.6.2-general",
+    "engine_sha256": "0aea8cffc6b2148b5a355cf8dee3286ca8ba52b26e17d987082fe2abe775491b",
+    "runtime_shared_at": "/studio/",
+    "client_persistence": "temporary tab-scoped sessionStorage; engine files memory only",
+    "lovable_sync_verified": false,
+    "executive_approval": false
+  },
+  "actual_live_engine_sha256": "0aea8cffc6b2148b5a355cf8dee3286ca8ba52b26e17d987082fe2abe775491b",
+  "actual_live_engine_matches_tested_build": true
+}

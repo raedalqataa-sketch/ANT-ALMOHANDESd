@@ -1,0 +1,46 @@
+[
+  {
+    "case": "small-sa",
+    "accepted": 3,
+    "ids": [
+      "spine-family_front-rear",
+      "cross-social_front-rear",
+      "cross-legacy-rear"
+    ],
+    "variants": 12,
+    "seconds": 2.88
+  },
+  {
+    "case": "medium-sa",
+    "accepted": 3,
+    "ids": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "stepped-legacy-rear"
+    ],
+    "variants": 7,
+    "seconds": 11.44
+  },
+  {
+    "case": "large-sa",
+    "accepted": 3,
+    "ids": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "L-legacy-rear"
+    ],
+    "variants": 7,
+    "seconds": 9.51
+  },
+  {
+    "case": "medium-ye",
+    "accepted": 3,
+    "ids": [
+      "spine-social_front-front",
+      "spine-legacy-rear",
+      "L-social_front-front"
+    ],
+    "variants": 7,
+    "seconds": 73.59
+  }
+]

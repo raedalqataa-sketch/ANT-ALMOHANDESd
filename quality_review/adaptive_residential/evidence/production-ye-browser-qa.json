@@ -1,0 +1,30 @@
+{
+  "country": "YE",
+  "output_level": "economy",
+  "priority": "efficiency",
+  "country_location_recovered": true,
+  "investment_drawing_blocked": true,
+  "investment_requirements_exported": true,
+  "basic_inputs_only": true,
+  "required_room_counts": false,
+  "required_room_dimensions": false,
+  "required_manual_setbacks": false,
+  "automatic_generation": true,
+  "family": 6,
+  "sleeping_capacity": 6,
+  "patterns": [
+    "spine-social_front-front",
+    "stepped-legacy-rear",
+    "spine-legacy-rear"
+  ],
+  "draft_recovered": true,
+  "real_downloads": [
+    "pdf",
+    "dxf",
+    "json"
+  ],
+  "unknown_street_width_disclosed": true,
+  "page_errors": [],
+  "mobile_overflow": false,
+  "executive_approved": false
+}

@@ -1,0 +1,23 @@
+{
+  "implementation_sha": "fdf2ef34f08dfb574104121155b659a52fd4e705",
+  "merged_main_sha": "e4843dc72f88f4d0bf7482a42438656a06758436",
+  "pr": 14,
+  "pr_ci": [
+    {
+      "run": 39818810026,
+      "conclusion": "success"
+    },
+    {
+      "run": 39818822261,
+      "conclusion": "success"
+    }
+  ],
+  "main_ci": {
+    "run": 39819259071,
+    "conclusion": "success"
+  },
+  "python_passed": 169,
+  "node_passed": 20,
+  "typescript_vite_build": "passed",
+  "drawings_executive_approved": false
+}
