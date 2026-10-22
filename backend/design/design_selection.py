@@ -114,7 +114,15 @@ def evaluate(model,intent):
         weight={'efficiency':.15,'usability':.25,'prestige':.20}[intent.design_priority]
         components['reference_patterns']=reference['design_penalty'];weights={**weights,'reference_patterns':weight}
         score=round(score+weight*reference['design_penalty'],6)
-    return {'reference_patterns':reference,'metrics':metrics,'heuristic_score':score,'objective':intent.design_priority,'output_level':intent.output_level,
+    intelligent=None
+    if model.get('generation_mode')=='V3_ADAPTIVE':
+        from .functional_intelligence import inspect
+        intelligent=inspect(model)
+        importance={'efficiency':.16,'usability':.32,'prestige':.20}[intent.design_priority]
+        components['measured_functional_relations']=intelligent['soft_penalty']
+        weights={**weights,'measured_functional_relations':importance}
+        score=round(score+importance*intelligent['soft_penalty'],6)
+    return {'functional_intelligence':intelligent,'reference_patterns':reference,'metrics':metrics,'heuristic_score':score,'objective':intent.design_priority,'output_level':intent.output_level,
         'score_components':components,'weights':weights,'failed_checks':failed,
         'pending_checks':[c['check_id'] for c in model['checks'] if c['status']=='PENDING'],
         'acceptance_reason':'اجتاز الفحوص الهندسية المتاحة؛ الاشتراطات المعلقة لا تمثل اعتمادًا' if not failed else 'حجب الرسم بسبب فشل فحوص هندسية',

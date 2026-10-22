@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة'}
+FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -28,6 +28,9 @@ def area(r):return r['width']*r['depth']
 def topology(family,W,D,c,ratio,top):
     """Disjoint cells tile a nonrectangular mass; lanes abut connected halls."""
     a=W*ratio;b=D*top
+    if family=='adaptive':
+        from .adaptive_geometry import adaptive_topology
+        return adaptive_topology(W,D,c,ratio,top)
     if family=='cross':
         # Four independently allocated clusters around a connected circulation node.
         return [box(a-c/2,0,c,D),box(0,b-c/2,a-c/2,c),box(a+c/2,b-c/2,W-a-c/2,c)],[
@@ -80,10 +83,29 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
     def bundle_order(rs):
         size=(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id'])
         if policy=='legacy':return size
+        if policy=='relationship_aware':
+            rank={'majlis':0,'kitchen':1,'dining':2,'living':3,'master':4,
+                  'bedroom':5,'bathroom':6,'office':7,'laundry':8,'storage':9}
+            return (min(rank.get(r['kind'],10) for r in rs),*size)
         if policy=='service_aligned':return (0 if all(r['kind'] in ('bathroom','kitchen','laundry') for r in rs) else 1,*size)
         rank={'majlis':0,'living':1,'dining':2,'kitchen':3,'office':4,'master':5,'bedroom':6,'bathroom':7,'laundry':8,'storage':9}
         return (min(rank.get(r['kind'],10) for r in rs),*size)
     ordered=sorted(bundles.values(),key=bundle_order)
+    def relationship_cost(groups):
+        if policy!='relationship_aware':return 0.
+        kinds=[{r['kind'] for r in group if not r.get('guest_distributor')} for group in groups]
+        present=set().union(*kinds) if kinds else set()
+        def detached(first,second):
+            return first in present and second in present and not any(
+                first in group and second in group for group in kinds)
+        cost=25*detached('kitchen','dining')+14*detached('living','dining')
+        cost+=9*detached('master','bathroom')+8*detached('bedroom','bathroom')
+        for group in groups:
+            guest=any(r.get('zone')=='guest' for r in group)
+            family=any(r.get('zone')!='guest' and r.get('request_id')
+                       for r in group)
+            if guest and family:cost+=18
+        return cost
     for bundle in ordered:
         expanded=[]
         for used,groups in states:
@@ -93,10 +115,14 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 u=used.copy();u[i]+=length;g=[row.copy() for row in groups];g[i].extend(bundle)
                 # Best-fit plus load balance; not an architectural quality score.
                 score=sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2 for j,(cap,v) in enumerate(zip(capacities,u)))
+                score+=14*relationship_cost(g)
                 expanded.append((score,u,g))
         if not expanded:return None
         expanded.sort(key=lambda state:state[0]);states=[(u,g) for _,u,g in expanded[:20]]
-    used,groups=min(states,key=lambda s:sum((cap-v)**2 for cap,v in zip(capacities,s[0])))
+    used,groups=min(states,key=lambda state:(
+        sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2
+            for j,(cap,v) in enumerate(zip(capacities,state[0])))+
+        14*relationship_cost(state[1])))
     cells=[]
     for i,lane in enumerate(lanes):
         axis=lane['axis'];start=lane['y' if axis=='y' else 'x']
@@ -106,6 +132,14 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         # Functional sequencing along a wing: services then social spaces, bedrooms together.
         order={'bathroom':0,'storage':1,'laundry':2,'kitchen':3,'dining':4,'living':5,'majlis':6,'office':7,'master':8,'bedroom':9}
         sequence=sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],(1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id'])))
+        if policy=='relationship_aware':
+            rank={'kitchen':0,'dining':1,'living':2,'office':3,'master':4,
+                  'bedroom':5,'bathroom':6,'laundry':7,'storage':8,'majlis':9}
+            sequence=sorted(sequence,key=lambda q:(
+                0 if q.get('zone')=='guest' else 1,
+                q.get('guest_parent') or q.get('id','') if q.get('zone')=='guest' else '',
+                0 if q.get('guest_distributor') else 1 if q.get('zone')=='guest' else rank.get(q['kind'],10),
+                q['id']))
         if policy=='social_front':
             # Guests stay a contiguous majlis/distributor/WC bundle when reversed.
             if (axis=='y' and entry_face=='south') or (axis=='x' and entry_face=='east'):sequence=list(reversed(sequence))
@@ -153,6 +187,11 @@ def search(brief,family,policy='legacy',core_position='rear'):
     best=None;attempts=0;pool=[]
     # Each candidate searches dimensions AND allocation, never just scales a fixed plan.
     variations=[(s,d,r,b) for s in (1.,.85,.70) for d in (1.,.82,.68,.55) for r in (.33,.36,.38,.40,.44,.47) for b in (.30,.36,.40,.44,.48)]
+    if family=='adaptive':
+        variations=[(s,d,r,b) for s in (.72,.82,.92,1.)
+                    for d in (.70,.82,.92,1.)
+                    for r in (.38,.46,.54,.62)
+                    for b in (.36,.45,.55,.64)]
     if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
     if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
@@ -458,7 +497,7 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    elif family in ('spine','cross'):
+    elif family in ('spine','cross','adaptive'):
         outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
@@ -656,7 +695,7 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
     options=search_options or [{'family':family,'policy':'legacy','core_position':'rear'} for family in families]
     for option in options:
         family=option['family'];policy=option.get('policy','legacy');core_position=option.get('core_position','rear')
-        if family not in FAMILIES or policy not in ('legacy','social_front','family_front','service_aligned') or core_position not in ('rear','front'):
+        if family not in FAMILIES or policy not in ('legacy','social_front','family_front','service_aligned','relationship_aware') or core_position not in ('rear','front'):
             raise ValueError('سياسة البحث غير مدعومة')
         label=FAMILIES[family]
         result=search(brief,family,policy,core_position)

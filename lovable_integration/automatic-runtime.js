@@ -43,6 +43,28 @@ window.AntStartAutomatic=async(draft,send)=>{
   const caution=document.createElement('p');caution.textContent='هذا التدقيق لا يثبت أن القواعد الـ143 نُفذت آليًا بالكامل، ولا يُعد اعتمادًا تنفيذيًا.';auditHost.append(caution);
  }else{const note=document.createElement('p');note.textContent='لم يتوفر تقرير V2 لهذه النسخة؛ الفحوص السابقة فقط فعالة.';auditHost.append(note);}
  program.append(auditHost);
+ const v3=result.planning?.generation_v3;
+ if(v3){
+  const report=document.createElement('section');report.setAttribute('aria-label','بحث المساقط الوظيفي V3');
+  const title=document.createElement('h3');title.textContent='محرك V3 — العلاقات الوظيفية وتشكيل الأجنحة';report.append(title);
+  const summary=document.createElement('p');
+  summary.textContent='بحث المحرك تكوينات بأجنحة متغيرة، وقاس مسارات الأبواب وعلاقات المعيشة والطعام والخدمة. القبول ما زال خاضعًا للفحوص الهندسية؛ النتائج مسودات للمراجعة.';
+  report.append(summary);
+  const rounds=v3.automatic_repair||[];
+  const repair=document.createElement('p');
+  repair.textContent=rounds.length?
+   `أجرى المحرك ${rounds.length} جولة إعادة بحث إصلاحية. لم يحذف الغرف المطلوبة ولم يخفض معايير الفحص.`:
+   'لم تستدعِ نتيجة البحث جولة إصلاح إضافية.';
+  report.append(repair);
+  for(const [i,m] of result.candidates.entries()){
+   const info=m.design_option?.functional_evidence;
+   if(!info)continue;
+   const p=document.createElement('p');
+   p.textContent=`البديل ${i+1}: قِيسَت ${info.evaluated_routes} علاقة حركة، ومسارات غير متصلة: ${info.unreachable_routes}. تفاصيل الفحص أسفل التقرير.`;
+   report.append(p);
+  }
+  program.append(report);
+ }
  const reasoning=document.createElement('ul');for(const reason of result.planning.reasoning){const item=document.createElement('li');item.textContent=reason;reasoning.append(item);}program.append(reasoning);
  const assumptions=document.createElement('details'),summary=document.createElement('summary');summary.textContent='كيف حُسبت الارتدادات؟ وما الافتراضات التي تحتاج مراجعة؟';assumptions.append(summary);
  for(const warning of result.planning.warnings){const p=document.createElement('p');p.textContent=warning;assumptions.append(p);}
