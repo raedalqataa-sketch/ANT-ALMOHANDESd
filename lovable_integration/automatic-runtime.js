@@ -46,9 +46,9 @@ window.AntStartAutomatic=async(draft,send)=>{
  const v3=result.planning?.generation_v3;
  if(v3){
   const report=document.createElement('section');report.setAttribute('aria-label','بحث المساقط الوظيفي V3');
-  const title=document.createElement('h3');title.textContent='محرك V3 — العلاقات الوظيفية وتشكيل الأجنحة';report.append(title);
+  const title=document.createElement('h3');title.textContent='محرك V3 — العلاقات الوظيفية وتشكيل الكتلة المتغيّر';report.append(title);
   const summary=document.createElement('p');
-  summary.textContent='بحث المحرك تكوينات بأجنحة متغيرة، وقاس مسارات الأبواب وعلاقات المعيشة والطعام والخدمة. القبول ما زال خاضعًا للفحوص الهندسية؛ النتائج مسودات للمراجعة.';
+  summary.textContent='بحث المحرك تشكيلات متعددة التراجع وأجنحة متغيرة، وقاس مسارات الأبواب وعلاقات المعيشة والطعام والخدمة. هذه حلول هندسية أولية، وليست نماذج إنشائية أو اعتمادًا قانونيًا.';
   report.append(summary);
   const rounds=v3.automatic_repair||[];
   const repair=document.createElement('p');
@@ -62,6 +62,17 @@ window.AntStartAutomatic=async(draft,send)=>{
    const p=document.createElement('p');
    p.textContent=`البديل ${i+1}: قِيسَت ${info.evaluated_routes} علاقة حركة، ومسارات غير متصلة: ${info.unreachable_routes}. تفاصيل الفحص أسفل التقرير.`;
    report.append(p);
+   const readiness=m.executive_readiness;
+   if(readiness){
+    const approval=document.createElement('details'),caption=document.createElement('summary');
+    caption.textContent=`البديل ${i+1} — اعتماد تنفيذي: غير ممنوح، ${readiness.required_signoffs.length} مراجعات لازمة`;
+    approval.append(caption);
+    const list=document.createElement('ul');
+    for(const requirement of readiness.required_signoffs){
+     const row=document.createElement('li');row.textContent=requirement.label_ar+' — لم يُتحقق بعد';list.append(row);
+    }
+    approval.append(list);report.append(approval);
+   }
   }
   program.append(report);
  }
