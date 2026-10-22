@@ -667,5 +667,5 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None):
             model['downloads'].update({ext:f'/api/files/{rev}.{ext}' for ext in ('pdf','dxf')})
         (out/f'{rev}.json').write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8');candidates.append(model)
     return {'status':'DRAFT_REVIEW','candidates':candidates,'unavailable':unavailable,
-            'scope':'أرض مستطيلة، دور أو دوران وملحق اختياري؛ إضافات مولدة حسب الطلب وبحث محدود L/U/متدرج؛ لا ضمان لإيجاد كل حل ممكن.',
+            'scope':('أرض مستطيلة، دور أو دوران؛ بحث هندسي ضمن مكتبة حلول متاحة، دون ضمان الحل الأمثل أو الاعتماد التنفيذي.' if candidate_families is not None else 'أرض مستطيلة، دور أو دوران وملحق اختياري؛ بحث محدود L/U/متدرج؛ لا ضمان لإيجاد كل حل ممكن.'),
             'ai':{'mode':'geometric_search','language_model_connected':False}}
