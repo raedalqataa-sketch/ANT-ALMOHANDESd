@@ -131,7 +131,7 @@ def propose(intent:ClientIntent):
         'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'] if intent.country=='SA' else {'jurisdiction':'YE','status':'UNVERIFIED_DESIGN_ASSUMPTION'},'unknown_street_faces':unknown,'local_parcel_verified':False}}
     return b,planning
 
-def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=False):
+def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=False,generation_v3=False):
     """Search physical allocations and core positions, validate, diversify, then export.
 
     No failed drawings or near-duplicate plans fill a missing third alternative.
@@ -141,15 +141,29 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True)
     b,planning=propose(intent)
-    primary=[{'family':f,'policy':'legacy','core_position':'rear'} for f in ('spine','L','U','stepped','cross')]
-    primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
-    primary.append({'family':'spine','policy':'service_aligned','core_position':'rear'})
-    pool=[];unavailable=[];examined=[]
+    if generation_v3:
+        primary=[{'family':f,'policy':p,'core_position':c} for f,p,c in (
+            ('adaptive','relationship_aware','rear'),
+            ('spine','relationship_aware','rear'),
+            ('cross','relationship_aware','rear'),
+            ('adaptive','social_front','front'),
+            ('spine','service_aligned','rear'),
+        )]
+    else:
+        primary=[{'family':f,'policy':'legacy','core_position':'rear'} for f in ('spine','L','U','stepped','cross')]
+        primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
+        primary.append({'family':'spine','policy':'service_aligned','core_position':'rear'})
+    pool=[];unavailable=[];examined=[];repair_history=[]
     def explore(options):
         batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
         unavailable.extend(batch['unavailable']);examined.extend(options)
         for m in batch['candidates']:
             m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))
+            if generation_v3:
+                from .functional_intelligence import repair_reasons
+                m['generation_mode']='V3_ADAPTIVE'
+                m['repair_diagnosis']=repair_reasons(m)
+                m['search']['relation_aware_allocation']=m['search']['allocation_policy']=='relationship_aware'
             if constitution_v2:
                 from .constitution_v2 import assess_candidate
                 audit=assess_candidate(m,intent)
@@ -161,12 +175,37 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     explore(primary)
     chosen=select(pool)
     expanded=False
-    if len(chosen)<3:
+    poor_quality=(generation_v3 and any(
+        (m['design_evaluation']['functional_intelligence'] or {}).get('soft_penalty',0)>.28
+        for m in chosen))
+    if len(chosen)<3 or poor_quality:
         expanded=True
-        explore([{'family':f,'policy':p,'core_position':c} for f,p,c in (
-            ('spine','family_front','rear'),('cross','social_front','rear'),('stepped','social_front','front'),
-            ('U','social_front','front'),('L','family_front','front'))])
+        if generation_v3:
+            from collections import Counter
+            reasons=Counter(r for model in pool for r in model.get('repair_diagnosis',[]))
+            preferred=[('adaptive','relationship_aware','front'),
+                       ('spine','relationship_aware','front'),
+                       ('cross','relationship_aware','front')]
+            if reasons.get('guest_circulation'):
+                preferred.insert(0,('cross','social_front','rear'))
+            if reasons.get('vertical_core') or reasons.get('furnishing'):
+                preferred.insert(0,('spine','family_front','rear'))
+            preferred.extend([('adaptive','service_aligned','rear'),
+                              ('cross','family_front','front'),
+                              ('spine','social_front','front')])
+            tried={(o['family'],o['policy'],o['core_position']) for o in examined}
+            repairs=[{'family':f,'policy':p,'core_position':c} for f,p,c in preferred
+                     if (f,p,c) not in tried][:5]
+            repair_history.append({'round':1,'previous_valid_distinct':len(chosen),
+                'reason_counts':dict(reasons),'method':'re-search alternative physical layout, never weaken checks',
+                'chosen_search_options':repairs})
+            if repairs:explore(repairs)
+        else:
+            explore([{'family':f,'policy':p,'core_position':c} for f,p,c in (
+                ('spine','family_front','rear'),('cross','social_front','rear'),('stepped','social_front','front'),
+                ('U','social_front','front'),('L','family_front','front'))])
         chosen=select(pool)
+        if repair_history:repair_history[-1]['result_valid_distinct']=len(chosen)
     titles=['المقترح الأنسب لاحتياجاتك','بديل وظيفي للمقارنة','بديل ثالث للمقارنة']
     for i,m in enumerate(chosen):
         metrics=m['design_evaluation']['metrics']
@@ -179,6 +218,14 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         reference=m['design_evaluation'].get('reference_patterns')
         if reference and reference['wet_alignment']['ratio'] is not None:
             m['design_option']['advantages'].append(f"تراكب الخدمات رأسيًا {100*reference['wet_alignment']['ratio']:.0f}٪ · مؤشر تنسيق مبدئي")
+        if generation_v3:
+            fi=m['design_evaluation']['functional_intelligence']
+            m['design_option']['functional_evidence']={
+                'evaluated_routes':fi['evaluated_relations'],
+                'unreachable_routes':len(fi['unreachable']),
+                'guest_exposure':fi['guest_family_exposure'],
+                'weighted_preference_penalty':fi['soft_penalty']}
+            m['design_option']['method']='V3 parametric wings, measured functional door routes and iterative search repair'
         m['search']['family_label_ar']=titles[i]
     diagnostics=[{'candidate_id':m['candidate_id'],'revision_id':m['model_revision_id'],
         'accepted':m in chosen,'geometry_valid':m['release']['drawing_export_allowed'],
@@ -188,12 +235,20 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     planning['reference_design']={'revision':'reference-principles-1','project_count':8,'unique_images':23,'legal_rules_extracted':0,'status':'visual design preferences; not surveyed or code-certified','unsupported_reference_features':['basements','general double-height slabs','arbitrary four-level programs','chamfered plots']}
     planning['reasoning'].append('تُقارن خدمة المطبخ للطعام دون عبور الغرف الخاصة، وتراكب الخدمات بين الأدوار، وفسحة نوافذ المعيشة داخل الأرض؛ مؤشرات تصميمية مستخلصة من المراجع وليست قوانين.')
     planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
+    if generation_v3:
+        planning['generation_v3']={
+            'revision':'adaptive-functional-search-1','status':'EXPERIMENTAL_DESIGN_DRAFT',
+            'geometric_method':'parametric independent wing offsets with actual occupied union',
+            'functional_method':'scored allocation + measured door-graph relations and privacy evidence',
+            'automatic_repair':repair_history,
+            'unverified':['unrestricted floorplate solver','structural model','full visual privacy','mechanical services','code approval'],
+            'legacy_shapes_in_default_v3_search':False}
     if constitution_v2:
         planning['architecture_constitution_v2']={'version':'2.0.0-draft',
             'mode':'EXPERIMENTAL_OPT_IN_PARTIAL','audited_count':len(pool),
             'blocked_by_v2_count':sum(bool(m['constitution_v2']['hard_failures']) for m in pool),
             'scope':'16 evidence-based audit gates; no complete 143-rule enforcement or code certification'}
-    planning['design_selection']={'strategy':'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
+    planning['design_selection']={'strategy':'objective_ranked_geometry_v3_functional' if generation_v3 else 'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
         'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),
         'library_limited':True,'diversity_rule':'normalized room displacement >= 0.065 plus changed functional order/quadrant',
@@ -208,5 +263,6 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         if m in chosen:export_general_model(m,b,out)
         (out/(m['model_revision_id']+'.json')).write_text(json.dumps(m,ensure_ascii=False,indent=2,allow_nan=False),encoding='utf-8')
     return {'status':'DRAFT_REVIEW' if chosen else 'BLOCKED','candidates':chosen,'unavailable':unavailable,
-        'planning':planning,'scope':'بحث هندسي محدود قابل للتوسعة؛ أراض مستطيلة ودور أو دوران؛ لا اعتماد تنفيذي',
+        'planning':planning,'scope':('V3: أجنحة متغيرة وتوزيع علاقات ومسارات وأثاث وبحث إصلاحي محدود؛ أراض مستطيلة 1–2 دور؛ مسودات غير تنفيذية'
+            if generation_v3 else 'بحث هندسي محدود قابل للتوسعة؛ أراض مستطيلة ودور أو دوران؛ لا اعتماد تنفيذي'),
         'ai':{'mode':'geometric_search','language_model_connected':False}}
