@@ -90,7 +90,14 @@ with sync_playwright() as p:
   frame.locator('#generate').click()
  frame.wait_for_function('!AntGeneral.busy && AntGeneral.result!==null',timeout=240000)
  assert frame.locator('#error').is_hidden(),frame.locator('#error').inner_text()
- models=frame.evaluate('AntGeneral.result.candidates.filter(m=>m.release.drawing_export_allowed)');assert len(models)>=2
+ result=frame.evaluate('AntGeneral.result')
+ (OUT/'all-candidates.json').write_text(json.dumps(result,ensure_ascii=False))
+ models=[m for m in result['candidates'] if m['release']['drawing_export_allowed']];assert len(models)>=2
+ for model in models:
+  folder=OUT/'candidates'/model['candidate_id'];folder.mkdir(parents=True,exist_ok=True)
+  for kind,path in {**model['downloads'],**model['previews']}.items():
+   data=frame.evaluate('async path=>Array.from(new Uint8Array(await (await AntFiles.read(path)).arrayBuffer()))',path)
+   extension=path.rsplit('.',1)[-1];(folder/(kind+'.'+extension)).write_bytes(bytes(data))
  assert page.get_by_role('region',name='محرك توليد مساقط الفلل').get_by_role('status').inner_text().startswith('اكتمل البحث')
  for m in models:
   assert m['brief']['plot_width']==24 and m['brief']['plot_depth']==32 and sum(r['count'] for r in m['brief']['rooms'])==9
