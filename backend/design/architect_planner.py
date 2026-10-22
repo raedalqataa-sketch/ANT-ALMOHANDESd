@@ -143,9 +143,11 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     b,planning=propose(intent)
     if generation_v3:
         primary=[{'family':f,'policy':p,'core_position':c} for f,p,c in (
+            ('freeform','relationship_aware','rear'),
             ('adaptive','relationship_aware','rear'),
             ('spine','relationship_aware','rear'),
             ('cross','relationship_aware','rear'),
+            ('freeform','social_front','front'),
             ('adaptive','social_front','front'),
             ('spine','service_aligned','rear'),
         )]
@@ -183,7 +185,8 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         if generation_v3:
             from collections import Counter
             reasons=Counter(r for model in pool for r in model.get('repair_diagnosis',[]))
-            preferred=[('adaptive','relationship_aware','front'),
+            preferred=[('freeform','relationship_aware','front'),
+                       ('adaptive','relationship_aware','front'),
                        ('spine','relationship_aware','front'),
                        ('cross','relationship_aware','front')]
             if reasons.get('guest_circulation'):
@@ -195,7 +198,8 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                 preferred.insert(0,('adaptive','relationship_aware','front'))
             if reasons.get('vertical_core') or reasons.get('furnishing'):
                 preferred.insert(0,('spine','family_front','rear'))
-            preferred.extend([('adaptive','service_aligned','rear'),
+            preferred.extend([('freeform','service_aligned','rear'),
+                              ('adaptive','service_aligned','rear'),
                               ('cross','family_front','front'),
                               ('spine','social_front','front')])
             tried={(o['family'],o['policy'],o['core_position']) for o in examined}
@@ -242,8 +246,8 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
     if generation_v3:
         planning['generation_v3']={
-            'revision':'adaptive-functional-search-1','status':'EXPERIMENTAL_DESIGN_DRAFT',
-            'geometric_method':'parametric independent wing offsets with actual occupied union',
+            'revision':'adaptive-functional-search-2','status':'EXPERIMENTAL_DESIGN_DRAFT',
+            'geometric_method':'bounded three-band variable setbacks plus adaptive orthogonal wings; actual occupied union',
             'functional_method':'scored allocation + measured door-graph relations and privacy evidence',
             'automatic_repair':repair_history,
             'unverified':['unrestricted floorplate solver','structural model','full visual privacy','mechanical services','code approval'],
@@ -268,6 +272,6 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         if m in chosen:export_general_model(m,b,out)
         (out/(m['model_revision_id']+'.json')).write_text(json.dumps(m,ensure_ascii=False,indent=2,allow_nan=False),encoding='utf-8')
     return {'status':'DRAFT_REVIEW' if chosen else 'BLOCKED','candidates':chosen,'unavailable':unavailable,
-        'planning':planning,'scope':('V3: أجنحة متغيرة وتوزيع علاقات ومسارات وأثاث وبحث إصلاحي محدود؛ أراض مستطيلة 1–2 دور؛ مسودات غير تنفيذية'
+        'planning':planning,'scope':('V3: كتل متغيرة التراجع وتوزيع علاقات ومسارات وأثاث وبحث إصلاحي محدود؛ أراض مستطيلة 1–2 دور؛ مسودات غير تنفيذية'
             if generation_v3 else 'بحث هندسي محدود قابل للتوسعة؛ أراض مستطيلة ودور أو دوران؛ لا اعتماد تنفيذي'),
         'ai':{'mode':'geometric_search','language_model_connected':False}}
