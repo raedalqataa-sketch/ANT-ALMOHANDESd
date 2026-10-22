@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد'}
+FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -31,6 +31,9 @@ def topology(family,W,D,c,ratio,top):
     if family=='adaptive':
         from .adaptive_geometry import adaptive_topology
         return adaptive_topology(W,D,c,ratio,top)
+    if family=='freeform':
+        from .adaptive_geometry import freeform_topology
+        return freeform_topology(W,D,c,ratio,top)
     if family=='cross':
         # Four independently allocated clusters around a connected circulation node.
         return [box(a-c/2,0,c,D),box(0,b-c/2,a-c/2,c),box(a+c/2,b-c/2,W-a-c/2,c)],[
@@ -187,6 +190,11 @@ def search(brief,family,policy='legacy',core_position='rear'):
     best=None;attempts=0;pool=[]
     # Each candidate searches dimensions AND allocation, never just scales a fixed plan.
     variations=[(s,d,r,b) for s in (1.,.85,.70) for d in (1.,.82,.68,.55) for r in (.33,.36,.38,.40,.44,.47) for b in (.30,.36,.40,.44,.48)]
+    if family=='freeform':
+        variations=[(s,d,r,b) for s in (.74,.88,1.)
+                    for d in (.78,.90,1.)
+                    for r in (.38,.48,.58)
+                    for b in (.36,.43,.50)]
     if family=='adaptive':
         variations=[(s,d,r,b) for s in (.72,.82,.92,1.)
                     for d in (.70,.82,.92,1.)
@@ -497,7 +505,7 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    elif family in ('spine','cross','adaptive'):
+    elif family in ('spine','cross','adaptive','freeform'):
         outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
