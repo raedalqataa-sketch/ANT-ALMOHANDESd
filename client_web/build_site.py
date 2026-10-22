@@ -21,7 +21,10 @@ def main():
   source_files=sorted(p for p in (ROOT/'client_web').rglob('*') if p.is_file() and not any(v in p.relative_to(ROOT/'client_web').parts for v in ('node_modules','dist','public','__pycache__')))
   digest=hashlib.sha256()
   for p in source_files:digest.update(str(p.relative_to(ROOT)).encode());digest.update(p.read_bytes())
-  provenance={'application':'ant-client-intake','path':'/client/','source_sha256':digest.hexdigest(),'source_reference':'Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only','engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((runtime/'engine.zip').read_bytes()).hexdigest(),'runtime_shared_at':'/studio/','client_persistence':'temporary tab-scoped sessionStorage; engine files memory only','lovable_sync_verified':False,'executive_approval':False}
+  bundle_digest=hashlib.sha256()
+  for p in sorted(public.rglob('*')):
+   if p.is_file():bundle_digest.update(str(p.relative_to(public)).encode());bundle_digest.update(p.read_bytes())
+  provenance={'embedded_bundle_sha256':bundle_digest.hexdigest(),'application':'ant-client-intake','path':'/client/','source_sha256':digest.hexdigest(),'source_reference':'Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only','engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((runtime/'engine.zip').read_bytes()).hexdigest(),'runtime_shared_at':'/studio/','client_persistence':'temporary tab-scoped sessionStorage; engine files memory only','lovable_sync_verified':False,'executive_approval':False}
   (built/'client-source.json').write_text(json.dumps(provenance,indent=2)+'\n')
   if target.exists():shutil.rmtree(target)
   shutil.copytree(built,target)

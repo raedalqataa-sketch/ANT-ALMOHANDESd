@@ -21,10 +21,11 @@ def main():
  html=(generate/'index.html').read_text()
  html=html.replace('<head>','<head><script>window.AntEmbedded=new URLSearchParams(location.search).get("embedded")==="1";if(window.AntEmbedded)document.documentElement.dataset.clientAwaiting="1";</script><style>html[data-client-awaiting] body{visibility:hidden}#client-transfer-notice{padding:20px;line-height:1.9}#client-transfer-notice p{margin:10px 0}html[data-embedded] header,html[data-embedded] .hero{display:none}</style>')
  html=html.replace('<script defer src="./app.js?v=062">','<script defer src="./client-bridge.js?v=1"></script><script defer src="./app.js?v=062">')
+ html=html.replace('<script defer src="./static-client.js', '<script defer src="./worker-session.js?v=1"></script><script defer src="./static-client.js')
  html=html.replace('</head>','<script defer src="./embedded-runtime.js?v=1"></script></head>')
  html=html.replace('الأرقام الحالية مثال قابل للتعديل، وليست اشتراطات رسمية.','أكمل الحقول الفارغة؛ قياسات الجدران والحركة الظاهرة مقترحات قابلة للتعديل، وليست اشتراطات رسمية.')
  (generate/'index.html').write_text(html)
- for file in ('client-bridge.js','embedded-runtime.js'):shutil.copyfile(ROOT/'lovable_integration'/file,generate/file)
+ for file in ('client-bridge.js','embedded-runtime.js','worker-session.js'):shutil.copyfile(ROOT/'lovable_integration'/file,generate/file)
  app=(generate/'app.js').read_text()
  app=app.replace("function persist(){try", "function persist(){if(window.AntEmbedded)return;try")
  app=app.replace("let chosen;try{chosen=JSON.parse", "let chosen=window.AntEmbedded?{revision:state.chosenRevision}:null;try{if(!window.AntEmbedded)chosen=JSON.parse")
@@ -37,15 +38,23 @@ def main():
  app=app.replace(" }init();", " }window.AntEmbeddedReady=init();\n window.AntLoadClientBrief=b=>{restore(b);changed();};")
  assert 'window.AntLoadClientBrief=b=>' in app
  (generate/'app.js').write_text(app)
- client=(generate/'static-client.js').read_text().replace("const worker=new Worker", "let worker=new Worker")
+ client=(generate/'static-client.js').read_text()
  client=client.replace("if('caches' in window)","if(!window.AntEmbedded&&'caches' in window)").replace("if('caches'in window)","if(!window.AntEmbedded&&'caches'in window)")
- client=client.replace("pending.set(id,{resolve,reject});", "const timer=setTimeout(()=>window.AntStopEngine('تجاوزت العملية مدة الانتظار؛ أعد المحاولة.'),600000);pending.set(id,{resolve,reject,timer});")
- client=client.replace("pending.delete(data.id);", "pending.delete(data.id);clearTimeout(request.timer);")
+ old="const nativeFetch=window.fetch.bind(window);const worker=new Worker('./worker.js?v=062');"
+ assert old in client
+ client=client.replace(old,"const nativeFetch=window.fetch.bind(window);const engine=window.AntWorkerSession.create({url:'./worker.js?v=062',store});window.AntStopEngine=reason=>engine.stop(reason);")
+ client=client.replace("const pending=new Map(),urls=new Map(),sessionFiles=new Map();let seq=0;", "const urls=new Map(),sessionFiles=new Map();")
+ start=client.index('  function call(');end=client.index('  async function read(',start)
+ client=client[:start]+"  const call=(operation,extra={})=>engine.call(operation,extra);\n"+client[end:]
  start=client.index('  worker.onmessage=');end=client.index('  window.AntFiles=',start)
- handlers=client[start:end].replace("for(const p of pending.values())p.reject(", "for(const p of pending.values()){clearTimeout(p.timer);p.reject(").replace("'));pending.clear()", "'));}pending.clear()")
- client=client[:start]+"  function attachWorker(){\n"+handlers+"  }\n  attachWorker();\n  window.AntStopEngine=(reason='أُوقفت العملية؛ يمكنك تعديل الإعدادات وإعادة التوليد.')=>{worker.terminate();for(const p of pending.values()){clearTimeout(p.timer);p.reject(Error(reason));}pending.clear();worker=new Worker('./worker.js?v=062');attachWorker();};\n"+client[end:]
+ client=client[:start]+client[end:]
+ worker=(generate/'worker.js').read_text()
+ marker="    await ready;"
+ assert marker in worker
+ worker=worker.replace(marker,marker+"\n    if(data.operation==='initialize'){postMessage({id:data.id,ready:true});return;}")
+ (generate/'worker.js').write_text(worker)
  (generate/'static-client.js').write_text(client)
- for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
+ for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
  source=ROOT/'lovable_integration/lovable-src'
  if source.exists():shutil.copytree(source,a.output/'src',dirs_exist_ok=True)
  manifest={'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False}
