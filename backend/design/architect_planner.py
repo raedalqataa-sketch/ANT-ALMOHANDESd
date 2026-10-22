@@ -131,7 +131,7 @@ def propose(intent:ClientIntent):
         'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'] if intent.country=='SA' else {'jurisdiction':'YE','status':'UNVERIFIED_DESIGN_ASSUMPTION'},'unknown_street_faces':unknown,'local_parcel_verified':False}}
     return b,planning
 
-def generate_automatic(intent:ClientIntent,output_dir=None):
+def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=False):
     """Search physical allocations and core positions, validate, diversify, then export.
 
     No failed drawings or near-duplicate plans fill a missing third alternative.
@@ -150,6 +150,13 @@ def generate_automatic(intent:ClientIntent,output_dir=None):
         unavailable.extend(batch['unavailable']);examined.extend(options)
         for m in batch['candidates']:
             m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))
+            if constitution_v2:
+                from .constitution_v2 import assess_candidate
+                audit=assess_candidate(m,intent)
+                m['constitution_v2']=audit
+                if audit['hard_failures']:
+                    m['release']['status']='BLOCKED'
+                    m['release']['drawing_export_allowed']=False
             m['design_evaluation']=evaluate(m,intent);pool.append(m)
     explore(primary)
     chosen=select(pool)
@@ -181,6 +188,11 @@ def generate_automatic(intent:ClientIntent,output_dir=None):
     planning['reference_design']={'revision':'reference-principles-1','project_count':8,'unique_images':23,'legal_rules_extracted':0,'status':'visual design preferences; not surveyed or code-certified','unsupported_reference_features':['basements','general double-height slabs','arbitrary four-level programs','chamfered plots']}
     planning['reasoning'].append('تُقارن خدمة المطبخ للطعام دون عبور الغرف الخاصة، وتراكب الخدمات بين الأدوار، وفسحة نوافذ المعيشة داخل الأرض؛ مؤشرات تصميمية مستخلصة من المراجع وليست قوانين.')
     planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
+    if constitution_v2:
+        planning['architecture_constitution_v2']={'version':'2.0.0-draft',
+            'mode':'EXPERIMENTAL_OPT_IN_PARTIAL','audited_count':len(pool),
+            'blocked_by_v2_count':sum(bool(m['constitution_v2']['hard_failures']) for m in pool),
+            'scope':'16 evidence-based audit gates; no complete 143-rule enforcement or code certification'}
     planning['design_selection']={'strategy':'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
         'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),

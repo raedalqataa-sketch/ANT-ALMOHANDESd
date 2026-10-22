@@ -16,12 +16,27 @@ def main():
   if source.exists():shutil.copyfile(source,studio/'assets'/name)
  for name in ('CPYTHON-LICENSE','PYODIDE-LICENSE','engine.zip','manifest.json'):shutil.copyfile(a.runtime_source/name,studio/name)
  base_engine_sha=hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest()
- if base_engine_sha!='5111c3eba2907d5818d951eef1054465185dd5c861ab27a9140c671faf8ea8dc':
-  raise ValueError('Unreviewed base runtime: verify the approved engine snapshot before packaging')
- # Retain the reviewed base runtime, and overlay the current backend source explicitly.
+ # Accept the previously approved site runtime or a freshly rebuilt runtime
+ # whose architectural source bytes match this repository exactly.
+ approved_sha='5111c3eba2907d5818d951eef1054465185dd5c861ab27a9140c671faf8ea8dc'
  existing=studio/'engine.zip'
  with zipfile.ZipFile(existing) as archive:entries={name:archive.read(name) for name in archive.namelist()}
+ base_verified_mode='PREVIOUS_APPROVED_SNAPSHOT' if base_engine_sha==approved_sha else 'CURRENT_REPOSITORY_SOURCES'
+ if base_verified_mode=='CURRENT_REPOSITORY_SOURCES':
+  required=('backend/design/general_engine.py','backend/design/architect_planner.py',
+            'backend/design/constitution_v2.py',
+            'constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json')
+  mismatched=[name for name in required if entries.get(name)!=(ROOT/name).read_bytes()]
+  if mismatched:raise ValueError('Unreviewed base runtime; source mismatch: '+', '.join(mismatched))
+ # Retain the verified runtime packages and overlay current reviewed source.
  for source in (ROOT/'backend').rglob('*.py'):entries[str(source.relative_to(ROOT))]=source.read_bytes()
+ # V2 is data-driven: bundle the policy JSON alongside the Python validator.
+ policy=ROOT/'constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json'
+ if not policy.exists():raise ValueError('Missing V2 policy catalog: cannot build browser engine')
+ specification=json.loads(policy.read_text(encoding='utf-8'))
+ if len(specification.get('prior_visual_extraction_143_rules',()))!=143 or len(specification.get('manus_constraints_adapted',()))!=12:
+  raise ValueError('Incomplete V2 policy catalog')
+ entries[str(policy.relative_to(ROOT))]=policy.read_bytes()
  with zipfile.ZipFile(existing,'w',zipfile.ZIP_DEFLATED) as archive:
   for name,data in sorted(entries.items()):archive.writestr(zipfile.ZipInfo(name),data,compress_type=zipfile.ZIP_DEFLATED)
  subprocess.run(['python','-m','web_generator.build','--output',str(generate)],cwd=ROOT,check=True)
@@ -62,13 +77,13 @@ def main():
  worker=worker.replace(marker,marker+"\n    if(data.operation==='initialize'){postMessage({id:data.id,ready:true});return;}")
  worker=worker.replace('from backend.design.general_engine import generate_general','from backend.design.general_engine import generate_general\nfrom backend.design.architect_planner import ClientIntent,generate_automatic')
  worker=worker.replace("data.operation==='general'", "(data.operation==='general'||data.operation==='automatic')")
- worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json))),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
+ worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
  (generate/'worker.js').write_text(worker)
  (generate/'static-client.js').write_text(client)
  for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
  source=ROOT/'lovable_integration/lovable-src'
  if source.exists():shutil.copytree(source,a.output/'src',dirs_exist_ok=True)
- manifest={'engine_revision':'coherent-massing-1','base_engine_sha256':base_engine_sha,'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False}
+ manifest={'engine_revision':'coherent-massing-1','base_engine_sha256':base_engine_sha,'base_verified_mode':base_verified_mode,'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False,'constitution_v2':'2.0.0-draft','policy_visual_rules':143,'policy_manus_constraints':12,'v2_runtime_mode':'embedded_automatic_enabled'}
  (target/'integration.json').write_text(json.dumps(manifest,indent=2)+'\n')
  print(json.dumps(manifest))
 

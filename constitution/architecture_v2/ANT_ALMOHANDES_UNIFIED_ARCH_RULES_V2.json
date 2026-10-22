@@ -1,0 +1,2483 @@
+{
+  "data_contract_version": "1.0",
+  "specification_type": "architectural_generation_policy_not_a_national_building_code",
+  "project": "أنت المهندس — ANT-ALMOHANDES",
+  "version": "2.0.0-proposed",
+  "locale": "ar",
+  "approval_status": "PROPOSED_NOT_APPROVED_NOT_DEPLOYED",
+  "input_sources": [
+    {
+      "id": "FIRST",
+      "name": "التحليل السابق لصور المساقط 143 قاعدة",
+      "kind": "visual_inference",
+      "may_prove_statutory_compliance": false
+    },
+    {
+      "id": "MANUS",
+      "name": "مواصفة قواعد توليد مساقط الفلل — Manus — 6 صفحات",
+      "kind": "derived_design_specification",
+      "may_prove_statutory_compliance": false
+    },
+    {
+      "id": "SYNTHESIS",
+      "name": "تحسينات هندسية وآلية تنفيذ مقترحة",
+      "kind": "engineering_recommendation",
+      "may_prove_statutory_compliance": false
+    }
+  ],
+  "policy_precedence": [
+    {
+      "priority": 1,
+      "type": "verified_applicable_building_code_and_safety",
+      "description": "اشتراط النظام الموثق أعلى من التفضيل أو طلب العميل؛ مصدره ووحداته وفترة سريانه إلزامية"
+    },
+    {
+      "priority": 2,
+      "type": "approved_locked_project_decisions",
+      "description": "حماية النسخ المعتمدة ومراجعة التغيير عبر سجل تغييرات"
+    },
+    {
+      "priority": 3,
+      "type": "client_approved_program_site_constraints",
+      "description": "غرف وأعداد وأبعاد وخصوصية المستخدم ضمن حدود النظام"
+    },
+    {
+      "priority": 4,
+      "type": "functional_hard_gates",
+      "description": "قابلية الوصول والتأثيث والخصوصية الحرجة وسلامة الحركة"
+    },
+    {
+      "priority": 5,
+      "type": "conditional_design_relationships",
+      "description": "تطبق عندما تظهر الفراغات والحالات التي تفعل القاعدة"
+    },
+    {
+      "priority": 6,
+      "type": "soft_quality_objectives",
+      "description": "تفضيلات اقتصادية وراحة وفخامة وتشكيل"
+    }
+  ],
+  "project_types": [
+    "villa",
+    "private_residence",
+    "residential_investment_building"
+  ],
+  "geographic_scope": {
+    "countries": [
+      "SA",
+      "YE"
+    ],
+    "country_names_ar": [
+      "السعودية",
+      "اليمن"
+    ],
+    "province_selection": "country_specific_list_plus_manual_verified_input",
+    "building_code": "separate_versioned_rulepack_per_jurisdiction",
+    "unknown_code_data": "UNKNOWN_NOT_AUTO_APPROVED"
+  },
+  "client_choices": {
+    "output_tier": [
+      "economic",
+      "medium",
+      "luxury"
+    ],
+    "design_priority": [
+      "space_efficiency",
+      "ease_of_use",
+      "luxurious_outcome"
+    ],
+    "desired_alternatives": 3,
+    "allow_multiple_priorities": true
+  },
+  "input_contract": {
+    "land": {
+      "accepted_sources": [
+        "verified_survey_polygon",
+        "dimensioned_land_plan_image",
+        "dimensioned_land_plan_pdf",
+        "geo_boundary_polygon",
+        "coordinates_plus_verified_parcel_boundary"
+      ],
+      "minimum_data": [
+        "boundary_geometry_or_confirmed_dimensions",
+        "units",
+        "roads_and_gate_feasibility",
+        "north_direction_or_explicit_unknown",
+        "setback_source_or_pending_verification"
+      ],
+      "single_point_coordinates_may_not_determine_parcel_boundary": true,
+      "never_infer_exact_dimensions_from_map_imagery_alone": true,
+      "uncertainty_action": "request_targeted_confirmation_or_mark_unknown_and_withhold_approval"
+    },
+    "building": {
+      "required": [
+        "type",
+        "country",
+        "province",
+        "floors",
+        "program_spaces",
+        "user_privacy_preferences"
+      ],
+      "optional": [
+        "budget",
+        "plot_surroundings",
+        "parking_count",
+        "occupant_profiles",
+        "accessibility_requirements",
+        "construction_system"
+      ]
+    },
+    "program_formats": [
+      "manual_form",
+      "excel_import",
+      "json_import",
+      "ai_chat_extraction_with_user_confirmation"
+    ],
+    "units": "meters_and_square_meters_with_explicit_unit_conversion",
+    "locked_input_protection": true,
+    "missing_data_policy": "distinguish blocking_unknowns_from_assumable_preferences; disclose assumptions and require approval for consequential ones"
+  },
+  "space_ontology": {
+    "zone_types": {
+      "PUBLIC": [
+        "guest_entry",
+        "guest_lobby",
+        "male_guest_hall",
+        "female_guest_hall",
+        "guest_wc",
+        "guest_dining"
+      ],
+      "SEMI_PRIVATE": [
+        "main_entry",
+        "family_entry",
+        "foyer",
+        "family_living",
+        "family_dining",
+        "dining",
+        "courtyard",
+        "garden",
+        "external_seating"
+      ],
+      "PRIVATE": [
+        "bedroom",
+        "master_bedroom",
+        "master_bath",
+        "dressing",
+        "family_lounge",
+        "private_balcony",
+        "senior_bedroom"
+      ],
+      "SERVICE": [
+        "service_entry",
+        "kitchen",
+        "dirty_kitchen",
+        "kitchenette",
+        "pantry",
+        "laundry",
+        "maid_room",
+        "driver_room",
+        "service_wc",
+        "mechanical_room"
+      ],
+      "VERTICAL_CORE": [
+        "stair",
+        "lift",
+        "distributor",
+        "floor_lobby",
+        "shaft"
+      ],
+      "EXTERIOR_ACCESS": [
+        "parking",
+        "vehicle_gate",
+        "pedestrian_gate",
+        "driveway",
+        "pool",
+        "terrace"
+      ]
+    },
+    "space_activation": "only_if_requested_or_required_by_verified_code; avoid auto-adding separate halls/pool/maids/dirty_kitchen",
+    "zone_privacy_per_user_adjustable": true
+  },
+  "functional_relationships": [
+    {
+      "id": "E001",
+      "from": "guest_entry",
+      "to": "male_guest_hall",
+      "type": "SHORT_PATH",
+      "strength": "strong",
+      "applicability": "guest_hall_present",
+      "verification": "guest_must_not_pass_private"
+    },
+    {
+      "id": "E002",
+      "from": "guest_entry",
+      "to": "female_guest_hall",
+      "type": "SHORT_PATH",
+      "strength": "strong",
+      "applicability": "female_guest_hall_present",
+      "verification": "female_guest_path_privacy"
+    },
+    {
+      "id": "E003",
+      "from": "male_guest_hall",
+      "to": "guest_wc",
+      "type": "SHORT_PATH",
+      "strength": "required_if_present",
+      "applicability": "guest_wc_present",
+      "verification": "no_private_crossing"
+    },
+    {
+      "id": "E004",
+      "from": "female_guest_hall",
+      "to": "guest_wc",
+      "type": "SHORT_PATH",
+      "strength": "required_if_present",
+      "applicability": "guest_wc_present",
+      "verification": "no_private_crossing"
+    },
+    {
+      "id": "E005",
+      "from": "male_guest_hall",
+      "to": "guest_dining",
+      "type": "SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "guest_dining_present",
+      "verification": "privacy_separator_if_needed"
+    },
+    {
+      "id": "E006",
+      "from": "kitchen",
+      "to": "family_dining",
+      "type": "ADJACENT_OR_SHORT_PATH",
+      "strength": "strong",
+      "applicability": "both_present",
+      "verification": "food_service_route"
+    },
+    {
+      "id": "E007",
+      "from": "kitchen",
+      "to": "dining",
+      "type": "ADJACENT_OR_SHORT_PATH",
+      "strength": "strong",
+      "applicability": "both_present",
+      "verification": "food_service_route"
+    },
+    {
+      "id": "E008",
+      "from": "kitchen",
+      "to": "pantry",
+      "type": "DIRECT_OR_SHORT_PATH",
+      "strength": "strong",
+      "applicability": "pantry_present",
+      "verification": "supply_efficiency"
+    },
+    {
+      "id": "E009",
+      "from": "kitchen",
+      "to": "dirty_kitchen",
+      "type": "DIRECT_OR_SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "dirty_kitchen_present",
+      "verification": "odor_separation"
+    },
+    {
+      "id": "E010",
+      "from": "kitchen",
+      "to": "service_entry",
+      "type": "SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "service_entry_present",
+      "verification": "avoid_formal_guest_route"
+    },
+    {
+      "id": "E011",
+      "from": "family_living",
+      "to": "garden",
+      "type": "VISUAL_OR_DIRECT",
+      "strength": "preferred",
+      "applicability": "garden_present",
+      "verification": "privacy_and_climate"
+    },
+    {
+      "id": "E012",
+      "from": "family_living",
+      "to": "courtyard",
+      "type": "VISUAL_OR_DIRECT",
+      "strength": "preferred",
+      "applicability": "courtyard_present",
+      "verification": "privacy_and_climate"
+    },
+    {
+      "id": "E013",
+      "from": "family_living",
+      "to": "family_dining",
+      "type": "DIRECT_OR_SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "family_dining_present",
+      "verification": "daily_use"
+    },
+    {
+      "id": "E014",
+      "from": "stair",
+      "to": "family_living",
+      "type": "SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "multi_floor",
+      "verification": "stair_not_inside_living_if_blocks_room"
+    },
+    {
+      "id": "E015",
+      "from": "stair",
+      "to": "distributor",
+      "type": "DIRECT_ACCESS",
+      "strength": "required_if_present",
+      "applicability": "multi_floor",
+      "verification": "vertical_access"
+    },
+    {
+      "id": "E016",
+      "from": "master_bedroom",
+      "to": "dressing",
+      "type": "DIRECT_ACCESS",
+      "strength": "strong",
+      "applicability": "dressing_present",
+      "verification": "private_suite"
+    },
+    {
+      "id": "E017",
+      "from": "master_bedroom",
+      "to": "master_bath",
+      "type": "DIRECT_ACCESS",
+      "strength": "strong",
+      "applicability": "master_bath_present",
+      "verification": "private_suite"
+    },
+    {
+      "id": "E018",
+      "from": "bedroom",
+      "to": "family_lounge",
+      "type": "SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "upper_family_lounge_present",
+      "verification": "avoid_guest_zone"
+    },
+    {
+      "id": "E019",
+      "from": "laundry",
+      "to": "bedroom",
+      "type": "SERVICE_SHORT_PATH",
+      "strength": "preferred",
+      "applicability": "laundry_and_bedrooms_present",
+      "verification": "do_not_open_on_formal_guest"
+    },
+    {
+      "id": "E020",
+      "from": "guest_entry",
+      "to": "bedroom",
+      "type": "VISUAL_SEPARATION",
+      "strength": "required_if_present",
+      "applicability": "bedrooms_present",
+      "verification": "sightline_block"
+    },
+    {
+      "id": "E021",
+      "from": "male_guest_hall",
+      "to": "bedroom",
+      "type": "NO_THROUGH_ROUTE",
+      "strength": "required_if_present",
+      "applicability": "male_guest_hall_present",
+      "verification": "private_zone"
+    },
+    {
+      "id": "E022",
+      "from": "female_guest_hall",
+      "to": "bedroom",
+      "type": "NO_THROUGH_ROUTE",
+      "strength": "required_if_present",
+      "applicability": "female_guest_hall_present",
+      "verification": "private_zone"
+    },
+    {
+      "id": "E023",
+      "from": "guest_entry",
+      "to": "family_living",
+      "type": "VISUAL_SEPARATION",
+      "strength": "required_if_present",
+      "applicability": "guest_entry_present",
+      "verification": "privacy_level"
+    },
+    {
+      "id": "E024",
+      "from": "main_entry",
+      "to": "master_bedroom",
+      "type": "VISUAL_SEPARATION",
+      "strength": "required_if_present",
+      "applicability": "master_bedroom_present",
+      "verification": "master_privacy"
+    },
+    {
+      "id": "E025",
+      "from": "external_seating",
+      "to": "bedroom",
+      "type": "SIGHTLINE_TEST",
+      "strength": "strong",
+      "applicability": "both_present",
+      "verification": "screens_or_offsets"
+    },
+    {
+      "id": "E026",
+      "from": "pool",
+      "to": "private_balcony",
+      "type": "SIGHTLINE_TEST",
+      "strength": "preferred",
+      "applicability": "both_present",
+      "verification": "no_unwanted_exposure"
+    },
+    {
+      "id": "E027",
+      "from": "guest_entry",
+      "to": "dirty_kitchen",
+      "type": "VISUAL_SEPARATION",
+      "strength": "preferred",
+      "applicability": "both_present",
+      "verification": "formal_access"
+    },
+    {
+      "id": "E028",
+      "from": "parking",
+      "to": "pedestrian_gate",
+      "type": "CONFLICT_AVOIDANCE",
+      "strength": "required_if_present",
+      "applicability": "both_present",
+      "verification": "safe_pedestrian_crossing"
+    }
+  ],
+  "circulation_networks": [
+    {
+      "id": "GUEST",
+      "nodes": [
+        "street",
+        "guest_entry",
+        "guest_lobby",
+        "guest_hall",
+        "guest_wc"
+      ],
+      "forbidden_through": [
+        "private_bedrooms",
+        "family_living",
+        "inner_kitchen"
+      ],
+      "activate_when": "guest_program_present"
+    },
+    {
+      "id": "FAMILY",
+      "nodes": [
+        "family_entry",
+        "foyer",
+        "family_living",
+        "family_dining",
+        "garden",
+        "stair"
+      ],
+      "forbidden_through": [
+        "male_guest_hall_as_only_route"
+      ],
+      "activate_when": "all_housing"
+    },
+    {
+      "id": "SERVICE",
+      "nodes": [
+        "entry_if_present",
+        "kitchen",
+        "pantry_if_present",
+        "laundry_if_present",
+        "dining"
+      ],
+      "forbidden_through": [
+        "formal_guest_hall"
+      ],
+      "activate_when": "service_spaces_present",
+      "separate_exterior_entry": "OPTIONAL_CONDITIONAL"
+    },
+    {
+      "id": "VERTICAL",
+      "nodes": [
+        "floor_entry",
+        "stair_or_lift",
+        "floor_distributor",
+        "bedrooms_or_upper_spaces"
+      ],
+      "forbidden_through": [
+        "private_bedroom",
+        "bathroom",
+        "locked_guest_hall"
+      ],
+      "activate_when": "multi_floor"
+    },
+    {
+      "id": "VEHICLE_PEDESTRIAN",
+      "nodes": [
+        "street",
+        "vehicle_gate",
+        "parking",
+        "pedestrian_gate",
+        "main_entry"
+      ],
+      "forbidden_through": [
+        "unmanaged_hazardous_crossing"
+      ],
+      "activate_when": "car_parking_present"
+    }
+  ],
+  "manus_constraints_adapted": [
+    {
+      "id": "Z01",
+      "rule_ar": "فصل مسار الضيوف عن صالة الأسرة وغرف النوم والمطبخ الداخلي",
+      "classification": "required_if_applicable",
+      "when": [
+        "guest_space_present"
+      ],
+      "check": "guest_route_does_not_cross_private_zone",
+      "on_failure": "BLOCK",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z02",
+      "rule_ar": "قرب المجلس المطلوب من مدخل الضيوف؛ لا يُنشئ المحرك مجلسًا غير مطلوب",
+      "classification": "strong_preference",
+      "when": [
+        "guest_space_present"
+      ],
+      "check": "guest_route_length_and_zone_crossing",
+      "on_failure": "PENALIZE",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z03",
+      "rule_ar": "وصول ضيوف المجالس إلى دورات المياه الخاصة بهم دون عبور النطاق الخاص",
+      "classification": "required_if_applicable",
+      "when": [
+        "guest_wc_required_or_present"
+      ],
+      "check": "guest_to_wc_no_private_crossing",
+      "on_failure": "BLOCK",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z04",
+      "rule_ar": "قرب الطعام من المطبخ/نقطة التحضير مع مسار مناسب",
+      "classification": "strong_preference",
+      "when": [
+        "dining_and_kitchen_present"
+      ],
+      "check": "kitchen_to_dining_route",
+      "on_failure": "PENALIZE",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z05",
+      "rule_ar": "قرب المخزن من المطبخ عندما يكون ضمن البرنامج",
+      "classification": "strong_preference",
+      "when": [
+        "pantry_present"
+      ],
+      "check": "pantry_to_kitchen_route",
+      "on_failure": "PENALIZE",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z06",
+      "rule_ar": "تنظيم حركة خدمة لا تمر عبر المجالس؛ المدخل الخارجي المنفصل خيار مشروط بحدود الأرض والبرنامج",
+      "classification": "conditional_required",
+      "when": [
+        "kitchen_or_service_present"
+      ],
+      "check": "service_route_avoids_formal_guest_hall",
+      "on_failure": "BLOCK_IF_BLOCKED_ROUTE",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z07",
+      "rule_ar": "الوصول إلى الدرج عبر موزع صالح للاستخدام لا عبر غرفة خاصة أو مجلس مغلق",
+      "classification": "required_if_applicable",
+      "when": [
+        "multi_floor"
+      ],
+      "check": "stairs_access_connectivity",
+      "on_failure": "BLOCK",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z08",
+      "rule_ar": "وجود نطاق نوم محمي من الحركة العامة ومن انكشاف المداخل",
+      "classification": "required_if_applicable",
+      "when": [
+        "bedrooms_present"
+      ],
+      "check": "sleeping_zone_privacy",
+      "on_failure": "BLOCK_IF_EXPOSED",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z09",
+      "rule_ar": "صلاحية كل فراغ مطلوب لتأثيثه وفتح أبوابه وتأمين الحركة",
+      "classification": "required_if_applicable",
+      "when": [
+        "all_spaces"
+      ],
+      "check": "furniture_fit_and_clearance",
+      "on_failure": "BLOCK",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z10",
+      "rule_ar": "تعارض الأبواب: يمنع الاعتماد إذا سد الحركة أو فتح باب لازم؛ وتُعاقب التعارضات الطفيفة الأخرى",
+      "classification": "required_if_applicable",
+      "when": [
+        "doors_present"
+      ],
+      "check": "swing_collision_severity",
+      "on_failure": "BLOCK_OR_PENALIZE",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z11",
+      "rule_ar": "اتصال الدرج واستمراره بين الأدوار المقصودة والخلوص الآمن",
+      "classification": "required_if_applicable",
+      "when": [
+        "multi_floor"
+      ],
+      "check": "stair_vertical_stack_and_clearance",
+      "on_failure": "BLOCK",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    },
+    {
+      "id": "Z12",
+      "rule_ar": "إمكانية صيانة تجهيزات الخدمات؛ التحقق من خلوصات الصيانة الملزمة من المصدر المختص",
+      "classification": "required_if_applicable",
+      "when": [
+        "equipment_present"
+      ],
+      "check": "maintenance_access_and_required_clearances",
+      "on_failure": "BLOCK_IF_MANDATORY_CLEARANCE_FAIL",
+      "source": "manus_pdf_adapted_after_architectural_review",
+      "source_section": "2 القيود الإلزامية"
+    }
+  ],
+  "manus_spatial_patterns_adapted": [
+    {
+      "id": "R01",
+      "name": "الفناء/الحديقة المنظمة",
+      "when": "توافر مساحة ووظيفة واضحة وتهوية وخصوصية",
+      "strategy": "إعطاء الحديقة دوراً وظيفياً قرب المعيشة لا اعتبارها بقايا",
+      "is_mandatory": false
+    },
+    {
+      "id": "R02",
+      "name": "أجنحة حول فراغ",
+      "when": "أرض كبيرة وبرنامج متعدد الأجنحة",
+      "strategy": "تجريب فصل جناح الضيافة عن الأسرة حول حديقة ثم تقييم الحركة",
+      "is_mandatory": false
+    },
+    {
+      "id": "R03",
+      "name": "توزيع طولي مرن",
+      "when": "أرض ضيقة طويلة",
+      "strategy": "تجريب تدرج طولي دون فرض ترتيب غرف ثابت",
+      "is_mandatory": false
+    },
+    {
+      "id": "R04",
+      "name": "نواة حركة متقاربة",
+      "when": "يمكن تقليل الممرات دون تعطيل التهوية أو الحركة",
+      "strategy": "تقريب الدرج والموزع والخدمات الملائمة",
+      "is_mandatory": false
+    },
+    {
+      "id": "R05",
+      "name": "المعيشة محور وظيفي",
+      "when": "كل تصميم يحتوي صالة عائلية",
+      "strategy": "منح الصالة مركزية استعمالية أو ربطاً بحديقة ولو لم تكن وسط هندسة المبنى",
+      "is_mandatory": false
+    }
+  ],
+  "prior_visual_extraction_143_rules": [
+    {
+      "id": "A001",
+      "category": "site",
+      "rule_ar": "تحديد أبعاد الأرض وحدودها ومساحتها وشكلها.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A002",
+      "category": "site",
+      "rule_ar": "تحديد واجهات الشوارع والمجاورات واتجاهات الوصول.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A003",
+      "category": "site",
+      "rule_ar": "توثيق الشمال واتجاهات الموقع الأربعة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A004",
+      "category": "site",
+      "rule_ar": "تمييز أنواع القطع حسب عدد واجهاتها على الشوارع.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A005",
+      "category": "site",
+      "rule_ar": "اختيار بوابة السيارات وفق الموقع وسلامة المناورة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A006",
+      "category": "site",
+      "rule_ar": "تحديد المدخل الرئيسي بحيث يكون واضحًا وسهل الوصول ويحمي الخصوصية.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A007",
+      "category": "site",
+      "rule_ar": "دراسة الارتدادات والمساحات المفتوحة قبل تثبيت الكتلة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A008",
+      "category": "site",
+      "rule_ar": "تخصيص الواجهات الأفضل للإضاءة الطبيعية للفراغات المناسبة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A009",
+      "category": "site",
+      "rule_ar": "مراعاة الجوار ومنع افتراض جواز فتح النوافذ نحو الحدود.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A010",
+      "category": "site",
+      "rule_ar": "عدم فرض تمركز المبنى في وسط الأرض تلقائيًا.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A011",
+      "category": "site",
+      "rule_ar": "حجز مساحات للمواقف والأفنية والممرات الخارجية بالتوازي مع البناء.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A012",
+      "category": "site",
+      "rule_ar": "تجنب بقايا فراغات خارجية ضيقة وغير قابلة للاستخدام.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A013",
+      "category": "site",
+      "rule_ar": "جعل البروزات والتراجعات تخدم مدخلًا أو جلسة أو تهوية أو إضاءة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A014",
+      "category": "site",
+      "rule_ar": "عدم فرض نسبة إشغال واحدة على جميع الأراضي.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "survey_geometry",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A015",
+      "category": "functional_zones",
+      "rule_ar": "فصل نطاق الضيافة عن نطاق الأسرة بحسب مستوى الخصوصية المطلوب.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A016",
+      "category": "functional_zones",
+      "rule_ar": "تفضيل قرب مجالس الضيوف من المداخل الملائمة لها.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A017",
+      "category": "functional_zones",
+      "rule_ar": "وضع المعيشة العائلية في منطقة أعمق خصوصية من مجالس الضيوف.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A018",
+      "category": "functional_zones",
+      "rule_ar": "تخصيص نطاق غرف النوم بعيدًا عن مرور الغرباء.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A019",
+      "category": "functional_zones",
+      "rule_ar": "تنظيم المطبخ والغسيل والمخازن والخدمات في نطاق متصل عمليًا.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A020",
+      "category": "functional_zones",
+      "rule_ar": "استخدام منطقة انتقال بين الضيافة والمنطقة الخاصة عند الحاجة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A021",
+      "category": "functional_zones",
+      "rule_ar": "منع كشف غرف النوم والمعيشة الخاصة مباشرة عند فتح مدخل الضيوف.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A022",
+      "category": "functional_zones",
+      "rule_ar": "السماح بربط قابل للإغلاق بين الضيافة والعائلة عند الحاجة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A023",
+      "category": "functional_zones",
+      "rule_ar": "تيسير الوصول اليومي إلى الغرف كثيرة الاستخدام.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A024",
+      "category": "functional_zones",
+      "rule_ar": "إبعاد النوم عن ضجيج الشارع أو المجالس حيث تسمح الأرض.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A025",
+      "category": "functional_zones",
+      "rule_ar": "عدم تكرار المجالس دون وظيفة وحاجة مثبتة في البرنامج.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "zoning_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A026",
+      "category": "entrances_privacy",
+      "rule_ar": "توفير مدخل رئيسي واضح ومقروء.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A027",
+      "category": "entrances_privacy",
+      "rule_ar": "تخصيص مدخل رجال مستقل عند طلبه وإمكان تنفيذه.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A028",
+      "category": "entrances_privacy",
+      "rule_ar": "توفير مدخل عائلي مستقل عند الحاجة للخصوصية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A029",
+      "category": "entrances_privacy",
+      "rule_ar": "إمكان مشاركة النساء والعائلة مدخلًا واحدًا مع فصل داخلي مدروس.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A030",
+      "category": "entrances_privacy",
+      "rule_ar": "توفير بهو أو موزع عند المدخل لمنع الانكشاف البصري إذا لزم.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A031",
+      "category": "entrances_privacy",
+      "rule_ar": "منع فتح مدخل خارجي مباشرة إلى غرفة نوم خاصة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A032",
+      "category": "entrances_privacy",
+      "rule_ar": "عدم كشف صالة الأسرة كلها من مدخل ضيوف الرجال.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A033",
+      "category": "entrances_privacy",
+      "rule_ar": "تسهيل وصول ضيوف المجلس إلى المغاسل ودورة المياه دون اختراق خاص.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A034",
+      "category": "entrances_privacy",
+      "rule_ar": "فصل مسار العمالة والخدمات عن استقبال الضيوف عند الإمكان.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A035",
+      "category": "entrances_privacy",
+      "rule_ar": "عدم جعل المرآب أو مدخل الخدمة منفذ الأسرة الوحيد دون ضرورة مصممة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A036",
+      "category": "entrances_privacy",
+      "rule_ar": "توفير منطقة وقوف وفتح أبواب مناسبة عند المدخل.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A037",
+      "category": "entrances_privacy",
+      "rule_ar": "حماية المداخل بيئيًا عندما تستدعي الظروف.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A038",
+      "category": "entrances_privacy",
+      "rule_ar": "منع تعارض فتحات الأبواب الذي يعطل المرور.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A039",
+      "category": "entrances_privacy",
+      "rule_ar": "تقديم خصوصية المدخل على التماثل الشكلي.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A040",
+      "category": "entrances_privacy",
+      "rule_ar": "تمييز المداخل المتجاورة في الوظيفة والتوجيه.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "access_and_sightline",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A041",
+      "category": "adjacency",
+      "rule_ar": "تحديد علاقات الفراغات وفق الاستخدام وتكرار النشاط.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A042",
+      "category": "adjacency",
+      "rule_ar": "تقريب الفراغات ذات الارتباط اليومي المرتفع.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A043",
+      "category": "adjacency",
+      "rule_ar": "فصل الأنشطة الصاخبة عن غرف النوم الهادئة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A044",
+      "category": "adjacency",
+      "rule_ar": "منع تحول صالة المعيشة إلى ممر عبور إلزامي لكل الغرف دون مبرر.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A045",
+      "category": "adjacency",
+      "rule_ar": "استخدام مناطق انتقال عندما لا يلائم الاتصال المباشر.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A046",
+      "category": "adjacency",
+      "rule_ar": "تقديم الخصوصية على اختصار غير مهم لمسار الحركة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A047",
+      "category": "adjacency",
+      "rule_ar": "وضع باب فصل قابل للإغلاق عند تقاطع وظائف متعارضة الخصوصية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A048",
+      "category": "adjacency",
+      "rule_ar": "اختبار تجاور الفراغات واتصالها البصري والصوتي بدل الاعتماد على المساحات فقط.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "adjacency_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A049",
+      "category": "circulation",
+      "rule_ar": "تعريف شبكات الحركة المستقلة قبل رسم الممرات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A050",
+      "category": "circulation",
+      "rule_ar": "حماية مسار النوم من مسار الضيوف.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A051",
+      "category": "circulation",
+      "rule_ar": "تقليل التقاطعات بين حركة الضيوف وحركة الأسرة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A052",
+      "category": "circulation",
+      "rule_ar": "إبعاد نقل أدوات المطبخ والغسيل عن المجالس.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A053",
+      "category": "circulation",
+      "rule_ar": "اختيار مواقع الممرات لخدمة أكبر عدد مناسب من الفراغات بكفاءة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A054",
+      "category": "circulation",
+      "rule_ar": "تجنب الممرات طويلة المسافة بلا وظيفة أو إنارة كافية.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A055",
+      "category": "circulation",
+      "rule_ar": "تقليل التواءات الممرات ومساحاتها المهدرة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A056",
+      "category": "circulation",
+      "rule_ar": "تحقيق عرض الممر وفق الأثاث والحركة والاشتراط المعتمد.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A057",
+      "category": "circulation",
+      "rule_ar": "تفضيل نهاية ممر ذات مقصد أو ضوء طبيعي.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A058",
+      "category": "circulation",
+      "rule_ar": "منع استخدام غرفة نوم طريقًا إلزاميًا لغرفة مستقلة أخرى، باستثناء الأجنحة المقصودة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A059",
+      "category": "circulation",
+      "rule_ar": "مراجعة إمكانية نقل الأثاث الكبير إلى الغرف.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A060",
+      "category": "circulation",
+      "rule_ar": "منع تعارض الأبواب مع بعضها ومع الممرات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A061",
+      "category": "circulation",
+      "rule_ar": "تحديد الدرج باعتباره عقدة في شبكة الحركة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A062",
+      "category": "circulation",
+      "rule_ar": "إمكان الوصول العائلي للدرج دون عبور مجلس مغلق أو غرفة خاصة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A063",
+      "category": "circulation",
+      "rule_ar": "تقريب الدرج من موزع الأسرة حسب الاستخدام.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A064",
+      "category": "circulation",
+      "rule_ar": "توجيه المستخدمين من كل مدخل إلى مناطقهم دون اختراق مناطق غير مخولة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A065",
+      "category": "circulation",
+      "rule_ar": "مراعاة اختلاف حركة الأسرة اليومية عن حركة الضيوف المناسباتية.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A066",
+      "category": "circulation",
+      "rule_ar": "فصل أو تأمين حركة المشاة عن حركة السيارات.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "routing_graph",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A067",
+      "category": "sleeping",
+      "rule_ar": "تفضيل تجميع غرف النوم في الدور العلوي عندما يخدم البرنامج.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A068",
+      "category": "sleeping",
+      "rule_ar": "توفير صالة أو موزع علوي يتصل بالغرف دون انتهاك خصوصيتها.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A069",
+      "category": "sleeping",
+      "rule_ar": "منع فتح غرف النوم مباشرة على مجالس عامة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A070",
+      "category": "sleeping",
+      "rule_ar": "تخصيص موقع هادئ ومناسب الإضاءة للجناح الرئيسي.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A071",
+      "category": "sleeping",
+      "rule_ar": "ربط الحمام والملابس بالجناح الرئيسي عند ورودهما في البرنامج.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A072",
+      "category": "sleeping",
+      "rule_ar": "تقريب حمامات الأطفال والموزع العائلي من غرف الأبناء.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A073",
+      "category": "sleeping",
+      "rule_ar": "تقسيم غرف الأبناء إلى أجنحة عند الحاجة فقط.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A074",
+      "category": "sleeping",
+      "rule_ar": "توفير غرفة مناسبة لكبار السن في الأرضي متى طلب ذلك.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A075",
+      "category": "sleeping",
+      "rule_ar": "توفير قرب حمام آمن وسهل الوصول لكبير السن.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A076",
+      "category": "sleeping",
+      "rule_ar": "خدمة الحمامات المشتركة للغرف التي تستخدمها بدل تماثل غير وظيفي.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A077",
+      "category": "sleeping",
+      "rule_ar": "تجنب اعتماد الإنارة المستعارة بديلًا أساسيًا لإنارة غرف النوم.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A078",
+      "category": "sleeping",
+      "rule_ar": "توجيه نوافذ النوم وفق الضوء والضوضاء والجوار والخصوصية.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A079",
+      "category": "sleeping",
+      "rule_ar": "توفير حائط صاف مناسب للسرير والخزانة قبل اعتماد الفتحات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A080",
+      "category": "sleeping",
+      "rule_ar": "تجنب البروزات والأعمدة التي تنتج زوايا عديمة النفع في النوم.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A081",
+      "category": "sleeping",
+      "rule_ar": "تصميم البلكونة والتراس كفراغ مستخدم ومناسب للمناخ عند اعتماده.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "room_geometry_and_privacy",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A082",
+      "category": "services",
+      "rule_ar": "تقريب العناصر الخدمية لتيسير العمل وتقليل تعقيد التمديدات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A083",
+      "category": "services",
+      "rule_ar": "تقريب المطبخ من الطعام مع إمكانية الفصل البصري والروائح.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A084",
+      "category": "services",
+      "rule_ar": "تقريب مخزن المواد الغذائية من المطبخ.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A085",
+      "category": "services",
+      "rule_ar": "إضافة مطبخ تحضيري أو مطبخ ثقيل فقط عندما يتطلب البرنامج.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A086",
+      "category": "services",
+      "rule_ar": "إيجاد مسار لنقل المشتريات والنفايات بعيدًا عن المجالس ما أمكن.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A087",
+      "category": "services",
+      "rule_ar": "منع فتح أبواب المراحيض إلى مكان تناول الطعام أو إعداد الطعام بصورة غير ملائمة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A088",
+      "category": "services",
+      "rule_ar": "توزيع الحمامات وفق مستخدميها مع الحفاظ على الخصوصية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A089",
+      "category": "services",
+      "rule_ar": "تجميع الخدمات الرطبة عند الملاءمة دون الإضرار بالتهوية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A090",
+      "category": "services",
+      "rule_ar": "توزيع غرفة الخادمة أو السائق بما يوفر خصوصيتهما ومسار خدمتهما.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A091",
+      "category": "services",
+      "rule_ar": "عدم إعاقة الحركة الأساسية بأنشطة الغسيل.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A092",
+      "category": "services",
+      "rule_ar": "التحقق من إنارة وتهوية المطابخ والحمامات والغسيل، والمنور عند الضرورة المدروسة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A093",
+      "category": "services",
+      "rule_ar": "عدم إضافة الخدمات الإضافية بلا طلب من البرنامج المعماري.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "service_graph_and_maintenance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A094",
+      "category": "climate_outdoor",
+      "rule_ar": "تخصيص الواجهات الجيدة للمعيشة والنوم ذوي الاستخدام الطويل.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A095",
+      "category": "climate_outdoor",
+      "rule_ar": "مراعاة الرؤية إلى الطرق والجيران عند توزيع الفتحات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A096",
+      "category": "climate_outdoor",
+      "rule_ar": "منع اعتماد غرف معتمة وعميقة دون معالجة الإضاءة الطبيعية.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A097",
+      "category": "climate_outdoor",
+      "rule_ar": "استخدام حدائق جانبية أو خلفية لإضاءة أكثر من فراغ متى أمكن.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A098",
+      "category": "climate_outdoor",
+      "rule_ar": "اعتماد فناء داخلي حين يقدم منفعة فعلية ضمن المساحة المتاحة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A099",
+      "category": "climate_outdoor",
+      "rule_ar": "ربط صالة الأسرة بصريًا ووظيفيًا بالحديقة أو الفناء.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A100",
+      "category": "climate_outdoor",
+      "rule_ar": "استخدام البروزات والتراجعات للظل والخصوصية حين تخدم التصميم.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A101",
+      "category": "climate_outdoor",
+      "rule_ar": "عدم تضخيم مساحات الحدائق على حساب برنامج الغرف الأساسي.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A102",
+      "category": "climate_outdoor",
+      "rule_ar": "عدم توليد أفنية ضيقة عديمة المنفعة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A103",
+      "category": "climate_outdoor",
+      "rule_ar": "فصل الجلسات العائلية الخارجية بصريًا عن مسارات الضيوف.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A104",
+      "category": "climate_outdoor",
+      "rule_ar": "إضافة المسبح فقط بطلب ووفق المساحة والصيانة والخصوصية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A105",
+      "category": "climate_outdoor",
+      "rule_ar": "تعدد الجلسات الخارجية حسب المستخدمين والبرنامج لا وفق تزيين شكلي.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A106",
+      "category": "climate_outdoor",
+      "rule_ar": "تصميم الشرفات والتراسات بحيث يسهل استخدامها والوصول إليها.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A107",
+      "category": "climate_outdoor",
+      "rule_ar": "التوفيق بين الإضاءة والتهوية والخصوصية عند اختيار كل نافذة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "openings_environment_and_visibility",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A108",
+      "category": "furniture_dimensions",
+      "rule_ar": "البدء بالأثاث والنشاط والحركة لتقرير أبعاد الغرفة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A109",
+      "category": "furniture_dimensions",
+      "rule_ar": "عدم اعتماد المساحة العددية وحدها دون فحص العرض والطول والنسب.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A110",
+      "category": "furniture_dimensions",
+      "rule_ar": "اختبار فتح الباب والخزانة ومسارات السير عند تأثيث غرفة النوم.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A111",
+      "category": "furniture_dimensions",
+      "rule_ar": "التحقق من استيعاب المجلس للمقاعد المطلوبة وحركة المستخدمين.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A112",
+      "category": "furniture_dimensions",
+      "rule_ar": "توفير فسحات سحب الكراسي والحركة حول طاولة الطعام.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A113",
+      "category": "furniture_dimensions",
+      "rule_ar": "اختبار أجهزة المطبخ والأسطح والأحواض وحركة العاملين.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A114",
+      "category": "furniture_dimensions",
+      "rule_ar": "منع تحوّل الصالة إلى ممر عابر يفقدها وظيفتها.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A115",
+      "category": "furniture_dimensions",
+      "rule_ar": "استعمال زوايا الغرف والبروزات بصورة قابلة للتأثيث.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A116",
+      "category": "furniture_dimensions",
+      "rule_ar": "تجنب الغرف شديدة الاستطالة دون احتياج وظيفي.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A117",
+      "category": "furniture_dimensions",
+      "rule_ar": "ترك جدران صافية كافية لترتيب الأثاث وفق متطلبات الأسرة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A118",
+      "category": "furniture_dimensions",
+      "rule_ar": "مراجعة الأبواب والشبابيك وفق مواضع الأثاث قبل تجميد المخطط.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A119",
+      "category": "furniture_dimensions",
+      "rule_ar": "تفاوت غرف الأبناء حسب عدد المستخدمين لا فرض تساوي المساحات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A120",
+      "category": "furniture_dimensions",
+      "rule_ar": "عدم اتخاذ أبعاد الأمثلة المصورة حدودًا نظامية عامة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "furniture_collision_and_clearance",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A121",
+      "category": "massing",
+      "rule_ar": "اشتقاق محيط المبنى من التوزيع الوظيفي بدل البدء بالشكل.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A122",
+      "category": "massing",
+      "rule_ar": "عدم إلزام التوليد بمستطيل أو حرف L أو U أو كتلة متدرجة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A123",
+      "category": "massing",
+      "rule_ar": "السماح بالبروز والتراجع إذا خدم وظيفة أو مناخًا أو جودة معمارية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A124",
+      "category": "massing",
+      "rule_ar": "تشكيل الأجنحة الوظيفية وربطها بحركة واضحة عند الحاجة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A125",
+      "category": "massing",
+      "rule_ar": "رفض البروزات المتكررة الصغيرة لمجرد التنويع الشكلي.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A126",
+      "category": "massing",
+      "rule_ar": "توظيف الفراغات بين الكتل كحدائق أو أفنية أو مداخل ذات منفعة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A127",
+      "category": "massing",
+      "rule_ar": "عدم فرض التناظر على المخططات كلها.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A128",
+      "category": "massing",
+      "rule_ar": "مراعاة علاقة الكتل بحجم الأرض ونوع السكن ومستوى المخرجات.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A129",
+      "category": "massing",
+      "rule_ar": "تبسيط المحيط الإنشائي عندما يكون الاقتصاد أولوية ما لم يضر الوظيفة.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A130",
+      "category": "massing",
+      "rule_ar": "السماح بثراء أكبر في تكوينات الفخامة بشرط الجدوى العملية.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A131",
+      "category": "massing",
+      "rule_ar": "الحفاظ على التكامل بين كتل الأرضي والأول والملحق.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A132",
+      "category": "massing",
+      "rule_ar": "عدم تغيير توزيع الغرف لتحسين الواجهة على حساب العلاقات والخصوصية.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "site_massing_validation",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A133",
+      "category": "vertical_constructability",
+      "rule_ar": "توحيد موضع الدرج وظيفيًا وهندسيًا بين الأدوار.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A134",
+      "category": "vertical_constructability",
+      "rule_ar": "توحيد مسار المصعد وتجاوزه للأدوار التي يخدمها عند اعتماده.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A135",
+      "category": "vertical_constructability",
+      "rule_ar": "تقريب مناطق الحمامات والمطابخ رأسيا لتسهيل الخدمات متى كان ذلك ملائمًا.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A136",
+      "category": "vertical_constructability",
+      "rule_ar": "عدم إحداث انتقالات إنشائية معقدة بلا حاجة وظيفية.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A137",
+      "category": "vertical_constructability",
+      "rule_ar": "مراجعة الأعمدة منذ مرحلة التوزيع المعماري.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A138",
+      "category": "vertical_constructability",
+      "rule_ar": "منع مرور الأعمدة عبر استعمالات الأثاث أو الحركة بغير معالجة.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A139",
+      "category": "vertical_constructability",
+      "rule_ar": "مراعاة البحور الإنشائية المناسبة للنظام الذي سيعتمده المختص.",
+      "classification": "conditional_design_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A140",
+      "category": "vertical_constructability",
+      "rule_ar": "حجز مجاري التمديدات والخدمات الرأسية عند الحاجة.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A141",
+      "category": "vertical_constructability",
+      "rule_ar": "مراجعة مواقع الحمامات العلوية من حيث العزل والصيانة والتوافق مع الأدنى.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A142",
+      "category": "vertical_constructability",
+      "rule_ar": "التحقق من المناسيب وتأثيرها على الدرج والمداخل.",
+      "classification": "preferred_architectural_guidance",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    },
+    {
+      "id": "A143",
+      "category": "vertical_constructability",
+      "rule_ar": "عدم مساواة المرجع التصويري بفحص الكود والإنشاء والسلامة والمخطط التنفيذي.",
+      "classification": "required_if_applicable",
+      "source": "first_visual_plan_analysis",
+      "evaluation_method": "multifloor_alignment_engineering_review",
+      "legal_code_claim": false
+    }
+  ],
+  "architecture_synthesis": {
+    "design_rule": "layout_from_zones_routes_light_furniture_then_generate_massing_not_massing_first",
+    "no_fixed_footprint_shapes": [
+      "L",
+      "U",
+      "staggered",
+      "rectangle",
+      "symmetric"
+    ],
+    "no_absolute_ban": "these shapes may occur organically if best scored",
+    "morphology_candidates": [
+      "compact_with_selective_recesses",
+      "courtyard_focus_when_feasible",
+      "functional_wings_when_feasible",
+      "longitudinal_when_narrow",
+      "side_garden_relationship_when_feasible"
+    ],
+    "multi_floor": "vertical stair/lift alignment; wet-core coordination; preliminary structural grid checks",
+    "natural_light_policy": "bedrooms kitchens bathrooms receive verified natural light and ventilation or qualifying approved shaft; no borrowed light substituted as equivalent",
+    "courtyard_pool_balcony_service_entry": "always conditional on program, climate, site, cost, and legal checks",
+    "investment_building": "generate and validate unit privacy and entrances, shared/common circulation, fire/escape/code independently from villa assumptions"
+  },
+  "generator_pipeline": [
+    "00_VALIDATE_INPUT_AND_PROVENANCE",
+    "01_SITE_ANALYSIS_AND_BUILDABLE_ENVELOPE",
+    "02_BUILD_ROOM_PROGRAM_WITH_FURNITURE_ENVELOPES",
+    "03_ZONE_PRIVACY_FUNCTION_AND_USER_ACCESS",
+    "04_BUILD_SIGNED_ADJACENCY_AND_MOVEMENT_GRAPHS",
+    "05_GENERATE_DIFFERENT_TOPOLOGICAL_OPTIONS",
+    "06_SOLVE_ROOM_GEOMETRY_AND_MASSING_TOGETHER",
+    "07_PLACE_DOORS_WINDOWS_STAIR_AND_FURNITURE",
+    "08_MULTI_FLOOR_SERVICES_STRUCTURE_PRELIMINARY_CHECK",
+    "09_RUN_MANDATORY_GATES_AND_CORRECT_OR_REJECT",
+    "10_SCORE_APPLICABLE_SOFT_CRITERIA_AND_DIVERSITY",
+    "11_SELECT_THREE_DISTINCT_VALID_CANDIDATES",
+    "12_EXPORT_AND_AUDIT_AND_EXPLAIN"
+  ],
+  "validation_gates": [
+    {
+      "id": "INPUT_GEOMETRY",
+      "description_ar": "فحص مصدر وحدود وأبعاد الأرض ووحداتها",
+      "outcome_on_failure": "BLOCK_IF_UNVERIFIED_CRITICAL",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "BUILDABLE_ENVELOPE",
+      "description_ar": "مطابقة بصمة الكتلة لحدود الأرض والارتدادات المعتمدة",
+      "outcome_on_failure": "BLOCK",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "SPACE_PROGRAM",
+      "description_ar": "وجود جميع الفراغات الملزمة وقياساتها",
+      "outcome_on_failure": "BLOCK",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "ROUTE_CONNECTIVITY",
+      "description_ar": "قابلية الوصول إلى جميع الفراغات والمخارج وعدم المرور المحظور",
+      "outcome_on_failure": "BLOCK",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "PRIVACY",
+      "description_ar": "اختبار المسارات والرؤية بحسب خصوصية البرنامج",
+      "outcome_on_failure": "BLOCK_IF_CRITICAL",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "DOOR_CLEARANCE",
+      "description_ar": "الأبواب دون تعطيل فتحاتها أو إغلاق الممرات",
+      "outcome_on_failure": "BLOCK_IF_CRITICAL",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "FURNITURE_FIT",
+      "description_ar": "الأثاث الأساسي والخلوصات المعتمدة لكل غرفة",
+      "outcome_on_failure": "BLOCK_IF_UNUSABLE",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "NATURAL_LIGHT_AIR",
+      "description_ar": "تهوية وإضاءة طبيعية للنوم والمطبخ والحمامات وفق سياسة المشروع والكود",
+      "outcome_on_failure": "BLOCK_OR_REVIEW_IF_SOURCE_MISSING",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "STAIRS_AND_LIFTS",
+      "description_ar": "ثبات الحركة الرأسية والوصول والخلوصات إن تعددت الأدوار",
+      "outcome_on_failure": "BLOCK",
+      "applies": "multi_floor",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "PLUMBING_STACKS",
+      "description_ar": "تناسق الخدمات الرطبة ومساراتها وعدم تعارضها جذريًا",
+      "outcome_on_failure": "REVIEW",
+      "applies": "multi_floor",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "STRUCTURAL_FEASIBILITY",
+      "description_ar": "الفحص المبدئي للأعمدة والبحور والفتحات والهبوطات",
+      "outcome_on_failure": "REVIEW_NOT_STRUCTURAL_APPROVAL",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "MEP_MAINTENANCE",
+      "description_ar": "إمكان الوصول للخدمات وصيانتها",
+      "outcome_on_failure": "BLOCK_IF_REQUIRED_CLEARANCE_FAIL",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "VEHICLE_PEDESTRIAN",
+      "description_ar": "فحص البوابات والمواقف والدوران والتقاطع مع المشاة",
+      "outcome_on_failure": "BLOCK_IF_HAZARDOUS",
+      "applies": "parking_present",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "INVESTMENT_BUILDING",
+      "description_ar": "استقلال الدخول والوحدات والخدمات والحريق حسب الكود",
+      "outcome_on_failure": "BLOCK_IF_NONCOMPLIANT",
+      "applies": "investment_only",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "CODE_COMPLIANCE",
+      "description_ar": "تحقق من القواعد المحلية النسخة والتاريخ والجهة",
+      "outcome_on_failure": "UNKNOWN_IS_NOT_PASS",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    },
+    {
+      "id": "EXPORT_INTEGRITY",
+      "description_ar": "توافق المساحات والأبعاد والأسماء بين المعاينة وPDF وDXF",
+      "outcome_on_failure": "BLOCK_BAD_EXPORT",
+      "applies": "all_types",
+      "expected_output": [
+        "PASS",
+        "FAIL",
+        "REVIEW",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "provenance": "integrative_engineering_requirement_not_proven_legal_clause"
+    }
+  ],
+  "gate_policy": {
+    "fail": "BLOCK_UNTIL_CORRECTED",
+    "unknown_on_safety_or_statutory": "REVIEW_NOT_APPROVED",
+    "minor_soft_issue": "SCORE_PENALTY",
+    "not_applicable": "REMOVE_FROM_SCORE_WITH_RENORMALIZATION",
+    "do_not_show_failed_candidate_as_approved": true
+  },
+  "scoring": {
+    "is_secondary_to_mandatory_gates": true,
+    "total": 100,
+    "weights": [
+      {
+        "id": "functional_completeness_and_adjacency",
+        "weight": 20
+      },
+      {
+        "id": "circulation_efficiency",
+        "weight": 15
+      },
+      {
+        "id": "privacy",
+        "weight": 15
+      },
+      {
+        "id": "daylight_ventilation",
+        "weight": 15
+      },
+      {
+        "id": "furnishing_and_room_proportions",
+        "weight": 15
+      },
+      {
+        "id": "services_vertical_maintenance",
+        "weight": 10
+      },
+      {
+        "id": "site_and_outdoor_use",
+        "weight": 5
+      },
+      {
+        "id": "space_economy_and_massing",
+        "weight": 5
+      }
+    ],
+    "exclude_not_applicable_then_renormalize": true,
+    "weight_adaptation": "tier/priority shifts only soft scoring components; no change to safety or statutory requirements",
+    "report_per_criterion": true,
+    "calibration": "run test corpus and architect review before treating values as fixed production weights"
+  },
+  "alternatives": {
+    "count": 3,
+    "distinctness_definition": [
+      "meaningfully_different_zoning",
+      "entry_or_stair_location_change_where_feasible",
+      "outdoor_space_strategy",
+      "circulation_graph_change",
+      "room_grouping_change"
+    ],
+    "reject_appearance_only_variation": true,
+    "diversity_verification": "compare zoning adjacency/route graph and footprint, record difference per alternative",
+    "when_less_than_three_valid": "return count achieved plus exact blockers, never fabricate three"
+  },
+  "workflow": {
+    "stages": [
+      "DRAFT",
+      "VALIDATING",
+      "VALIDATED",
+      "APPROVED",
+      "LOCKED"
+    ],
+    "no_silent_changes_to_approved": true,
+    "design_change_log": [
+      "field",
+      "old_value",
+      "new_value",
+      "justification",
+      "user_approval",
+      "timestamp"
+    ],
+    "approved_version_requires_explicit_approval": true
+  },
+  "output_contract": {
+    "alternatives": [
+      "furnished_floor_plan_all_floors",
+      "plot_and_access_diagram",
+      "space_area_schedule",
+      "access_routes_and_privacy_diagram",
+      "door_window_stair_dimensions",
+      "performance_score_and_applicability",
+      "rule_verification_report",
+      "assumptions_and_unknowns",
+      "differences_between_options"
+    ],
+    "downloadable_formats": [
+      "PDF",
+      "DXF_R2010",
+      "JSON_design_and_audit"
+    ],
+    "dxf_version": "AutoCAD R2010 / AC1024",
+    "dxf_layers": [
+      "A-WALL",
+      "A-DOOR",
+      "A-WIND",
+      "A-FURN",
+      "A-STRS",
+      "A-DIMS",
+      "A-TEXT",
+      "A-HATCH",
+      "A-PLOT",
+      "A-ZONES",
+      "A-ROUTES",
+      "A-SERV"
+    ],
+    "geometry_rules": "model-space metric consistency; closed outlines; nonoverlapping spaces; accurate dimensions and units; layer audit; font fallback; export-reopen test",
+    "professional_status": "not automatically a signed, permitted, or construction-ready plan without qualified human review"
+  },
+  "integration_release": {
+    "do_not_change_live_without_explicit_approval": true,
+    "feature_flags": [
+      "arch_constitution_v2",
+      "constraint_gate_v2",
+      "three_valid_diverse_options",
+      "dxf_r2010_export"
+    ],
+    "test_before_deploy": [
+      "unit_tests_rules_and_conditions",
+      "property_tests_geometry",
+      "golden_plan_regressions",
+      "excel_import",
+      "multi_floor_stack",
+      "dxf_reopen_and_validation",
+      "site_inputs_uncertainty",
+      "permissions_and_approved_lock"
+    ],
+    "rollback": "keep last approved engine and migrate only after acceptance"
+  },
+  "benchmark_test_scenarios": [
+    "20x25m villa single_road with two entrances_requested",
+    "narrow_long_plot and limited frontage",
+    "corner_plot two_roads",
+    "tight_land_no_independent_service_entry",
+    "single_floor elderly_bedroom",
+    "multi_floor_with_upper_annex",
+    "luxury_courtyard_request",
+    "economy_with_no_pool_or_guest_second_hall",
+    "investment_building_with_independent_units",
+    "only_single_gps_coordinate_no_parcel_boundary",
+    "dimensioned_image_without_confirmed_north",
+    "furniture_door_clash_test",
+    "non_compliant_dxf_export_regression"
+  ],
+  "manus_crosswalk": {
+    "Z01": [
+      "A015",
+      "A021",
+      "A050"
+    ],
+    "Z02": [
+      "A016",
+      "A027",
+      "A028"
+    ],
+    "Z03": [
+      "A033"
+    ],
+    "Z04": [
+      "A041",
+      "A042",
+      "A083"
+    ],
+    "Z05": [
+      "A084"
+    ],
+    "Z06": [
+      "A034",
+      "A086"
+    ],
+    "Z07": [
+      "A061",
+      "A062",
+      "A063"
+    ],
+    "Z08": [
+      "A018",
+      "A024",
+      "A067",
+      "A069"
+    ],
+    "Z09": [
+      "A108",
+      "A109",
+      "A110",
+      "A111",
+      "A112",
+      "A113",
+      "A114",
+      "A115",
+      "A116",
+      "A117",
+      "A118",
+      "A119"
+    ],
+    "Z10": [
+      "A038",
+      "A060",
+      "A110"
+    ],
+    "Z11": [
+      "A133",
+      "A134"
+    ],
+    "Z12": [
+      "A090",
+      "A140"
+    ]
+  }
+}

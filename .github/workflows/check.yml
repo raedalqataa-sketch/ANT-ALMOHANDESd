@@ -21,6 +21,8 @@ jobs:
       - if: always()
         run: node --check web_generator/app.js
       - if: always()
+        run: node --check lovable_integration/automatic-runtime.js
+      - if: always()
         run: node --test tests/lovable_bridge.test.cjs tests/worker_session.test.cjs
       - if: always()
         run: npm ci --prefix client_web --ignore-scripts --no-audit --no-fund
