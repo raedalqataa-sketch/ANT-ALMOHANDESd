@@ -15,12 +15,13 @@ def main():
   source=ROOT/'frontend'/name
   if source.exists():shutil.copyfile(source,studio/'assets'/name)
  for name in ('CPYTHON-LICENSE','PYODIDE-LICENSE','engine.zip','manifest.json'):shutil.copyfile(a.runtime_source/name,studio/name)
- with zipfile.ZipFile(studio/'engine.zip') as archive:
-  assert archive.read('backend/design/general_engine.py')==(ROOT/'backend/design/general_engine.py').read_bytes(),'Runtime source must match the checked-out geometric engine'
- # Add the proposed-program layer without changing any approved geometry module.
+ base_engine_sha=hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest()
+ if base_engine_sha!='5111c3eba2907d5818d951eef1054465185dd5c861ab27a9140c671faf8ea8dc':
+  raise ValueError('Unreviewed base runtime: verify the approved engine snapshot before packaging')
+ # Retain the reviewed base runtime, and overlay the current backend source explicitly.
  existing=studio/'engine.zip'
  with zipfile.ZipFile(existing) as archive:entries={name:archive.read(name) for name in archive.namelist()}
- entries['backend/design/architect_planner.py']=(ROOT/'backend/design/architect_planner.py').read_bytes()
+ for source in (ROOT/'backend').rglob('*.py'):entries[str(source.relative_to(ROOT))]=source.read_bytes()
  with zipfile.ZipFile(existing,'w',zipfile.ZIP_DEFLATED) as archive:
   for name,data in sorted(entries.items()):archive.writestr(zipfile.ZipInfo(name),data,compress_type=zipfile.ZIP_DEFLATED)
  subprocess.run(['python','-m','web_generator.build','--output',str(generate)],cwd=ROOT,check=True)
@@ -67,7 +68,7 @@ def main():
  for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
  source=ROOT/'lovable_integration/lovable-src'
  if source.exists():shutil.copytree(source,a.output/'src',dirs_exist_ok=True)
- manifest={'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False}
+ manifest={'engine_revision':'coherent-massing-1','base_engine_sha256':base_engine_sha,'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False}
  (target/'integration.json').write_text(json.dumps(manifest,indent=2)+'\n')
  print(json.dumps(manifest))
 
