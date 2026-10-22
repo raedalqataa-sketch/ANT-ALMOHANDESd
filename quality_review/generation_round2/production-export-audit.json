@@ -1,0 +1,41 @@
+{
+  "all_actual_exports_audited": true,
+  "candidates": [
+    {
+      "pattern": "L",
+      "dxf": "AC1024",
+      "units": "metres",
+      "dxf_audit_errors": 0,
+      "fills": false,
+      "pdf_pages": 3,
+      "actual_requested_spaces": 9,
+      "native_independent_recheck_failures": [],
+      "pending_checks": 26,
+      "executive_approved": false
+    },
+    {
+      "pattern": "U",
+      "dxf": "AC1024",
+      "units": "metres",
+      "dxf_audit_errors": 0,
+      "fills": false,
+      "pdf_pages": 3,
+      "actual_requested_spaces": 9,
+      "native_independent_recheck_failures": [],
+      "pending_checks": 26,
+      "executive_approved": false
+    },
+    {
+      "pattern": "stepped",
+      "dxf": "AC1024",
+      "units": "metres",
+      "dxf_audit_errors": 0,
+      "fills": false,
+      "pdf_pages": 3,
+      "actual_requested_spaces": 9,
+      "native_independent_recheck_failures": [],
+      "pending_checks": 26,
+      "executive_approved": false
+    }
+  ]
+}
