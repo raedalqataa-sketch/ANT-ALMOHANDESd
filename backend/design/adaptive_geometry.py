@@ -78,3 +78,45 @@ def freeform_topology(width, depth, corridor, center_fraction, split_fraction):
             lanes.append(dict(x=x,y=a,width=cross,depth=b-a,
                               axis="y",door_side="east" if side==0 else "west"))
     return hall,lanes
+
+
+# These multipliers are disclosed design heuristics for proportional room planning.
+# They are NOT statutory maximum floor areas.
+EXPANSION_MULTIPLIERS={
+    "bathroom":1.7,"bedroom":1.8,"master":1.9,
+    "dining":1.85,"kitchen":1.85,"living":1.9,
+    "majlis":1.9,"office":1.85,"laundry":1.8,"storage":1.8,
+}
+
+
+def moderate_room_expansion(cells, wall_thickness):
+    """Trim oversized occupied wings *toward* the central corridor.
+
+    Only regular room cells with actual program requirements are reduced.
+    The corridor-facing boundary and requested min net area/side remain fixed.
+    Unoccupied strips become exterior setbacks, yielding a finer freeform mass.
+    Full geometric, furniture, door and daylight validation still decides acceptance.
+    """
+    result=[]
+    for original in cells:
+        cell=dict(original)
+        kind=cell.get("kind")
+        ratio=EXPANSION_MULTIPLIERS.get(kind)
+        if ratio is None or not cell.get("request_id") or cell.get("door_side") not in ("east","west"):
+            result.append(cell)
+            continue
+        t=wall_thickness
+        net_depth=cell["depth"]-t
+        if net_depth<=0:
+            result.append(cell)
+            continue
+        target=max(t+cell["min_side"],
+                   t+ratio*cell["min_area"]/net_depth,
+                   t+net_depth/2.8)
+        target=min(cell["width"],target)
+        if target<cell["width"]-1e-6:
+            if cell["door_side"]=="east":
+                cell["x"]+=cell["width"]-target
+            cell["width"]=target
+        result.append(cell)
+    return result
