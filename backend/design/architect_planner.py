@@ -123,23 +123,74 @@ def propose(intent:ClientIntent):
     return b,planning
 
 def generate_automatic(intent:ClientIntent,output_dir=None):
+    """Select three distinct *validated* geometries using the user's objectives.
+
+    The search library may grow; no externally fixed L/U/stepped alternative.
+    Unsupported multi-unit buildings deliberately fail instead of fabricating
+    apartments from the detached-family program.
+    """
     from .general_engine import generate_general
     b,planning=propose(intent)
-    result=generate_general(b,output_dir)
-    def rank(model):
-        if not model['release']['drawing_export_allowed']:return (1,float('inf'))
-        metrics=list(model.get('massing_quality',{}).get('floors',{}).values())
-        cost=sum(m['normalized_perimeter']+(1-m['envelope_fill'])+m['circulation_ratio'] for m in metrics)/len(metrics) if metrics else float('inf')
-        return (0,cost)
-    result['candidates'].sort(key=rank)
+    search_families=('spine','L','U','stepped')
+    result=generate_general(b,output_dir,candidate_families=search_families)
+
+    def indicators(model):
+        metrics=model.get('metrics',{})
+        built=float(metrics.get('floor_built_m2') or 1)
+        floors=model.get('massing_quality',{}).get('floors',{})
+        quality=list(floors.values())
+        perimeter=sum(float(m.get('normalized_perimeter') or 0) for m in quality)/len(quality) if quality else 2
+        fill=sum(float(m.get('envelope_fill') or 0) for m in quality)/len(quality) if quality else .5
+        circulation=float(metrics.get('circulation_m2') or 0)/max(built*b.floors,1)
+        public=sum(float(r['width']*r['depth']) for floor in model['floors']
+                   for r in floor['rooms'] if r.get('request_id') and r['kind'] in ('majlis','living','dining'))
+        return {'built_area_m2':round(built,2),'circulation_ratio':round(circulation,4),
+                'normalized_perimeter':round(perimeter,4),'envelope_fill':round(fill,4),
+                'social_area_m2':round(public,2)}
+
+    def score(m):
+        x=indicators(m)
+        # Scores are design HEURISTICS (not construction estimates, usability
+        # certification, or proof of luxury). Lower values are preferred.
+        economy=x['built_area_m2']*(1+x['circulation_ratio']*.65)+x['normalized_perimeter']*9
+        accessible=x['circulation_ratio']*180+x['normalized_perimeter']*9+(1-x['envelope_fill'])*12
+        prestige=-x['social_area_m2']+x['normalized_perimeter']*9+(1-x['envelope_fill'])*14
+        weights={'efficiency':(.75,.20,.05),'usability':(.3,.6,.1),'prestige':(.15,.25,.6)}[intent.design_priority]
+        # Compare within each indicator separately, not currency or measured costs.
+        all_scores=(economy/100,accessible/30,prestige/100)
+        return round(sum(w*v for w,v in zip(weights,all_scores)),6)
+
+    for m in result['candidates']:
+        m['design_evaluation']={'metrics':indicators(m),'objective':intent.design_priority,
+                                'output_level':intent.output_level,'heuristic_score':score(m),
+                                'method':'measured_area+circulation+mass_compactness+social_area; unverified heuristic'}
+    valid=sorted((m for m in result['candidates'] if m['release']['drawing_export_allowed']),
+                 key=lambda m:(m['design_evaluation']['heuristic_score'],m['candidate_id']))
+    rejected=sorted((m for m in result['candidates'] if not m['release']['drawing_export_allowed']),
+                    key=lambda m:(len([c for c in m['checks'] if c['status']=='FAIL']),m['candidate_id']))
+    # Never call a failed drawing a candidate that passed. Prefer three
+    # buildable review drafts; preserve failed diagnostics when too few exist.
+    chosen=(valid+rejected)[:3]
+    titles=['المقترح الأنسب لاحتياجاتك','مقترح بديل للمقارنة','مقترح ثالث للمقارنة']
+    for i,m in enumerate(chosen):
+        m['design_option']={'order':i+1,'title':titles[i],
+            'profile':intent.output_level,'priority':intent.design_priority,
+            'validated':bool(m['release']['drawing_export_allowed']),
+            'method':'adaptive ranking over an expandable geometric search library'}
+        m['search']['family_label_ar']=titles[i]
+    result['candidates']=chosen
     planning['massing_strategy']='coherent-1'
-    planning['recommended_pattern']=next((m['candidate_id'] for m in result['candidates'] if m['release']['drawing_export_allowed']),None)
-    planning['reasoning'].append('أُعطيت الأولوية لكتلة متصلة ومنتظمة نسبيًا، مع تقليل النتوءات والممرات غير الخادمة؛ يُعرض البديل الأفضل في هذا القياس أولًا.')
+    planning['design_selection']={'strategy':'objective_ranked_geometry_v1',
+        'user_level':intent.output_level,'user_priority':intent.design_priority,
+        'families_examined':len(search_families),'alternatives_returned':len(chosen),
+        'validated_count':sum(bool(m['release']['drawing_export_allowed']) for m in chosen),
+        'library_limited':True,'executive_approval':False}
+    planning['reasoning'].append('تمت مقارنة مكتبة هندسية متوسعة وفق المساحة المبنية والحركة وانتظام الكتلة ورحابة المعيشة؛ لا يُفرض شكل L أو U أو المتدرج كاسم للبديل.')
+    planning['reasoning'].append('النتائج محدودة بالحلول التي اختبرها المحرك؛ المعايير النوعية والتكلفة الفعلية والإنشاء والخصوصية الكاملة تتطلب مراجعة المهندس.')
     planning['placement_strategy']='auto-rear-corner-1'
-    planning['reasoning'].append('عندما تسمح المساحة، يُجمع المبنى في أحد الركنين الخلفيين بعيدًا عن المدخل، بمحاذاة حدين متعامدين من نطاق البناء، لتبقى فسحة أمامية متصلة. تبقى الارتدادات النظامية محفوظة.')
     result['planning']=planning
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
-    for model in result['candidates']:
+    for model in chosen:
         model['planning']=planning
         (out/(model['model_revision_id']+'.json')).write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8')
     return result
