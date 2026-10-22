@@ -25,6 +25,7 @@ with sync_playwright() as p:
  assert frame.locator('.workspace').is_hidden()
  frame.wait_for_function('AntGeneral.result!==null',timeout=240000)
  assert frame.locator('#auto-program').is_visible();result=frame.evaluate('AntGeneral.result')
+ assert frame.evaluate('AntGeneral.floor')=='SITE'
  assert result['planning']['sleeping_capacity']==6
  assert result['planning']['setbacks']['unknown_street_faces']==['south']
  assert result['planning']['original_intent']['street_widths']=={}
@@ -32,6 +33,9 @@ with sync_playwright() as p:
  for m in models:
   assert sum(r['count']*r['capacity'] for r in m['brief']['rooms'])==6
   assert any(r.get('guest_distributor') for r in m['floors'][0]['rooms'])
+  assert m['site_placement']['active'] and m['site_placement']['rear_face']=='north'
+  assert 'south' not in m['site_placement']['anchor_faces']
+  assert all(value+1e-5>=m['brief']['setbacks'][face] for face,value in m['site_placement']['actual_clearances_m'].items())
   assert not m['release']['executive_issue_allowed']
   folder=OUT/'candidates'/m['candidate_id'];folder.mkdir(parents=True,exist_ok=True)
   for key,path in {**m['downloads'],**m['previews']}.items():

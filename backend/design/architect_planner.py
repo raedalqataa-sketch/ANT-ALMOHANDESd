@@ -90,7 +90,7 @@ def propose(intent:ClientIntent):
     b=VillaBrief(project_name='تصور مسكن الأسرة',plot_width=width,plot_depth=depth,floors=floors,setbacks=setbacks,
         entrance_face=entry,rooms=rows,city=intent.city,municipality=municipality,boundary_widths=known,
         dining_seats=next((n for n in (4,6,8,10,12) if n>=intent.family),12),separate_guest_entry=intent.majlis,
-        notes=intent.notes,massing_strategy='coherent')
+        notes=intent.notes,massing_strategy='coherent',site_placement='auto_rear_corner')
     planning={'version':'architect-program-1','method':'household program synthesis + constrained geometric search; no language model connected',
         'original_intent':intent.model_dump(),'orientation':{'north_up':True,'edge_mapping':mapping},
         'recommended_floors':floors,'sleeping_capacity':sum(r.count*r.capacity for r in rows),
@@ -111,6 +111,8 @@ def generate_automatic(intent:ClientIntent,output_dir=None):
     planning['massing_strategy']='coherent-1'
     planning['recommended_pattern']=next((m['candidate_id'] for m in result['candidates'] if m['release']['drawing_export_allowed']),None)
     planning['reasoning'].append('أُعطيت الأولوية لكتلة متصلة ومنتظمة نسبيًا، مع تقليل النتوءات والممرات غير الخادمة؛ يُعرض البديل الأفضل في هذا القياس أولًا.')
+    planning['placement_strategy']='auto-rear-corner-1'
+    planning['reasoning'].append('عندما تسمح المساحة، يُجمع المبنى في أحد الركنين الخلفيين بعيدًا عن المدخل، بمحاذاة حدين متعامدين من نطاق البناء، لتبقى فسحة أمامية متصلة. تبقى الارتدادات النظامية محفوظة.')
     result['planning']=planning
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     for model in result['candidates']:
