@@ -68,3 +68,16 @@ def test_catalogue_has_eight_projects_23_unique_images_and_no_extracted_laws():
  assert set(PROJECTS)=={p['id'] for p in c['projects']}
  assert all(set(r['sources'])<=set(PROJECTS) for r in RULES)
  assert 'LABEL_FIRST' in [i['floor_classification'] for i in c['projects'][1]['images']]
+
+
+def test_swapping_identical_bedroom_instance_ids_is_not_a_new_design():
+ from backend.design.design_selection import difference
+ rooms=[dict(id='B1',request_id='children',kind='bedroom',capacity=2,x=0,y=0,width=4,depth=5),dict(id='B2',request_id='children',kind='bedroom',capacity=2,x=6,y=0,width=4,depth=5)]
+ a={'floors':[{'id':'FF','rooms':rooms,'cells':rooms}],'design_evaluation':{'metrics':{'normalized_rooms':{'FF:B1':(.2,.5,.4,1),'FF:B2':(.8,.5,.4,1)}}}}
+ b=copy.deepcopy(a);b['floors'][0]['rooms'][0]['id']='B2';b['floors'][0]['rooms'][1]['id']='B1'
+ b['design_evaluation']['metrics']['normalized_rooms']={'FF:B1':(.8,.5,.4,1),'FF:B2':(.2,.5,.4,1)}
+ assert difference(a,b)['semantic_duplicate'] and not difference(a,b)['distinct']
+ # A real spatial change to the two-bedroom grouping is still measured.
+ b['floors'][0]['rooms'][1]['x']=2;b['floors'][0]['rooms'][1]['y']=5
+ b['design_evaluation']['metrics']['normalized_rooms']['FF:B1']=(.4,.8,.4,.5)
+ assert 'semantic_duplicate' not in difference(a,b)

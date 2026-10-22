@@ -75,7 +75,21 @@ def objective_score(metrics,priority):
     weights={**weights,'program_excess':.15}
     return round(sum(weights[k]*v for k,v in components.items()),6),components,weights
 
+def semantic_layout(model):
+    """Ignore instance IDs of interchangeable rooms and a whole-building translation."""
+    rows=[]
+    for f in model.get('floors',[]):
+        cells=f['cells'];x=min(r['x'] for r in cells);y=min(r['y'] for r in cells)
+        w=max(r['x']+r['width'] for r in cells)-x;d=max(r['y']+r['depth'] for r in cells)-y
+        for r in f['rooms']:
+            rows.append((f['id'],r.get('request_id') or r['kind'],r['kind'],r.get('capacity',0),r.get('zone','family'),bool(r.get('guest_distributor')),
+                round((r['x']-x)/w,5),round((r['y']-y)/d,5),round(r['width']/w,5),round(r['depth']/d,5)))
+    return sorted(rows)
+
+
 def difference(a,b):
+    if a.get('floors') and b.get('floors') and semantic_layout(a)==semantic_layout(b):
+        return {'distinct':False,'mean_displacement':0,'relative_order_changes':0,'quadrant_changes':0,'semantic_duplicate':True,'reason':'same physical functional layout; interchangeable instance IDs ignored'}
     ar=a['design_evaluation']['metrics']['normalized_rooms'];br=b['design_evaluation']['metrics']['normalized_rooms']
     keys=set(ar)&set(br)
     if not keys:return {'distinct':False,'mean_displacement':0,'relative_order_changes':0,'quadrant_changes':0}
