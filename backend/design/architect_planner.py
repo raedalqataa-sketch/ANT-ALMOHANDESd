@@ -228,6 +228,9 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         if reference and reference['wet_alignment']['ratio'] is not None:
             m['design_option']['advantages'].append(f"تراكب الخدمات رأسيًا {100*reference['wet_alignment']['ratio']:.0f}٪ · مؤشر تنسيق مبدئي")
         if generation_v3:
+            from .executive_readiness import assess as executive_assess
+            m['executive_readiness']=executive_assess(m)
+            m['release']['executive_issue_allowed']=False
             fi=m['design_evaluation']['functional_intelligence']
             m['design_option']['functional_evidence']={
                 'evaluated_routes':fi['evaluated_relations'],
