@@ -4,6 +4,21 @@ This layer DOES NOT attest legal/code compliance and never invents measured data
 The legacy geometric solver remains unchanged unless opted in by the API caller.
 """
 from __future__ import annotations
+import json
+from functools import lru_cache
+from pathlib import Path
+
+@lru_cache(maxsize=1)
+def policy_bundle():
+    """Load complete versioned policy data without confusing it with verified code."""
+    path = Path(__file__).resolve().parents[2] / "constitution" / "architecture_v2" / "ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if (len(data.get("prior_visual_extraction_143_rules", ())) != 143 or
+            len(data.get("manus_constraints_adapted", ())) != 12 or
+            len(data.get("validation_gates", ())) != 16):
+        raise ValueError("Architectural policy V2 is incomplete or unexpectedly modified")
+    return data
+
 
 VERSION = "2.0.0-draft"
 STATUS = ("PASS", "FAIL", "REVIEW", "NOT_APPLICABLE")
@@ -100,6 +115,7 @@ def _from_checks(rows, tokens):
 
 def assess_candidate(model, intent=None):
     """Return an explicit 16-gate audit. No code certification or fake score."""
+    source = policy_bundle()
     brief = model.get("brief", {})
     checks = list(model.get("checks", []))
     floors = model.get("floors", [])
@@ -148,7 +164,7 @@ def assess_candidate(model, intent=None):
     reviews = [g["id"] for g in all_gates if g["status"] == "REVIEW"]
     return {
         "version": VERSION, "policy": "architectural_proposal_not_building_code",
-        "source": "143 visual design guidelines + adapted Manus Z01-Z12; phased implementation",
+        "source": {"policy_version": source["version"], "rule_catalog": "constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json", "visual_rules_total": 143, "manus_constraints_total": 12, "rule_execution": "PARTIAL_EVIDENCE_BASED_GATES"},
         "gate_count": len(all_gates), "gates": all_gates, "manus_crosswalk": MANUS_CROSSWALK,
         "hard_failures": failures, "review_required": reviews,
         "release_decision": "BLOCKED" if failures else "DRAFT_REVIEW",
@@ -160,8 +176,12 @@ def assess_candidate(model, intent=None):
 
 
 def public_manifest():
+    source = policy_bundle()
     return {
         "version": VERSION, "status": "EXPERIMENTAL_OPT_IN",
+        "source_policy": source["version"], "visual_rules_total": len(source["prior_visual_extraction_143_rules"]),
+        "manus_rules_total": len(source["manus_constraints_adapted"]),
+        "relationships_total": len(source["functional_relationships"]),
         "gates": [{"id": g, "label_ar": GATE_EXPLANATION[g]} for g in GATE_IDS],
         "manus_constraints": list(MANUS_CROSSWALK),
         "scoring_weights": WEIGHTS,
