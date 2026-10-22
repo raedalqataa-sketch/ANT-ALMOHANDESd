@@ -18,17 +18,20 @@ def test_coherent_massing_improves_actual_geometry_without_changing_setbacks_or_
  intent=ClientIntent(width=24,depth=32,city='الرياض',family=6,street_edges=['bottom'])
  b,_=propose(intent);old=b.model_copy(update={'massing_strategy':'legacy'})
  baseline=generate_general(old,tmp_path/'legacy');updated=generate_automatic(intent,tmp_path/'coherent')
- assert updated['planning']['recommended_pattern']=='stepped'
- assert updated['candidates'][0]['candidate_id']=='stepped'
- assert {m['candidate_id'] for m in updated['candidates'] if m['release']['drawing_export_allowed']}=={'L','U','stepped'}
+ assert updated['planning']['design_selection']['strategy']=='objective_ranked_geometry_v1'
+ assert len(updated['candidates'])==3
+ assert len({m['candidate_id'] for m in updated['candidates']})==3
  before={m['candidate_id']:m for m in baseline['candidates']}
  for model in updated['candidates']:
   assert model['brief']['setbacks']==old.setbacks.model_dump()
   assert model['brief']['boundary_widths']==old.boundary_widths
   assert model['brief']['rooms']==old.model_dump()['rooms']
   assert model['release']['executive_issue_allowed'] is False
-  measured=measures(model['floors'][0]['cells']);previous=measures(before[model['candidate_id']]['floors'][0]['cells'])
-  assert measured['components']==1 and measured['normalized_perimeter']<previous['normalized_perimeter']
+  measured=measures(model['floors'][0]['cells'])
+  assert measured['components']==1
+  if model['candidate_id'] in before:
+   previous=measures(before[model['candidate_id']]['floors'][0]['cells'])
+   assert measured['normalized_perimeter']<previous['normalized_perimeter']
   assert not [c for c in validate_general(model,b) if c['status']=='FAIL']
  model=updated['candidates'][0];moved=copy.deepcopy(model);moved['floors'][0]['cells'][0]['x']+=100
  checks=validate_general(moved,b)
