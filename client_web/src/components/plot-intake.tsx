@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {FileImage,MapPinned,RotateCcw,Ruler,CheckCircle2} from 'lucide-react';
 import {measureGeoCorners,measureImageCorners} from '@/lib/plot-intake';
 import type {PlotMeasurement,Point,GeoCorner} from '@/lib/plot-intake';
@@ -9,6 +9,7 @@ interface Props {onApply:(measurement:PlotMeasurement)=>void}
 
 export function PlotIntake({onApply}:Props){
  const [mode,setMode]=useState<Mode>('image');
+ const imageRef=useRef<HTMLImageElement|null>(null);
  const [fileUrl,setFileUrl]=useState('');
  const [fileName,setFileName]=useState('');
  const [fileType,setFileType]=useState<'image'|'pdf'|''>('');
@@ -43,7 +44,7 @@ export function PlotIntake({onApply}:Props){
    const measurement=mode==='image'?(()=>{
     if(fileType!=='image')throw new Error('لمعايرة مخطط PDF، احفظ صفحته كصورة أولًا، أو أدخل الأبعاد يدويًا أدناه.');
     if(points.length!==4)throw new Error('حدد أركان الأرض الأربعة على الصورة بالترتيب A ثم B ثم C ثم D.');
-    return measureImageCorners(points,Number(known));
+    return measureImageCorners(points,Number(known),(imageRef.current?.naturalWidth||1)/(imageRef.current?.naturalHeight||1));
    })():(()=>{
     const parsed:GeoCorner[]=coordinates.map(value=>{
      const bits=value.trim().replace(/،/g,',').split(/[,\s]+/).filter(Boolean);
@@ -69,7 +70,7 @@ export function PlotIntake({onApply}:Props){
    {fileUrl&&<div className="space-y-2">
     <p className="break-all text-xs text-muted-foreground">{fileName} · لا يُرفع الملف إلى الخادم</p>
     {fileType==='image'?<div className="relative overflow-hidden rounded-lg border bg-white" dir="ltr">
-     <img src={fileUrl} alt="المخطط المرفوع لتحديد زوايا الأرض" className="block h-auto w-full"/>
+     <img ref={imageRef} src={fileUrl} alt="المخطط المرفوع لتحديد زوايا الأرض" className="block h-auto w-full"/>
      <button type="button" className="absolute inset-0 cursor-crosshair" aria-label={'حدد '+(labels[points.length]||'اكتملت الزوايا')} onClick={mark} disabled={points.length>=4}/>
      {points.map((p,i)=><span key={i} className="pointer-events-none absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-xs font-bold text-white shadow-lg" style={{left:(p.x*100)+'%',top:(p.y*100)+'%'}}>{'ABCD'[i]}</span>)}
     </div>:<p className="rounded-lg border bg-card p-3 text-xs leading-6">ملف PDF مقبول للمعاينة المرجعية فقط. لا نقرأ قياساته آليًا بعد؛ حوّل الصفحة التي تحتوي حدود الأرض إلى صورة PNG/JPG لتحديد الأركان، أو أدخل الأبعاد بنفسك.</p>}
