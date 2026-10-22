@@ -15,6 +15,10 @@ if(window.AntEmbedded){
   if(message.nonce!==nonce||message.type!=='DRAFT'||accepted||importing)return;
   importing=true;
   try{
+   if(message.draft?.mode==='automatic'){
+    await window.AntEmbeddedReady;accepted=true;
+    await window.AntStartAutomatic(message.draft,send);return;
+   }
    const converted=AntClientBridge.convert(message.draft);
    await window.AntEmbeddedReady;
    window.AntLoadClientBrief(converted.brief);

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type {AutomaticDraft} from '@/lib/automatic-intent';
 import type { ClientDraft } from '@/lib/client-requirements';
 import { Button } from '@/components/ui/button';
 
@@ -8,7 +9,7 @@ const enginePath = import.meta.env.BASE_URL + 'villa-engine/generate/index.html?
 /** Same-origin bridge to the unchanged Python geometric engine in a Web Worker.
  * No project/database save, credentials, cloud compute, or engineering approval.
  */
-export function VillaGenerator({ draft }: { draft: ClientDraft }) {
+export function VillaGenerator({ draft }: { draft: ClientDraft | AutomaticDraft }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const imported = useRef(false);
   const [session, setSession] = useState('');
@@ -37,7 +38,7 @@ export function VillaGenerator({ draft }: { draft: ClientDraft }) {
         if (!Number.isInteger(message.roomCount) || message.roomCount < 0 || message.roomCount > 36) return;
         imported.current = true;
         window.clearInterval(retry); window.clearTimeout(timeout);
-        setStatus(`نُقلت متطلبات ${message.roomCount} فراغًا إلى المحرك. أكمل البيانات الفارغة أدناه ثم اضغط «توليد المقترحات الثلاثة». لم يُنشأ مسقط بعد.`);
+        setStatus('mode' in draft && draft.mode==='automatic' ? 'نقترح الآن البرنامج والمساحات ونبحث عن البدائل الهندسية…' : `نُقلت متطلبات ${message.roomCount} فراغًا إلى المحرك. أكمل البيانات الفارغة أدناه ثم اضغط «توليد المقترحات الثلاثة». لم يُنشأ مسقط بعد.`);
       } else if (message.type === 'RESULT' && imported.current) {
         if (!Array.isArray(message.candidates) || message.candidates.length > 3) return;
         const available = message.candidates.filter((candidate: { reviewable?: unknown }) => candidate.reviewable === true).length;
