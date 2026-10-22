@@ -67,7 +67,7 @@ def test_real_v3_designs_are_measured_and_not_preset_l_u_stepped(tmp_path):
     assert planning["generation_v3"]["revision"]=="adaptive-functional-search-1"
     assert planning["generation_v3"]["legacy_shapes_in_default_v3_search"] is False
     assert planning["design_selection"]["search_variants_examined"]>=5
-    assert all(x["family"] not in {"L","U","stepped"} for x in planning["design_selection"]["diagnostics"])
+    assert all(x["candidate_id"].split("-")[0] not in {"L","U","stepped"} for x in planning["design_selection"]["diagnostics"])
     assert result["candidates"], "V3 should find at least one geometrically valid candidate"
     for a,b in combinations(result["candidates"],2):
         assert difference(a,b)["distinct"]
