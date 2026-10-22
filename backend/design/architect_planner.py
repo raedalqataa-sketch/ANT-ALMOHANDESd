@@ -9,6 +9,13 @@ from pydantic import Field,model_validator
 from .general_models import Strict,VillaBrief,SpaceRequest
 from .saudi_rules import required_setbacks,registry
 
+class SiteEvidence(Strict):
+    source: Literal['scaled_image','gps_corners']
+    area_m2: float = Field(gt=0,le=5000)
+    point_count: Literal[4]
+    review_required: Literal[True]
+
+
 class ClientIntent(Strict):
     width: float = Field(ge=8,le=60)
     depth: float = Field(ge=8,le=80)
@@ -25,6 +32,7 @@ class ClientIntent(Strict):
     office: bool=False
     accessible_bedroom: bool=False
     notes: str=Field(default='',max_length=1500)
+    site_evidence: SiteEvidence | None = None
 
     @model_validator(mode='after')
     def consistent(self):
@@ -32,6 +40,8 @@ class ClientIntent(Strict):
             raise ValueError('حدد الشارع الرئيسي ضمن جهات الشوارع دون تكرار')
         if any(k not in self.street_edges or not 1<=v<=100 for k,v in self.street_widths.items()):
             raise ValueError('عرض الشارع المعروف بين 1 و100 م ولجهة شارع محددة فقط')
+        if self.site_evidence and abs(self.width*self.depth-self.site_evidence.area_m2)>0.08*self.width*self.depth:
+            raise ValueError('مساحة القياس المبدئي لا تتفق مع الأبعاد؛ أعد فحص الأركان')
         return self
 
 def propose(intent:ClientIntent):
@@ -83,6 +93,8 @@ def propose(intent:ClientIntent):
     if unknown:warnings.append('عروض بعض الشوارع غير معروفة: اقتُرحت ارتدادات أولية 6 م للواجهة الرئيسية و3 م لبقية الشوارع؛ مطابقتها النظامية غير محسومة.')
     if rotation:warnings.append('رُتبت الأبعاد والجهات لعرض المسقط والشمال إلى الأعلى؛ بيانات الأرض الأصلية محفوظة دون تغيير.')
     if intent.notes.strip():warnings.append('الرغبات النصية محفوظة كاملة؛ لا يُعد النص غير المحوّل إلى فراغ أو قيد منفذًا تلقائيًا.')
+    if intent.site_evidence:
+        warnings.append('أبعاد الأرض مستخلصة من زوايا مُدخلة أو صورة مُعايرة؛ ليست إثباتًا مساحيًا أو سند ملكية ولا تحدد الشوارع تلقائيًا.')
     municipality=''
     directory=json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())
     for amanat in directory['amanats']:
@@ -92,7 +104,7 @@ def propose(intent:ClientIntent):
         dining_seats=next((n for n in (4,6,8,10,12) if n>=intent.family),12),separate_guest_entry=intent.majlis,
         notes=intent.notes,massing_strategy='coherent',site_placement='auto_rear_corner')
     planning={'version':'architect-program-1','method':'household program synthesis + constrained geometric search; no language model connected',
-        'original_intent':intent.model_dump(),'orientation':{'north_up':True,'edge_mapping':mapping},
+        'original_intent':intent.model_dump(),'site_evidence':intent.site_evidence.model_dump() if intent.site_evidence else None,'orientation':{'north_up':True,'edge_mapping':mapping},
         'recommended_floors':floors,'sleeping_capacity':sum(r.count*r.capacity for r in rows),
         'program':[r.model_dump() for r in rows],'reasoning':reasoning,'warnings':warnings,
         'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'],'unknown_street_faces':unknown,'local_parcel_verified':False}}
