@@ -1,0 +1,208 @@
+{
+  "actual_directional_generation": [
+    {
+      "street_edge": "top",
+      "front_face": "north",
+      "pattern": "stepped",
+      "anchor_faces": [
+        "south",
+        "west"
+      ],
+      "clearances_m": {
+        "west": 1.5,
+        "east": 10.716000000000001,
+        "north": 16.188,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "top",
+      "front_face": "north",
+      "pattern": "L",
+      "anchor_faces": [
+        "south",
+        "east"
+      ],
+      "clearances_m": {
+        "west": 10.14,
+        "east": 1.5,
+        "north": 18.735,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "top",
+      "front_face": "north",
+      "pattern": "U",
+      "anchor_faces": [
+        "south",
+        "east"
+      ],
+      "clearances_m": {
+        "west": 10.14,
+        "east": 1.5,
+        "north": 18.735,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "bottom",
+      "front_face": "south",
+      "pattern": "stepped",
+      "anchor_faces": [
+        "north",
+        "west"
+      ],
+      "clearances_m": {
+        "west": 1.5,
+        "east": 10.716000000000001,
+        "north": 1.5,
+        "south": 16.188
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "bottom",
+      "front_face": "south",
+      "pattern": "L",
+      "anchor_faces": [
+        "north",
+        "east"
+      ],
+      "clearances_m": {
+        "west": 10.14,
+        "east": 1.5,
+        "north": 1.5,
+        "south": 18.735
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "bottom",
+      "front_face": "south",
+      "pattern": "U",
+      "anchor_faces": [
+        "north",
+        "east"
+      ],
+      "clearances_m": {
+        "west": 10.14,
+        "east": 1.5,
+        "north": 1.5,
+        "south": 18.735
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "left",
+      "front_face": "west",
+      "pattern": "stepped",
+      "anchor_faces": [
+        "east",
+        "south"
+      ],
+      "clearances_m": {
+        "west": 13.29,
+        "east": 1.5,
+        "north": 11.996,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "left",
+      "front_face": "west",
+      "pattern": "L",
+      "anchor_faces": [
+        "east",
+        "north"
+      ],
+      "clearances_m": {
+        "west": 13.29,
+        "east": 1.5,
+        "north": 1.5,
+        "south": 16.26
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "left",
+      "front_face": "west",
+      "pattern": "U",
+      "anchor_faces": [
+        "east",
+        "north"
+      ],
+      "clearances_m": {
+        "west": 13.29,
+        "east": 1.5,
+        "north": 1.5,
+        "south": 16.26
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "right",
+      "front_face": "east",
+      "pattern": "stepped",
+      "anchor_faces": [
+        "west",
+        "south"
+      ],
+      "clearances_m": {
+        "west": 1.5,
+        "east": 13.29,
+        "north": 11.996,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "right",
+      "front_face": "east",
+      "pattern": "L",
+      "anchor_faces": [
+        "west",
+        "south"
+      ],
+      "clearances_m": {
+        "west": 1.5,
+        "east": 13.29,
+        "north": 16.26,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    },
+    {
+      "street_edge": "right",
+      "front_face": "east",
+      "pattern": "U",
+      "anchor_faces": [
+        "west",
+        "south"
+      ],
+      "clearances_m": {
+        "west": 1.5,
+        "east": 13.29,
+        "north": 16.26,
+        "south": 1.5
+      },
+      "failed_checks": [],
+      "executive_approved": false
+    }
+  ]
+}

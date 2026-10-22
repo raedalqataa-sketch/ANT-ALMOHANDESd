@@ -141,6 +141,7 @@ class VillaBrief(Strict):
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
     massing_strategy: Literal['legacy','coherent'] = 'legacy'
+    site_placement: Literal['legacy','auto_rear_corner'] = 'legacy'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)
     notes: str = Field(default='', max_length=4000)
 

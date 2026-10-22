@@ -50,6 +50,14 @@ def drawing(model,floor,site_view=False):
         scene.rect(0,0,siteW,siteD,stroke='#777777',lw=.012,layer='SITE')
         s=model['brief']['setbacks'];x,y=s['west'],s['north'];w=siteW-x-s['east'];d=siteD-y-s['south']
         for a,b in [((x,y),(x+w,y)),((x+w,y),(x+w,y+d)),((x+w,y+d),(x,y+d)),((x,y+d),(x,y))]:scene.line(a,b,stroke='#999999',lw=.009,dash=[.13,.10],layer='SETBACKS')
+        placement=model.get('site_placement') or {}
+        if placement.get('active'):
+            yard=placement['front_open_envelope']
+            scene.text(yard['x']+yard['width']/2,yard['y']+yard['depth']/2,'فسحة أمامية · مداخل ومواقف',.26,layer='SITE_LABEL')
+            scene.text(siteW/2,-2.5,placement['label_ar'],.24,layer='SITE_LABEL')
+            face=placement['front_face']
+            label_at={'north':(siteW/2,.45),'south':(siteW/2,siteD-.45),'west':(1,siteD/2),'east':(siteW-1,siteD/2)}[face]
+            scene.text(*label_at,'جهة المدخل',.20,layer='SITE_LABEL')
         for park in model.get('parking',[]):
             scene.rect(park['x'],park['y'],park['width'],park['depth'],stroke='#555555',lw=.018,layer='PARKING')
             if park['width']<park['depth']:car_symbol(scene,park)

@@ -1,0 +1,24 @@
+{
+  "basic_inputs_only": true,
+  "required_room_counts": false,
+  "required_room_dimensions": false,
+  "required_manual_setbacks": false,
+  "automatic_generation": true,
+  "family": 6,
+  "sleeping_capacity": 6,
+  "patterns": [
+    "stepped",
+    "U",
+    "L"
+  ],
+  "draft_recovered": true,
+  "real_downloads": [
+    "pdf",
+    "dxf",
+    "json"
+  ],
+  "unknown_street_width_disclosed": true,
+  "page_errors": [],
+  "mobile_overflow": false,
+  "executive_approved": false
+}

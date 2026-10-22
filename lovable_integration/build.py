@@ -42,7 +42,7 @@ def main():
  app=app.replace("renderResult();$('engine-state').textContent='اكتمل", "renderResult();window.AntEmbeddedNotify?.(result);$('engine-state').textContent='اكتمل")
  app=app.replace("$('municipality').addEventListener('change',()=>{$('city').value=''", "$('municipality').addEventListener('change',()=>{if(!window.AntEmbedded)$('city').value=''")
  app=app.replace("async function init(){let saved;", "async function init(){if(window.AntEmbedded){document.documentElement.dataset.embedded='1';state.rooms=[];renderRooms();await loadJurisdictions();aiStatus();return;}let saved;")
- app=app.replace(" }init();", " }window.AntEmbeddedReady=init();\n window.AntLoadClientBrief=b=>{restore(b);changed();};window.AntApplyAutomaticResult=result=>{if(result.candidates[0])restore(result.candidates[0].brief);state.result=result;state.stale=false;renderResult();};")
+ app=app.replace(" }init();", " }window.AntEmbeddedReady=init();\n window.AntLoadClientBrief=b=>{restore(b);changed();};window.AntApplyAutomaticResult=result=>{if(result.candidates[0])restore(result.candidates[0].brief);state.result=result;state.floor=result.candidates[0]?.site_placement?.active?'SITE':'GF';state.stale=false;renderResult();};")
  assert 'window.AntLoadClientBrief=b=>' in app
  (generate/'app.js').write_text(app)
  client=(generate/'static-client.js').read_text()

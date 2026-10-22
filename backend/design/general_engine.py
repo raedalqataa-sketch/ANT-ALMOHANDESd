@@ -198,10 +198,15 @@ def search(brief,family):
         pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
         if brief.massing_strategy=='coherent':
-            fallback=search(brief.model_copy(update={'massing_strategy':'legacy'}),family)
+            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family)
             if fallback:
                 backups=[{k:v for k,v in fallback.items() if k!='alternatives'}]+fallback.get('alternatives',[])
                 best['alternatives'].extend({**r,'massing_fallback':True} for r in backups)
+    if best and brief.site_placement=='auto_rear_corner':
+        from .site_placement import alternatives as placements
+        layouts=[{k:v for k,v in best.items() if k!='alternatives'}]+best.get('alternatives',[])
+        expanded=[placed for group,layout in enumerate(layouts) for placed in placements(brief,layout,group)]
+        best=expanded[0];best['alternatives']=expanded[1:]
     return best
 
 
@@ -471,6 +476,9 @@ def materialize(brief,family,result):
     if brief.massing_strategy=='coherent':
         from .massing_quality import measures
         model['massing_quality']={'revision':'coherent-1','floors':{f['id']:measures(f['cells']) for f in model['floors']}}
+    if result.get('site_placement'):
+        from .site_placement import evidence
+        model['site_placement']=evidence(model,brief,result['site_placement'])
     model['geometry_sha256']=hashlib.sha256(json.dumps(clean(canonical),sort_keys=True).encode()).hexdigest()
     return model
 
@@ -586,6 +594,9 @@ def validate_general(model,brief):
     from .automatic_features import feature_checks
     checks.extend(feature_checks(model,brief))
     checks.extend(saudi_rules.checks(model,brief))
+    from .site_placement import recheck as placement_check
+    placement=placement_check(model,brief)
+    if placement:checks.append(placement)
     return checks
 
 
@@ -618,8 +629,16 @@ def generate_general(brief:VillaBrief,output_dir=None):
             }
             if model is None or (violation_cost(errors),len(errors)) < (violation_cost(failures),len(failures)):
                 model=trial;failures=errors
-            if not errors:model=trial;failures=[];break
+            if not errors:
+                def placement_cost(m):
+                    value=m.get('site_placement',{}).get('entrance_to_street_midpoint_m')
+                    return value if value is not None else float('inf')
+                if failures or model is trial or placement_cost(trial)<placement_cost(model):model=trial
+                failures=[]
+            same_group=(attempt+1<len(alternatives) and layout.get('site_placement',{}).get('active') and alternatives[attempt+1].get('placement_group')==layout.get('placement_group'))
+            if not failures and not same_group:break
             if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
+        model['search']['validated_layouts_tested']=attempt+1
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
         rev=model['model_revision_id'];model['downloads']={'json':f'/api/files/{rev}.json'};model['previews']={}
         if not failures:
@@ -629,7 +648,7 @@ def generate_general(brief:VillaBrief,output_dir=None):
             (out/f'{rev}-SITE.svg').write_text(scene_svg(model,model['floors'][0],drawing=drawing(model,model['floors'][0],site_view=True)),encoding='utf-8')
             model['previews']['SITE']=f'/api/files/{rev}-SITE.svg'
             export_model=model;export_scenes=scenes
-            if model.get('feature_generation') or brief.regulatory_geometry:
+            if model.get('feature_generation') or brief.regulatory_geometry or model.get('site_placement',{}).get('active'):
                 export_model={**model,'floors':model['floors']+[{'id':'SITE','name':'الموقع والخدمات','rooms':[]}]}
                 export_scenes=scenes+[drawing(model,model['floors'][0],site_view=True)]
             report_model={**export_model,'floors':export_model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
