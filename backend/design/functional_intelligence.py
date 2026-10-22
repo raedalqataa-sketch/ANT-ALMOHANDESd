@@ -7,11 +7,16 @@ import math
 from .reference_patterns import graph, route
 from .general_quality import privacy_evidence
 
+# Supported room kinds are mapped to V2 relationships where semantically exact.
+# E017 is intentionally not asserted: this engine has no distinct master_bath kind.
+# Values are transparent design preferences, not statutory route-distance limits.
 RELATIONSHIPS=(
-    ("kitchen", "dining", 1.0, "FOOD_SERVICE"),
-    ("living", "dining", .9, "FAMILY_COMMON"),
-    ("master", "bathroom", .8, "MASTER_BATH_ACCESS"),
-    ("bedroom", "bathroom", .7, "FAMILY_BATH_ACCESS"),
+    ("kitchen", "dining", 1.0, "FOOD_SERVICE", "E007"),
+    ("living", "dining", .9, "FAMILY_COMMON", "E013"),
+    ("master", "bathroom", .8, "MASTER_BATH_ACCESS", None),
+    ("bedroom", "bathroom", .7, "FAMILY_BATH_ACCESS", None),
+    ("laundry", "bedroom", .5, "LAUNDRY_SERVICE", "E019"),
+    ("stair", "living", .5, "STAIR_FAMILY_ACCESS", "E014"),
 )
 
 
@@ -19,9 +24,9 @@ def inspect(model):
     routes=[]
     for floor in model.get("floors", ()):
         rooms, doors = graph(floor)
-        required=[r for r in rooms.values() if r.get("request_id") and
+        required=[r for r in rooms.values() if (r.get("request_id") or r.get("kind")=="stair") and
                   r.get("zone")!="guest"]
-        for source_kind, target_kind, weight, relation_id in RELATIONSHIPS:
+        for source_kind, target_kind, weight, relation_id, source_rule in RELATIONSHIPS:
             source=[r for r in required if r["kind"]==source_kind]
             targets=[r for r in required if r["kind"]==target_kind]
             for a in source:
@@ -39,14 +44,14 @@ def inspect(model):
                 if not candidates:
                     routes.append(dict(id=relation_id, floor=floor["id"], from_id=a["id"],
                                        target_kind=target_kind,status="UNREACHABLE",
-                                       route_m=None,detour_ratio=None,weight=weight))
+                                       route_m=None,detour_ratio=None,weight=weight,source_rule=source_rule))
                     continue
                 distance,b,straight=min(candidates,key=lambda q:q[0])
                 routes.append(dict(id=relation_id,floor=floor["id"],from_id=a["id"],
                                    to_id=b["id"],target_kind=target_kind,status="MEASURED",
                                    route_m=round(distance,3),
                                    detour_ratio=round(distance/max(straight,.1),3),
-                                   weight=weight))
+                                   weight=weight,source_rule=source_rule))
     # Measure kitchen-to-dining detours separately from guest/family circulation.
     # A large detour is a preference warning, not proof of a regulatory failure.
     service_detours=[r for r in routes if r["id"]=="FOOD_SERVICE" and
@@ -63,7 +68,9 @@ def inspect(model):
                 min(2,max(0,item["detour_ratio"]-1.5))) for item in routes)
     cost+=3*len(exposure)
     return {
-        "version":"functional-relations-1",
+        "version":"functional-relations-2",
+        "v2_relationships_operationalized":["E007","E013","E014","E019"],
+        "v2_relationships_not_fully_implemented":True,
         "evaluated_relations":len(routes),"routes":routes,
         "unreachable":failures,"long_detours":excessive,
         "guest_family_exposure":list(exposure),
