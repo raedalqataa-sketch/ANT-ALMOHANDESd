@@ -19,13 +19,17 @@ class SiteEvidence(Strict):
 class ClientIntent(Strict):
     width: float = Field(ge=8,le=60)
     depth: float = Field(ge=8,le=80)
-    city: str = Field(min_length=1,max_length=100)
+    country: Literal['SA','YE']='SA'
+    region: str = Field(default='',max_length=100)
+    city: str = Field(default='',max_length=100)
     north_edge: Literal['top','right','bottom','left']='top'
     street_edges: list[Literal['top','right','bottom','left']]=Field(min_length=1,max_length=4)
     main_street: Literal['top','right','bottom','left']='bottom'
     street_widths: dict[str,float]=Field(default_factory=dict)
     family: int = Field(ge=1,le=12)
-    building: Literal['villa','house']='villa'
+    building: Literal['villa','house','investment']='villa'
+    output_level: Literal['economy','standard','luxury']='standard'
+    design_priority: Literal['efficiency','usability','prestige']='usability'
     floors: Literal['auto','one','two']='auto'
     comfort: Literal['compact','balanced','generous']='balanced'
     majlis: bool=True
@@ -36,6 +40,8 @@ class ClientIntent(Strict):
 
     @model_validator(mode='after')
     def consistent(self):
+        if not (self.city.strip() or self.region.strip()):
+            raise ValueError('حدد المحافظة أو المنطقة، أو اكتب اسم الموقع يدويًا')
         if len(set(self.street_edges))!=len(self.street_edges) or self.main_street not in self.street_edges:
             raise ValueError('حدد الشارع الرئيسي ضمن جهات الشوارع دون تكرار')
         if any(k not in self.street_edges or not 1<=v<=100 for k,v in self.street_widths.items()):
@@ -45,6 +51,8 @@ class ClientIntent(Strict):
         return self
 
 def propose(intent:ClientIntent):
+    if intent.building=='investment':
+        raise ValueError('المبنى السكني الاستثماري يحتاج محرك وحدات مستقلة ومداخل وسلالم مشتركة؛ لا يجوز توليد فيلا وتسميتها مبنى استثماريًا. هذا النوع متاح لإدخال البيانات فقط حتى اكتمال محرك الوحدات.')
     edges=['top','right','bottom','left'];directions=['north','east','south','west']
     rotation=edges.index(intent.north_edge)
     mapping={edge:directions[(i-rotation)%4] for i,edge in enumerate(edges)}
@@ -56,13 +64,14 @@ def propose(intent:ClientIntent):
     known={mapping[e]:(intent.street_widths[e] if e in intent.street_widths else 0) for e in edges if e not in intent.street_edges or e in intent.street_widths}
     # Calculate known boundaries through the existing, source-bound rule engine.
     from types import SimpleNamespace
-    calculated=required_setbacks(SimpleNamespace(boundary_widths=known,entrance_face=entry))
+    calculated=required_setbacks(SimpleNamespace(boundary_widths=known,entrance_face=entry)) if intent.country=='SA' else {}
+    # Yemen: indicative design clearances only; never mislabel as Yemen legal setbacks.
     unknown=[mapping[e] for e in intent.street_edges if e not in intent.street_widths]
-    setbacks={face:calculated.get(face,6.0 if face==entry else 3.0) for face in directions}
+    setbacks={face:calculated.get(face,(6.0 if face==entry else 3.0) if intent.country=='SA' else (4.0 if face==entry else 2.0)) for face in directions}
     rows=[];reasoning=[]
-    scale={'compact':.92,'balanced':1.,'generous':1.15}[intent.comfort]
+    scale={'compact':.92,'balanced':1.,'generous':1.15}[intent.comfort]*{'economy':.92,'standard':1.,'luxury':1.12}[intent.output_level]
     def add(id,name,kind,floor,count,area,side,capacity=0):
-        minimum=registry()['rules']['rooms']['minimums'].get(kind,[0,0])
+        minimum=registry()['rules']['rooms']['minimums'].get(kind,[0,0]) if intent.country=='SA' else [0,0]
         rows.append(SpaceRequest(id=id,name=name,kind=kind,floor=floor,count=count,min_area=round(max(area*scale,minimum[0]),2),min_side=max(side,minimum[1]),capacity=capacity))
     sleeping=floors-1
     master_floor=0 if intent.accessible_bedroom else sleeping
@@ -89,25 +98,28 @@ def propose(intent:ClientIntent):
         'المساحات والأبعاد توصيات تصميمية قابلة للتعديل، وليست حدودًا قانونية إلا حيث يحدد مرجع القاعدة ذلك.',
     ])
     if intent.accessible_bedroom:reasoning.append('غرفة رئيسية وحمام في الأرضي لتقليل استخدام الدرج؛ لا يعني ذلك اعتماد إتاحة الوصول.')
-    warnings=['اختيار المدينة لا يستبدل اشتراطات المخطط وقطعة الأرض؛ التطبيق يستخدم المرجع الوطني المتاح وتبقى المراجعة المحلية معلقة.']
-    if unknown:warnings.append('عروض بعض الشوارع غير معروفة: اقتُرحت ارتدادات أولية 6 م للواجهة الرئيسية و3 م لبقية الشوارع؛ مطابقتها النظامية غير محسومة.')
+    warnings=(['اختيار المنطقة والمدينة لا يستبدل اشتراطات قطعة الأرض؛ تُستخدم مراجع السعودية المتاحة جزئيًا وتبقى المطابقة المحلية معلقة.'] if intent.country=='SA' else ['اليمن: لا تتوفر اشتراطات تنظيمية محلية موثقة في هذا الإصدار؛ الارتدادات 4م أمامي و2م جانبي/خلفي افتراضات تصميمية غير قانونية، ويجب اعتمادها من الجهة المختصة قبل أي إصدار تنفيذي.'])
+    if unknown:warnings.append('عروض بعض الشوارع غير معروفة: جميع الارتدادات أمام الشوارع غير المتحقق منها افتراضية، ويجب مراجعتها محليًا.')
     if rotation:warnings.append('رُتبت الأبعاد والجهات لعرض المسقط والشمال إلى الأعلى؛ بيانات الأرض الأصلية محفوظة دون تغيير.')
     if intent.notes.strip():warnings.append('الرغبات النصية محفوظة كاملة؛ لا يُعد النص غير المحوّل إلى فراغ أو قيد منفذًا تلقائيًا.')
     if intent.site_evidence:
         warnings.append('أبعاد الأرض مستخلصة من زوايا مُدخلة أو صورة مُعايرة؛ ليست إثباتًا مساحيًا أو سند ملكية ولا تحدد الشوارع تلقائيًا.')
     municipality=''
-    directory=json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())
-    for amanat in directory['amanats']:
-        if intent.city==amanat['name'] or any(intent.city==r['Name'] for r in amanat['municipalities']):municipality=amanat['name'];break
+    if intent.country=='SA':
+        directory=json.loads((Path(__file__).resolve().parents[2]/'constitution/saudi/municipalities.json').read_text())
+        for amanat in directory['amanats']:
+            if intent.city==amanat['name'] or any(intent.city==r['Name'] for r in amanat['municipalities']):municipality=amanat['name'];break
     b=VillaBrief(project_name='تصور مسكن الأسرة',plot_width=width,plot_depth=depth,floors=floors,setbacks=setbacks,
-        entrance_face=entry,rooms=rows,city=intent.city,municipality=municipality,boundary_widths=known,
+        country=intent.country,apply_saudi_rules=intent.country=='SA',region=intent.region,
+        entrance_face=entry,rooms=rows,city=intent.city or intent.region,municipality=municipality,boundary_widths=known,
         dining_seats=next((n for n in (4,6,8,10,12) if n>=intent.family),12),separate_guest_entry=intent.majlis,
         notes=intent.notes,massing_strategy='coherent',site_placement='auto_rear_corner')
-    planning={'version':'architect-program-1','method':'household program synthesis + constrained geometric search; no language model connected',
+    reasoning.append('مستوى المخرجات: '+{'economy':'اقتصادي','standard':'متوسط','luxury':'فاخر'}[intent.output_level]+'؛ أولوية التصميم: '+{'efficiency':'ترشيد المساحة','usability':'سهولة الاستخدام','prestige':'الرحابة والفخامة'}[intent.design_priority]+'.')
+    planning={'version':'architect-program-2','method':'household program synthesis + constrained geometric search; no language model connected',
         'original_intent':intent.model_dump(),'site_evidence':intent.site_evidence.model_dump() if intent.site_evidence else None,'orientation':{'north_up':True,'edge_mapping':mapping},
         'recommended_floors':floors,'sleeping_capacity':sum(r.count*r.capacity for r in rows),
         'program':[r.model_dump() for r in rows],'reasoning':reasoning,'warnings':warnings,
-        'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'],'unknown_street_faces':unknown,'local_parcel_verified':False}}
+        'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'] if intent.country=='SA' else {'jurisdiction':'YE','status':'UNVERIFIED_DESIGN_ASSUMPTION'},'unknown_street_faces':unknown,'local_parcel_verified':False}}
     return b,planning
 
 def generate_automatic(intent:ClientIntent,output_dir=None):
