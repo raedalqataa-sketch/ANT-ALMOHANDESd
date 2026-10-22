@@ -1,0 +1,32 @@
+name: V3 architectural drawing evidence (draft)
+on:
+  push:
+    branches:
+      - feature/functional-adaptive-generation-v3
+    paths:
+      - 'backend/design/**'
+      - 'quality_review/v3_export.py'
+      - '.github/workflows/v3-review-packet.yml'
+  workflow_dispatch:
+jobs:
+  export-v3-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python -m quality_review.v3_export /tmp/v3-review
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ant-v3-architectural-review-not-executive
+          path: |
+            /tmp/v3-review/alternative-*.pdf
+            /tmp/v3-review/alternative-*.dxf
+            /tmp/v3-review/alternative-*.json
+            /tmp/v3-review/REVIEW_NOT_EXECUTIVE.json
+          if-no-files-found: error
+          retention-days: 30
