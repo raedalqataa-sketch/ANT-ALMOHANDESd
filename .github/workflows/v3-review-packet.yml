@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - feature/functional-adaptive-generation-v3
+      - feature/functional-engine-v3-privacy-repair
+      - main
     paths:
       - 'backend/design/**'
       - 'quality_review/v3_export.py'

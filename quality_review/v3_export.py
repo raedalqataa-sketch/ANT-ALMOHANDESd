@@ -45,6 +45,7 @@ def main(target):
             "scoring_heuristic":model["design_evaluation"]["heuristic_score"],
             "hard_failures":model["constitution_v2"]["hard_failures"],
             "review_required":model["constitution_v2"]["review_required"],
+            "executive_readiness":model["executive_readiness"],
             "code_approved":False,
         })
     (target/"REVIEW_NOT_EXECUTIVE.json").write_text(json.dumps(summary,indent=2,ensure_ascii=False,allow_nan=False),encoding="utf-8")
