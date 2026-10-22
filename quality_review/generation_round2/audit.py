@@ -25,6 +25,11 @@ def main():
   actual=sum(bool(r.get('request_id')) for f in exported['floors'] for r in f['rooms']);assert actual==requested
   assert exported['release']['executive_issue_allowed'] is False
   rows.append({'pattern':model['candidate_id'],'dxf':'AC1024','units':'metres','dxf_audit_errors':len(errors),'fills':False,'pdf_pages':len(pdf),'actual_requested_spaces':actual,'native_independent_recheck_failures':failed,'pending_checks':sum(c['status']=='PENDING' for c in checks),'executive_approved':False})
- assert {r['pattern'] for r in rows}=={'L','U','stepped'}
+ if result.get('planning',{}).get('design_selection',{}).get('strategy')=='objective_ranked_geometry_v2':
+  from backend.design.design_selection import difference
+  from itertools import combinations
+  assert len(rows)==result['planning']['design_selection']['validated_count']
+  assert all(difference(a,b)['distinct'] for a,b in combinations(result['candidates'],2))
+ else:assert {r['pattern'] for r in rows}=={'L','U','stepped'}
  report={'all_actual_exports_audited':True,'candidates':rows};(root/'export-audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');print(json.dumps(report,ensure_ascii=False))
 if __name__=='__main__':main()

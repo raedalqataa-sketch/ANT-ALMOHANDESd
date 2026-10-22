@@ -50,6 +50,20 @@ def drawing(model,floor,site_view=False):
         scene.rect(0,0,siteW,siteD,stroke='#777777',lw=.012,layer='SITE')
         s=model['brief']['setbacks'];x,y=s['west'],s['north'];w=siteW-x-s['east'];d=siteD-y-s['south']
         for a,b in [((x,y),(x+w,y)),((x+w,y),(x+w,y+d)),((x+w,y+d),(x,y+d)),((x,y+d),(x,y))]:scene.line(a,b,stroke='#999999',lw=.009,dash=[.13,.10],layer='SETBACKS')
+        scene.line((siteW-1.0,2.0),(siteW-1.0,.8),lw=.02,layer='NORTH')
+        scene.line((siteW-1.0,.8),(siteW-1.2,1.15),lw=.02,layer='NORTH')
+        scene.line((siteW-1.0,.8),(siteW-.8,1.15),lw=.02,layer='NORTH')
+        scene.text(siteW-1.0,.45,'N',.25,layer='NORTH')
+        for face,width in model['brief'].get('boundary_widths',{}).items():
+            if width<=0:continue
+            xx,yy={'north':(siteW*.25,.65),'south':(siteW*.65,siteD-.65),'west':(.8,siteD*.65),'east':(siteW-.8,siteD*.65)}[face]
+            scene.text(xx,yy,f'شارع {width:g} م',.22,layer='STREET')
+        planning=model.get('planning',{});orientation=planning.get('orientation',{}).get('edge_mapping',{})
+        for edge in planning.get('original_intent',{}).get('street_edges',[]):
+            face=orientation.get(edge)
+            if not face or model['brief'].get('boundary_widths',{}).get(face,0)>0:continue
+            xx,yy={'north':(siteW*.25,.65),'south':(siteW*.65,siteD-.65),'west':(.8,siteD*.65),'east':(siteW-.8,siteD*.65)}[face]
+            scene.text(xx,yy,'شارع · العرض غير معلوم',.19,layer='STREET')
         placement=model.get('site_placement') or {}
         if placement.get('active'):
             yard=placement['front_open_envelope']
@@ -83,7 +97,7 @@ def drawing(model,floor,site_view=False):
             scene.text(x0+W/2,y0+D+2.2,'مضلعات تنظيمية مقترحة غير معتمدة وليست جدرانًا',.18,layer='TITLE')
     scene.text(x0+W/2,y0-1.8,model['profile']['project_name'],.48,color='#111111',layer='TITLE')
     scene.text(x0+W/2,y0-.95,('الموقع والمواقف' if site_view else model['search']['family_label_ar']+' · '+floor['name']),.30,color='#222222',layer='TITLE')
-    scene.text(x0+W/2,y0-.5,f'أرض {siteW:g} × {siteD:g} م · '+(model['brief'].get('city') or 'السعودية — المدينة غير محددة'),.20,color='#555555',layer='TITLE')
+    scene.text(x0+W/2,y0-.5,f'أرض {siteW:g} × {siteD:g} م · '+(model['brief'].get('city') or ('اليمن' if model['brief'].get('country')=='YE' else 'السعودية')+' — المدينة غير محددة'),.20,color='#555555',layer='TITLE')
     wall_rects=[]
     for wall in floor['walls']:
         axis=0 if wall['axis']=='horizontal' else 1;fixed=wall['start'][1-axis]
@@ -161,7 +175,7 @@ def drawing(model,floor,site_view=False):
         for xx in (x0,x0+W):scene.line((xx-.10,yy+.10),(xx+.10,yy-.10),'#555555',.012,'DIMENSION')
     scene.text(x0+W/2,y0+D+.5,f'{W:.2f} m',.24,color='#333333',layer='DIMENSION')
     scene.text(x0-.8,y0+D/2,f'{D:.2f} m',.25,color='#333333',layer='DIMENSION')
-    scene.text(x0+W/2,y0+D+1.3,'مسودة — المطابقة الشاملة للكود السعودي غير معتمدة',.21,color='#333333',layer='TITLE')
+    scene.text(x0+W/2,y0+D+1.3,('مسودة — اشتراطات البناء اليمنية غير موثقة' if model['brief'].get('country')=='YE' else 'مسودة — المطابقة الشاملة للكود السعودي غير معتمدة'),.21,color='#333333',layer='TITLE')
     scene.text(x0+W/2,y0+D+1.85,'خطوط فقط · DXF 2010 · الفحوص والمصادر في تقرير JSON',.18,color='#555555',layer='TITLE')
     scene.line((x0,y0+D+2.5),(x0+5,y0+D+2.5),'#111111',.025,'SCALE')
     for i in range(6):
@@ -182,20 +196,30 @@ def review_drawing(model):
     """Portable review page carried inside the PDF, including unresolved Saudi checks."""
     scene=Scene((0,0,21,29.7));scene.linework_only=True
     scene.text(19.5,1.3,'تقرير الفحوص والمصادر — '+model['profile']['project_name'],.40,align='right',layer='REPORT')
-    scene.text(19.5,2.0,'مسودة للمراجعة؛ المطابقة الشاملة للكود السعودي غير معتمدة',.26,align='right',layer='REPORT')
-    brief=model['brief'];place=(brief.get('municipality') or 'الأمانة غير محددة')+' / '+(brief.get('city') or 'المدينة غير محددة')
+    scene.text(19.5,2.0,('مسودة للمراجعة؛ اشتراطات البناء اليمنية المحلية معلقة' if model['brief'].get('country')=='YE' else 'مسودة للمراجعة؛ المطابقة الشاملة للكود السعودي غير معتمدة'),.26,align='right',layer='REPORT')
+    brief=model['brief'];place=('الجمهورية اليمنية / ' if brief.get('country')=='YE' else 'المملكة العربية السعودية / ')+(brief.get('region') or '')+' / '+(brief.get('municipality') or 'الأمانة غير محددة')+' / '+(brief.get('city') or 'المدينة غير محددة')
     scene.text(19.5,2.6,place,.23,align='right',layer='REPORT')
-    yy=3.3
+    location=' / '.join(brief.get(k,'') for k in ('district','neighborhood') if brief.get(k))
+    if location:scene.text(19.5,3.0,location,.20,align='right',layer='REPORT')
+    yy=3.5
+    option=model.get('design_option')
+    if option:
+        scene.text(19.5,yy,option['title']+' · '+{'economy':'اقتصادي','standard':'متوسط','luxury':'فاخر'}[option['profile']],.23,align='right',layer='REPORT');yy+=.45
+        for text in option['advantages']:
+            scene.text(19.5,yy,text,.20,align='right',layer='REPORT');yy+=.35
+
     names={'PASS':'ناجح جزئيًا','FAIL':'فشل','PENDING':'يحتاج تحققًا','NOT_APPLICABLE':'غير منطبق'}
     for check in model['checks']:
         label=check['label'];source=check.get('source',{}).get('section','')
         scene.text(19.5,yy,label+(' · '+source if source else ''),.19,align='right',layer='REPORT')
         scene.text(1.5,yy,names[check['status']],.18,align='left',layer='REPORT');yy+=.41
     yy+=.3
-    for line in ['المراجع الرسمية: https://momah.gov.sa/ar/node/15715',
+    references=['المراجع الرسمية: https://momah.gov.sa/ar/node/15715',
                  'https://sbc.gov.sa/ar/BC/Pages/BuildingCode/BC.aspx?year=2024',
                  'دليل الجهات البلدية محمّل؛ اشتراطات جميع قطع المدن ليست موثقة تلقائيًا.',
-                 'القواعد المطبقة جزئية؛ الإنشاء والخدمات والحريق والطاقة والاشتراطات المحلية تحتاج اعتمادًا.']:
+                 'القواعد المطبقة جزئية؛ الإنشاء والخدمات والحريق والطاقة والاشتراطات المحلية تحتاج اعتمادًا.']
+    if brief.get('country')=='YE':references=['اليمن: لا توجد اشتراطات محلية موثقة في المستودع؛ لا يُطبق الكود السعودي.', 'المطلوب: إفادة حدود وارتدادات ونسبة بناء واشتراطات جهة الترخيص المحلية.', 'الارتدادات والأبعاد المقترحة افتراضات تصميمية تحتاج اعتمادًا محليًا.']
+    for line in references:
         scene.text(19.5,yy,line,.19,align='right',layer='REPORT');yy+=.4
     if yy>29:scene.viewbox=(0,0,21,yy+.7)
     return scene

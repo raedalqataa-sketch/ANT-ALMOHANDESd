@@ -129,9 +129,12 @@ class VillaBrief(Strict):
     country: Literal['SA','YE'] = 'SA'
     city: str = Field(default='',max_length=100)
     region: str = Field(default='',max_length=100)
+    neighborhood: str = Field(default='',max_length=100)
+    building_type: Literal['villa','house']='villa'
     district: str = Field(default='',max_length=100)
     plan_number: str = Field(default='',max_length=80)
     parcel_number: str = Field(default='',max_length=80)
+    design_parking_count: int = Field(default=1,ge=0,le=4)
     dining_seats: Literal[4,6,8,10,12] = 6
     municipality: str = Field(default='',max_length=140)
     parcel_reference: str = Field(default='',max_length=300)
@@ -141,6 +144,7 @@ class VillaBrief(Strict):
     automatic_features: AutomaticFeatures = Field(default_factory=AutomaticFeatures)
     separate_guest_entry: bool = True
     flexible_space_policy: Literal['remove','keep'] = 'remove'
+    adaptive_search: bool = False
     massing_strategy: Literal['legacy','coherent'] = 'legacy'
     site_placement: Literal['legacy','auto_rear_corner'] = 'legacy'
     stair_headroom: float = Field(default=2.1, ge=2, le=2.5)

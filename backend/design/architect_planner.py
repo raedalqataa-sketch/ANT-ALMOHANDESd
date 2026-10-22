@@ -22,6 +22,10 @@ class ClientIntent(Strict):
     country: Literal['SA','YE']='SA'
     region: str = Field(default='',max_length=100)
     city: str = Field(default='',max_length=100)
+    district: str = Field(default='',max_length=100)
+    neighborhood: str = Field(default='',max_length=100)
+    investment_units: int = Field(default=4,ge=2,le=40)
+    investment_unit_area: float = Field(default=100,ge=30,le=400)
     north_edge: Literal['top','right','bottom','left']='top'
     street_edges: list[Literal['top','right','bottom','left']]=Field(min_length=1,max_length=4)
     main_street: Literal['top','right','bottom','left']='bottom'
@@ -70,6 +74,9 @@ def propose(intent:ClientIntent):
     setbacks={face:calculated.get(face,(6.0 if face==entry else 3.0) if intent.country=='SA' else (4.0 if face==entry else 2.0)) for face in directions}
     rows=[];reasoning=[]
     scale={'compact':.92,'balanced':1.,'generous':1.15}[intent.comfort]*{'economy':.92,'standard':1.,'luxury':1.12}[intent.output_level]
+    if intent.building=='house':scale*=.95
+    corridor={'economy':1.3,'standard':1.5,'luxury':1.65}[intent.output_level]
+    if intent.building=='house':corridor=max(1.2,corridor-.1)
     def add(id,name,kind,floor,count,area,side,capacity=0):
         minimum=registry()['rules']['rooms']['minimums'].get(kind,[0,0]) if intent.country=='SA' else [0,0]
         rows.append(SpaceRequest(id=id,name=name,kind=kind,floor=floor,count=count,min_area=round(max(area*scale,minimum[0]),2),min_side=max(side,minimum[1]),capacity=capacity))
@@ -110,12 +117,14 @@ def propose(intent:ClientIntent):
         for amanat in directory['amanats']:
             if intent.city==amanat['name'] or any(intent.city==r['Name'] for r in amanat['municipalities']):municipality=amanat['name'];break
     b=VillaBrief(project_name='تصور مسكن الأسرة',plot_width=width,plot_depth=depth,floors=floors,setbacks=setbacks,
-        country=intent.country,apply_saudi_rules=intent.country=='SA',region=intent.region,
+        country=intent.country,apply_saudi_rules=intent.country=='SA',region=intent.region,district=intent.district,neighborhood=intent.neighborhood,building_type=intent.building,
+        corridor_width=corridor,
         entrance_face=entry,rooms=rows,city=intent.city or intent.region,municipality=municipality,boundary_widths=known,
         dining_seats=next((n for n in (4,6,8,10,12) if n>=intent.family),12),separate_guest_entry=intent.majlis,
-        notes=intent.notes,massing_strategy='coherent',site_placement='auto_rear_corner')
+        notes=intent.notes,adaptive_search=True,massing_strategy='coherent',site_placement='auto_rear_corner')
+    reasoning.append('سكن خاص: برنامج عائلي مدمج وخدمات متقاربة وممرات أقل اتساعًا مع بقاء فصل الضيوف.' if intent.building=='house' else 'فيلا: فصل الاستقبال عن الأسرة مع رحابة حركة مناسبة للمستوى المختار.')
     reasoning.append('مستوى المخرجات: '+{'economy':'اقتصادي','standard':'متوسط','luxury':'فاخر'}[intent.output_level]+'؛ أولوية التصميم: '+{'efficiency':'ترشيد المساحة','usability':'سهولة الاستخدام','prestige':'الرحابة والفخامة'}[intent.design_priority]+'.')
-    planning={'version':'architect-program-2','method':'household program synthesis + constrained geometric search; no language model connected',
+    planning={'version':'architect-program-3','method':'household program synthesis + constrained geometric search; no language model connected',
         'original_intent':intent.model_dump(),'site_evidence':intent.site_evidence.model_dump() if intent.site_evidence else None,'orientation':{'north_up':True,'edge_mapping':mapping},
         'recommended_floors':floors,'sleeping_capacity':sum(r.count*r.capacity for r in rows),
         'program':[r.model_dump() for r in rows],'reasoning':reasoning,'warnings':warnings,
@@ -123,74 +132,63 @@ def propose(intent:ClientIntent):
     return b,planning
 
 def generate_automatic(intent:ClientIntent,output_dir=None):
-    """Select three distinct *validated* geometries using the user's objectives.
+    """Search physical allocations and core positions, validate, diversify, then export.
 
-    The search library may grow; no externally fixed L/U/stepped alternative.
-    Unsupported multi-unit buildings deliberately fail instead of fabricating
-    apartments from the detached-family program.
+    No failed drawings or near-duplicate plans fill a missing third alternative.
     """
-    from .general_engine import generate_general
-    b,planning=propose(intent)
-    search_families=('spine','L','U','stepped')
-    result=generate_general(b,output_dir,candidate_families=search_families)
-
-    def indicators(model):
-        metrics=model.get('metrics',{})
-        built=float(metrics.get('floor_built_m2') or 1)
-        floors=model.get('massing_quality',{}).get('floors',{})
-        quality=list(floors.values())
-        perimeter=sum(float(m.get('normalized_perimeter') or 0) for m in quality)/len(quality) if quality else 2
-        fill=sum(float(m.get('envelope_fill') or 0) for m in quality)/len(quality) if quality else .5
-        circulation=float(metrics.get('circulation_m2') or 0)/max(built*b.floors,1)
-        public=sum(float(r['width']*r['depth']) for floor in model['floors']
-                   for r in floor['rooms'] if r.get('request_id') and r['kind'] in ('majlis','living','dining'))
-        return {'built_area_m2':round(built,2),'circulation_ratio':round(circulation,4),
-                'normalized_perimeter':round(perimeter,4),'envelope_fill':round(fill,4),
-                'social_area_m2':round(public,2)}
-
-    def score(m):
-        x=indicators(m)
-        # Scores are design HEURISTICS (not construction estimates, usability
-        # certification, or proof of luxury). Lower values are preferred.
-        economy=x['built_area_m2']*(1+x['circulation_ratio']*.65)+x['normalized_perimeter']*9
-        accessible=x['circulation_ratio']*180+x['normalized_perimeter']*9+(1-x['envelope_fill'])*12
-        prestige=-x['social_area_m2']+x['normalized_perimeter']*9+(1-x['envelope_fill'])*14
-        weights={'efficiency':(.75,.20,.05),'usability':(.3,.6,.1),'prestige':(.15,.25,.6)}[intent.design_priority]
-        # Compare within each indicator separately, not currency or measured costs.
-        all_scores=(economy/100,accessible/30,prestige/100)
-        return round(sum(w*v for w,v in zip(weights,all_scores)),6)
-
-    for m in result['candidates']:
-        m['design_evaluation']={'metrics':indicators(m),'objective':intent.design_priority,
-                                'output_level':intent.output_level,'heuristic_score':score(m),
-                                'method':'measured_area+circulation+mass_compactness+social_area; unverified heuristic'}
-    valid=sorted((m for m in result['candidates'] if m['release']['drawing_export_allowed']),
-                 key=lambda m:(m['design_evaluation']['heuristic_score'],m['candidate_id']))
-    rejected=sorted((m for m in result['candidates'] if not m['release']['drawing_export_allowed']),
-                    key=lambda m:(len([c for c in m['checks'] if c['status']=='FAIL']),m['candidate_id']))
-    # Never call a failed drawing a candidate that passed. Prefer three
-    # buildable review drafts; preserve failed diagnostics when too few exist.
-    chosen=(valid+rejected)[:3]
-    titles=['المقترح الأنسب لاحتياجاتك','مقترح بديل للمقارنة','مقترح ثالث للمقارنة']
-    for i,m in enumerate(chosen):
-        m['design_option']={'order':i+1,'title':titles[i],
-            'profile':intent.output_level,'priority':intent.design_priority,
-            'validated':bool(m['release']['drawing_export_allowed']),
-            'method':'adaptive ranking over an expandable geometric search library'}
-        m['search']['family_label_ar']=titles[i]
-    result['candidates']=chosen
-    planning['massing_strategy']='coherent-1'
-    planning['design_selection']={'strategy':'objective_ranked_geometry_v1',
-        'user_level':intent.output_level,'user_priority':intent.design_priority,
-        'families_examined':len(search_families),'alternatives_returned':len(chosen),
-        'validated_count':sum(bool(m['release']['drawing_export_allowed']) for m in chosen),
-        'library_limited':True,'executive_approval':False}
-    planning['reasoning'].append('تمت مقارنة مكتبة هندسية متوسعة وفق المساحة المبنية والحركة وانتظام الكتلة ورحابة المعيشة؛ لا يُفرض شكل L أو U أو المتدرج كاسم للبديل.')
-    planning['reasoning'].append('النتائج محدودة بالحلول التي اختبرها المحرك؛ المعايير النوعية والتكلفة الفعلية والإنشاء والخصوصية الكاملة تتطلب مراجعة المهندس.')
-    planning['placement_strategy']='auto-rear-corner-1'
-    result['planning']=planning
+    from .general_engine import generate_general,export_general_model
+    from .design_selection import evaluate,select
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
-    for model in chosen:
-        model['planning']=planning
-        (out/(model['model_revision_id']+'.json')).write_text(json.dumps(model,ensure_ascii=False,indent=2),encoding='utf-8')
-    return result
+    out.mkdir(parents=True,exist_ok=True)
+    b,planning=propose(intent)
+    primary=[{'family':f,'policy':'legacy','core_position':'rear'} for f in ('spine','L','U','stepped','cross')]
+    primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
+    pool=[];unavailable=[];examined=[]
+    def explore(options):
+        batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
+        unavailable.extend(batch['unavailable']);examined.extend(options)
+        for m in batch['candidates']:
+            m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))
+            m['design_evaluation']=evaluate(m,intent);pool.append(m)
+    explore(primary)
+    chosen=select(pool)
+    expanded=False
+    if len(chosen)<3:
+        expanded=True
+        explore([{'family':f,'policy':p,'core_position':c} for f,p,c in (
+            ('spine','family_front','rear'),('cross','social_front','rear'),('stepped','social_front','front'),
+            ('U','social_front','front'),('L','family_front','front'))])
+        chosen=select(pool)
+    titles=['المقترح الأنسب لاحتياجاتك','بديل وظيفي للمقارنة','بديل ثالث للمقارنة']
+    for i,m in enumerate(chosen):
+        metrics=m['design_evaluation']['metrics']
+        m['design_option']={'order':i+1,'title':titles[i],'profile':intent.output_level,'priority':intent.design_priority,
+            'validated':True,'method':'diversified physical allocations and vertical cores after geometric validation',
+            'advantages':[f"نسبة الممرات {metrics['circulation_ratio']*100:.1f}٪ من المسطح الكلي",
+                f"متوسط مسارات العلاقات الوظيفية المقاسة {metrics['mean_functional_route_m']:.1f} م",
+                f"مسطح إجمالي للأدوار {metrics['total_built_m2']:.1f} م²"],
+            'selection_reason':'اجتياز الفحوص ثم ترتيب الهدف المختار، مع اختلاف مواقع/ترتيب الفراغات هندسيًا ووظيفيًا عن البدائل السابقة.'}
+        m['search']['family_label_ar']=titles[i]
+    diagnostics=[{'candidate_id':m['candidate_id'],'revision_id':m['model_revision_id'],
+        'accepted':m in chosen,'geometry_valid':m['release']['drawing_export_allowed'],
+        'score':m['design_evaluation']['heuristic_score'],'failed_checks':m['design_evaluation']['failed_checks'],
+        'reason':('اختير بعد تقييم الأولوية والتنوع' if m in chosen else 'فشل هندسي؛ الرسم محجوب' if not m['release']['drawing_export_allowed'] else 'لم يفضل في الترتيب أو لم يحقق اختلافًا كافيًا')}
+        for m in pool]
+    planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
+    planning['design_selection']={'strategy':'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
+        'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
+        'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),
+        'library_limited':True,'diversity_rule':'normalized room displacement >= 0.065 plus changed functional order/quadrant',
+        'executive_approval':False,'diagnostics':diagnostics}
+    planning['reasoning'].append('البحث يغير عنقود الغرف وترتيب الاستقبال والأسرة وموضع الدرج، ويقارن مسارات الأبواب والمسطحات والكتلة. لا يفرض ثلاثة أشكال خارجية.')
+    planning['reasoning'].append('الدرجات وعتبات التنوع مؤشرات تصميمية معلنة، وليست تكلفة محسوبة أو اعتمادًا قانونيًا أو ضمانًا للحل الأمثل.')
+    if len(chosen)<3:
+        unavailable.append({'family':'adaptive','label':'بدائل لم تتحقق','reason':f'بعد توسيع البحث في {len(examined)} توزيعات، تحقق {len(chosen)} حلول مختلفة مجتازة فقط؛ لم تُحذف غرف أو تُخفف فحوص لملء البدائل.'})
+    # Only selected valid plans get drawing files. Diagnostics retain JSON only.
+    for m in pool:
+        m['planning']=planning
+        if m in chosen:export_general_model(m,b,out)
+        (out/(m['model_revision_id']+'.json')).write_text(json.dumps(m,ensure_ascii=False,indent=2,allow_nan=False),encoding='utf-8')
+    return {'status':'DRAFT_REVIEW' if chosen else 'BLOCKED','candidates':chosen,'unavailable':unavailable,
+        'planning':planning,'scope':'بحث هندسي محدود قابل للتوسعة؛ أراض مستطيلة ودور أو دوران؛ لا اعتماد تنفيذي',
+        'ai':{'mode':'geometric_search','language_model_connected':False}}

@@ -16,6 +16,7 @@ window.AntStartAutomatic=async(draft,send)=>{
  const program=document.createElement('div');program.id='auto-program';
  const dl=document.createElement('dl');dl.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:20px 0';
  for(const row of result.planning.program){const cell=document.createElement('div'),name=document.createElement('dt'),value=document.createElement('dd');name.textContent=row.name+' × '+row.count;value.textContent=(row.floor?'الدور الأول':'الدور الأرضي')+' · مساحة مقترحة من '+row.min_area+' م²';cell.append(name,value);dl.append(cell);}program.append(dl);
+ const selection=result.planning.design_selection;if(selection){const decision=document.createElement('p');decision.textContent=`قارنّا ${selection.search_variants_examined} توزيعات أولية، واخترنا ${selection.validated_count} بدائل مختلفة اجتازت الفحوص المتاحة. تجد سبب اختيار كل بديل ومزاياه مع معاينته.`;program.append(decision);}
  const reasoning=document.createElement('ul');for(const reason of result.planning.reasoning){const item=document.createElement('li');item.textContent=reason;reasoning.append(item);}program.append(reasoning);
  const assumptions=document.createElement('details'),summary=document.createElement('summary');summary.textContent='كيف حُسبت الارتدادات؟ وما الافتراضات التي تحتاج مراجعة؟';assumptions.append(summary);
  for(const warning of result.planning.warnings){const p=document.createElement('p');p.textContent=warning;assumptions.append(p);}

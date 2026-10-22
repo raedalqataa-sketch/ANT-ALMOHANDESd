@@ -1,0 +1,15 @@
+{
+  "identical_program_and_setbacks": true,
+  "before": {
+    "candidate_id": "spine-social_front-front",
+    "largest_floor_m2": 218.15,
+    "guest_bath_m2": 22.78,
+    "stair_m2": 33.82
+  },
+  "after": {
+    "candidate_id": "spine-social_front-front",
+    "largest_floor_m2": 159.62,
+    "guest_bath_m2": 7.12,
+    "stair_m2": 18.7
+  }
+}

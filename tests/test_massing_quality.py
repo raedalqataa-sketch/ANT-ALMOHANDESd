@@ -18,7 +18,7 @@ def test_coherent_massing_improves_actual_geometry_without_changing_setbacks_or_
  intent=ClientIntent(width=24,depth=32,city='الرياض',family=6,street_edges=['bottom'])
  b,_=propose(intent);old=b.model_copy(update={'massing_strategy':'legacy'})
  baseline=generate_general(old,tmp_path/'legacy');updated=generate_automatic(intent,tmp_path/'coherent')
- assert updated['planning']['design_selection']['strategy']=='objective_ranked_geometry_v1'
+ assert updated['planning']['design_selection']['strategy']=='objective_ranked_geometry_v2'
  assert len(updated['candidates'])==3
  assert len({m['candidate_id'] for m in updated['candidates']})==3
  before={m['candidate_id']:m for m in baseline['candidates']}
@@ -29,8 +29,9 @@ def test_coherent_massing_improves_actual_geometry_without_changing_setbacks_or_
   assert model['release']['executive_issue_allowed'] is False
   measured=measures(model['floors'][0]['cells'])
   assert measured['components']==1
-  if model['candidate_id'] in before:
-   previous=measures(before[model['candidate_id']]['floors'][0]['cells'])
+  family=model['search']['family']
+  if family in before and model['search']['allocation_policy']=='legacy':
+   previous=measures(before[family]['floors'][0]['cells'])
    assert measured['normalized_perimeter']<previous['normalized_perimeter']
   assert not [c for c in validate_general(model,b) if c['status']=='FAIL']
  model=updated['candidates'][0];moved=copy.deepcopy(model);moved['floors'][0]['cells'][0]['x']+=100

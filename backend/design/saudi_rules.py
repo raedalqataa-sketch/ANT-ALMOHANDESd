@@ -34,9 +34,10 @@ def required_setbacks(brief):
     return result
 
 
-def parking(model,brief):
-    if not brief.apply_saudi_rules:return []
-    count=parking_count(brief)
+def parking(model,brief,*,requested_count=None):
+    if not brief.apply_saudi_rules and requested_count is None:return []
+    count=parking_count(brief) if requested_count is None else requested_count
+    if count==0:return []
     width,depth=2.8,5.5 # Proposed stall dimensions; count is sourced, turning geometry is not certified.
     cells=model['floors'][0]['cells'];t=brief.wall_thickness
     occupied=[dict(x=c['x']-t/2,y=c['y']-t/2,width=c['width']+t,depth=c['depth']+t) for c in cells]
