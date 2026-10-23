@@ -213,12 +213,23 @@ def search(brief,family,policy='legacy',core_position='rear'):
         nominal=2*wing+brief.corridor_width+brief.wall_thickness
         scales=sorted({round(min(aw,w)/aw,6) for w in (nominal,nominal+1.5,nominal+3,aw*.7,aw*.85,aw)})
         variations=[(s,d,r,.4) for s in scales for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
-    for ws,ds,ratio,top in variations:
+    # One-floor sites that are much wider than deep need a genuinely different
+    # geometric orientation; merely changing facade position cannot create it.
+    # Two-floor plans are excluded until core/stair direction is independently
+    # validated. Original orientations remain in the pool for regression safety.
+    can_rotate=(brief.floors==1 and not brief.automatic_features.roof_annex
+        and aw>1.45*ad and family in ('spine','cross','adaptive','freeform','cluster'))
+    variations=[(*v,False) for v in variations]+([(*v,True) for v in variations] if can_rotate else [])
+    for ws,ds,ratio,top,rotated in variations:
         W,D=aw*ws,ad*ds
-        shape=topology(family,W,D,max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0),ratio,top)
+        c=max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0)
+        shape=topology(family,D,W,c,ratio,top) if rotated else topology(family,W,D,c,ratio,top)
         attempts+=1
         if not shape:continue
         halls,lanes=copy.deepcopy(shape)
+        if rotated:
+            from .adaptive_geometry import rotate_orthogonal_topology
+            halls,lanes=rotate_orthogonal_topology(halls,lanes,D)
         if min(min(l['width'],l['depth']) for l in lanes)<1.6:continue
         stair=None
         if brief.floors==2 or brief.automatic_features.roof_annex:
@@ -279,7 +290,7 @@ def search(brief,family,policy='legacy',core_position='rear'):
             for cells,floor_halls in zip(floors,halls_by_floor):
                 cost,metrics=penalty([cells],floor_halls);massing_cost+=cost/len(floors);massing.extend(metrics)
             score*=1+massing_cost
-        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing))
+        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated))
         if best is None or score<best['score']:best=pool[-1]
     if best:
         pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
@@ -507,7 +518,7 @@ def materialize(brief,family,result):
     model=dict(schema_version='0.6.2-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
                brief=brief.model_dump(),profile={'project_name':brief.project_name,'massing_strategy':brief.massing_strategy,'massing_revision':'coherent-1' if brief.massing_strategy=='coherent' else 'legacy','massing_fallback':bool(result.get('massing_fallback'))},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(origin_x,origin_y,result['W'],result['D']),
-               search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
+               search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False,'topology_rotated':result.get('topology_rotated',False)},
                requirements_resolution=resolve_notes(brief),regulatory_geometry=brief.regulatory_geometry.model_dump() if brief.regulatory_geometry else None,presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
     W,D=result['W'],result['D'];a=result['halls'][0]['x']+result['halls'][0]['width']
     if family=='L':
