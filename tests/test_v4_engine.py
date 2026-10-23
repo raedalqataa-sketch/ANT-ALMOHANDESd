@@ -267,3 +267,25 @@ def test_v3_selection_remains_compatible_without_v4_callback(monkeypatch,tmp_pat
     assert result['candidates'][0]['model_revision_id']=='first'
     assert result['candidates'][0]['release']['drawing_export_allowed']
     assert result['candidates'][0]['search']['preflight']['enabled'] is False
+
+
+def test_search_diagnostics_prove_area_shortfall_only_when_math_requires_it():
+    from backend.design.general_engine import search_feasibility_evidence
+    small=VillaBrief(plot_width=8,plot_depth=10,floors=1,
+        country='YE',apply_saudi_rules=False,
+        setbacks=dict(north=1,south=1,east=1,west=1),
+        rooms=[dict(id='m',name='غرفة ضرورية',kind='living',floor=0,min_area=100,min_side=3)])
+    report=search_feasibility_evidence(small)
+    assert report['available_envelope_m2_per_floor_upper_bound']==48
+    assert report['required_net_room_m2_by_floor']=={'0':100.}
+    assert report['classification']=='PROVEN_ENVELOPE_SHORTFALL'
+    assert not report['legal_buildability_certified']
+
+    feasible_bounds=small.model_copy(update={
+        'plot_width':24,'plot_depth':32,
+        'rooms':[small.rooms[0].model_copy(update={'min_area':20})]})
+    report=search_feasibility_evidence(feasible_bounds)
+    assert report['classification']=='SEARCH_EXHAUSTED_NOT_PROVEN_IMPOSSIBLE'
+    assert report['required_net_room_m2_by_floor']=={'0':20.}
+    assert report['available_envelope_m2_per_floor_upper_bound']==660
+    assert not report['legal_buildability_certified']
