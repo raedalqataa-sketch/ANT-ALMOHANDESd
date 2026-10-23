@@ -37,6 +37,40 @@ def mutation_variants(layout, wall_thickness, *, limit=6):
     base={k:v for k,v in layout.items() if k!="alternatives"}
     floors=base.get("floors",())
     made=0
+    # Moving both shared boundaries translates the middle room without
+    # shrinking it. A single-boundary move may fail its area constraint even
+    # when the two outer rooms have enough spare depth.
+    for floor_index,cells in enumerate(floors):
+        for first_index,first in enumerate(cells):
+            if not _editable(first) or first.get("door_side") not in ("east","west"):
+                continue
+            lane=[(index,room) for index,room in enumerate(cells)
+                  if _editable(room) and room.get("door_side")==first["door_side"]
+                  and abs(room["x"]-first["x"])<=TOL
+                  and abs(room["width"]-first["width"])<=TOL]
+            lane.sort(key=lambda item:item[1]["y"])
+            for triple in zip(lane,lane[1:],lane[2:]):
+                (ai,a),(bi,b),(ci,c)=triple
+                if ai!=first_index:
+                    continue
+                if abs(a["y"]+a["depth"]-b["y"])>TOL or abs(b["y"]+b["depth"]-c["y"])>TOL:
+                    continue
+                for shift in (0.45,-0.45):
+                    first_shape={**a,"depth":a["depth"]+shift}
+                    last_shape={**c,"y":c["y"]+shift,"depth":c["depth"]-shift}
+                    if not _fits(a,first_shape,wall_thickness) or not _fits(c,last_shape,wall_thickness):
+                        continue
+                    alt=copy.deepcopy(base)
+                    left,middle,right=(alt["floors"][floor_index][index] for index in (ai,bi,ci))
+                    left["depth"]+=shift
+                    middle["y"]+=shift
+                    right["y"]+=shift
+                    right["depth"]-=shift
+                    alt["local_reflow"]={"operation":"redistribute_three_room_boundaries",
+                        "floor":floor_index,"room_ids":[a["id"],b["id"],c["id"]],"delta_m":shift}
+                    yield alt
+                    made+=1
+                    if made>=limit:return
     for floor_index, cells in enumerate(floors):
         for i,first in enumerate(cells):
             if not _editable(first) or first.get("door_side") not in ("east","west"):
