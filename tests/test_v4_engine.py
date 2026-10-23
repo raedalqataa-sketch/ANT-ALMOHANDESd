@@ -289,3 +289,25 @@ def test_search_diagnostics_prove_area_shortfall_only_when_math_requires_it():
     assert report['required_net_room_m2_by_floor']=={'0':20.}
     assert report['available_envelope_m2_per_floor_upper_bound']==660
     assert not report['legal_buildability_certified']
+
+
+def test_rotating_real_orthogonal_lanes_preserves_area_and_connectivity():
+    from backend.design.adaptive_geometry import clustered_topology,rotate_orthogonal_topology
+    from backend.design.massing_quality import measures
+    halls,lanes=clustered_topology(10,20,1.5,.5,.5)
+    rotated_halls,rotated_lanes=rotate_orthogonal_topology(halls,lanes,10)
+    original=halls+lanes
+    new=rotated_halls+rotated_lanes
+    assert len(original)==len(new)
+    assert sum(r['width']*r['depth'] for r in original)==pytest.approx(
+        sum(r['width']*r['depth'] for r in new))
+    assert measures(new)['components']==1
+    assert min(r['x'] for r in new)>=0
+    assert min(r['y'] for r in new)>=0
+    assert max(r['x']+r['width'] for r in new)==pytest.approx(20)
+    assert max(r['y']+r['depth'] for r in new)==pytest.approx(10)
+    assert all(r['axis']=='x' for r in rotated_lanes)
+    assert set(r['door_side'] for r in rotated_lanes)=={'north','south'}
+    assert all(not (a['x']<b['x']+b['width']-1e-6 and b['x']<a['x']+a['width']-1e-6
+                    and a['y']<b['y']+b['depth']-1e-6 and b['y']<a['y']+a['depth']-1e-6)
+               for a,b in combinations(new,2))
