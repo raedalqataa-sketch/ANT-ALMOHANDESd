@@ -4,7 +4,7 @@ on:
     paths: ['backend/design/**', 'tests/test_v4_engine.py', 'quality_review/v4_benchmark.py', 'ops/release/package_review.py', '.github/workflows/v4-review-packet.yml']
   push:
     branches: [main]
-    paths: ['backend/design/**', 'quality_review/v4_benchmark.py', '.github/workflows/v4-review-packet.yml']
+    paths: ['backend/design/**', 'quality_review/v4_benchmark.py', 'ops/release/package_review.py', '.github/workflows/v4-review-packet.yml']
   workflow_dispatch:
 jobs:
   measured-designs:
