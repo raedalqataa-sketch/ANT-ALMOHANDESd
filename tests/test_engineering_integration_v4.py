@@ -97,6 +97,12 @@ def test_new_v4_checks_block_geom_but_not_unverified_graph():
         "independent_geometry": {
             "status": "FAIL", "requires_circulation_review": True, "floors": []
         },
+        "execution_coordination": {
+            "site": {"geometric_status": "PASS"},
+            "code": {"status": "PENDING"},
+            "structure": {"status": "PENDING"},
+            "mep": {"status": "PENDING"},
+        },
     }
     rows = {row["check_id"]: row for row in checks(report)}
     assert rows["V4-geos-independent"]["status"] == "FAIL"
