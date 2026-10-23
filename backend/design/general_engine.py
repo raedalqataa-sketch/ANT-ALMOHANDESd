@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة'}
+FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة','meander':'ثلاثة تجمعات مترابطة بممر متعرج'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -31,6 +31,9 @@ def topology(family,W,D,c,ratio,top):
     if family=='cluster':
         from .adaptive_geometry import clustered_topology
         return clustered_topology(W,D,c,ratio,top)
+    if family=='meander':
+        from .meander_geometry import meander_topology
+        return meander_topology(W,D,c,ratio,top)
     if family=='adaptive':
         from .adaptive_geometry import adaptive_topology
         return adaptive_topology(W,D,c,ratio,top)
@@ -112,6 +115,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                        for r in group)
             if guest and family:cost+=18
         return cost
+    fallback_allocation=None
     for bundle in ordered:
         expanded=[]
         for used,groups in states:
@@ -123,9 +127,13 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 score=sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2 for j,(cap,v) in enumerate(zip(capacities,u)))
                 score+=14*relationship_cost(g)
                 expanded.append((score,u,g))
-        if not expanded:return None
+        if not expanded:
+            from .allocation_repair import reassign_bundles
+            fallback_allocation=reassign_bundles(ordered,lanes,t,length_for)
+            if fallback_allocation is None:return None
+            break
         expanded.sort(key=lambda state:state[0]);states=[(u,g) for _,u,g in expanded[:20]]
-    used,groups=min(states,key=lambda state:(
+    used,groups=fallback_allocation if fallback_allocation is not None else min(states,key=lambda state:(
         sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2
             for j,(cap,v) in enumerate(zip(capacities,state[0])))+
         14*relationship_cost(state[1])))
@@ -204,6 +212,7 @@ def search(brief,family,policy='legacy',core_position='rear'):
                     for r in (.38,.46,.54,.62)
                     for b in (.36,.45,.55,.64)]
     if family=='cluster':variations=[(s,d,r,b) for s in (.74,.88,1.) for d in (.78,.9,1.) for r in (.35,.42,.58,.65) for b in (.36,.5,.64)]
+    if family=='meander':variations=[(s,d,r,b) for s in (.80,.92,1.) for d in (.84,1.) for r in (.38,.44,.55,.61) for b in (.30,.36,.42)]
     if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
     if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
@@ -525,7 +534,7 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    elif family in ('spine','cross','adaptive','freeform','cluster'):
+    elif family in ('spine','cross','adaptive','freeform','cluster','meander'):
         outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
@@ -735,7 +744,7 @@ def search_feasibility_evidence(brief:VillaBrief):
         'legal_buildability_certified':False}
 
 
-def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4,repair_layout=False):
     """Search physical layouts; an optional V4 validator participates in candidate choice.
 
     The budget bounds expensive room/furniture path checks. No unchecked alternative
@@ -767,8 +776,14 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
                 reason='تعذر استيعاب مزايا المبنى الاختيارية مع البرنامج الحالي. '+reason
             unavailable.append({'family':family,'label':label,'reason':reason,'search_evidence':evidence});continue
         alternatives=[result]+result.get('alternatives',[]);model=None;failures=[];preflights=0
+        if repair_layout:
+            from .layout_mutations import mutation_variants
+            mutations=list(mutation_variants(result,brief.wall_thickness,limit=4))
+            alternatives=alternatives[:2]+mutations+alternatives[2:]
         for attempt,layout in enumerate(alternatives):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
+            if layout.get('local_reflow'):
+                trial['search']['local_room_mutation']=layout['local_reflow']
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
             if candidate_validator is not None and not errors:
                 if preflights>=validation_budget:

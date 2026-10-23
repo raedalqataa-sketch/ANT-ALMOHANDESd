@@ -24,6 +24,7 @@ def assess(model):
     pending=[c.get("check_id") for c in checks if c.get("status")=="PENDING"]
     v2=[g.get("id") for g in audit.get("gates",())
         if g.get("status") in ("FAIL","REVIEW","UNKNOWN")]
+    coordination=(model.get("functional_program_v4") or {}).get("execution_coordination")
     return {
         "status":"NOT_APPROVED",
         "issue_type":"PRELIMINARY_ARCHITECTURAL_DESIGN_ONLY",
@@ -34,5 +35,7 @@ def assess(model):
         "required_signoffs":[{"id":key,"label_ar":label,"status":"NOT_VERIFIED"}
                              for key,label in SIGNOFFS],
         "authorization_granted":False,
+        "site_structure_mep_evidence":coordination,
+        "external_review_required":True,
         "scope":"تقرير مراجعة أولية فقط؛ لا توقيع ولا ترخيص ولا اعتماد تنفيذي آلي",
     }

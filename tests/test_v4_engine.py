@@ -153,6 +153,11 @@ def test_real_v4_exports_have_no_failed_gate_and_stale_geometry_cannot_export(tm
         assert all(s['width']<=2.8+1e-6 for s in m['stairs'])
         assert m['functional_program_v4']['movement']['routes']
         assert not m['functional_program_v4']['movement']['unreachable']
+        assert m['functional_program_v4']['independent_geometry']['status']=='PASS'
+        assert m['functional_program_v4']['execution_coordination']['site']['geometric_status']=='PASS'
+        assert m['functional_program_v4']['execution_coordination']['mep']['status']=='PENDING'
+        assert m['design_evaluation']['selection_solver']['selected_count']==3
+        assert any(c['check_id']=='V4-site-gross-envelope' and c['status']=='PASS' for c in m['checks'])
         d=ezdxf.readfile(tmp_path/(m['model_revision_id']+'.dxf'))
         assert d.dxfversion=='AC1024' and not d.audit().errors
         assert not list(d.modelspace().query('HATCH SOLID'))
