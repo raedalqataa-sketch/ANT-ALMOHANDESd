@@ -701,6 +701,29 @@ def validate_general(model,brief):
     return checks
 
 
+def search_feasibility_evidence(brief:VillaBrief):
+    """Conservative lower-bound certificate; no unsupported impossibility claims.
+
+    Net requested room area is a strict lower bound on built area. A failure to
+    pack otherwise is only a search failure, not proof that no architect can
+    satisfy this program. Real walls/circulation reduce usable space further.
+    """
+    w=max(0.,brief.plot_width-brief.setbacks.west-brief.setbacks.east)
+    d=max(0.,brief.plot_depth-brief.setbacks.north-brief.setbacks.south)
+    envelope=w*d
+    per_floor={str(f):round(sum(r.min_area*r.count for r in brief.rooms if r.floor==f),3)
+               for f in range(brief.floors)}
+    area_blocked=any(v>envelope+EPS for v in per_floor.values())
+    width_blocked=any(r.min_side>min(w,d)+EPS for r in brief.rooms)
+    classification='PROVEN_ENVELOPE_SHORTFALL' if area_blocked or width_blocked else 'SEARCH_EXHAUSTED_NOT_PROVEN_IMPOSSIBLE'
+    return {'classification':classification,'plot_width_m':brief.plot_width,'plot_depth_m':brief.plot_depth,
+        'available_envelope_m2_per_floor_upper_bound':round(envelope,3),
+        'available_envelope_width_m':round(w,3),'available_envelope_depth_m':round(d,3),
+        'required_net_room_m2_by_floor':per_floor,
+        'does_not_include':'internal walls, stairs, passages, parking or local parcel approvals',
+        'legal_buildability_certified':False}
+
+
 def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4):
     """Search physical layouts; an optional V4 validator participates in candidate choice.
 
@@ -724,7 +747,14 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         label=FAMILIES[family]
         result=search(brief,family,policy,core_position)
         if not result:
-            unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
+            evidence=search_feasibility_evidence(brief)
+            impossibility=evidence['classification']=='PROVEN_ENVELOPE_SHORTFALL'
+            reason=('الحد الأعلى لمساحة البناء المتاحة داخل الارتدادات أقل من صافي البرنامج المطلوب؛ يثبت تعارضًا حسابيًا لهذه المدخلات، دون حكم على إمكانية تعديل الاشتراطات الرسمية.' if impossibility else
+                    'لم يجد البحث الهندسي المحدود توزيعًا مجتازًا ضمن أنماطه الحالية؛ لا يثبت ذلك استحالة التصميم. يلزم توسيع البحث ومراجعة قيود القطعة دون حذف الغرف أو تخفيف الشروط سرًا.')
+            if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,
+                    brief.automatic_features.balcony,brief.automatic_features.service_yard)):
+                reason='تعذر استيعاب مزايا المبنى الاختيارية مع البرنامج الحالي. '+reason
+            unavailable.append({'family':family,'label':label,'reason':reason,'search_evidence':evidence});continue
         alternatives=[result]+result.get('alternatives',[]);model=None;failures=[];preflights=0
         for attempt,layout in enumerate(alternatives):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
