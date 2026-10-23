@@ -1,4 +1,4 @@
-"""Read-only production-site engine verification against checked-out GitHub code.
+"""Read-only production-site CLIENT engine verification against checked-out GitHub code.
 
 Requires no credentials. Does not publish, mutate, or pass/fail on release
 labels alone. Reads the real static browser engine ZIP and verifies source bytes.
@@ -71,7 +71,7 @@ def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
     try:
         info_bytes = fetch(root + "/client/client-source.json", timeout, 2 * 1024 * 1024)
         info = json.loads(info_bytes)
-        engine_bytes = fetch(root + "/studio/engine.zip", timeout, 100 * 1024 * 1024)
+        engine_bytes = fetch(root + "/client/villa-engine/engine.zip", timeout, 100 * 1024 * 1024)
         live_engine_digest = hashlib.sha256(engine_bytes).hexdigest()
         measurements = inspect_archive(engine_bytes, repository)
         declared_digest = info.get("engine_sha256")
@@ -86,6 +86,7 @@ def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
                 "selection_revision": info.get("selection_revision"),
                 "declared_engine_sha256": declared_digest,
             },
+            "engine_url": root + "/client/villa-engine/engine.zip",
             "actual_engine_sha256": live_engine_digest,
             "manifest_matches_download": reported_equals_file,
             "measured_files": measurements,
