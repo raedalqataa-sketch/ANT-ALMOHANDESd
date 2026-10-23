@@ -1,10 +1,10 @@
 name: V4 geometric benchmark and drawing evidence
 on:
   pull_request:
-    paths: ['backend/design/**', 'tests/test_v4_engine.py', 'quality_review/v4_benchmark.py', '.github/workflows/v4-review-packet.yml']
+    paths: ['backend/design/**', 'tests/test_v4_engine.py', 'quality_review/v4_benchmark.py', 'ops/release/package_review.py', '.github/workflows/v4-review-packet.yml']
   push:
     branches: [main]
-    paths: ['backend/design/**', 'quality_review/v4_benchmark.py', '.github/workflows/v4-review-packet.yml']
+    paths: ['backend/design/**', 'quality_review/v4_benchmark.py', 'ops/release/package_review.py', '.github/workflows/v4-review-packet.yml']
   workflow_dispatch:
 jobs:
   measured-designs:
@@ -17,6 +17,18 @@ jobs:
           python-version: '3.11'
       - run: pip install -r requirements.txt
       - run: python -m quality_review.v4_benchmark /tmp/v4-matrix
+      - name: Package verified V4 review drawings
+        run: |
+          (cd /tmp/v4-matrix && zip -qr /tmp/v4-artifact.zip .)
+          python -m ops.release.package_review /tmp/v4-artifact.zip /tmp/v4-review.zip --source-commit "$GITHUB_SHA"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v4-reviewed-alternatives
+          path: |
+            /tmp/v4-review.zip
+            /tmp/v4-artifact.zip
+          if-no-files-found: error
+          retention-days: 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:

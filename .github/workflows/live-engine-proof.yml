@@ -25,7 +25,6 @@ jobs:
           python-version: '3.11'
       - name: Verify browser engine source against current checked out commit
         id: live
-        continue-on-error: true
         run: |
           python ops/release/verify_live.py --expected-commit "$GITHUB_SHA" --timeout 20 --output live-engine-proof.json
       - name: Publish transparent result

@@ -1,0 +1,704 @@
+{
+  "document": "ANT_ALMOHANDES_CODEX_COMPLETION_ORDER_AR.pdf",
+  "baseline_main_sha": "27c87af281f0a3e296987be424e8749330456cca",
+  "working_branch": "codex/live-engine-proof-gate",
+  "status_as_of": "2026-10-23",
+  "status_meaning": {
+    "COMPLETED": "مثبت بدليل مباشر",
+    "PARTIAL": "دعم جزئي أو دليل غير كاف للقبول الكامل",
+    "BLOCKED": "تتطلب بوابة خارجية لم تكتمل",
+    "NOT_IMPLEMENTED": "لم يثبت تنفيذ الوظيفة المطلوبة"
+  },
+  "site_provenance": {
+    "status": "MISMATCH",
+    "changed_files": 2,
+    "missing_files": 7,
+    "evidence": "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39895934178"
+  },
+  "requirements": [
+    {
+      "id": "0.1",
+      "requirement": "تحديد نسخة المصدر والمحرك المنشور",
+      "status": "COMPLETED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39895934178"
+      ]
+    },
+    {
+      "id": "0.2",
+      "requirement": "بوابة فشل المطابقة",
+      "status": "COMPLETED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27",
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39934056569"
+      ]
+    },
+    {
+      "id": "0.3",
+      "requirement": "release-manifest بالبصمات",
+      "status": "PARTIAL",
+      "evidence": [
+        "ops/release/build_manifest.py",
+        "tests/test_release_manifest.py"
+      ],
+      "note": "أداة البيان ترفض الحزمة القديمة؛ لم تثبت بعد إضافتها إلى بناء الموقع الحي."
+    },
+    {
+      "id": "0.4",
+      "requirement": "بناء الحزمة من الالتزام",
+      "status": "BLOCKED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39895934178"
+      ]
+    },
+    {
+      "id": "0.5",
+      "requirement": "التحقق من الاستضافة",
+      "status": "PARTIAL",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39895934178"
+      ]
+    },
+    {
+      "id": "0.6",
+      "requirement": "النشر والاختبار الحي",
+      "status": "BLOCKED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39895934178"
+      ]
+    },
+    {
+      "id": "0.7",
+      "requirement": "توثيق تعذر النشر",
+      "status": "COMPLETED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "1.1",
+      "requirement": "مضلعات وعمليات الاتحاد والطرح",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "quality_review/v4/EXECUTION_STATE_AR.md"
+      ]
+    },
+    {
+      "id": "1.2",
+      "requirement": "كتل متعامدة وغير متعامدة",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4/EXECUTION_STATE_AR.md"
+      ]
+    },
+    {
+      "id": "1.3",
+      "requirement": "اشتقاق الشكل من البرنامج والموقع",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4/EXECUTION_STATE_AR.md"
+      ]
+    },
+    {
+      "id": "1.4",
+      "requirement": "قيود الغرف داخل البحث",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4/EXECUTION_STATE_AR.md"
+      ]
+    },
+    {
+      "id": "1.5",
+      "requirement": "بحث محدود وتسجيل التعذر",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4/EXECUTION_STATE_AR.md"
+      ]
+    },
+    {
+      "id": "1.6",
+      "requirement": "تنوع هندسي حقيقي",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4/EXECUTION_STATE_AR.md"
+      ]
+    },
+    {
+      "id": "2.1",
+      "requirement": "نقل الغرف وعلاقاتها",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/layout_mutations.py"
+      ]
+    },
+    {
+      "id": "2.2",
+      "requirement": "تبديل الغرف وتحريك الحدود",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/layout_mutations.py",
+        "tests/test_layout_mutations_v4.py"
+      ]
+    },
+    {
+      "id": "2.3",
+      "requirement": "إعادة بناء الأجنحة والممرات",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/layout_mutations.py"
+      ]
+    },
+    {
+      "id": "2.4",
+      "requirement": "دراسة الدرج والنواة",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "backend/design/layout_mutations.py"
+      ]
+    },
+    {
+      "id": "2.5",
+      "requirement": "إعادة اشتقاق العناصر",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/layout_mutations.py"
+      ]
+    },
+    {
+      "id": "2.6",
+      "requirement": "سجل الإصلاح والتراجع",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/layout_mutations.py"
+      ]
+    },
+    {
+      "id": "2.7",
+      "requirement": "حماية النسخ المعتمدة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/layout_mutations.py"
+      ]
+    },
+    {
+      "id": "3.1",
+      "requirement": "العلاقات الوظيفية",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "3.2",
+      "requirement": "مدخل الضيوف والخصوصية",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "3.3",
+      "requirement": "مسارات الحركة مع الأثاث",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "3.4",
+      "requirement": "ترتيب استخدام الفراغات",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "3.5",
+      "requirement": "الخصوصية والصوت والجوار",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "3.6",
+      "requirement": "الضوء والتهوية بمصدر",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "3.7",
+      "requirement": "مراجعة برنامج العميل",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/functional_program.py"
+      ]
+    },
+    {
+      "id": "4.1",
+      "requirement": "مصادر الأرض والإحداثيات",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/lib/plot-intake.ts"
+      ]
+    },
+    {
+      "id": "4.2",
+      "requirement": "استخراج حدود القطعة والثقة",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/lib/plot-intake.ts"
+      ]
+    },
+    {
+      "id": "4.3",
+      "requirement": "فحص المضلع والمقياس",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/lib/plot-intake.ts"
+      ]
+    },
+    {
+      "id": "4.4",
+      "requirement": "توثيق الشوارع والمجاورات",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "client_web/src/lib/plot-intake.ts"
+      ]
+    },
+    {
+      "id": "4.5",
+      "requirement": "مضلع الارتدادات",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "client_web/src/lib/plot-intake.ts"
+      ]
+    },
+    {
+      "id": "4.6",
+      "requirement": "حجب اعتماد الأرض بلا وثيقة",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/lib/plot-intake.ts"
+      ]
+    },
+    {
+      "id": "5.1",
+      "requirement": "سجل القواعد القانوني",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/saudi_rules.py"
+      ]
+    },
+    {
+      "id": "5.2",
+      "requirement": "فصل اشتراطات السكن عن SBC",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/saudi_rules.py"
+      ]
+    },
+    {
+      "id": "5.3",
+      "requirement": "توسيع الفحوص الموثقة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/saudi_rules.py"
+      ]
+    },
+    {
+      "id": "5.4",
+      "requirement": "المناطق والإدخال اليدوي",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/saudi_rules.py"
+      ]
+    },
+    {
+      "id": "5.5",
+      "requirement": "حالات البنود القانونية",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/saudi_rules.py"
+      ]
+    },
+    {
+      "id": "5.6",
+      "requirement": "فصل الترخيص عن المحرك",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/saudi_rules.py"
+      ]
+    },
+    {
+      "id": "6.1",
+      "requirement": "شبكة أعمدة أولية",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/execution_coordination.py"
+      ]
+    },
+    {
+      "id": "6.2",
+      "requirement": "استمرارية النواة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/execution_coordination.py"
+      ]
+    },
+    {
+      "id": "6.3",
+      "requirement": "مجاري الخدمات",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/execution_coordination.py"
+      ]
+    },
+    {
+      "id": "6.4",
+      "requirement": "مسارات MEP والتعارضات",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/execution_coordination.py"
+      ]
+    },
+    {
+      "id": "6.5",
+      "requirement": "المواقف والمناورة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/execution_coordination.py"
+      ]
+    },
+    {
+      "id": "6.6",
+      "requirement": "نموذج تنسيق التخصصات",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/execution_coordination.py"
+      ]
+    },
+    {
+      "id": "7.1",
+      "requirement": "مولد وحدات مستقلة",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "web_studio/deployment.json"
+      ]
+    },
+    {
+      "id": "7.2",
+      "requirement": "الخدمات والمداخل المشتركة",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "web_studio/deployment.json"
+      ]
+    },
+    {
+      "id": "7.3",
+      "requirement": "الطوابق المتكررة",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "web_studio/deployment.json"
+      ]
+    },
+    {
+      "id": "7.4",
+      "requirement": "القبوات والطوابق الإضافية",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": [
+        "web_studio/deployment.json"
+      ]
+    },
+    {
+      "id": "7.5",
+      "requirement": "حجب مخرجات الاستثمار غير المثبتة",
+      "status": "COMPLETED",
+      "evidence": [
+        "web_studio/deployment.json"
+      ]
+    },
+    {
+      "id": "8.1",
+      "requirement": "بديل اقتصادي",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/engineering_selection.py"
+      ]
+    },
+    {
+      "id": "8.2",
+      "requirement": "بديل وظيفي",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/engineering_selection.py"
+      ]
+    },
+    {
+      "id": "8.3",
+      "requirement": "بديل فاخر",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/engineering_selection.py"
+      ]
+    },
+    {
+      "id": "8.4",
+      "requirement": "مقاييس وتقارير البدائل",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/engineering_selection.py"
+      ]
+    },
+    {
+      "id": "8.5",
+      "requirement": "PDF وDXF وJSON وmanifest",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/engineering_selection.py"
+      ]
+    },
+    {
+      "id": "8.6",
+      "requirement": "ZIP للبدائل الصحيحة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/engineering_selection.py"
+      ]
+    },
+    {
+      "id": "9.1",
+      "requirement": "استيراد Excel وPDF",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.2",
+      "requirement": "عرض مراحل التوليد",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.3",
+      "requirement": "مقارنة البدائل والمراجعات",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.4",
+      "requirement": "حماية الحالات على الخادم",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.5",
+      "requirement": "Auth0 وفق البنية المعتمدة",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.6",
+      "requirement": "Logtura دون بيانات العملاء",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.7",
+      "requirement": "مساعد لغوي اختياري",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "9.8",
+      "requirement": "Figma عند توفر الملف",
+      "status": "PARTIAL",
+      "evidence": [
+        "client_web/src/pages/client-requirements.tsx"
+      ]
+    },
+    {
+      "id": "10.1",
+      "requirement": "حالة المحفد 30×20",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "10.2",
+      "requirement": "أراض وبرامج متنوعة",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "10.3",
+      "requirement": "التداخل والحركة والخصوصية",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "10.4",
+      "requirement": "اختبار الإصلاح والتراجع",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "10.5",
+      "requirement": "مقارنة V3 وV4",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "10.6",
+      "requirement": "فحص PDF وDXF",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "10.7",
+      "requirement": "اختبارات الشيفرة والمتصفح وDocker",
+      "status": "PARTIAL",
+      "evidence": [
+        "quality_review/v4_benchmark.py"
+      ]
+    },
+    {
+      "id": "11.1",
+      "requirement": "حالات DRAFT إلى LOCKED",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "11.2",
+      "requirement": "حجب التعارضات المانعة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "11.3",
+      "requirement": "حماية برنامج العميل",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "11.4",
+      "requirement": "إبقاء مراجعات الكود معلقة",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "11.5",
+      "requirement": "البصمة والفحص قبل التصدير",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "11.6",
+      "requirement": "لوحات المراجعة التقنية",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "11.7",
+      "requirement": "منع الترخيص الآلي",
+      "status": "PARTIAL",
+      "evidence": [
+        "backend/design/executive_readiness.py"
+      ]
+    },
+    {
+      "id": "12.1",
+      "requirement": "فرع من أحدث main",
+      "status": "COMPLETED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "12.2",
+      "requirement": "PR موثق",
+      "status": "COMPLETED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "12.3",
+      "requirement": "دمج بعد البوابات",
+      "status": "BLOCKED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "12.4",
+      "requirement": "نشر الموقع الحالي",
+      "status": "BLOCKED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "12.5",
+      "requirement": "إثبات MATCH الحي",
+      "status": "BLOCKED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "12.6",
+      "requirement": "ثلاث حزم صحيحة أو تفسير النقص",
+      "status": "BLOCKED",
+      "evidence": [
+        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/pull/27"
+      ]
+    },
+    {
+      "id": "12.7",
+      "requirement": "سجل JSON لكل متطلب",
+      "status": "COMPLETED",
+      "evidence": [
+        "quality_review/completion_order_status.json"
+      ]
+    }
+  ]
+}
