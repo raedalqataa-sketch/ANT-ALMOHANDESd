@@ -133,12 +133,29 @@ def evaluate(model,intent):
         'acceptance_reason':'اجتاز الفحوص الهندسية المتاحة؛ الاشتراطات المعلقة لا تمثل اعتمادًا' if not failed else 'حجب الرسم بسبب فشل فحوص هندسية',
         'method':'actual net rooms, gross mass and weighted hosted-door graph routes; disclosed design heuristics'}
 
-def select(models,limit=3):
-    valid=sorted((m for m in models if m['release']['drawing_export_allowed']),key=lambda m:(m['design_evaluation']['heuristic_score'],m['candidate_id']))
-    chosen=[]
-    for model in valid:
-        pairwise=[difference(model,old) for old in chosen]
-        model['design_evaluation']['diversity_against_selected']=pairwise
-        if all(d['distinct'] for d in pairwise):chosen.append(model)
-        if len(chosen)==limit:break
+def select(models,limit=3,*,optimization='greedy'):
+    valid=sorted((m for m in models if m['release']['drawing_export_allowed']),
+                 key=lambda m:(m['design_evaluation']['heuristic_score'],m['candidate_id']))
+    if optimization not in ('greedy','cp_sat'):
+        raise ValueError('Unknown architecture portfolio selection strategy')
+    if optimization=='cp_sat':
+        from .engineering_selection import choose_distinct_subset
+        incompatible=[]
+        for i,j in combinations(range(len(valid)),2):
+            if not difference(valid[i],valid[j])['distinct']:
+                incompatible.append((i,j))
+        indices,solver_info=choose_distinct_subset(len(valid),incompatible,limit=limit)
+        chosen=[valid[index] for index in indices]
+        for model in chosen:
+            model['design_evaluation']['selection_solver']=dict(solver_info)
+    else:
+        chosen=[]
+        for model in valid:
+            if all(difference(model,old)['distinct'] for old in chosen):
+                chosen.append(model)
+            if len(chosen)==limit:break
+    for i,model in enumerate(chosen):
+        model['design_evaluation']['diversity_against_selected']=[
+            difference(model,old) for old in chosen[:i]
+        ]
     return chosen
