@@ -1,5 +1,11 @@
 name: Check architectural drafts
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -8,7 +14,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pip check
       - run: python -m pytest -q
       - uses: actions/setup-node@v4
         if: always()
@@ -30,3 +37,13 @@ jobs:
         run: node --test tests/plot-intake.test.cjs tests/locations.test.cjs
       - if: always()
         run: npm run build --prefix client_web
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Python 3.11 production runtime
+        run: docker build -t ant-almohandes:ci .
+      - name: Confirm runtime engineering modules import
+        run: |
+          docker run --rm --entrypoint python ant-almohandes:ci -c "import ortools, shapely, networkx, cv2, pypdf, pypdfium2, ezdxf; print('Engineering imports OK')"
