@@ -34,3 +34,28 @@ test('cancellation during file registration cannot report a successful stale res
 test('a cold timeout rejects the request and never queues its design after readiness',async()=>{
  const engine=setup({timeoutMs:10});const pending=engine.call('general');await assert.rejects(pending,/مدة الانتظار/);const worker=Worker.instances[0];await worker.emit({id:0,ready:true});assert.equal(worker.messages.length,1);engine.stop();
 });
+
+
+test('a timeout emits only a safe timeout code; a user cancellation stays silent',async()=>{
+ const captured=[];
+ globalThis.AntTelemetry={report:(code,stage)=>captured.push([code,stage])};
+ try{
+  const timed=setup({timeoutMs:8});const expired=timed.call('general');
+  await assert.rejects(expired,/مدة الانتظار/);
+  assert.deepEqual(captured,[['ENGINE_TIMEOUT','timeout']]);
+  timed.stop();
+  const manual=setup();const interrupted=manual.call('general');manual.stop();
+  await assert.rejects(interrupted,/أُوقف/);
+  assert.equal(captured.length,1);
+ }finally{delete globalThis.AntTelemetry;}
+});
+test('failure creating a Worker reports safe transport code without exposing exception text',async()=>{
+ const captured=[];
+ globalThis.AntTelemetry={report:(code,stage)=>captured.push([code,stage])};
+ class BrokenWorker {constructor(){throw Error('customer-private-input');}}
+ try{
+  const engine=setup({WorkerClass:BrokenWorker});
+  await assert.rejects(engine.call('general'),/customer-private-input/);
+  assert.deepEqual(captured,[['ENGINE_WORKER_FAILED','worker']]);
+ }finally{delete globalThis.AntTelemetry;}
+});

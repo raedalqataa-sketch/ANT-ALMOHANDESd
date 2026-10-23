@@ -31,7 +31,7 @@ if(window.AntEmbedded){
    accepted=true;delete document.documentElement.dataset.clientAwaiting;
    send('IMPORTED',{roomRows:converted.brief.rooms.length,roomCount:converted.brief.rooms.reduce((n,r)=>n+r.count,0),warnings:converted.warnings});
    new ResizeObserver(()=>send('RESIZE',{height:Math.min(16000,Math.max(900,document.documentElement.scrollHeight))})).observe(document.body);
-  }catch(error){send('ERROR',{error:error.message||'تعذر نقل المتطلبات.'});}
+  }catch(error){try{window.AntTelemetry?.report?.('EMBEDDED_BRIDGE_FAILED','bridge');}catch{}send('ERROR',{error:error.message||'تعذر نقل المتطلبات.'});}
   finally{importing=false;}
  });
 }

@@ -1,0 +1,28 @@
+name: Logtura CLI compatibility preflight
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'ops/logtura/**'
+      - 'lovable_integration/telemetry.js'
+      - 'api/telemetry.js'
+      - '.github/workflows/logtura-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm Logtura CLI can start
+        run: npm exec --yes --package=@logtura/cli@0.3.6 -- logtura --help
+      - name: Confirm Vercel source driver is advertised
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm exec --yes --package=@logtura/cli@0.3.6 -- logtura providers list --json > /tmp/logtura-providers.json
+          node -e "const fs=require('node:fs');const text=fs.readFileSync('/tmp/logtura-providers.json','utf8').toLowerCase();if(!text.includes('vercel')) process.exit(2);console.log('Logtura Vercel provider found')"

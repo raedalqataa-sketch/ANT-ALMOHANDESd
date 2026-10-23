@@ -23,7 +23,7 @@ jobs:
       - if: always()
         run: node --check lovable_integration/automatic-runtime.js
       - if: always()
-        run: node --test tests/lovable_bridge.test.cjs tests/worker_session.test.cjs tests/request_path.test.cjs
+        run: node --test tests/lovable_bridge.test.cjs tests/worker_session.test.cjs tests/request_path.test.cjs tests/telemetry.test.cjs
       - if: always()
         run: npm ci --prefix client_web --ignore-scripts --no-audit --no-fund
       - if: always()
