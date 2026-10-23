@@ -227,3 +227,29 @@ def review_drawing(model):
         scene.text(19.5,yy,line,.19,align='right',layer='REPORT');yy+=.4
     if yy>29:scene.viewbox=(0,0,21,yy+.7)
     return scene
+
+
+def review_pages(model):
+    """Keep V4 audit text legible instead of shrinking one unbounded PDF sheet.
+
+    Preserve every title, check and source line; split complete rows (including
+    their left-hand status) together. Drawing floors and DXF are unchanged.
+    """
+    import copy
+    source=review_drawing(model)
+    if not model.get('functional_program_v4'):return [source]
+    grouped={}
+    for item in source.items:grouped.setdefault(item['y'],[]).append(item)
+    pages=[];page=Scene((0,0,21,29.7));page.linework_only=True
+    offset=0.
+    for y,items in sorted(grouped.items()):
+        if y-offset>27.7:
+            pages.append(page);page=Scene((0,0,21,29.7));page.linework_only=True
+            page.text(19.5,1.2,'تقرير الفحوص — تابع',.34,align='right',layer='REPORT')
+            offset=y-2.2
+        for item in items:
+            q=copy.deepcopy(item);q['y']-=offset
+            q['size']=max(q['size'],.23)
+            page.items.append(q)
+    if page.items:pages.append(page)
+    return pages

@@ -781,7 +781,9 @@ def export_general_model(model,brief,out):
     if model.get('design_option') or model.get('feature_generation') or brief.regulatory_geometry or model.get('site_placement',{}).get('active'):
         export_model={**model,'floors':model['floors']+[{'id':'SITE','name':'الموقع والخدمات','rooms':[]}]}
         export_scenes=scenes+[drawing(model,model['floors'][0],site_view=True)]
-    report_model={**export_model,'floors':export_model['floors']+[{'id':'REVIEW','name':'تقرير الفحوص'}]}
-    scene_pdf(report_model,out/f'{rev}.pdf',drawings=export_scenes+[review_drawing(model)],include_report=False)
+    from .general_drawing import review_pages
+    reports=review_pages(model)
+    report_model={**export_model,'floors':export_model['floors']+[{'id':f'REVIEW{i+1}','name':'تقرير الفحوص'} for i in range(len(reports))]}
+    scene_pdf(report_model,out/f'{rev}.pdf',drawings=export_scenes+reports,include_report=False)
     model['export_audit']=scene_dxf(export_model,out/f'{rev}.dxf',drawings=export_scenes)
     model['downloads'].update({ext:f'/api/files/{rev}.{ext}' for ext in ('pdf','dxf')})

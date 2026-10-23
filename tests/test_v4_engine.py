@@ -178,3 +178,19 @@ def test_complete_furniture_group_is_replaced_instead_of_deleting_obstacles():
     assert result['auto_repair_v4']['attempts'][0]['operation']=='replace_complete_furniture_group'
     assert check(result)[0]['status']=='PASS'
     assert result['floors'][0]['rooms']==m['floors'][0]['rooms']
+
+
+def test_v4_report_pagination_preserves_all_rows_and_readable_type():
+    from unittest.mock import patch
+    from backend.design.scene import Scene
+    from backend.design.general_drawing import review_pages
+    scene=Scene((0,0,21,55))
+    for i in range(100):
+        scene.text(19.5,1+i*.5,f'check-{i}',.19,align='right')
+        scene.text(1.5,1+i*.5,'PASS',.18,align='left')
+    with patch('backend.design.general_drawing.review_drawing',return_value=scene):
+        pages=review_pages({'functional_program_v4':True})
+    assert len(pages)==2
+    rows=[p for page in pages for p in page.items if p['text'].startswith('check-')]
+    assert len(rows)==100 and len({r['text'] for r in rows})==100
+    assert all(p['size']>=.23 and 0<p['y']<29.7 for page in pages for p in page.items)
