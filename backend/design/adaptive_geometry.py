@@ -144,3 +144,22 @@ def clustered_topology(width, depth, corridor, front_fraction, split_fraction):
         lanes.extend([dict(x=0.,y=y,width=x,depth=size,axis='y',door_side='east'),
                       dict(x=x+corridor,y=y,width=width-x-corridor,depth=size,axis='y',door_side='west')])
     return halls,lanes
+
+
+def rotate_orthogonal_topology(halls, lanes, original_width):
+    """Rotate a searched axis-aligned arrangement by 90 degrees, preserving doors.
+
+    The old topology envelope is [0, original_width] in X. Coordinates rotate
+    to (old_y, original_width - old_x - old_width) without scaling; x-oriented
+    room runs and north/south-facing hall doors remain real walls/portals.
+    Only the topology geometry is transformed; site/street directions stay fixed.
+    """
+    def rotated(cell):
+        x,y,w,d=cell['x'],cell['y'],cell['width'],cell['depth']
+        result={**cell,'x':y,'y':original_width-x-w,'width':d,'depth':w}
+        if cell.get('axis') in ('x','y'):
+            result['axis']='x' if cell['axis']=='y' else 'y'
+        side={'east':'south','west':'north','north':'east','south':'west'}
+        if cell.get('door_side') in side:result['door_side']=side[cell['door_side']]
+        return result
+    return [rotated(h) for h in halls],[rotated(l) for l in lanes]
