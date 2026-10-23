@@ -194,3 +194,76 @@ def test_v4_report_pagination_preserves_all_rows_and_readable_type():
     rows=[p for page in pages for p in page.items if p['text'].startswith('check-')]
     assert len(rows)==100 and len({r['text'] for r in rows})==100
     assert all(p['size']>=.23 and 0<p['y']<29.7 for page in pages for p in page.items)
+
+
+def test_v4_preflight_rejects_first_geometric_option_but_accepts_next(monkeypatch,tmp_path):
+    """A baseline-V3 PASS must never short-circuit a later viable V4 candidate."""
+    from backend.design import general_engine as g
+    from types import SimpleNamespace
+    layouts=[{'variant':'first'},{'variant':'next'}]
+    monkeypatch.setattr(g,'search',lambda *a,**kw:{**layouts[0],'alternatives':[layouts[1]]})
+    monkeypatch.setattr(g,'materialize',lambda brief,family,layout:{
+        'model_revision_id':layout['variant'],'search':{},'checks':[],
+        'floors':[],'site_placement':{}})
+    monkeypatch.setattr(g,'validate_general',lambda *args:[
+        {'check_id':'baseline','status':'PASS'}])
+    assessed=[]
+    def v4_preflight(model):
+        assessed.append(model['model_revision_id'])
+        model['checks'].append({'check_id':'V4-measured-clearance',
+            'status':'FAIL' if model['model_revision_id']=='first' else 'PASS'})
+        model['auto_repair_v4']={'accepted_steps':0}
+        return model
+    result=g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+        emit_drawings=False,candidate_validator=v4_preflight,validation_budget=3)
+    assert assessed==['first','next']
+    assert result['candidates'][0]['model_revision_id']=='next'
+    assert result['candidates'][0]['release']['drawing_export_allowed']
+    assert result['candidates'][0]['search']['v4_preflights']==2
+    assert not result['candidates'][0]['search']['v4_search_budget_exhausted']
+    assert json.loads((tmp_path/'next.json').read_text())['checks'][-1]['status']=='PASS'
+
+
+def test_v4_preflight_budget_rejects_unverified_following_candidate(monkeypatch,tmp_path):
+    """A search timeout/budget exhaustion cannot be disguised as a passing drawing."""
+    from backend.design import general_engine as g
+    from types import SimpleNamespace
+    monkeypatch.setattr(g,'search',lambda *a,**kw:{
+        'variant':'first','alternatives':[{'variant':'unchecked'}]})
+    monkeypatch.setattr(g,'materialize',lambda brief,family,layout:{
+        'model_revision_id':layout['variant'],'search':{},'checks':[],
+        'floors':[],'site_placement':{}})
+    monkeypatch.setattr(g,'validate_general',lambda *args:[
+        {'check_id':'baseline','status':'PASS'}])
+    assessed=[]
+    def reject(model):
+        assessed.append(model['model_revision_id'])
+        model['checks'].append({'check_id':'V4-real','status':'FAIL'})
+        return model
+    result=g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+        emit_drawings=False,candidate_validator=reject,validation_budget=1)
+    assert assessed==['first']
+    assert result['candidates'][0]['release']['status']=='BLOCKED'
+    assert not result['candidates'][0]['release']['drawing_export_allowed']
+    assert result['candidates'][0]['search']['v4_search_budget_exhausted']
+    assert not (tmp_path/'first.pdf').exists()
+    with pytest.raises(ValueError,match='validation_budget'):
+        g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+            emit_drawings=False,candidate_validator=reject,validation_budget=0)
+
+
+def test_v3_selection_remains_compatible_without_v4_callback(monkeypatch,tmp_path):
+    from backend.design import general_engine as g
+    from types import SimpleNamespace
+    monkeypatch.setattr(g,'search',lambda *a,**kw:{
+        'variant':'first','alternatives':[{'variant':'second'}]})
+    monkeypatch.setattr(g,'materialize',lambda brief,family,layout:{
+        'model_revision_id':layout['variant'],'search':{},'checks':[],
+        'floors':[],'site_placement':{}})
+    monkeypatch.setattr(g,'validate_general',lambda *args:[
+        {'check_id':'baseline','status':'PASS'}])
+    result=g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+        emit_drawings=False)
+    assert result['candidates'][0]['model_revision_id']=='first'
+    assert result['candidates'][0]['release']['drawing_export_allowed']
+    assert result['candidates'][0]['search']['preflight']['enabled'] is False
