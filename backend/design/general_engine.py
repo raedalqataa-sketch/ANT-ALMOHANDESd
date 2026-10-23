@@ -710,7 +710,7 @@ def validate_general(model,brief):
     return checks
 
 
-def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,repair_layout=False):
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
@@ -728,10 +728,16 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         if not result:
             unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
         alternatives=[result]+result.get('alternatives',[]);model=None;failures=[]
+        if repair_layout:
+            from .layout_mutations import mutation_variants
+            for seed in alternatives[:2]:
+                alternatives.extend(mutation_variants(seed,brief.wall_thickness,limit=4))
         for attempt,layout in enumerate(alternatives):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
             trial['search']['validated_layouts_tested']=attempt+1
+            if layout.get('local_reflow'):
+                trial['search']['local_room_mutation']=layout['local_reflow']
             # Feedback-driven candidate selection: favor fewer critical architectural
             # violations rather than treating every failed check as equally severe.
             # Only valid candidates may be exported; PENDING remains unresolved.
