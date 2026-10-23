@@ -36,10 +36,12 @@
     {
       "id": "0.3",
       "requirement": "release-manifest بالبصمات",
-      "status": "NOT_IMPLEMENTED",
+      "status": "PARTIAL",
       "evidence": [
-        "https://github.com/raedalqataa-sketch/ANT-ALMOHANDESd/actions/runs/39895934178"
-      ]
+        "ops/release/build_manifest.py",
+        "tests/test_release_manifest.py"
+      ],
+      "note": "أداة البيان ترفض الحزمة القديمة؛ لم تثبت بعد إضافتها إلى بناء الموقع الحي."
     },
     {
       "id": "0.4",
