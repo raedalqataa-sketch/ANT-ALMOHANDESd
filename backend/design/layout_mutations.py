@@ -33,6 +33,8 @@ def mutation_variants(layout, wall_thickness, *, limit=6):
     the *same lane*. A resize moves a shared boundary up to 0.6 m; the second
     room moves as its usable depth changes. Corridor/receptive rooms untouched.
     """
+    if layout.get("release", {}).get("status") in ("APPROVED", "LOCKED"):
+        raise ValueError("cannot mutate an approved or locked design")
     if limit<=0:return
     base={k:v for k,v in layout.items() if k!="alternatives"}
     floors=base.get("floors",())

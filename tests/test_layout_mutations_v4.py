@@ -1,7 +1,9 @@
 """Only unapproved, constraint-fitting cells may be moved or resized."""
 from copy import deepcopy
+import pytest
 
 from backend.design.layout_mutations import mutation_variants
+from backend.design.auto_repair import ArchitectureAutoRepairEngine
 
 
 def shape(identifier,y,*,kind="bedroom",zone="family",area=14):
@@ -49,3 +51,19 @@ def test_does_not_mutate_or_resize_guests_stairs_and_unfit_rooms():
     assert all(v["local_reflow"]["operation"]!="shift_shared_room_boundary"
                or v["local_reflow"]["delta_m"]!=0.45 for v in variants)
     assert not list(mutation_variants(plan,.2,limit=0))
+
+
+@pytest.mark.parametrize("status", ["APPROVED", "LOCKED"])
+def test_approved_layout_cannot_be_mutated_in_place(status):
+    plan=sample()
+    plan["release"]={"status":status}
+    with pytest.raises(ValueError,match="approved or locked"):
+        list(mutation_variants(plan,.2))
+
+
+@pytest.mark.parametrize("status", ["APPROVED", "LOCKED"])
+def test_approved_model_cannot_enter_local_auto_repair(status):
+    model={"release":{"status":status}}
+    engine=ArchitectureAutoRepairEngine(lambda model: [])
+    with pytest.raises(ValueError,match="approved or locked"):
+        engine.repair(model)

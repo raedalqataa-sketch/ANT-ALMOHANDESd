@@ -25,6 +25,10 @@ PROOF_FILES = (
     "backend/design/execution_coordination.py",
     "backend/design/engineering_selection.py",
 )
+ESSENTIAL_CLIENT_FILES = frozenset({
+    "client/villa-engine/engine.zip", "client/client-source.json",
+    "client/index.html", "client/villa-engine/generate/automatic-runtime.js",
+})
 
 
 def _download(url, timeout, size_limit):
@@ -38,11 +42,16 @@ def _download(url, timeout, size_limit):
         return data
 
 
-def inspect_archive(payload, repository=REPO):
+def inspect_archive(payload, repository=REPO, *, all_engine=False):
     """Compare individual architect engine Python files (including new V4 files)."""
     measurements = []
     with ZipFile(io.BytesIO(payload)) as archive:
-        for path in PROOF_FILES:
+        bundled_source = ({name for name in archive.namelist()
+                           if (repository / name).is_file()} if all_engine else set())
+        required_engine = ({str(path.relative_to(repository)).replace('\\', '/')
+                            for path in (repository / 'backend/design').glob('*.py')}
+                           if all_engine else set())
+        for path in sorted(set(PROOF_FILES) | bundled_source | required_engine):
             wanted = (repository / path).read_bytes()
             if path not in archive.namelist():
                 measurements.append({"file": path, "status": "MISSING_ON_SITE"})
@@ -58,7 +67,7 @@ def inspect_archive(payload, repository=REPO):
 
 
 def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
-           fetch=_download, repository=REPO):
+           fetch=_download, repository=REPO, strict_release=False):
     root = base_url.rstrip("/")
     result = {
         "site_url": root,
@@ -73,12 +82,53 @@ def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
         info = json.loads(info_bytes)
         engine_bytes = fetch(root + "/client/villa-engine/engine.zip", timeout, 100 * 1024 * 1024)
         live_engine_digest = hashlib.sha256(engine_bytes).hexdigest()
-        measurements = inspect_archive(engine_bytes, repository)
+        measurements = inspect_archive(engine_bytes, repository, all_engine=strict_release)
         declared_digest = info.get("engine_sha256")
         reported_equals_file = bool(declared_digest) and declared_digest == live_engine_digest
         source_equals_checkout = all(x["status"] == "MATCH" for x in measurements)
+        release_matches = None
+        if strict_release:
+            try:
+                release = json.loads(fetch(root + "/client/release-manifest.json", timeout,
+                                           2 * 1024 * 1024))
+                files = release.get("files", {})
+                safe_files = isinstance(files, dict) and ESSENTIAL_CLIENT_FILES <= files.keys()
+                checked_files = []
+                if safe_files:
+                    for name, wanted_hash in sorted(files.items()):
+                        parts = name.split("/")
+                        if (len(parts) < 2 or parts[0] != "client"
+                                or any(part in ("", ".", "..") for part in parts)
+                                or not isinstance(wanted_hash, str)):
+                            safe_files = False
+                            break
+                        if name == "client/villa-engine/engine.zip":
+                            actual = engine_bytes
+                        elif name == "client/client-source.json":
+                            actual = info_bytes
+                        else:
+                            actual = fetch(root + "/" + name, timeout, 10 * 1024 * 1024)
+                        matches = hashlib.sha256(actual).hexdigest() == wanted_hash
+                        checked_files.append({"file": name, "status": "MATCH" if matches else "DIFFERENT"})
+                        if not matches:
+                            safe_files = False
+                result["release_files_checked"] = checked_files
+                release_matches = (
+                    bool(expected_commit)
+                    and release.get("git_commit") == expected_commit
+                    and info.get("repository_commit") == expected_commit
+                    and release.get("bundle_sha256") == live_engine_digest
+                    and files.get("client/villa-engine/engine.zip") == live_engine_digest
+                    and files.get("client/client-source.json") == hashlib.sha256(info_bytes).hexdigest()
+                    and safe_files
+                )
+                result["release_manifest"] = release
+            except (HTTPError, URLError, RuntimeError, ValueError, KeyError, OSError) as error:
+                release_matches = False
+                result["release_manifest_error"] = f"{type(error).__name__}: {error}"
         result.update({
-            "status": "MATCH" if reported_equals_file and source_equals_checkout else "MISMATCH",
+            "status": "MATCH" if reported_equals_file and source_equals_checkout
+                      and release_matches is not False else "MISMATCH",
             "live_site_published": True,
             "source_manifest": {
                 "engine_version": info.get("engine_version"),
@@ -90,8 +140,11 @@ def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
             "actual_engine_sha256": live_engine_digest,
             "manifest_matches_download": reported_equals_file,
             "measured_files": measurements,
-            "verified_same_engine": reported_equals_file and source_equals_checkout,
+            "verified_same_engine": reported_equals_file and source_equals_checkout
+                                    and release_matches is not False,
         })
+        if strict_release:
+            result["release_manifest_matches"] = release_matches
     except (HTTPError, URLError, RuntimeError, ValueError, KeyError, BadZipFile, OSError) as error:
         result["error"] = f"{type(error).__name__}: {error}"
     return result
@@ -103,8 +156,10 @@ def main():
     parser.add_argument("--expected-commit", default=None)
     parser.add_argument("--timeout", type=float, default=20)
     parser.add_argument("--output", type=Path, default=Path("live-engine-proof.json"))
+    parser.add_argument("--strict-release", action="store_true")
     args = parser.parse_args()
-    output = verify(args.site, expected_commit=args.expected_commit, timeout=args.timeout)
+    output = verify(args.site, expected_commit=args.expected_commit, timeout=args.timeout,
+                    strict_release=args.strict_release)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({k: v for k, v in output.items() if k != "measured_files"}, indent=2))

@@ -1,0 +1,100 @@
+{
+  "document": "1-ANT_ALMOHANDES_CODEX_COMPLETION_ORDER_AR (1).pdf",
+  "review_date_utc": "2026-10-23",
+  "status_vocabulary": ["COMPLETED", "PARTIAL", "BLOCKED", "NOT_IMPLEMENTED"],
+  "scope": "حالة شفرة المستودع قبل إثبات النشر النهائي. كل رقم في requirements يطابق رقم بند المرحلة في وثيقة المستخدم.",
+  "professional_approval": false,
+  "phases": [
+    {
+      "id": 0,
+      "title": "مطابقة الموقع",
+      "requirements": {"1": "COMPLETED", "2": "COMPLETED", "3": "COMPLETED", "4": "PARTIAL", "5": "COMPLETED", "6": "PARTIAL", "7": "COMPLETED"},
+      "evidence": ["ops/release/verify_live.py", "ops/release/manifest.py", ".github/workflows/live-release-gate.yml", "tests/test_live_release_provenance.py", "tests/test_release_manifest.py"],
+      "remaining": "البناء من الالتزام المدمج ونشره وفحص MATCH الحي ما زالت خطوات تشغيلية. الوصول إلى Site الحالي متاح."
+    },
+    {
+      "id": 1,
+      "title": "التشكيل الهندسي الحر",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "PARTIAL", "4": "PARTIAL", "5": "PARTIAL", "6": "PARTIAL"},
+      "evidence": ["backend/design/adaptive_geometry.py", "backend/design/meander_geometry.py", "backend/design/independent_audit.py", "backend/design/architect_planner.py", "tests/test_meander_geometry.py"],
+      "remaining": "محلّل مضلعات عامة، حدود مائلة، حلول غير متعامدة، وتكامل كامل بين قيود الغرفة والبحث غير مكتمل."
+    },
+    {
+      "id": 2,
+      "title": "الإصلاح الذاتي",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "NOT_IMPLEMENTED", "4": "NOT_IMPLEMENTED", "5": "PARTIAL", "6": "PARTIAL", "7": "PARTIAL"},
+      "evidence": ["backend/design/layout_mutations.py", "backend/design/layout_rebuild.py", "backend/design/auto_repair.py", "tests/test_layout_mutations_v4.py", "tests/test_execution_coordination_v4.py"],
+      "remaining": "تبديل وتحجيم محدودان قبل الرسم فقط؛ نقل غرف مخطط قائم وإعادة بناء الممر والدرج وإدارة صلاحيات اعتماد النسخ غير عامة."
+    },
+    {
+      "id": 3,
+      "title": "الوظائف والعلاقات",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "PARTIAL", "4": "PARTIAL", "5": "PARTIAL", "6": "PARTIAL", "7": "PARTIAL"},
+      "evidence": ["backend/design/functional_program.py", "backend/design/walkability.py", "backend/design/visual_privacy.py", "backend/design/general_quality.py", "backend/design/architect_planner.py"],
+      "remaining": "العلاقات المدعومة محدودة، الرؤية عينات ثنائية الأبعاد، والضوء والصوت ووصف العميل الحر يحتاجان مصادر وقياسات ومراجعة."
+    },
+    {
+      "id": 4,
+      "title": "الموقع والأرض",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "PARTIAL", "4": "NOT_IMPLEMENTED", "5": "NOT_IMPLEMENTED", "6": "PARTIAL"},
+      "evidence": ["client_web/src/lib/plot-intake.ts", "client_web/src/components/plot-intake.tsx", "backend/design/architect_planner.py", "tests/plot-intake.test.cjs"],
+      "remaining": "لا يوجد رفع مساحي مستقل من PDF/CAD ولا محرك بناء على مضلع مائل أو شطفة. الشارع والملكية يعتمدان على وثيقة الأرض."
+    },
+    {
+      "id": 5,
+      "title": "اشتراطات السعودية واليمن",
+      "requirements": {"1": "PARTIAL", "2": "COMPLETED", "3": "PARTIAL", "4": "COMPLETED", "5": "PARTIAL", "6": "COMPLETED"},
+      "evidence": ["constitution/saudi/national-2024.json", "constitution/saudi/local-coverage.json", "backend/design/jurisdiction.py", "client_web/src/lib/locations.ts", "tests/test_saudi_2024_geometry.py"],
+      "remaining": "تغطية SBC والمحافظات والبلديات جزئية؛ اليمن PENDING حتى وصول مستندات رسمية، ولا يوجد ترخيص آلي."
+    },
+    {
+      "id": 6,
+      "title": "التنسيق الإنشائي والخدمات",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "PARTIAL", "4": "PARTIAL", "5": "PARTIAL", "6": "PARTIAL"},
+      "evidence": ["backend/design/execution_coordination.py", "backend/design/executive_readiness.py", "tests/test_execution_coordination_v4.py"],
+      "remaining": "المقترحات تنسيقية أولية؛ الحسابات الإنشائية والشبكات والارتفاعات والمناورة واشتراطات المختص PENDING."
+    },
+    {
+      "id": 7,
+      "title": "السكن الاستثماري والطوابق",
+      "requirements": {"1": "NOT_IMPLEMENTED", "2": "NOT_IMPLEMENTED", "3": "NOT_IMPLEMENTED", "4": "NOT_IMPLEMENTED", "5": "COMPLETED"},
+      "evidence": ["backend/design/architect_planner.py", "tests/test_constitution_v2.py"],
+      "remaining": "مولد الوحدات الاستثمارية والقبو والطوابق الإضافية غير موجود؛ الرسم محجوب لهذا النوع والمتطلبات محفوظة."
+    },
+    {
+      "id": 8,
+      "title": "البدائل الثلاثة والمخرجات",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "PARTIAL", "4": "PARTIAL", "5": "PARTIAL", "6": "PARTIAL"},
+      "evidence": ["backend/design/design_selection.py", "backend/design/general_drawing.py", "backend/design/architect_planner.py", "quality_review/v4_benchmark.py"],
+      "remaining": "الأوزان والتنوع حقيقيان لكن الجودة ليست ضمانًا لكل برنامج؛ حزمة ZIP واحدة للبدائل لم تُدمج بواجهة العميل بعد."
+    },
+    {
+      "id": 9,
+      "title": "الواجهة والتكامل والأمان",
+      "requirements": {"1": "PARTIAL", "2": "PARTIAL", "3": "PARTIAL", "4": "NOT_IMPLEMENTED", "5": "BLOCKED", "6": "PARTIAL", "7": "NOT_IMPLEMENTED", "8": "BLOCKED"},
+      "evidence": ["client_web/src/pages/automatic-client.tsx", "client_web/src/lib/excel-import.ts", "lovable_integration/automatic-runtime.js", "ops/logtura/README_AR.md"],
+      "remaining": "استيراد PDF للمتطلبات وصلاحيات نسخ الخادم والمساعد اللغوي وتوثيق Figma غير مكتمل؛ Auth0 ليس جزءًا مثبتًا من بنية العميل."
+    },
+    {
+      "id": 10,
+      "title": "الاختبارات والأدلة",
+      "requirements": {"1": "BLOCKED", "2": "PARTIAL", "3": "PARTIAL", "4": "PARTIAL", "5": "PARTIAL", "6": "COMPLETED", "7": "PARTIAL"},
+      "evidence": ["requirements/villa-almahfad.json", "quality_review/v4_benchmark.py", "tests/test_v4_engine.py", "client_web/tests/home.spec.ts", ".github/workflows/check.yml"],
+      "remaining": "قطعة المحفد 20×30 وأسرة 9 مثبتة، لكن جهة الشارع والعروض والارتدادات غير مؤكدة؛ لا يجوز نسب سيناريو مفترض إلى الموقع المعتمد."
+    },
+    {
+      "id": 11,
+      "title": "التحقق والاعتماد",
+      "requirements": {"1": "COMPLETED", "2": "PARTIAL", "3": "COMPLETED", "4": "COMPLETED", "5": "PARTIAL", "6": "PARTIAL"},
+      "evidence": ["backend/design/general_engine.py", "backend/design/auto_repair.py", "backend/design/executive_readiness.py", "backend/design/architect_planner.py"],
+      "remaining": "حالات APPROVED/LOCKED وصلاحياتها لا تُدار بنظام مراجعات خادمي كامل؛ لا اعتماد مهني آلي."
+    },
+    {
+      "id": 12,
+      "title": "الدمج والنشر والتسليم",
+      "requirements": {"1": "COMPLETED", "2": "PARTIAL", "3": "PARTIAL", "4": "PARTIAL", "5": "PARTIAL", "6": "PARTIAL", "7": "COMPLETED"},
+      "evidence": [".github/workflows/check.yml", ".github/workflows/live-release-gate.yml", "quality_review/completion_order/status.json"],
+      "remaining": "طلب الدمج والنشر الحي وفحص MATCH وروابط عينات البدائل تُضاف بعد نجاح الفحوص."
+    }
+  ]
+}

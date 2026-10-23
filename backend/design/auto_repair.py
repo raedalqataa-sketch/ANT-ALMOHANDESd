@@ -34,6 +34,8 @@ def _sync_swing(floor,door):
 class ArchitectureAutoRepairEngine:
     def __init__(self,validator,max_attempts=8):self.validator=validator;self.max_attempts=max_attempts
     def repair(self,model):
+        if model.get('release',{}).get('status') in ('APPROVED','LOCKED'):
+            raise ValueError('cannot repair an approved or locked design in place')
         current=copy.deepcopy(model);initial=self.validator(current);current['checks']=initial
         history=[];initial_digest=fingerprint(current);invariants=_invariants(current)
         while _failures(current['checks']) and len(history)<self.max_attempts:

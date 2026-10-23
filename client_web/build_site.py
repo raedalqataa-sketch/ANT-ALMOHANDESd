@@ -1,6 +1,8 @@
 """Build the public client intake alongside the existing approved Site engine."""
 from pathlib import Path
-import argparse,hashlib,json,shutil,subprocess,sys,tempfile
+from datetime import datetime,timezone
+import argparse,hashlib,json,os,shutil,subprocess,sys,tempfile
+from ops.release.manifest import write_release_manifest
 ROOT=Path(__file__).resolve().parents[1]
 
 def main():
@@ -25,8 +27,13 @@ def main():
   bundle_digest=hashlib.sha256()
   for p in sorted(public.rglob('*')):
    if p.is_file():bundle_digest.update(str(p.relative_to(public)).encode());bundle_digest.update(p.read_bytes())
-  provenance={'embedded_bundle_sha256':bundle_digest.hexdigest(),'application':'ant-client-intake','path':'/client/','source_sha256':digest.hexdigest(),'source_reference':'Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only','site_placement_revision':'rear-corner-1','massing_revision':'coherent-massing-1','planner_version':'architect-program-4','reference_patterns_revision':'reference-principles-2','reference_projects':6,'reference_unique_images':19,'generation_revision':'architectural-engine-4','selection_revision':'objective_ranked_geometry_v4_functional','supported_countries':['SA','YE'],'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((public.parent/'engine.zip').read_bytes()).hexdigest(),'runtime_shared_at':'/studio/','client_persistence':'temporary tab-scoped sessionStorage; engine files memory only','lovable_sync_verified':False,'executive_approval':False}
+  git_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+  provenance={'embedded_bundle_sha256':bundle_digest.hexdigest(),'application':'ant-client-intake','path':'/client/','repository_commit':git_commit,'source_sha256':digest.hexdigest(),'source_reference':'Lovable 0534539568b6818e52ebe072ca780dc6afe9b5e1; adapted public intake only','site_placement_revision':'rear-corner-1','massing_revision':'coherent-massing-1','planner_version':'architect-program-4','reference_patterns_revision':'reference-principles-2','reference_projects':6,'reference_unique_images':19,'generation_revision':'architectural-engine-4','selection_revision':'objective_ranked_geometry_v4_functional','supported_countries':['SA','YE'],'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((public.parent/'engine.zip').read_bytes()).hexdigest(),'runtime_shared_at':'/studio/','client_persistence':'temporary tab-scoped sessionStorage; engine files memory only','lovable_sync_verified':False,'executive_approval':False}
   (built/'client-source.json').write_text(json.dumps(provenance,indent=2)+'\n')
+  write_release_manifest(
+   built, git_commit=git_commit,
+   build_number=os.environ.get('GITHUB_RUN_NUMBER') or datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S'),
+   built_at=datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'))
   if target.exists():shutil.rmtree(target)
   shutil.copytree(built,target)
  home=dist/'index.html';html=home.read_text()

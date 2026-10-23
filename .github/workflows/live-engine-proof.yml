@@ -1,4 +1,4 @@
-name: Live site engine provenance (read only)
+name: Live site engine provenance (informational)
 on:
   pull_request:
     paths:
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Verify browser engine source against current checked out commit
+      - name: Monitor browser engine source against current checked out commit
         id: live
         continue-on-error: true
         run: |
@@ -40,7 +40,7 @@ jobs:
               f.write("## Live browser-engine provenance\n\n")
               f.write(f"**{p['status']}** vs commit \`{p['expected_git_commit']}\`\n\n")
               f.write(f"Published reachable: {p['live_site_published']}; engine identical: {p['verified_same_engine']}\n")
-              f.write("\nSite deployment is not performed by this read-only check.\n")
+              f.write("\nThis is an informational pre-release monitor. The separate Live release gate must report MATCH after deployment.\n")
           PY
           else
             echo 'No live engine proof report produced' >> "$GITHUB_STEP_SUMMARY"
