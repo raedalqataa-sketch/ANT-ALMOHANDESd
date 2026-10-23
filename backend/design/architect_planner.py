@@ -186,7 +186,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                     m['release']['drawing_export_allowed']=False
             m['design_evaluation']=evaluate(m,intent);pool.append(m)
     explore(primary)
-    chosen=select(pool)
+    chosen=select(pool,optimization='cp_sat' if generation_v4 else 'greedy')
     expanded=False
     poor_quality=(generation_v3 and any(
         (m['design_evaluation']['functional_intelligence'] or {}).get('soft_penalty',0)>.28
@@ -225,7 +225,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
             explore([{'family':f,'policy':p,'core_position':c} for f,p,c in (
                 ('spine','family_front','rear'),('cross','social_front','rear'),('stepped','social_front','front'),
                 ('U','social_front','front'),('L','family_front','front'))])
-        chosen=select(pool)
+        chosen=select(pool,optimization='cp_sat' if generation_v4 else 'greedy')
         if repair_history:repair_history[-1]['result_valid_distinct']=len(chosen)
     if generation_v4:
         from .rule_traceability import matrix
@@ -281,6 +281,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         planning['generation_v4']={'revision':'architectural-engine-4','status':'PARTIALLY_COMPLETED',
             'reproducibility':{'stochastic':False,'search_seed':0,'algorithm':'deterministic bounded beam and parameter enumeration','settings':examined},
             'functional_routes':'furniture-aware 0.20m raster with 0.60m design body; recorded polylines',
+            'portfolio_selection':'deterministic OR-Tools CP-SAT cardinality-first selection of validated distinct designs',
             'local_repair_attempts':sum(len(m['auto_repair_v4']['attempts']) for m in pool),
             'local_repairs_accepted':sum(m['auto_repair_v4']['accepted_steps'] for m in pool),
             'reference_projects':['P01','P03','P04','P06','P07','P08'],
