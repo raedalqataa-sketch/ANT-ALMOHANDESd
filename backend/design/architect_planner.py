@@ -163,7 +163,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         primary.insert(1,{'family':'meander','policy':'relationship_aware','core_position':'rear'})
     pool=[];unavailable=[];examined=[];repair_history=[]
     def explore(options):
-        batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
+        batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False,repair_layout=generation_v4)
         unavailable.extend(batch['unavailable']);examined.extend(options)
         for m in batch['candidates']:
             if generation_v4:
