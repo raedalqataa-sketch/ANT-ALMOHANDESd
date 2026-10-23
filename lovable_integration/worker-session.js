@@ -5,6 +5,7 @@
   else root.AntWorkerSession=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
+  function report(code,stage){try{globalThis.AntTelemetry?.report(code,stage);}catch{}}
   function create({url,store=async()=>{},WorkerClass=globalThis.Worker,timeoutMs=600000}){
     let worker=null,ready=false,sequence=0;
     const pending=new Map();
@@ -26,7 +27,7 @@
       current.onmessage=async({data})=>{
         if(worker!==current)return;
         if(data.id===0){
-          if(data.error){rejectAll(data.error);dispose();return;}
+          if(data.error){report('ENGINE_INITIALIZATION_FAILED','initialization');rejectAll(data.error);dispose();return;}
           if(data.ready!==true)return;
           ready=true;
           for(const [id,request] of pending)dispatch(id,request);
@@ -34,15 +35,15 @@
         }
         const request=pending.get(data.id);if(!request||!request.sent)return;
         try{
-          if(data.error)throw Error(data.error);
+          if(data.error){report('ENGINE_GENERATION_FAILED','generation');throw Error(data.error);}
           await store(data.files);
           if(worker!==current||pending.get(data.id)!==request)return;
           pending.delete(data.id);clearTimeout(request.timer);request.resolve(data.result);
         }catch(error){
-          if(pending.get(data.id)===request){pending.delete(data.id);clearTimeout(request.timer);request.reject(error);}
+          if(pending.get(data.id)===request){report('ENGINE_RESULT_FAILED','result');pending.delete(data.id);clearTimeout(request.timer);request.reject(error);}
         }
       };
-      current.onerror=()=>{if(worker!==current)return;rejectAll('تعذر تشغيل المحرك في هذا المتصفح. أعد المحاولة أو جرّب متصفحًا حديثًا.');dispose();};
+      current.onerror=()=>{if(worker!==current)return;report('ENGINE_WORKER_FAILED','worker');rejectAll('تعذر تشغيل المحرك في هذا المتصفح. أعد المحاولة أو جرّب متصفحًا حديثًا.');dispose();};
       current.postMessage({id:0,operation:'initialize'});
     }
     function stop(reason=cancelled){
