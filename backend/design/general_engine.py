@@ -701,7 +701,14 @@ def validate_general(model,brief):
     return checks
 
 
-def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4):
+    """Search physical layouts; an optional V4 validator participates in candidate choice.
+
+    The budget bounds expensive room/furniture path checks. No unchecked alternative
+    may become a released drawing when preflight is enabled.
+    """
+    if candidate_validator is not None and validation_budget<1:
+        raise ValueError('validation_budget must be positive')
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
@@ -718,10 +725,25 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         result=search(brief,family,policy,core_position)
         if not result:
             unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
-        alternatives=[result]+result.get('alternatives',[]);model=None;failures=[]
+        alternatives=[result]+result.get('alternatives',[]);model=None;failures=[];preflights=0
         for attempt,layout in enumerate(alternatives):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
+            if candidate_validator is not None and not errors:
+                if preflights>=validation_budget:
+                    # The materialized layout is still UNVERIFIED by V4. It may
+                    # not replace an already measured failure or get exported.
+                    trial['checks'].append({'check_id':'V4-preflight-budget','status':'FAIL',
+                        'label':'لم تُفحص هندسة هذا البديل بعد بسبب حد البحث'})
+                else:
+                    preflights+=1
+                    trial=candidate_validator(trial)
+                errors=[c for c in trial['checks'] if c['status']=='FAIL']
+            trial['search']['preflight']={
+                'enabled':candidate_validator is not None,
+                'candidates_validated':preflights,
+                'validation_budget':validation_budget if candidate_validator is not None else None,
+                'reason':'V4 evidence-based geometric validation before option selection' if candidate_validator is not None else 'legacy validation'}
             trial['search']['validated_layouts_tested']=attempt+1
             # Feedback-driven candidate selection: favor fewer critical architectural
             # violations rather than treating every failed check as equally severe.
@@ -746,8 +768,13 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
                 failures=[]
             same_group=(attempt+1<len(alternatives) and layout.get('site_placement',{}).get('active') and alternatives[attempt+1].get('placement_group')==layout.get('placement_group'))
             if not failures and not same_group:break
+            if candidate_validator is not None and preflights>=validation_budget:
+                # No V4-certified candidate found inside the bounded budget.
+                break
             if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
-        model['search'].update(allocation_policy=policy,core_position=core_position,validated_layouts_tested=attempt+1)
+        model['search'].update(allocation_policy=policy,core_position=core_position,validated_layouts_tested=attempt+1,
+            v4_preflights=preflights if candidate_validator is not None else None,
+            v4_search_budget_exhausted=bool(candidate_validator is not None and preflights>=validation_budget and failures))
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
         rev=model['model_revision_id'];model['downloads']={'json':f'/api/files/{rev}.json'};model['previews']={}
         if not failures and emit_drawings:
