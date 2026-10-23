@@ -43,11 +43,11 @@ def main():
  html=(generate/'index.html').read_text()
  html=html.replace('<head>','<head><script>window.AntEmbedded=new URLSearchParams(location.search).get("embedded")==="1";if(window.AntEmbedded)document.documentElement.dataset.clientAwaiting="1";</script><style>html[data-client-awaiting] body{visibility:hidden}#client-transfer-notice{padding:20px;line-height:1.9}#client-transfer-notice p{margin:10px 0}html[data-embedded] header,html[data-embedded] .hero{display:none}</style>')
  html=html.replace('<script defer src="./app.js?v=062">','<script defer src="./client-bridge.js?v=1"></script><script defer src="./app.js?v=062">')
- html=html.replace('<script defer src="./static-client.js', '<script defer src="./worker-session.js?v=1"></script><script defer src="./static-client.js')
+ html=html.replace('<script defer src="./static-client.js', '<script defer src="./worker-session.js?v=1"></script><script defer src="./request-path.js?v=1"></script><script defer src="./static-client.js')
  html=html.replace('</head>','<script defer src="./automatic-runtime.js?v=1"></script><script defer src="./embedded-runtime.js?v=1"></script></head>')
  html=html.replace('الأرقام الحالية مثال قابل للتعديل، وليست اشتراطات رسمية.','أكمل الحقول الفارغة؛ قياسات الجدران والحركة الظاهرة مقترحات قابلة للتعديل، وليست اشتراطات رسمية.')
  (generate/'index.html').write_text(html)
- for file in ('client-bridge.js','embedded-runtime.js','worker-session.js','automatic-runtime.js'):shutil.copyfile(ROOT/'lovable_integration'/file,generate/file)
+ for file in ('client-bridge.js','embedded-runtime.js','worker-session.js','request-path.js','automatic-runtime.js'):shutil.copyfile(ROOT/'lovable_integration'/file,generate/file)
  app=(generate/'app.js').read_text()
  app=app.replace("function persist(){try", "function persist(){if(window.AntEmbedded)return;try")
  app=app.replace("let chosen;try{chosen=JSON.parse", "let chosen=window.AntEmbedded?{revision:state.chosenRevision}:null;try{if(!window.AntEmbedded)chosen=JSON.parse")
@@ -65,6 +65,7 @@ def main():
  old="const nativeFetch=window.fetch.bind(window);const worker=new Worker('./worker.js?v=062');"
  assert old in client
  client=client.replace(old,"const nativeFetch=window.fetch.bind(window);const engine=window.AntWorkerSession.create({url:'./worker.js?v=062',store});window.AntStopEngine=reason=>engine.stop(reason);")
+ client=client.replace("const path=typeof input==='string'?input:input.url;","const path=window.AntRequestPath(input,location.href);")
  client=client.replace("if(path==='/api/v3/design')","if(path==='/api/v3/auto-design')return Response.json(await call('automatic',{options:JSON.parse(options.body)}));if(path==='/api/v3/design')")
  client=client.replace("const pending=new Map(),urls=new Map(),sessionFiles=new Map();let seq=0;", "const urls=new Map(),sessionFiles=new Map();")
  start=client.index('  function call(');end=client.index('  async function read(',start)
