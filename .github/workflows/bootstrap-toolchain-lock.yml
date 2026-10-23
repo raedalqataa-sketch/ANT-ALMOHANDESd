@@ -1,0 +1,37 @@
+# One-time, branch-scoped lockfile bootstrap.
+# Remove this workflow once client_web/package-lock.json is updated.
+name: Bootstrap client toolchain lockfile
+on:
+  push:
+    branches:
+      - chore/engineering-tools-2026-10-23
+    paths:
+      - '.github/workflows/bootstrap-toolchain-lock.yml'
+permissions:
+  contents: write
+jobs:
+  update-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/engineering-tools-2026-10-23
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install client dependencies and regenerate npm lockfile
+        run: |
+          npm install --prefix client_web three --save --ignore-scripts --no-audit --no-fund
+          npm install --prefix client_web @types/three @playwright/test --save-dev --ignore-scripts --no-audit --no-fund
+          npm ci --prefix client_web --ignore-scripts --no-audit --no-fund
+          npm run build --prefix client_web
+      - name: Commit package manifest and lockfile to feature branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add client_web/package.json client_web/package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(web): lock Three.js and Playwright dependencies"
+            git push origin HEAD:refs/heads/chore/engineering-tools-2026-10-23
+          fi
