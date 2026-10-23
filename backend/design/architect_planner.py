@@ -160,6 +160,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         primary.append({'family':'spine','policy':'service_aligned','core_position':'rear'})
     if generation_v4:
         primary.insert(0,{'family':'cluster','policy':'relationship_aware','core_position':'rear'})
+        primary.insert(1,{'family':'meander','policy':'relationship_aware','core_position':'rear'})
     pool=[];unavailable=[];examined=[];repair_history=[]
     def explore(options):
         batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
