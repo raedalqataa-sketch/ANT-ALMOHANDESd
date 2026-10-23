@@ -1,0 +1,24 @@
+name: Live release gate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  published-engine-match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Require published source, commit, and bundle hashes to match
+        run: |
+          python ops/release/verify_live.py --expected-commit "$GITHUB_SHA" --strict-release --timeout 20 --output live-release-proof.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-release-proof
+          path: live-release-proof.json
+          if-no-files-found: warn
+          retention-days: 30
