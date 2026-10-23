@@ -213,7 +213,9 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                               ('adaptive','service_aligned','rear'),
                               ('cross','family_front','front'),
                               ('spine','social_front','front')])
-            if generation_v4:preferred.insert(0,('cluster','relationship_aware','front'))
+            if generation_v4:
+                preferred.insert(0,('cluster','relationship_aware','front'))
+                preferred.insert(0,('meander','relationship_aware','rear'))
             tried={(o['family'],o['policy'],o['core_position']) for o in examined}
             repairs=[{'family':f,'policy':p,'core_position':c} for f,p,c in preferred
                      if (f,p,c) not in tried][:5]
@@ -227,6 +229,15 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                 ('U','social_front','front'),('L','family_front','front'))])
         chosen=select(pool,optimization='cp_sat' if generation_v4 else 'greedy')
         if repair_history:repair_history[-1]['result_valid_distinct']=len(chosen)
+        if generation_v4:
+            from .layout_rebuild import replacement_evidence
+            blocked=[m for m in pool if not m['release']['drawing_export_allowed']]
+            for selected in chosen:
+                if selected.get('layout_rebuild_v4') or not blocked:continue
+                source=next((candidate for candidate in blocked
+                             if candidate['candidate_id']!=selected['candidate_id']),None)
+                if source is not None:
+                    selected['layout_rebuild_v4']=replacement_evidence(source,selected)
     if generation_v4:
         from .rule_traceability import matrix
         for m in pool:m['rule_traceability_v4']=matrix(m)
@@ -286,7 +297,9 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
             'local_repairs_accepted':sum(m['auto_repair_v4']['accepted_steps'] for m in pool),
             'reference_projects':['P01','P03','P04','P06','P07','P08'],
             'excluded_reference_projects':['P02','P05'],
-            'unimplemented':['unrestricted_polygon_solver','room_move_swap_resize_repair','corridor_rebuild_repair','stair_relocation_repair','complete_visual_acoustic_privacy','investment_unit_engine','structural_MEP_approval']}
+            'bounded_relayout':'rebuild the candidate from alternate freeform/cluster/meander topology and revalidate before showing a room relocation/resize/corridor change',
+            'reflow_evidence_count':sum(bool(m.get('layout_rebuild_v4')) for m in chosen),
+            'unimplemented':['unrestricted_polygon_solver','arbitrary_room_edit_within_locked_model','generalized_corridor_polygon_solver','stair_relocation_repair','complete_visual_acoustic_privacy','investment_unit_engine','structural_MEP_approval']}
     planning['design_selection']={'strategy':'objective_ranked_geometry_v3_functional' if generation_v3 else 'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
         'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),
