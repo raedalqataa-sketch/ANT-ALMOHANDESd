@@ -71,6 +71,12 @@ def inspect(model):
             if any(v in EXTERIOR_IDS for v in connected):
                 entry_room_ids.update(internal)
 
+        # Upper floors are entered through their physical stair core rather than
+        # a ground-level exterior opening. Mark it as a graph source only.
+        if floor.get('id') != 'GF':
+            entry_room_ids.update(r['id'] for r in rooms
+                                  if r.get('kind') == 'stair' and r.get('id') in shapes)
+
         # Corridor cells touch across full edges without a door; this is a
         # *topology* edge only and not proof of an unobstructed real-life route.
         halls = [r for r in rooms if r.get("kind") == "corridor" and r.get("id") in shapes]
