@@ -38,11 +38,21 @@ scale, north, provenance, street data, and parcel boundaries.
 ## Frontend and browser test tools
 
 The repository also includes `client_web` (Vite/React), installed with `npm ci`.
-Three.js is appropriate **when the frontend has an agreed 3D viewer design**.
-Playwright browsers should run in a CI/test environment, not in the production
-FastAPI Docker image. Add `three`, `@types/three` and `@playwright/test`
-using `npm install` so `package.json` AND `package-lock.json` are updated
-together. Do not hand-edit npm lockfile metadata.
+Three.js and its type definitions are installed in `client_web` for future
+3D viewing features; no 3D scene or architectural output is changed by
+installation alone. Playwright is installed as a development dependency,
+with a browser smoke-test workflow. The browser runs in CI rather than the
+production FastAPI image. Both `package.json` and `package-lock.json` were
+updated using `npm install`; do not hand-edit npm lockfile metadata.
+
+To run the browser smoke test locally:
+```bash
+cd client_web
+npm ci
+npm run build
+npx playwright install --with-deps chromium
+npm run test:e2e
+```
 
 ## Safety/release
 
