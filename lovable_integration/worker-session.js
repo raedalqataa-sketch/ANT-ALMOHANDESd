@@ -40,7 +40,7 @@
           if(worker!==current||pending.get(data.id)!==request)return;
           pending.delete(data.id);clearTimeout(request.timer);request.resolve(data.result);
         }catch(error){
-          if(pending.get(data.id)===request){report('ENGINE_RESULT_FAILED','result');pending.delete(data.id);clearTimeout(request.timer);request.reject(error);}
+          if(pending.get(data.id)===request){if(!data.error)report('ENGINE_RESULT_FAILED','result');pending.delete(data.id);clearTimeout(request.timer);request.reject(error);}
         }
       };
       current.onerror=()=>{if(worker!==current)return;report('ENGINE_WORKER_FAILED','worker');rejectAll('تعذر تشغيل المحرك في هذا المتصفح. أعد المحاولة أو جرّب متصفحًا حديثًا.');dispose();};
