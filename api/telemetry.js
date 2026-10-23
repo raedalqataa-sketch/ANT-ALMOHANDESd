@@ -3,10 +3,10 @@
  */
 const VALID_CODES = new Set([
   'ENGINE_INITIALIZATION_FAILED', 'ENGINE_GENERATION_FAILED',
-  'ENGINE_WORKER_FAILED', 'ENGINE_RESULT_FAILED',
+  'ENGINE_WORKER_FAILED', 'ENGINE_RESULT_FAILED', 'ENGINE_TIMEOUT',
   'EMBEDDED_BRIDGE_FAILED', 'BROWSER_UNHANDLED_ERROR'
 ]);
-const VALID_STAGES = new Set(['initialization', 'generation', 'worker', 'result', 'bridge', 'browser']);
+const VALID_STAGES = new Set(['initialization', 'generation', 'worker', 'result', 'bridge', 'browser', 'timeout']);
 
 function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
