@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة'}
+FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة','meander':'ثلاثة تجمعات مترابطة بممر متعرج'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -31,6 +31,9 @@ def topology(family,W,D,c,ratio,top):
     if family=='cluster':
         from .adaptive_geometry import clustered_topology
         return clustered_topology(W,D,c,ratio,top)
+    if family=='meander':
+        from .meander_geometry import meander_topology
+        return meander_topology(W,D,c,ratio,top)
     if family=='adaptive':
         from .adaptive_geometry import adaptive_topology
         return adaptive_topology(W,D,c,ratio,top)
@@ -209,6 +212,7 @@ def search(brief,family,policy='legacy',core_position='rear'):
                     for r in (.38,.46,.54,.62)
                     for b in (.36,.45,.55,.64)]
     if family=='cluster':variations=[(s,d,r,b) for s in (.74,.88,1.) for d in (.78,.9,1.) for r in (.35,.42,.58,.65) for b in (.36,.5,.64)]
+    if family=='meander':variations=[(s,d,r,b) for s in (.80,.92,1.) for d in (.84,1.) for r in (.38,.44,.55,.61) for b in (.30,.36,.42)]
     if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
     if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
@@ -519,7 +523,7 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    elif family in ('spine','cross','adaptive','freeform','cluster'):
+    elif family in ('spine','cross','adaptive','freeform','cluster','meander'):
         outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
