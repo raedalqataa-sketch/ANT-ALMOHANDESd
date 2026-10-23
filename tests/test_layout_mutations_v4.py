@@ -49,3 +49,19 @@ def test_does_not_mutate_or_resize_guests_stairs_and_unfit_rooms():
     assert all(v["local_reflow"]["operation"]!="shift_shared_room_boundary"
                or v["local_reflow"]["delta_m"]!=0.45 for v in variants)
     assert not list(mutation_variants(plan,.2,limit=0))
+
+
+def test_three_room_reflow_preserves_middle_area_when_pairwise_resize_cannot():
+    plan={"floors":[[shape("A",0.),shape("B",5.,area=18),shape("C",10.)]]}
+    original=deepcopy(plan)
+    variants=list(mutation_variants(plan,.2,limit=2))
+    assert plan==original
+    assert len(variants)==2
+    for variant in variants:
+        assert variant["local_reflow"]["operation"]=="redistribute_three_room_boundaries"
+        a,b,c=variant["floors"][0]
+        assert b["depth"]==5.
+        assert abs(a["y"]+a["depth"]-b["y"])<1e-7
+        assert abs(b["y"]+b["depth"]-c["y"])<1e-7
+        assert abs(a["depth"]+b["depth"]+c["depth"]-15.)<1e-7
+        assert all((room["width"]-.2)*(room["depth"]-.2)>=room["min_area"] for room in (a,b,c))
