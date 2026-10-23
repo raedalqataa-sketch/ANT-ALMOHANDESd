@@ -21,5 +21,5 @@ jobs:
           cache-dependency-path: client_web/package-lock.json
       - run: npm ci --prefix client_web --no-audit --no-fund
       - run: npm run build --prefix client_web
-      - run: npx --prefix client_web playwright install --with-deps chromium
+      - run: cd client_web && npx playwright install --with-deps chromium
       - run: npm run test:e2e --prefix client_web
