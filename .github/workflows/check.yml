@@ -1,5 +1,8 @@
 name: Check architectural drafts
 on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -31,3 +34,13 @@ jobs:
         run: node --test tests/plot-intake.test.cjs tests/locations.test.cjs
       - if: always()
         run: npm run build --prefix client_web
+  docker-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the actual Python 3.11 runtime container
+        run: docker build -t ant-almohandes:toolchain-ci .
+      - name: Verify imports inside the built container
+        run: |
+          docker run --rm --entrypoint python ant-almohandes:toolchain-ci -c "import ortools, shapely, networkx, cv2, pypdf, pypdfium2, ezdxf; print('Engineering runtime imports OK')"
