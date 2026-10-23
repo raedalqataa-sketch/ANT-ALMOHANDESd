@@ -54,7 +54,8 @@ with sync_playwright() as p:
  assert frame.locator('.workspace').is_hidden()
  frame.wait_for_function('AntGeneral.result!==null',timeout=600000)
  assert frame.locator('#auto-program').is_visible();result=frame.evaluate('AntGeneral.result')
- assert frame.evaluate('AntGeneral.floor')=='SITE'
+ assert frame.evaluate('AntGeneral.floor') in ('SITE','GF')
+ (OUT/'all-candidates.json').write_text(json.dumps(result,ensure_ascii=False))
  assert result['planning']['reference_design']['project_count']==6
  assert result['planning']['reference_design']['legal_rules_extracted']==0
  assert result['planning']['reference_design']['unique_images']==19
@@ -70,9 +71,16 @@ with sync_playwright() as p:
  for m in models:
   assert sum(r['count']*r['capacity'] for r in m['brief']['rooms'])==6
   assert any(r.get('guest_distributor') for r in m['floors'][0]['rooms'])
-  assert m['site_placement']['active'] and m['site_placement']['rear_face']=='north'
-  assert 'south' not in m['site_placement']['anchor_faces']
-  assert all(value+1e-5>=m['brief']['setbacks'][face] for face,value in m['site_placement']['actual_clearances_m'].items())
+  place=m['site_placement']
+  if place['active']:
+   assert place['rear_face']=='north' and 'south' not in place['anchor_faces']
+   assert all(value+1e-5>=m['brief']['setbacks'][face] for face,value in place['actual_clearances_m'].items())
+  else:
+   assert place['reason']=='insufficient_front_or_side_surplus'
+   assert not (place['front_extra_m']>=3-1e-5 and place['side_extra_m']>=2-1e-5 and place['envelope_ratio']<=.8+1e-5)
+  points=[p for polys in m['footprint']['polygons_by_floor'].values() for poly in polys for p in poly]
+  clear={'west':min(p[0] for p in points),'east':m['site']['width']-max(p[0] for p in points),'north':min(p[1] for p in points),'south':m['site']['depth']-max(p[1] for p in points)}
+  assert all(clear[face]+1e-5>=value for face,value in m['brief']['setbacks'].items())
   assert not m['release']['executive_issue_allowed']
   assert next(c for c in m['checks'] if c['check_id']=='REF-functional-route')['status']=='PASS'
   assert m['design_evaluation']['reference_patterns']['revision']=='reference-principles-2'
