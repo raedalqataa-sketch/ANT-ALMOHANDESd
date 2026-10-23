@@ -44,10 +44,10 @@ def main():
  html=html.replace('<head>','<head><script>window.AntEmbedded=new URLSearchParams(location.search).get("embedded")==="1";if(window.AntEmbedded)document.documentElement.dataset.clientAwaiting="1";</script><style>html[data-client-awaiting] body{visibility:hidden}#client-transfer-notice{padding:20px;line-height:1.9}#client-transfer-notice p{margin:10px 0}html[data-embedded] header,html[data-embedded] .hero{display:none}</style>')
  html=html.replace('<script defer src="./app.js?v=062">','<script defer src="./client-bridge.js?v=1"></script><script defer src="./app.js?v=062">')
  html=html.replace('<script defer src="./static-client.js', '<script defer src="./worker-session.js?v=1"></script><script defer src="./request-path.js?v=1"></script><script defer src="./static-client.js')
- html=html.replace('</head>','<script defer src="./automatic-runtime.js?v=1"></script><script defer src="./embedded-runtime.js?v=1"></script></head>')
+ html=html.replace('</head>','<script defer src="./telemetry.js?v=1"></script><script defer src="./automatic-runtime.js?v=1"></script><script defer src="./embedded-runtime.js?v=1"></script></head>')
  html=html.replace('الأرقام الحالية مثال قابل للتعديل، وليست اشتراطات رسمية.','أكمل الحقول الفارغة؛ قياسات الجدران والحركة الظاهرة مقترحات قابلة للتعديل، وليست اشتراطات رسمية.')
  (generate/'index.html').write_text(html)
- for file in ('client-bridge.js','embedded-runtime.js','worker-session.js','request-path.js','automatic-runtime.js'):shutil.copyfile(ROOT/'lovable_integration'/file,generate/file)
+ for file in ('client-bridge.js','embedded-runtime.js','worker-session.js','request-path.js','automatic-runtime.js','telemetry.js'):shutil.copyfile(ROOT/'lovable_integration'/file,generate/file)
  app=(generate/'app.js').read_text()
  app=app.replace("function persist(){try", "function persist(){if(window.AntEmbedded)return;try")
  app=app.replace("let chosen;try{chosen=JSON.parse", "let chosen=window.AntEmbedded?{revision:state.chosenRevision}:null;try{if(!window.AntEmbedded)chosen=JSON.parse")
@@ -81,7 +81,7 @@ def main():
  worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True,generation_v3=True,generation_v4=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
  (generate/'worker.js').write_text(worker)
  (generate/'static-client.js').write_text(client)
- for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
+ for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js','telemetry.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
  source=ROOT/'lovable_integration/lovable-src'
  if source.exists():shutil.copytree(source,a.output/'src',dirs_exist_ok=True)
  manifest={'engine_revision':'coherent-massing-1','base_engine_sha256':base_engine_sha,'base_verified_mode':base_verified_mode,'engine_version':'0.6.2-general','engine_sha256':hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest(),'same_origin_assets':True,'runtime_paid_services':False,'client_data_persistence':'memory; parent draft expires in sessionStorage','executive_approval':False,'constitution_v2':'2.0.0-draft','policy_visual_rules':143,'policy_manus_constraints':12,'v2_runtime_mode':'embedded_automatic_enabled'}
