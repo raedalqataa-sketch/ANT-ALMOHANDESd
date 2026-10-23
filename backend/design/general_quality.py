@@ -28,8 +28,9 @@ def door_geometry(floor,opening):
     axis=0 if wall['axis']=='horizontal' else 1
     room=next(r for r in floor['rooms'] if r['id']==opening['connects'][0])
     side=1 if room['y' if axis==0 else 'x']+room['depth' if axis==0 else 'width']/2>opening['center'][1-axis] else -1
-    hinge=list(opening['center']);hinge[axis]-=opening['width']/2
-    closed=[0.,0.];closed[axis]=1.
+    hand=-1. if opening.get('hinge_end','low')=='high' else 1.
+    hinge=list(opening['center']);hinge[axis]-=hand*opening['width']/2
+    closed=[0.,0.];closed[axis]=hand
     opened=[0.,0.];opened[1-axis]=side
     return {'hinge':hinge,'closed_direction':closed,'open_direction':opened,'radius':opening['width']}
 

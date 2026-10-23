@@ -1,0 +1,26 @@
+name: V4 geometric benchmark and drawing evidence
+on:
+  pull_request:
+    paths: ['backend/design/**', 'tests/test_v4_engine.py', 'quality_review/v4_benchmark.py', '.github/workflows/v4-review-packet.yml']
+  push:
+    branches: [main]
+    paths: ['backend/design/**', 'quality_review/v4_benchmark.py', '.github/workflows/v4-review-packet.yml']
+  workflow_dispatch:
+jobs:
+  measured-designs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python -m quality_review.v4_benchmark /tmp/v4-matrix
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v4-measured-designs-not-executive
+          path: /tmp/v4-matrix
+          if-no-files-found: error
+          retention-days: 30

@@ -1,4 +1,4 @@
-"""Design preferences derived from 8 user-supplied projects, never statutory rules.
+"""Design preferences derived from 6 retained user-supplied projects, never statutory rules.
 
 Raw drawings, names and contact details are not runtime data. The checked visual
 inventory and its uncertainties live in quality_review/reference_library/catalog.json.
@@ -7,14 +7,16 @@ import heapq
 import math
 from itertools import combinations
 
-REVISION='reference-principles-1'
-PROJECTS=tuple(f'P{i:02d}' for i in range(1,9))
+REVISION='reference-principles-2'
+UNIQUE_IMAGES=19
+EXCLUDED_PROJECTS=('P02','P05')
+PROJECTS=('P01','P03','P04','P06','P07','P08')
 RULES=(
- {'id':'REF-guest-sequence','sources':['P01','P04','P05','P07','P08'],'kind':'existing_geometric_invariant','meaning_ar':'مدخل ضيوف وموزع يخدم المجلس والحمام دون المرور بالأسرة'},
+ {'id':'REF-guest-sequence','sources':['P01','P04','P07','P08'],'kind':'existing_geometric_invariant','meaning_ar':'مدخل ضيوف وموزع يخدم المجلس والحمام دون المرور بالأسرة'},
  {'id':'REF-family-node','sources':list(PROJECTS),'kind':'design_preference','meaning_ar':'ترابط المعيشة والطعام والنواة مع تقليل الحركة العابرة للغرف الخاصة'},
  {'id':'REF-service-route','sources':list(PROJECTS),'kind':'geometric_invariant','meaning_ar':'خدمة المطبخ للطعام والحمام للنوم دون المرور بغرفة نوم أخرى أو منطقة الضيوف'},
  {'id':'REF-wet-stack','sources':['P01','P03','P04','P06','P07','P08'],'kind':'design_preference','meaning_ar':'تقارب وتراكب الخدمات بين الأدوار؛ ليس تصميم تمديدات معتمدًا'},
- {'id':'REF-core','sources':['P01','P03','P04','P05','P06','P07','P08'],'kind':'existing_geometric_invariant','meaning_ar':'استمرار موضع النواة الرأسية؛ قراءة الصور تقريبية ويعاد الفحص في النموذج'},
+ {'id':'REF-core','sources':['P01','P03','P04','P06','P07','P08'],'kind':'existing_geometric_invariant','meaning_ar':'استمرار موضع النواة الرأسية؛ قراءة الصور تقريبية ويعاد الفحص في النموذج'},
  {'id':'REF-outlook','sources':list(PROJECTS),'kind':'design_preference','meaning_ar':'توجيه نوافذ المعيشة إلى فسحة أو فناء؛ لا يثبت حق الفتح أو معدلات التهوية'},
  {'id':'REF-upper-retreat','sources':['P01','P03','P06','P07','P08'],'kind':'capability_limit','meaning_ar':'الملحق متراجع والتراسات جزء من التكوين؛ لا تستخلص نسب بناء قانونية'},
  {'id':'REF-double-height','sources':['P01','P03','P06'],'kind':'deferred','meaning_ar':'الفراغ المزدوج عنصر اختياري يحتاج نموذج فتحات بلاطات ودرابزين وإنشاء'},

@@ -1,5 +1,5 @@
 {
-  "version": "reference-library-8-v1",
+  "version": "reference-library-6-v2",
   "method": "human visual reading; no automatic tracing, survey, legal certification or model retraining",
   "projects": [
     {
@@ -52,52 +52,6 @@
       "uncertainties_ar": [
         "دقة بعض الأبعاد والكتابات ضعيفة؛ لا تستخرج قيم ارتداد ملزمة من الصورة",
         "وظائف الفضاءات واضحة بصريًا؛ لا توجد وثيقة اعتماد بلدي"
-      ],
-      "country_verified": false,
-      "city_verified": false,
-      "legal_compliance_verified": false,
-      "design_reading_confidence": "medium",
-      "raw_images_published": false
-    },
-    {
-      "id": "P02",
-      "image_count": 2,
-      "images": [
-        {
-          "id": "P02-LABEL_FIRST",
-          "file_name": "1-5866267805953934995_121.jpg",
-          "sha256": "ededea287f21a2505fe868be502861c366028fcf34a0db5559241d9f9176fd07",
-          "pixel_size": [
-            647,
-            1280
-          ],
-          "floor_classification": "LABEL_FIRST",
-          "dimension_status": "visually_reported_not_surveyed",
-          "personal_data_extracted": false
-        },
-        {
-          "id": "P02-LABEL_SECOND",
-          "file_name": "2-5866267805953934996_121.jpg",
-          "sha256": "5afb9e4d7b181701fd81dfb2b71b61a6c6d5e5a077cc29a1d975af3b4f5bf021",
-          "pixel_size": [
-            671,
-            1280
-          ],
-          "floor_classification": "LABEL_SECOND",
-          "dimension_status": "visually_reported_not_surveyed",
-          "personal_data_extracted": false
-        }
-      ],
-      "observed_patterns_ar": [
-        "تجميع غرف النوم في الخلف والاستقبال والمعيشة والطعام في المقدمة",
-        "المطبخ والخادمة والغسيل والخدمات في شريط جانبي",
-        "درج ومصعد في موضع متقارب بين الصورتين",
-        "اختلاف الشرفات ومساحة الجزء المبني بين المستويين"
-      ],
-      "uncertainties_ar": [
-        "لا يوجد دور أرضي ضمن الإرسال",
-        "العنوان العربي الثاني يتعارض مع تذييل ROOF FLOOR؛ لا يجزم بنظام الوحدات أو الأدوار",
-        "قد تكون برامج مستقلة أو متصلة؛ لا تفرض استنتاجًا دون دليل"
       ],
       "country_verified": false,
       "city_verified": false,
@@ -212,51 +166,6 @@
       "uncertainties_ar": [
         "لا تظهر أبعاد إجمالية موثوقة للأرض أو اتجاه شمال مقروء",
         "الفناء حل تصميمي؛ لا يثبت نسب إنارة أو تهوية قانونية"
-      ],
-      "country_verified": false,
-      "city_verified": false,
-      "legal_compliance_verified": false,
-      "design_reading_confidence": "medium",
-      "raw_images_published": false
-    },
-    {
-      "id": "P05",
-      "image_count": 2,
-      "images": [
-        {
-          "id": "P05-FF",
-          "file_name": "1-IMG_20261019_022439_242.jpg",
-          "sha256": "e68f0b194b82a512d3fe32f6853ed3ea1367ff1a2e6666d9caf54bb5b697d584",
-          "pixel_size": [
-            945,
-            1280
-          ],
-          "floor_classification": "FF",
-          "dimension_status": "visually_reported_not_surveyed",
-          "personal_data_extracted": false
-        },
-        {
-          "id": "P05-GF",
-          "file_name": "2-IMG_20261019_022439_170.jpg",
-          "sha256": "e4b15dfa095e531e400b25951eabbedc835c87272187d6343deffc4fa36fb9a3",
-          "pixel_size": [
-            942,
-            1280
-          ],
-          "floor_classification": "GF",
-          "dimension_status": "visually_reported_not_surveyed",
-          "personal_data_extracted": false
-        }
-      ],
-      "observed_patterns_ar": [
-        "كتلة رئيسية جانبية وخلفية تحتضن ساحة خارجية متصلة",
-        "فصل مجلس الضيوف الأمامي عن معيشة الأسرة الخلفية",
-        "مطبخ ومخزن وخدمة في آخر كتلة المبنى",
-        "نواة درج ومصعد ثابتة تقريبًا وتجميع النوم والخدمة في الأعلى"
-      ],
-      "uncertainties_ar": [
-        "العناوين الإنجليزية تسمي اللوحتين GROUND FLOOR؛ يعتمد التصنيف العربي مع تسجيل التعارض",
-        "لا توجد أبعاد إجمالية مقروءة كافية للقطعة"
       ],
       "country_verified": false,
       "city_verified": false,
@@ -449,8 +358,8 @@
       "raw_images_published": false
     }
   ],
-  "unique_images": 23,
-  "uploads_including_duplicate": 24,
+  "unique_images": 19,
+  "uploads_including_duplicate": 20,
   "duplicates": [
     {
       "sha256": "4c9b0e5267c1f35c80e4d4c1e2d86016f6891d8a6f9fdc7710be66887db94e3a",
@@ -460,5 +369,18 @@
   ],
   "numerical_design_thresholds": "Engineering heuristics must be disclosed; no numerical legal limits are inferred from images",
   "legal_rules_extracted": 0,
-  "personal_data_extracted": false
+  "personal_data_extracted": false,
+  "original_uploads_including_excluded": 24,
+  "excluded_projects": [
+    {
+      "id": "P02",
+      "reason": "user_requested_exclusion_from_analysis",
+      "used_for_inference": false
+    },
+    {
+      "id": "P05",
+      "reason": "user_requested_exclusion_from_analysis",
+      "used_for_inference": false
+    }
+  ]
 }

@@ -120,3 +120,27 @@ def moderate_room_expansion(cells, wall_thickness):
             cell["width"]=target
         result.append(cell)
     return result
+
+
+def clustered_topology(width, depth, corridor, front_fraction, split_fraction):
+    """Two room clusters linked by a lateral node, without a full axial hall.
+
+    Orthogonal bounded topology: independent front/back stems yield circulation
+    bends and exterior recesses. Occupied cells determine the final silhouette.
+    Parameters are searched against the actual program, never a fixed facade.
+    """
+    if min(width,depth,corridor)<=0:return None
+    junction=depth*split_fraction
+    front=width*front_fraction-corridor/2
+    rear=width*(1-front_fraction)-corridor/2
+    if min(front,rear,width-front-corridor,width-rear-corridor)<2.8:return None
+    if min(junction,depth-junction-corridor)<5:return None
+    left=min(front,rear);right=max(front,rear)+corridor
+    halls=[dict(x=front,y=0.,width=corridor,depth=junction),
+           dict(x=left,y=junction,width=right-left,depth=corridor),
+           dict(x=rear,y=junction+corridor,width=corridor,depth=depth-junction-corridor)]
+    lanes=[]
+    for x,y,size in ((front,0.,junction),(rear,junction+corridor,depth-junction-corridor)):
+        lanes.extend([dict(x=0.,y=y,width=x,depth=size,axis='y',door_side='east'),
+                      dict(x=x+corridor,y=y,width=width-x-corridor,depth=size,axis='y',door_side='west')])
+    return halls,lanes

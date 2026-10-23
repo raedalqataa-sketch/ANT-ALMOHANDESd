@@ -57,17 +57,19 @@ def test_courtyard_window_stops_at_opposite_wing_before_plot_boundary():
  assert outlook(m)[0]['best_unobstructed_own_plot_depth_m']==11
 
 
-def test_catalogue_has_eight_projects_23_unique_images_and_no_extracted_laws():
+def test_catalogue_has_six_projects_19_unique_images_and_no_extracted_laws():
  root=Path(__file__).resolve().parents[1]
  c=json.loads((root/'quality_review/reference_library/catalog.json').read_text())
- assert len(c['projects'])==8 and c['unique_images']==23 and c['uploads_including_duplicate']==24
+ assert len(c['projects'])==6 and c['unique_images']==19 and c['uploads_including_duplicate']==20
  hashes=[i['sha256'] for p in c['projects'] for i in p['images']]
- assert len(set(hashes))==23 and c['duplicates'][0]['sha256'] in hashes
+ assert len(set(hashes))==19 and c['duplicates'][0]['sha256'] in hashes
  assert c['legal_rules_extracted']==0 and not c['personal_data_extracted']
  assert all(not p['raw_images_published'] and not p['legal_compliance_verified'] for p in c['projects'])
  assert set(PROJECTS)=={p['id'] for p in c['projects']}
  assert all(set(r['sources'])<=set(PROJECTS) for r in RULES)
- assert 'LABEL_FIRST' in [i['floor_classification'] for i in c['projects'][1]['images']]
+ assert not {'P02','P05'} & set(PROJECTS)
+ assert {p['id'] for p in c['excluded_projects']}=={'P02','P05'}
+ assert c['original_uploads_including_excluded']==24
 
 
 def test_swapping_identical_bedroom_instance_ids_is_not_a_new_design():

@@ -63,6 +63,6 @@ def constitution_manifest_v2():
 
 
 @router.post('/auto-design')
-def auto_design(intent:ClientIntent, constitution_v2:bool=False, generation_v3:bool=False):
-    try:return generate_automatic(intent,constitution_v2=constitution_v2,generation_v3=generation_v3)
+def auto_design(intent:ClientIntent, constitution_v2:bool=False, generation_v3:bool=False, generation_v4:bool=False):
+    try:return generate_automatic(intent,constitution_v2=constitution_v2,generation_v3=generation_v3,generation_v4=generation_v4)
     except ValueError as exc:raise HTTPException(422,str(exc))
