@@ -112,12 +112,25 @@ def furniture_issues(model):
 def assess(model,brief):
     program=RoomProgramValidator(brief).validate(model);paths=FunctionalGraph(model).inspect();furniture=furniture_issues(model)
     from .visual_privacy import inspect as inspect_privacy
-    return {'visual_privacy':inspect_privacy(model),'revision':'functional-program-4','program':program,'movement':paths,'furniture_issues':furniture}
+    from .independent_audit import inspect as inspect_independent
+    from .execution_coordination import assess as assess_coordination
+    return {'visual_privacy':inspect_privacy(model),'independent_geometry':inspect_independent(model),
+            'execution_coordination':assess_coordination(model,brief),
+            'revision':'functional-program-4','program':program,'movement':paths,'furniture_issues':furniture}
 
 def checks(report):
-    return [dict(check_id='V4-program',status=report['program']['status'],label='سلامة الوظيفة والسعة والبرنامج',evidence={'errors':report['program']['errors']}),
+    from .execution_coordination import checks as coordination_checks
+    basic=[dict(check_id='V4-program',status=report['program']['status'],label='سلامة الوظيفة والسعة والبرنامج',evidence={'errors':report['program']['errors']}),
             dict(check_id='V4-functional-paths',status='FAIL' if report['movement']['unreachable'] else 'PASS',label='مسارات وظيفية حول الأثاث عبر الأبواب دون اختراق الخصوصية',evidence=report['movement']),
-            dict(check_id='V4-furniture-clearance',status='FAIL' if report['furniture_issues'] else 'PASS',label='عدم تداخل الأثاث وخلوصات الاستعمال والفتح',evidence={'invalid':report['furniture_issues']})]
+            dict(check_id='V4-furniture-clearance',status='FAIL' if report['furniture_issues'] else 'PASS',label='عدم تداخل الأثاث وخلوصات الاستعمال والفتح',evidence={'invalid':report['furniture_issues']}),
+            dict(check_id='V4-geos-independent',status=report['independent_geometry']['status'],
+                 label='تدقيق مستقل لتداخل الغرف وخروجها عن حيز الكتلة',evidence=report['independent_geometry']),
+            dict(check_id='V4-networkx-topology',
+                 status='PENDING' if report['independent_geometry']['requires_circulation_review'] else 'PASS',
+                 label='رسم بياني مستقل لاتصال الفراغات؛ لا يحل محل فحص مسارات الحركة',
+                 evidence={'requires_review':report['independent_geometry']['requires_circulation_review'],
+                           'floors':report['independent_geometry']['floors']})]
+    return basic+coordination_checks(report['execution_coordination'])
 
 
 def validate(model,brief):
