@@ -51,3 +51,14 @@ test('endpoint logs only schema-approved codes',()=>{
   const log=console.error;let output='';console.error=msg=>output=msg;
   try {const {req,result}=mockRequest();handler(req,result);assert.equal(result.code,204);assert.deepEqual(JSON.parse(output),{level:'error',service:'ant-almohandes',event:'client_engine_error',code:'ENGINE_WORKER_FAILED',stage:'worker'});}finally{console.error=log;if(prev===undefined)delete process.env.ANT_MONITORING_ORIGIN;else process.env.ANT_MONITORING_ORIGIN=prev;}
 });
+
+
+test('timeout code is supported but arbitrary error text is never sent',()=>{
+ const {client,calls}=browser({enabled:true,endpoint:'/api/telemetry'});
+ assert.equal(client.report('ENGINE_TIMEOUT','timeout'),true);
+ assert.equal(client.report('ENGINE_TIMEOUT: private example','timeout'),false);
+ assert.equal(calls.length,1);
+ const body=JSON.parse(calls[0][1].body);
+ assert.equal(body.code,'ENGINE_TIMEOUT');
+ assert.equal(JSON.stringify(body).includes('private example'),false);
+});
