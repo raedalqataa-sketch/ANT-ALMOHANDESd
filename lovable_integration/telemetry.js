@@ -7,10 +7,10 @@
   'use strict';
   const codes = new Set([
     'ENGINE_INITIALIZATION_FAILED', 'ENGINE_GENERATION_FAILED',
-    'ENGINE_WORKER_FAILED', 'ENGINE_RESULT_FAILED',
+    'ENGINE_WORKER_FAILED', 'ENGINE_RESULT_FAILED', 'ENGINE_TIMEOUT',
     'EMBEDDED_BRIDGE_FAILED', 'BROWSER_UNHANDLED_ERROR'
   ]);
-  const stages = new Set(['initialization', 'generation', 'worker', 'result', 'bridge', 'browser']);
+  const stages = new Set(['initialization', 'generation', 'worker', 'result', 'bridge', 'browser', 'timeout']);
 
   function create(config = {}, runtime = globalThis) {
     let endpoint = null;
