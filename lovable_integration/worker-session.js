@@ -19,7 +19,7 @@
       if(request.sent)return;
       request.sent=true;
       try{worker.postMessage({id,operation:request.operation,...request.extra},request.extra.bytes?[request.extra.bytes]:[]);}
-      catch(error){pending.delete(id);clearTimeout(request.timer);request.reject(error);}
+      catch(error){report('ENGINE_WORKER_FAILED','worker');pending.delete(id);clearTimeout(request.timer);request.reject(error);}
     }
     function start(){
       if(worker)return;
@@ -55,10 +55,10 @@
     function call(operation,extra={}){
       return new Promise((resolve,reject)=>{
         const id=++sequence;
-        const timer=setTimeout(()=>stop('تجاوزت العملية مدة الانتظار؛ أعد المحاولة.'),timeoutMs);
+        const timer=setTimeout(()=>{report('ENGINE_TIMEOUT','timeout');stop('تجاوزت العملية مدة الانتظار؛ أعد المحاولة.');},timeoutMs);
         const request={resolve,reject,timer,operation,extra,sent:false};pending.set(id,request);
         try{start();if(ready)dispatch(id,request);}
-        catch(error){rejectAll(error.message);dispose();}
+        catch(error){report('ENGINE_WORKER_FAILED','worker');rejectAll(error.message);dispose();}
       });
     }
     return {call,stop};
