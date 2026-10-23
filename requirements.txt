@@ -8,3 +8,13 @@ pytest
 httpx
 arabic-reshaper
 python-bidi
+
+# Computational geometry, adjacency graphs and constraint optimization
+ortools>=9.11,<10
+shapely>=2.0,<3
+networkx>=3.4,<3.7
+
+# Land drawing / PDF intake (headless server)
+opencv-python-headless>=4.10,<5
+pypdf>=5,<7
+pypdfium2>=4.30,<6
