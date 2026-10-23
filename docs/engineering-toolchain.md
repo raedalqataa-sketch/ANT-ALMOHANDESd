@@ -94,3 +94,51 @@ The raster parser libraries are dependencies ready for a later *explicitly
 specified, calibrated* intake flow; they do not convert unscaled images into
 surveyed land or prove street ownership. Three.js is installed in the client,
 but no fabricated 3D building model is generated.
+
+## Extended V4 geometry and execution-evidence gates
+
+A fifth orthogonal family, `meander`, now connects three variable-width
+room clusters by two lateral corridor junctions. It is searched by default
+**only in the opt-in V4 generator** and remains bounded by rectangular
+land plots and right-angled cell geometry. Tests verify actual corridor
+continuity and absence of spatial overlaps.
+
+The older V4 room allocation search has a CP-SAT fallback if its greedy/beam
+packing runs out of capacity. It assigns the **same room bundles** to other
+lanes, without reducing requested area or splitting the guest suite. This
+is followed by the ordinary wall/door/furniture construction and independent
+geometry, access and functional validation. It does not mutate an
+already approved drawing.
+
+If the initial V4 proposals fail or do not provide three distinct valid
+designs, the repair search can also try the meandering corridor and other
+alternative morphologies. `layout_rebuild.replacement_evidence` compares
+a rejected candidate with a complete new valid draft and records **actual
+room center displacements, room size differences and corridor changes**,
+rejecting a changed brief, changed room IDs, floor change, locked source
+or any failed output. This is whole-plan replacement, not arbitrary
+face dragging on a validated execution drawing.
+
+`execution_coordination.assess` checks the **gross** occupied cells against
+the plot buildable rectangle inferred from entered setbacks. Violations
+produce `V4-site-gross-envelope: FAIL`. It also exposes detailed
+**PENDING** inputs for parcel/street verification, municipality-specific
+rules, structural grids and geotechnical calculations, sanitary risers,
+electrical and HVAC routes, life safety and multidisciplinary signoff.
+A wet-room stacking report is **only a spatial coordination hint**. It is
+not an MEP calculation, structural verification or evidence that country
+or local building-code compliance was approved.
+
+Relevant tests:
+
+```bash
+python -m pytest -q tests/test_meander_geometry.py
+python -m pytest -q tests/test_execution_coordination_v4.py
+python -m pytest -q tests/test_allocation_repair.py
+python -m pytest -q tests/test_v4_engine.py
+```
+
+**Release policy:** V4 returns DRAFT_REVIEW with executive approval false.
+Do not merge, publish or advertise construction-ready drawings unless all
+CI checks pass and the missing survey, code, structure and MEP requirements
+have been independently completed and licensed reviewers have signed.
