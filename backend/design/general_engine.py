@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة'}
+FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -28,6 +28,9 @@ def area(r):return r['width']*r['depth']
 def topology(family,W,D,c,ratio,top):
     """Disjoint cells tile a nonrectangular mass; lanes abut connected halls."""
     a=W*ratio;b=D*top
+    if family=='cluster':
+        from .adaptive_geometry import clustered_topology
+        return clustered_topology(W,D,c,ratio,top)
     if family=='adaptive':
         from .adaptive_geometry import adaptive_topology
         return adaptive_topology(W,D,c,ratio,top)
@@ -141,7 +144,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
             sequence=sorted(sequence,key=lambda q:(
                 0 if q.get('zone')=='guest' else 1,
                 q.get('guest_parent') or q.get('id','') if q.get('zone')=='guest' else '',
-                0 if q.get('guest_distributor') else 1 if q.get('zone')=='guest' else rank.get(q['kind'],10),
+                (1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0) if q.get('zone')=='guest' else rank.get(q['kind'],10),
                 q['id']))
         if policy=='social_front':
             # Guests stay a contiguous majlis/distributor/WC bundle when reversed.
@@ -200,6 +203,7 @@ def search(brief,family,policy='legacy',core_position='rear'):
                     for d in (.70,.82,.92,1.)
                     for r in (.38,.46,.54,.62)
                     for b in (.36,.45,.55,.64)]
+    if family=='cluster':variations=[(s,d,r,b) for s in (.74,.88,1.) for d in (.78,.9,1.) for r in (.35,.42,.58,.65) for b in (.36,.5,.64)]
     if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
     if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
     if family=='stepped':variations=[(s,d,.4,b) for s in (1.,.85,.70) for d in (1.,.90,.82,.74,.68,.60,.55) for b in (.30,.36,.40,.44,.48)]
@@ -228,7 +232,9 @@ def search(brief,family,policy='legacy',core_position='rear'):
             i,l=min(eligible,key=lambda p:p[1]['depth'])
             core_depth=4.6 if l['depth']>=7.0 else l['depth']
             retreat=1.6 if brief.automatic_features.roof_annex else 0
-            stair=box(l['x'],l['y']+l['depth']-core_depth-retreat,l['width'],core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
+            core_width=min(l['width'],3.0) if brief.compact_core else l['width']
+            core_x=l['x']+l['width']-core_width if l['door_side']=='east' else l['x']
+            stair=box(core_x,l['y']+l['depth']-core_depth-retreat,core_width,core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
             if core_position=='front' and not brief.automatic_features.roof_annex:
                 stair['y']=l['y'];l['y']+=core_depth
             l['depth']-=core_depth+retreat
@@ -508,7 +514,7 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    elif family in ('spine','cross','adaptive','freeform'):
+    elif family in ('spine','cross','adaptive','freeform','cluster'):
         outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
@@ -756,6 +762,14 @@ def export_general_model(model,brief,out):
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     rev=model['model_revision_id']
+    if model.get('functional_program_v4'):
+        from .functional_program import validate as validate_v4
+        from .auto_repair import fingerprint
+        if fingerprint(model)!=model['geometry_sha256']:
+            raise ValueError('تغيرت هندسة النموذج بعد الفحص؛ يلزم إصدار وفحص جديد قبل التصدير')
+        model['checks']=validate_v4(model,brief)
+        if any(c['status']=='FAIL' for c in model['checks']):
+            model['release'].update(status='BLOCKED',drawing_export_allowed=False)
     if not model['release']['drawing_export_allowed']:
         raise ValueError('لا يجوز تصدير رسم أخفق في فحص هندسي')
     scenes=[drawing(model,f) for f in model['floors']]

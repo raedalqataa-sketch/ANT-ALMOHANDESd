@@ -9,7 +9,7 @@ window.AntStartAutomatic=async(draft,send)=>{
  window.AntOriginalClientDraft=structuredClone(draft);
  send('IMPORTED',{roomCount:0,roomRows:0,automatic:true});
  new ResizeObserver(()=>send('RESIZE',{height:Math.min(20000,Math.max(900,document.documentElement.scrollHeight))})).observe(document.body);
- const response=await fetch('/api/v3/auto-design',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft.intent)});
+ const response=await fetch('/api/v3/auto-design?constitution_v2=true&generation_v3=true&generation_v4=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft.intent)});
  const result=await response.json();if(!response.ok)throw Error(typeof result.detail==='string'?result.detail:'راجع بيانات الأرض والأسرة؛ تعذر تكوين برنامج ضمن حدود المحرك.');
  window.AntApplyAutomaticResult(result);
  title.textContent='البرنامج الذي اقترحناه لأسرتك';text.textContent='أنت قدمت بيانات الأرض والأسرة؛ هذه قرارات مقترحة من النظام وليست مدخلات طلبنا منك حسابها.';
@@ -75,6 +75,17 @@ window.AntStartAutomatic=async(draft,send)=>{
    }
   }
   program.append(report);
+ }
+ const v4=result.planning?.generation_v4;
+ if(v4){
+  const section=document.createElement('section');section.setAttribute('aria-label','فحص المسارات والإصلاح V4');
+  const heading=document.createElement('h3');heading.textContent='مسارات حول الأثاث وإصلاح هندسي محلي';section.append(heading);
+  const note=document.createElement('p');note.textContent=`فُحصت المسارات مع الأبواب والأثاث. قُبل ${v4.local_repairs_accepted} إصلاح من ${v4.local_repair_attempts} محاولة محلية؛ المحاولات التي لم تحسّن الفحص أُلغيت. لا تزال بعض وظائف V4 قيد التطوير.`;section.append(note);
+  for(const [i,m] of result.candidates.entries()){
+   const info=m.functional_program_v4;if(!info)continue;
+   const row=document.createElement('p');row.textContent=`البديل ${i+1}: ${info.movement.routes.length} مسار مقاس؛ ${info.movement.unreachable.length} غير متصل. فحص شبكي تقريبي وليس اعتماد إتاحة وصول.`;section.append(row);
+  }
+  const source=document.createElement('p');source.textContent='المراجع الفعالة: 6 مشروعات و19 صورة؛ استُبعد المقترحان الثاني والخامس. مصفوفة القواعد وأدلة الإصلاح محفوظة في JSON؛ القواعد غير المتحققة تبقى للمراجعة.';section.append(source);program.append(section);
  }
  const reasoning=document.createElement('ul');for(const reason of result.planning.reasoning){const item=document.createElement('li');item.textContent=reason;reasoning.append(item);}program.append(reasoning);
  const assumptions=document.createElement('details'),summary=document.createElement('summary');summary.textContent='كيف حُسبت الارتدادات؟ وما الافتراضات التي تحتاج مراجعة؟';assumptions.append(summary);

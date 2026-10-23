@@ -131,16 +131,19 @@ def propose(intent:ClientIntent):
         'setbacks':{'values':setbacks,'source':registry()['rules']['setbacks'] if intent.country=='SA' else {'jurisdiction':'YE','status':'UNVERIFIED_DESIGN_ASSUMPTION'},'unknown_street_faces':unknown,'local_parcel_verified':False}}
     return b,planning
 
-def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=False,generation_v3=False):
+def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=False,generation_v3=False,generation_v4=False):
     """Search physical allocations and core positions, validate, diversify, then export.
 
     No failed drawings or near-duplicate plans fill a missing third alternative.
     """
+    generation_v3=generation_v3 or generation_v4
+    constitution_v2=constitution_v2 or generation_v4
     from .general_engine import generate_general,export_general_model
     from .design_selection import evaluate,select
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True)
     b,planning=propose(intent)
+    if generation_v4:b=b.model_copy(update={'compact_core':True})
     if generation_v3:
         primary=[{'family':f,'policy':p,'core_position':c} for f,p,c in (
             ('freeform','relationship_aware','rear'),
@@ -155,11 +158,19 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         primary=[{'family':f,'policy':'legacy','core_position':'rear'} for f in ('spine','L','U','stepped','cross')]
         primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
         primary.append({'family':'spine','policy':'service_aligned','core_position':'rear'})
+    if generation_v4:
+        primary.insert(0,{'family':'cluster','policy':'relationship_aware','core_position':'rear'})
     pool=[];unavailable=[];examined=[];repair_history=[]
     def explore(options):
         batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
         unavailable.extend(batch['unavailable']);examined.extend(options)
         for m in batch['candidates']:
+            if generation_v4:
+                from .auto_repair import ArchitectureAutoRepairEngine
+                from .functional_program import validate as validate_v4
+                m=ArchitectureAutoRepairEngine(lambda candidate:validate_v4(candidate,b),max_attempts=8).repair(m)
+                failed=any(row['status']=='FAIL' for row in m['checks'])
+                m['release'].update(status='BLOCKED' if failed else 'DRAFT_REVIEW',drawing_export_allowed=not failed)
             m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))
             if generation_v3:
                 from .functional_intelligence import repair_reasons
@@ -202,6 +213,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                               ('adaptive','service_aligned','rear'),
                               ('cross','family_front','front'),
                               ('spine','social_front','front')])
+            if generation_v4:preferred.insert(0,('cluster','relationship_aware','front'))
             tried={(o['family'],o['policy'],o['core_position']) for o in examined}
             repairs=[{'family':f,'policy':p,'core_position':c} for f,p,c in preferred
                      if (f,p,c) not in tried][:5]
@@ -215,6 +227,9 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                 ('U','social_front','front'),('L','family_front','front'))])
         chosen=select(pool)
         if repair_history:repair_history[-1]['result_valid_distinct']=len(chosen)
+    if generation_v4:
+        from .rule_traceability import matrix
+        for m in pool:m['rule_traceability_v4']=matrix(m)
     titles=['المقترح الأنسب لاحتياجاتك','بديل وظيفي للمقارنة','بديل ثالث للمقارنة']
     for i,m in enumerate(chosen):
         metrics=m['design_evaluation']['metrics']
@@ -238,13 +253,15 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                 'guest_exposure':fi['guest_family_exposure'],
                 'weighted_preference_penalty':fi['soft_penalty']}
             m['design_option']['method']='V3 parametric wings, measured functional door routes and iterative search repair'
+        if generation_v4:m['design_option']['method']='V4 bounded clustered/wing allocation, furniture-aware raster routes, transactional local repair and measured ranking'
         m['search']['family_label_ar']=titles[i]
     diagnostics=[{'candidate_id':m['candidate_id'],'revision_id':m['model_revision_id'],
         'accepted':m in chosen,'geometry_valid':m['release']['drawing_export_allowed'],
         'score':m['design_evaluation']['heuristic_score'],'failed_checks':m['design_evaluation']['failed_checks'],
         'reason':('اختير بعد تقييم الأولوية والتنوع' if m in chosen else 'فشل هندسي؛ الرسم محجوب' if not m['release']['drawing_export_allowed'] else 'لم يفضل في الترتيب أو لم يحقق اختلافًا كافيًا')}
         for m in pool]
-    planning['reference_design']={'revision':'reference-principles-1','project_count':8,'unique_images':23,'legal_rules_extracted':0,'status':'visual design preferences; not surveyed or code-certified','unsupported_reference_features':['basements','general double-height slabs','arbitrary four-level programs','chamfered plots']}
+    from .reference_patterns import REVISION,PROJECTS,UNIQUE_IMAGES
+    planning['reference_design']={'revision':REVISION,'project_count':len(PROJECTS),'unique_images':UNIQUE_IMAGES,'legal_rules_extracted':0,'status':'visual design preferences; not surveyed or code-certified','unsupported_reference_features':['basements','general double-height slabs','arbitrary four-level programs','chamfered plots']}
     planning['reasoning'].append('تُقارن خدمة المطبخ للطعام دون عبور الغرف الخاصة، وتراكب الخدمات بين الأدوار، وفسحة نوافذ المعيشة داخل الأرض؛ مؤشرات تصميمية مستخلصة من المراجع وليست قوانين.')
     planning.update(massing_strategy='coherent-1',placement_strategy='auto-rear-corner-1')
     if generation_v3:
@@ -260,6 +277,15 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
             'mode':'EXPERIMENTAL_OPT_IN_PARTIAL','audited_count':len(pool),
             'blocked_by_v2_count':sum(bool(m['constitution_v2']['hard_failures']) for m in pool),
             'scope':'16 evidence-based audit gates; no complete 143-rule enforcement or code certification'}
+    if generation_v4:
+        planning['generation_v4']={'revision':'architectural-engine-4','status':'PARTIALLY_COMPLETED',
+            'reproducibility':{'stochastic':False,'search_seed':0,'algorithm':'deterministic bounded beam and parameter enumeration','settings':examined},
+            'functional_routes':'furniture-aware 0.20m raster with 0.60m design body; recorded polylines',
+            'local_repair_attempts':sum(len(m['auto_repair_v4']['attempts']) for m in pool),
+            'local_repairs_accepted':sum(m['auto_repair_v4']['accepted_steps'] for m in pool),
+            'reference_projects':['P01','P03','P04','P06','P07','P08'],
+            'excluded_reference_projects':['P02','P05'],
+            'unimplemented':['unrestricted_polygon_solver','room_move_swap_resize_repair','corridor_rebuild_repair','stair_relocation_repair','complete_visual_acoustic_privacy','investment_unit_engine','structural_MEP_approval']}
     planning['design_selection']={'strategy':'objective_ranked_geometry_v3_functional' if generation_v3 else 'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
         'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),

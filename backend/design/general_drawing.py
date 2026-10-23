@@ -123,15 +123,13 @@ def drawing(model,floor,site_view=False):
                 scene.line(pt(lo,fixed+t*.2),pt(hi,fixed+t*.2),'#333333',.014,'SLIDING_DOOR')
                 scene.line(pt(center,fixed-t/2),pt(center,fixed+t/2),'#333333',.014,'SLIDING_DOOR')
             else:
-                room=next((r for r in floor['rooms'] if r['id']==o['connects'][0]),None)
-                if room:
-                    side=1 if (room['y']+room['depth']/2 if axis==0 else room['x']+room['width']/2)>fixed else -1
-                else:side=1
-                radius=o['width'];hinge=pt(lo,fixed);tip=pt(lo,fixed+side*radius);endp=pt(hi,fixed)
-                scene.line(hinge,tip,'#333333',.017,'DOOR')
-                # Quarter circle represented as a cubic in SVG/PDF and an ARC in DXF.
+                from .general_quality import door_geometry
+                g=door_geometry(floor,o);h=g['hinge'];u=g['closed_direction'];v=g['open_direction'];radius=g['radius']
+                def along(du,dv):return (h[0]+du*u[0]+dv*v[0],h[1]+du*u[1]+dv*v[1])
+                tip=along(0,radius);endp=along(radius,0)
+                scene.line(h,tip,'#333333',.017,'DOOR')
                 k=.5522847498
-                scene.curve([endp,pt(hi,fixed+side*radius*k),pt(lo+radius*k,fixed+side*radius),tip],'#555555',.011,'DOOR')
+                scene.curve([endp,along(radius,radius*k),along(radius*k,radius),tip],'#555555',.011,'DOOR')
     wall_outlines(scene,wall_rects)
     for q in floor['furniture']:furniture_symbol(scene,q)
     for stair in model.get('stairs',[]):
@@ -208,6 +206,12 @@ def review_drawing(model):
         for text in option['advantages']:
             scene.text(19.5,yy,text,.20,align='right',layer='REPORT');yy+=.35
 
+    if model.get('functional_program_v4'):
+        report=model['functional_program_v4'];repair=model.get('auto_repair_v4',{})
+        for text in (f"مسارات حول الأثاث: {len(report['movement']['routes'])}؛ غير متصل: {len(report['movement']['unreachable'])}",
+                     f"إصلاحات محلية مقبولة: {repair.get('accepted_steps',0)}؛ تفاصيل قبل وبعد في JSON",
+                     'مصفوفة تتبع 199 بندًا؛ لا تعني تنفيذ جميع القواعد أو اعتمادها'):
+            scene.text(19.5,yy,text,.19,align='right',layer='REPORT');yy+=.36
     names={'PASS':'ناجح جزئيًا','FAIL':'فشل','PENDING':'يحتاج تحققًا','NOT_APPLICABLE':'غير منطبق'}
     for check in model['checks']:
         label=check['label'];source=check.get('source',{}).get('section','')

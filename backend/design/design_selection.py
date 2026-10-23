@@ -122,6 +122,11 @@ def evaluate(model,intent):
         components['measured_functional_relations']=intelligent['soft_penalty']
         weights={**weights,'measured_functional_relations':importance}
         score=round(score+importance*intelligent['soft_penalty'],6)
+    if model.get('functional_program_v4'):
+        value=model['functional_program_v4']['movement']['soft_penalty']
+        importance={'efficiency':.16,'usability':.32,'prestige':.20}[intent.design_priority]
+        components['furniture_aware_paths']=value;weights={**weights,'furniture_aware_paths':importance}
+        score=round(score+importance*value,6)
     return {'functional_intelligence':intelligent,'reference_patterns':reference,'metrics':metrics,'heuristic_score':score,'objective':intent.design_priority,'output_level':intent.output_level,
         'score_components':components,'weights':weights,'failed_checks':failed,
         'pending_checks':[c['check_id'] for c in model['checks'] if c['status']=='PENDING'],

@@ -12,7 +12,7 @@ def stair_flights(stair):
             dict(x=stair['x']+stair['width']-stair['flight_width_m'],y=y,width=stair['flight_width_m'],depth=depth)]
 
 
-def floor_access(model,floor,step=.20,body_width=.60):
+def floor_access(model,floor,step=.20,body_width=.60,*,start_room_id=None,allowed_room_ids=None):
     from .export import wall_runs
     radius=body_width/2;fp=model['footprint'];ox=fp['x']-.5;oy=fp['y']-.5
     nx=math.ceil((fp['width']+1)/step);ny=math.ceil((fp['depth']+1)/step)
@@ -22,12 +22,15 @@ def floor_access(model,floor,step=.20,body_width=.60):
         y0=max(0,math.ceil((q['y']-expand-oy)/step-.5));y1=min(ny,math.floor((q['y']+q['depth']+expand-oy)/step-.5)+1)
         for j in range(y0,y1):
             for i in range(x0,x1):free[j][i]=value
-    for r in floor['rooms']:raster(r,True)
+    allowed=set(allowed_room_ids) if allowed_room_ids is not None else {r['id'] for r in floor['rooms']}
+    for r in floor['rooms']:
+        if r['id'] in allowed:raster(r,True)
     for r in floor.get('cells',[]):
-        if r['kind']=='corridor':raster(r,True)
+        if r['kind']=='corridor' and r['id'] in allowed:raster(r,True)
     walls={w['id']:w for w in floor['walls']}
     for o in floor['openings']:
         if o['kind'] not in ('door','passage'):continue
+        if any(i not in allowed and i not in ('EXTERIOR','OUTSIDE') for i in o['connects']):continue
         w=walls.get(o['wall_id'])
         if not w:continue
         x,y=o['center']
@@ -56,7 +59,14 @@ def floor_access(model,floor,step=.20,body_width=.60):
         return min(choices)[1:] if choices else None
     rooms={r['id']:r for r in floor['rooms']}
     seeds=[]
-    if floor['id']=='GF':
+    if start_room_id is not None:
+        r=rooms.get(start_room_id)
+        if r and start_room_id in allowed:
+            stair=next((s for s in model.get('stairs',[]) if s.get('room_id')==start_room_id),None)
+            anchor=stair['entry_apron'] if stair else r
+            node=nearest(anchor['x']+anchor['width']/2,anchor['y']+anchor['depth']/2,r)
+            if node:seeds.append(node)
+    elif floor['id']=='GF':
         for o in floor['openings']:
             if o['kind']=='door' and ('EXTERIOR' in o['connects'] or 'OUTSIDE' in o['connects']):
                 r=rooms.get(o['connects'][0])
@@ -82,7 +92,10 @@ def floor_access(model,floor,step=.20,body_width=.60):
             if 0<=n[0]<nx and 0<=n[1]<ny and free[n[1]][n[0]] and n not in parent:parent[n]=(i,j);queue.append(n)
     unreachable=[];routes={}
     for r in floor['rooms']:
-        target=nearest(r['x']+r['width']/2,r['y']+r['depth']/2,r)
+        if r['id'] not in allowed:continue
+        stair=next((s for s in model.get('stairs',[]) if s.get('room_id')==r['id']),None)
+        anchor=stair['entry_apron'] if stair else r
+        target=nearest(anchor['x']+anchor['width']/2,anchor['y']+anchor['depth']/2,r)
         if target is None or target not in parent:
             unreachable.append(r['id']);continue
         chain=[];p=target
