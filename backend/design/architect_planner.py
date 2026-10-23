@@ -161,14 +161,23 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     if generation_v4:
         primary.insert(0,{'family':'cluster','policy':'relationship_aware','core_position':'rear'})
     pool=[];unavailable=[];examined=[];repair_history=[]
+    def preflight_v4(candidate):
+        # Evaluate actual room/furniture paths and attempt safe local repairs
+        # *before* accepting a geometric candidate. A V3-valid first layout
+        # may fail V4 even when the following layout is fit for use.
+        from .auto_repair import ArchitectureAutoRepairEngine
+        from .functional_program import validate as validate_v4
+        return ArchitectureAutoRepairEngine(lambda proposed:validate_v4(proposed,b),max_attempts=8).repair(candidate)
     def explore(options):
-        batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False)
+        batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False,
+            candidate_validator=preflight_v4 if generation_v4 else None)
         unavailable.extend(batch['unavailable']);examined.extend(options)
         for m in batch['candidates']:
             if generation_v4:
-                from .auto_repair import ArchitectureAutoRepairEngine
-                from .functional_program import validate as validate_v4
-                m=ArchitectureAutoRepairEngine(lambda candidate:validate_v4(candidate,b),max_attempts=8).repair(m)
+                # Preflight may have inspected several room arrangements already.
+                # Never skip validation of a legacy-rejected fallback model.
+                if 'auto_repair_v4' not in m:
+                    m=preflight_v4(m)
                 failed=any(row['status']=='FAIL' for row in m['checks'])
                 m['release'].update(status='BLOCKED' if failed else 'DRAFT_REVIEW',drawing_export_allowed=not failed)
             m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))

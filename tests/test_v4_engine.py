@@ -194,3 +194,120 @@ def test_v4_report_pagination_preserves_all_rows_and_readable_type():
     rows=[p for page in pages for p in page.items if p['text'].startswith('check-')]
     assert len(rows)==100 and len({r['text'] for r in rows})==100
     assert all(p['size']>=.23 and 0<p['y']<29.7 for page in pages for p in page.items)
+
+
+def test_v4_preflight_rejects_first_geometric_option_but_accepts_next(monkeypatch,tmp_path):
+    """A baseline-V3 PASS must never short-circuit a later viable V4 candidate."""
+    from backend.design import general_engine as g
+    from types import SimpleNamespace
+    layouts=[{'variant':'first'},{'variant':'next'}]
+    monkeypatch.setattr(g,'search',lambda *a,**kw:{**layouts[0],'alternatives':[layouts[1]]})
+    monkeypatch.setattr(g,'materialize',lambda brief,family,layout:{
+        'model_revision_id':layout['variant'],'search':{},'checks':[],
+        'floors':[],'site_placement':{}})
+    monkeypatch.setattr(g,'validate_general',lambda *args:[
+        {'check_id':'baseline','status':'PASS'}])
+    assessed=[]
+    def v4_preflight(model):
+        assessed.append(model['model_revision_id'])
+        model['checks'].append({'check_id':'V4-measured-clearance',
+            'status':'FAIL' if model['model_revision_id']=='first' else 'PASS'})
+        model['auto_repair_v4']={'accepted_steps':0}
+        return model
+    result=g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+        emit_drawings=False,candidate_validator=v4_preflight,validation_budget=3)
+    assert assessed==['first','next']
+    assert result['candidates'][0]['model_revision_id']=='next'
+    assert result['candidates'][0]['release']['drawing_export_allowed']
+    assert result['candidates'][0]['search']['v4_preflights']==2
+    assert not result['candidates'][0]['search']['v4_search_budget_exhausted']
+    assert json.loads((tmp_path/'next.json').read_text())['checks'][-1]['status']=='PASS'
+
+
+def test_v4_preflight_budget_rejects_unverified_following_candidate(monkeypatch,tmp_path):
+    """A search timeout/budget exhaustion cannot be disguised as a passing drawing."""
+    from backend.design import general_engine as g
+    from types import SimpleNamespace
+    monkeypatch.setattr(g,'search',lambda *a,**kw:{
+        'variant':'first','alternatives':[{'variant':'unchecked'}]})
+    monkeypatch.setattr(g,'materialize',lambda brief,family,layout:{
+        'model_revision_id':layout['variant'],'search':{},'checks':[],
+        'floors':[],'site_placement':{}})
+    monkeypatch.setattr(g,'validate_general',lambda *args:[
+        {'check_id':'baseline','status':'PASS'}])
+    assessed=[]
+    def reject(model):
+        assessed.append(model['model_revision_id'])
+        model['checks'].append({'check_id':'V4-real','status':'FAIL'})
+        return model
+    result=g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+        emit_drawings=False,candidate_validator=reject,validation_budget=1)
+    assert assessed==['first']
+    assert result['candidates'][0]['release']['status']=='BLOCKED'
+    assert not result['candidates'][0]['release']['drawing_export_allowed']
+    assert result['candidates'][0]['search']['v4_search_budget_exhausted']
+    assert not (tmp_path/'first.pdf').exists()
+    with pytest.raises(ValueError,match='validation_budget'):
+        g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+            emit_drawings=False,candidate_validator=reject,validation_budget=0)
+
+
+def test_v3_selection_remains_compatible_without_v4_callback(monkeypatch,tmp_path):
+    from backend.design import general_engine as g
+    from types import SimpleNamespace
+    monkeypatch.setattr(g,'search',lambda *a,**kw:{
+        'variant':'first','alternatives':[{'variant':'second'}]})
+    monkeypatch.setattr(g,'materialize',lambda brief,family,layout:{
+        'model_revision_id':layout['variant'],'search':{},'checks':[],
+        'floors':[],'site_placement':{}})
+    monkeypatch.setattr(g,'validate_general',lambda *args:[
+        {'check_id':'baseline','status':'PASS'}])
+    result=g.generate_general(SimpleNamespace(),tmp_path,candidate_families=('spine',),
+        emit_drawings=False)
+    assert result['candidates'][0]['model_revision_id']=='first'
+    assert result['candidates'][0]['release']['drawing_export_allowed']
+    assert result['candidates'][0]['search']['preflight']['enabled'] is False
+
+
+def test_search_diagnostics_prove_area_shortfall_only_when_math_requires_it():
+    from backend.design.general_engine import search_feasibility_evidence
+    small=VillaBrief(plot_width=8,plot_depth=10,floors=1,
+        country='YE',apply_saudi_rules=False,
+        setbacks=dict(north=1,south=1,east=1,west=1),
+        rooms=[dict(id='m',name='غرفة ضرورية',kind='living',floor=0,min_area=100,min_side=3)])
+    report=search_feasibility_evidence(small)
+    assert report['available_envelope_m2_per_floor_upper_bound']==48
+    assert report['required_net_room_m2_by_floor']=={'0':100.}
+    assert report['classification']=='PROVEN_ENVELOPE_SHORTFALL'
+    assert not report['legal_buildability_certified']
+
+    feasible_bounds=small.model_copy(update={
+        'plot_width':24,'plot_depth':32,
+        'rooms':[small.rooms[0].model_copy(update={'min_area':20})]})
+    report=search_feasibility_evidence(feasible_bounds)
+    assert report['classification']=='SEARCH_EXHAUSTED_NOT_PROVEN_IMPOSSIBLE'
+    assert report['required_net_room_m2_by_floor']=={'0':20.}
+    assert report['available_envelope_m2_per_floor_upper_bound']==660
+    assert not report['legal_buildability_certified']
+
+
+def test_rotating_real_orthogonal_lanes_preserves_area_and_connectivity():
+    from backend.design.adaptive_geometry import clustered_topology,rotate_orthogonal_topology
+    from backend.design.massing_quality import measures
+    halls,lanes=clustered_topology(10,20,1.5,.5,.5)
+    rotated_halls,rotated_lanes=rotate_orthogonal_topology(halls,lanes,10)
+    original=halls+lanes
+    new=rotated_halls+rotated_lanes
+    assert len(original)==len(new)
+    assert sum(r['width']*r['depth'] for r in original)==pytest.approx(
+        sum(r['width']*r['depth'] for r in new))
+    assert measures(new)['components']==1
+    assert min(r['x'] for r in new)>=0
+    assert min(r['y'] for r in new)>=0
+    assert max(r['x']+r['width'] for r in new)==pytest.approx(20)
+    assert max(r['y']+r['depth'] for r in new)==pytest.approx(10)
+    assert all(r['axis']=='x' for r in rotated_lanes)
+    assert set(r['door_side'] for r in rotated_lanes)=={'north','south'}
+    assert all(not (a['x']<b['x']+b['width']-1e-6 and b['x']<a['x']+a['width']-1e-6
+                    and a['y']<b['y']+b['depth']-1e-6 and b['y']<a['y']+a['depth']-1e-6)
+               for a,b in combinations(new,2))

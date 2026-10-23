@@ -213,12 +213,23 @@ def search(brief,family,policy='legacy',core_position='rear'):
         nominal=2*wing+brief.corridor_width+brief.wall_thickness
         scales=sorted({round(min(aw,w)/aw,6) for w in (nominal,nominal+1.5,nominal+3,aw*.7,aw*.85,aw)})
         variations=[(s,d,r,.4) for s in scales for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
-    for ws,ds,ratio,top in variations:
+    # One-floor sites that are much wider than deep need a genuinely different
+    # geometric orientation; merely changing facade position cannot create it.
+    # Two-floor plans are excluded until core/stair direction is independently
+    # validated. Original orientations remain in the pool for regression safety.
+    can_rotate=(brief.floors==1 and not brief.automatic_features.roof_annex
+        and aw>1.45*ad and family in ('spine','cross','adaptive','freeform','cluster'))
+    variations=[(*v,False) for v in variations]+([(*v,True) for v in variations] if can_rotate else [])
+    for ws,ds,ratio,top,rotated in variations:
         W,D=aw*ws,ad*ds
-        shape=topology(family,W,D,max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0),ratio,top)
+        c=max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0)
+        shape=topology(family,D,W,c,ratio,top) if rotated else topology(family,W,D,c,ratio,top)
         attempts+=1
         if not shape:continue
         halls,lanes=copy.deepcopy(shape)
+        if rotated:
+            from .adaptive_geometry import rotate_orthogonal_topology
+            halls,lanes=rotate_orthogonal_topology(halls,lanes,D)
         if min(min(l['width'],l['depth']) for l in lanes)<1.6:continue
         stair=None
         if brief.floors==2 or brief.automatic_features.roof_annex:
@@ -279,7 +290,7 @@ def search(brief,family,policy='legacy',core_position='rear'):
             for cells,floor_halls in zip(floors,halls_by_floor):
                 cost,metrics=penalty([cells],floor_halls);massing_cost+=cost/len(floors);massing.extend(metrics)
             score*=1+massing_cost
-        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing))
+        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated))
         if best is None or score<best['score']:best=pool[-1]
     if best:
         pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
@@ -507,7 +518,7 @@ def materialize(brief,family,result):
     model=dict(schema_version='0.6.2-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
                brief=brief.model_dump(),profile={'project_name':brief.project_name,'massing_strategy':brief.massing_strategy,'massing_revision':'coherent-1' if brief.massing_strategy=='coherent' else 'legacy','massing_fallback':bool(result.get('massing_fallback'))},site={'width':brief.plot_width,'depth':brief.plot_depth},
                footprint=box(origin_x,origin_y,result['W'],result['D']),
-               search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False},
+               search={'family':family,'family_label_ar':FAMILIES[family],'dimensions_tested':result['attempts'],'method':'bounded wing allocation beam search','optimality_proven':False,'topology_rotated':result.get('topology_rotated',False)},
                requirements_resolution=resolve_notes(brief),regulatory_geometry=brief.regulatory_geometry.model_dump() if brief.regulatory_geometry else None,presentation={'style':'linework','furniture_symbols':SYMBOL_VERSION},floors=[],stairs=[])
     W,D=result['W'],result['D'];a=result['halls'][0]['x']+result['halls'][0]['width']
     if family=='L':
@@ -701,7 +712,37 @@ def validate_general(model,brief):
     return checks
 
 
-def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True):
+def search_feasibility_evidence(brief:VillaBrief):
+    """Conservative lower-bound certificate; no unsupported impossibility claims.
+
+    Net requested room area is a strict lower bound on built area. A failure to
+    pack otherwise is only a search failure, not proof that no architect can
+    satisfy this program. Real walls/circulation reduce usable space further.
+    """
+    w=max(0.,brief.plot_width-brief.setbacks.west-brief.setbacks.east)
+    d=max(0.,brief.plot_depth-brief.setbacks.north-brief.setbacks.south)
+    envelope=w*d
+    per_floor={str(f):round(sum(r.min_area*r.count for r in brief.rooms if r.floor==f),3)
+               for f in range(brief.floors)}
+    area_blocked=any(v>envelope+EPS for v in per_floor.values())
+    width_blocked=any(r.min_side>min(w,d)+EPS for r in brief.rooms)
+    classification='PROVEN_ENVELOPE_SHORTFALL' if area_blocked or width_blocked else 'SEARCH_EXHAUSTED_NOT_PROVEN_IMPOSSIBLE'
+    return {'classification':classification,'plot_width_m':brief.plot_width,'plot_depth_m':brief.plot_depth,
+        'available_envelope_m2_per_floor_upper_bound':round(envelope,3),
+        'available_envelope_width_m':round(w,3),'available_envelope_depth_m':round(d,3),
+        'required_net_room_m2_by_floor':per_floor,
+        'does_not_include':'internal walls, stairs, passages, parking or local parcel approvals',
+        'legal_buildability_certified':False}
+
+
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4):
+    """Search physical layouts; an optional V4 validator participates in candidate choice.
+
+    The budget bounds expensive room/furniture path checks. No unchecked alternative
+    may become a released drawing when preflight is enabled.
+    """
+    if candidate_validator is not None and validation_budget<1:
+        raise ValueError('validation_budget must be positive')
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
@@ -717,11 +758,33 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         label=FAMILIES[family]
         result=search(brief,family,policy,core_position)
         if not result:
-            unavailable.append({'family':family,'label':label,'reason':('تعذر إنشاء الإضافات المطلوبة مع كامل برنامج الغرف. ' if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,brief.automatic_features.balcony,brief.automatic_features.service_yard)) else '')+'لم يجد البحث المحدود توزيعًا يحقق عدد ومساحات وأبعاد الفراغات مع الممر والدرج في حدود الارتدادات المدخلة. جرّب تخفيف البرنامج أو زيادة المسطح المتاح.'});continue
-        alternatives=[result]+result.get('alternatives',[]);model=None;failures=[]
+            evidence=search_feasibility_evidence(brief)
+            impossibility=evidence['classification']=='PROVEN_ENVELOPE_SHORTFALL'
+            reason=('الحد الأعلى لمساحة البناء المتاحة داخل الارتدادات أقل من صافي البرنامج المطلوب؛ يثبت تعارضًا حسابيًا لهذه المدخلات، دون حكم على إمكانية تعديل الاشتراطات الرسمية.' if impossibility else
+                    'لم يجد البحث الهندسي المحدود توزيعًا مجتازًا ضمن أنماطه الحالية؛ لا يثبت ذلك استحالة التصميم. يلزم توسيع البحث ومراجعة قيود القطعة دون حذف الغرف أو تخفيف الشروط سرًا.')
+            if any((brief.automatic_features.lightwell,brief.automatic_features.roof_annex,
+                    brief.automatic_features.balcony,brief.automatic_features.service_yard)):
+                reason='تعذر استيعاب مزايا المبنى الاختيارية مع البرنامج الحالي. '+reason
+            unavailable.append({'family':family,'label':label,'reason':reason,'search_evidence':evidence});continue
+        alternatives=[result]+result.get('alternatives',[]);model=None;failures=[];preflights=0
         for attempt,layout in enumerate(alternatives):
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
+            if candidate_validator is not None and not errors:
+                if preflights>=validation_budget:
+                    # The materialized layout is still UNVERIFIED by V4. It may
+                    # not replace an already measured failure or get exported.
+                    trial['checks'].append({'check_id':'V4-preflight-budget','status':'FAIL',
+                        'label':'لم تُفحص هندسة هذا البديل بعد بسبب حد البحث'})
+                else:
+                    preflights+=1
+                    trial=candidate_validator(trial)
+                errors=[c for c in trial['checks'] if c['status']=='FAIL']
+            trial['search']['preflight']={
+                'enabled':candidate_validator is not None,
+                'candidates_validated':preflights,
+                'validation_budget':validation_budget if candidate_validator is not None else None,
+                'reason':'V4 evidence-based geometric validation before option selection' if candidate_validator is not None else 'legacy validation'}
             trial['search']['validated_layouts_tested']=attempt+1
             # Feedback-driven candidate selection: favor fewer critical architectural
             # violations rather than treating every failed check as equally severe.
@@ -746,8 +809,13 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
                 failures=[]
             same_group=(attempt+1<len(alternatives) and layout.get('site_placement',{}).get('active') and alternatives[attempt+1].get('placement_group')==layout.get('placement_group'))
             if not failures and not same_group:break
+            if candidate_validator is not None and preflights>=validation_budget:
+                # No V4-certified candidate found inside the bounded budget.
+                break
             if any(c['check_id'] in ('SA-setbacks-baseline','SA-dwelling-program') for c in errors):model=trial;failures=errors;break
-        model['search'].update(allocation_policy=policy,core_position=core_position,validated_layouts_tested=attempt+1)
+        model['search'].update(allocation_policy=policy,core_position=core_position,validated_layouts_tested=attempt+1,
+            v4_preflights=preflights if candidate_validator is not None else None,
+            v4_search_budget_exhausted=bool(candidate_validator is not None and preflights>=validation_budget and failures))
         model['release']={'status':'BLOCKED' if failures else 'DRAFT_REVIEW','drawing_export_allowed':not failures,'executive_issue_allowed':False}
         rev=model['model_revision_id'];model['downloads']={'json':f'/api/files/{rev}.json'};model['previews']={}
         if not failures and emit_drawings:
