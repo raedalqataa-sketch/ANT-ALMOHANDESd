@@ -62,3 +62,35 @@ npm run test:e2e
   production release.
 - CI verifies compatibility; professional architectural/code review remains
   required for any "executive-ready" claim.
+
+## V4 integration (opt-in only)
+
+The `generation_v4=True` path now invokes:
+
+1. `independent_audit.inspect` in `functional_program.assess`. Shapely
+   checks real room rectangles for positive-area overlaps and for parts outside
+   the measured footprint envelope. Hard geometric faults block export through
+   the ordinary V4 `checks` contract. NetworkX measures the physical
+   door/corridor adjacency graph; unreachable rooms yield a **PENDING**
+   circulation-review item, not invented fire-egress approval.
+2. `engineering_selection.choose_distinct_subset` via
+   `design_selection.select(..., optimization='cp_sat')`. Only candidates
+   already permitted by geometry and other checks enter the CP-SAT portfolio.
+   The solver maximizes the number of materially different designs (up to
+   three), then prefers better-scoring plans; it never fabricates duplicates.
+   The solver reports its status and whether that portfolio selection is
+   optimal. This is **not proof of optimal floor allocation**.
+3. `tests/test_engineering_integration_v4.py` verifies fault injection and
+   CP-SAT's improvement over greedy selection. The existing real V4 integration
+   test verifies GEOS and CP-SAT evidence appears on generated drawings.
+
+**Legacy and V3 remain unchanged.** V4 remains explicitly requested and
+draft-only. Outdoor balcony/yard and future investment parcel approval require
+independent surveying and local-code review. The approved villa-almahfad
+requirements JSON at `requirements/villa-almahfad.json` specifies **20 × 30 m**
+and does not establish street edges, frontage or enforceable setbacks.
+
+The raster parser libraries are dependencies ready for a later *explicitly
+specified, calibrated* intake flow; they do not convert unscaled images into
+surveyed land or prove street ownership. Three.js is installed in the client,
+but no fabricated 3D building model is generated.
