@@ -32,6 +32,7 @@ def replacement_evidence(rejected, rebuilt, *, min_delta_m=.05):
     if set(a)!=set(b):
         raise ValueError("room count and program IDs cannot change in a re-layout")
     if any(a[k].get("kind")!=b[k].get("kind") or
+           a[k].get("request_id")!=b[k].get("request_id") or
            a[k].get("floor_id")!=b[k].get("floor_id") or
            a[k].get("capacity")!=b[k].get("capacity") for k in a):
         raise ValueError("room type, floor and capacity cannot change")
