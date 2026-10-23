@@ -112,6 +112,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                        for r in group)
             if guest and family:cost+=18
         return cost
+    fallback_allocation=None
     for bundle in ordered:
         expanded=[]
         for used,groups in states:
@@ -123,9 +124,13 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 score=sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2 for j,(cap,v) in enumerate(zip(capacities,u)))
                 score+=14*relationship_cost(g)
                 expanded.append((score,u,g))
-        if not expanded:return None
+        if not expanded:
+            from .allocation_repair import reassign_bundles
+            fallback_allocation=reassign_bundles(ordered,lanes,t,length_for)
+            if fallback_allocation is None:return None
+            break
         expanded.sort(key=lambda state:state[0]);states=[(u,g) for _,u,g in expanded[:20]]
-    used,groups=min(states,key=lambda state:(
+    used,groups=fallback_allocation if fallback_allocation is not None else min(states,key=lambda state:(
         sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2
             for j,(cap,v) in enumerate(zip(capacities,state[0])))+
         14*relationship_cost(state[1])))
