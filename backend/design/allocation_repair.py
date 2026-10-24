@@ -3,7 +3,58 @@
 Preserves *every* requested space, requested floor, guest bundle, minimum area
 and side. It modifies candidate *assignment*, not accepted walls or client brief.
 """
-from ortools.sat.python import cp_model
+import math
+import time
+try:
+    from ortools.sat.python import cp_model
+except ImportError:  # OR-Tools has no wheel for the bundled Pyodide runtime.
+    cp_model = None
+
+
+def _bounded_python_assignment(bundles, lanes, lengths, capacities, feasible, budget_s):
+    """Preserve exact capacity constraints when CP-SAT cannot run in a browser."""
+    scale=1000
+    integer_lengths=[[math.ceil(value*scale-1e-7) if math.isfinite(value) else math.inf
+                      for value in row] for row in lengths]
+    remaining=[math.floor(value*scale+1e-7) for value in capacities]
+    order=sorted(range(len(bundles)), key=lambda i:(len(feasible[i]),
+                  -min(integer_lengths[i][j] for j in feasible[i]),i))
+    assignment=[None]*len(bundles)
+    best=None
+    best_cost=math.inf
+    deadline=time.monotonic()+max(0.,budget_s)
+
+    def search(position, cost):
+        nonlocal best,best_cost
+        if time.monotonic()>deadline:
+            return
+        if position==len(order):
+            if cost<best_cost:
+                best_cost=cost
+                best=assignment.copy()
+            return
+        i=order[position]
+        for j in feasible[i]:
+            size=integer_lengths[i][j]
+            if size>remaining[j] or cost+j+1>=best_cost:
+                continue
+            remaining[j]-=size
+            assignment[i]=j
+            search(position+1,cost+j+1)
+            remaining[j]+=size
+            assignment[i]=None
+
+    search(0,0)
+    if best is None:
+        return None
+    groups=[[] for _ in lanes]
+    used=[0.]*len(lanes)
+    for i,j in enumerate(best):
+        groups[j].extend(bundles[i])
+        used[j]+=lengths[i][j]
+    if any(value>capacity+1e-5 for value,capacity in zip(used,capacities)):
+        return None
+    return used,groups
 
 
 def reassign_bundles(bundles, lanes, wall_thickness, length_for, *, budget_s=0.4):
@@ -13,11 +64,12 @@ def reassign_bundles(bundles, lanes, wall_thickness, length_for, *, budget_s=0.4
     scale=1000
     lengths=[[sum(length_for(r,lane,wall_thickness) for r in bundle)
               for lane in lanes] for bundle in bundles]
-    import math
     feasible={i:[j for j,value in enumerate(row)
                  if math.isfinite(value) and value <= capacities[j]+1e-6]
               for i,row in enumerate(lengths)}
     if any(not v for v in feasible.values()):return None
+    if cp_model is None:
+        return _bounded_python_assignment(bundles,lanes,lengths,capacities,feasible,budget_s)
     model=cp_model.CpModel()
     assignments={(i,j):model.new_bool_var(f'b{i}_l{j}')
                  for i in range(len(bundles)) for j in feasible[i]}

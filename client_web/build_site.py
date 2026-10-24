@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime,timezone
 import argparse,hashlib,json,os,shutil,subprocess,sys,tempfile
 from ops.release.manifest import write_release_manifest
+from lovable_integration.browser_dependencies import prepare_browser_dependencies
 ROOT=Path(__file__).resolve().parents[1]
 
 def main():
@@ -10,6 +11,8 @@ def main():
  site=a.site.resolve();hosting=json.loads((site/'.openai/hosting.json').read_text());dist=site/hosting['static']['directory'];runtime=dist/'studio'
  target=dist/'client'
  if target.exists() and not (target/'client-source.json').exists():raise SystemExit('Refusing to replace an unmanaged client directory')
+ client_manifest=ROOT/'client_web/public/villa-engine/manifest.json'
+ prepare_browser_dependencies(runtime/'runtime',runtime/'wheels',runtime/'manifest.json',client_manifest)
  with tempfile.TemporaryDirectory(prefix='ant-client-bundle-') as temporary:
   subprocess.run([sys.executable,'-m','lovable_integration.build','--output',temporary,'--runtime-source',str(runtime)],cwd=ROOT,check=True)
   public=ROOT/'client_web/public/villa-engine/generate';public.parent.mkdir(parents=True,exist_ok=True)
@@ -18,7 +21,9 @@ def main():
   shutil.copyfile(Path(temporary)/'public/villa-engine/studio/engine.zip',public.parent/'engine.zip')
   for path in public.iterdir():
    if path.suffix in ('.js','.css'):
-    path.write_text(path.read_text().replace('../studio/','/studio/').replace('/studio/engine.zip?v=062','../engine.zip?v=architect1'))
+    generated=path.read_text().replace('../studio/','/studio/').replace('/studio/engine.zip?v=062','../engine.zip?v=architect1')
+    if path.name=='worker.js':generated=generated.replace('/studio/manifest.json?v=062','../manifest.json?v=architect4')
+    path.write_text(generated)
   subprocess.run(['npm','run','build'],cwd=ROOT/'client_web',check=True)
   built=ROOT/'client_web/dist'
   source_files=sorted(p for p in (ROOT/'client_web').rglob('*') if p.is_file() and not any(v in p.relative_to(ROOT/'client_web').parts for v in ('node_modules','dist','public','__pycache__')))

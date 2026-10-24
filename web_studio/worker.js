@@ -6,6 +6,7 @@ async function initialize(){
   python=await loadPyodide({indexURL:new URL('./runtime/',self.location.href).href});
   const manifest=await (await fetch('./manifest.json')).json();
   await python.loadPackage(['pydantic','numpy','pillow','fonttools','pyparsing','charset-normalizer','six']);
+  if(manifest.engineering_wasm_packages?.length)await python.loadPackage(manifest.engineering_wasm_packages);
   python.FS.mkdirTree('/project');python.FS.mkdirTree('/wheels');
   for(const file of manifest.pure_wheels)python.FS.writeFile('/wheels/'+file,new Uint8Array(await (await fetch('./wheels/'+file)).arrayBuffer()));
   python.FS.writeFile('/engine.zip',new Uint8Array(await (await fetch('./engine.zip')).arrayBuffer()));
