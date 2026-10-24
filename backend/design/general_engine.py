@@ -267,9 +267,9 @@ def search(brief,family,policy='legacy',core_position='rear'):
         for f in range(brief.floors):
             cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face)
             if cells is None:failed=True;break
-            if family in ('freeform','adaptive') and policy!='legacy':
+            if brief.proposed_room_area_factor is not None or (family in ('freeform','adaptive') and policy!='legacy'):
                 from .adaptive_geometry import moderate_room_expansion
-                cells=moderate_room_expansion(cells,brief.wall_thickness)
+                cells=moderate_room_expansion(cells,brief.wall_thickness,brief.proposed_room_area_factor)
             if brief.automatic_features.roof_annex:
                 # Only retain the strip supporting the annex lounge immediately
                 # before the stair. Unrelated spare lanes remain removable.

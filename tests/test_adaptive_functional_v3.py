@@ -144,3 +144,25 @@ def test_proportional_freeform_rooms_keep_clearances_and_hall_connections():
         assert (cell["width"]-t)*(cell["depth"]-t)>=cell["min_area"]-1e-7
         assert min(cell["width"]-t,cell["depth"]-t)>=cell["min_side"]-1e-7
         assert max(cell["width"]-t,cell["depth"]-t)/min(cell["width"]-t,cell["depth"]-t)<=2.8+1e-7
+
+
+def test_program_sized_room_growth_keeps_hall_contact_and_minimums():
+    from backend.design.adaptive_geometry import moderate_room_expansion
+    t=.2
+    dining={"id":"dining","kind":"dining","request_id":"dining",
+            "x":9.0,"y":0.0,"width":7.0,"depth":5.0,
+            "min_area":16.0,"min_side":3.0,"door_side":"west"}
+    bath={"id":"bath","kind":"bathroom","request_id":"bath",
+          "x":0.0,"y":0.0,"width":7.0,"depth":4.0,
+          "min_area":5.0,"min_side":1.6,"door_side":"east"}
+    original=[dining,bath]
+    resized=moderate_room_expansion(original,t,area_factor=1.2)
+    assert dining["width"]==bath["width"]==7.0
+    assert resized[0]["x"]==9.0
+    assert abs(resized[1]["x"]+resized[1]["width"]-7.0)<1e-7
+    assert abs((resized[0]["width"]-t)*(resized[0]["depth"]-t)-19.2)<1e-7
+    for room in resized:
+        net_w,net_d=room["width"]-t,room["depth"]-t
+        assert net_w*net_d>=room["min_area"]-1e-7
+        assert min(net_w,net_d)>=room["min_side"]-1e-7
+        assert max(net_w,net_d)/min(net_w,net_d)<=2.8+1e-7

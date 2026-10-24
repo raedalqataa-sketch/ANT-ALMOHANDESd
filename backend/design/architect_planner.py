@@ -143,7 +143,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True)
     b,planning=propose(intent)
-    if generation_v4:b=b.model_copy(update={'compact_core':True})
+    if generation_v4:b=b.model_copy(update={'compact_core':True,'proposed_room_area_factor':1.2})
     if generation_v3:
         primary=[{'family':f,'policy':p,'core_position':c} for f,p,c in (
             ('freeform','relationship_aware','rear'),
@@ -316,8 +316,12 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
         'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),
         'max_sleeping_aspect_ratio_design_limit':MAX_SLEEPING_ASPECT_RATIO,
+        'proposed_room_area_factor':b.proposed_room_area_factor,
+        'room_area_factor_basis':'design target relative to the tier-scaled proposed minimum; room dimensions, furniture and full geometric checks take precedence; not a legal maximum',
         'library_limited':True,'diversity_rule':'normalized room displacement >= 0.065 plus changed functional order/quadrant',
         'executive_approval':False,'diagnostics':diagnostics}
+    if b.proposed_room_area_factor is not None:
+        planning['reasoning'].append('تُقلّص الأجنحة نحو الخارج لاستهداف مساحة الغرفة المقترحة دون تجاوز عامل 1.2 من الحد التصميمي الأدنى حيث تسمح الأبعاد والأثاث؛ هذا هدف تصميمي لا اشتراط نظامي.')
     planning['reasoning'].append('البحث يغير عنقود الغرف وترتيب الاستقبال والأسرة وموضع الدرج، ويقارن مسارات الأبواب والمسطحات والكتلة. لا يفرض ثلاثة أشكال خارجية.')
     planning['reasoning'].append('الدرجات وعتبات التنوع مؤشرات تصميمية معلنة، وليست تكلفة محسوبة أو اعتمادًا قانونيًا أو ضمانًا للحل الأمثل.')
     if len(chosen)<3:
