@@ -29,6 +29,28 @@ ESSENTIAL_CLIENT_FILES = frozenset({
     "client/villa-engine/engine.zip", "client/client-source.json",
     "client/index.html", "client/villa-engine/generate/automatic-runtime.js",
 })
+_CF_JSD_START = b"<script>(function(){function c(){"
+_CF_JSD_MARKER = b"/cdn-cgi/challenge-platform/scripts/jsd/main.js"
+
+
+def _source_html_after_cloudflare_jsd(payload):
+    """Recover source HTML only from Cloudflare's known trailing bot-check script.
+
+    A recovered page is trusted only if its full SHA-256 matches the release
+    manifest; this helper never blesses arbitrary page changes or other HTML.
+    """
+    if payload.count(_CF_JSD_START) != 1:
+        return None
+    start = payload.find(_CF_JSD_START)
+    end = payload.find(b"</script>", start)
+    if end < 0 or end - start > 8192:
+        return None
+    script = payload[start:end + len(b"</script>")]
+    if b"window.__CF$cv$params=" not in script or _CF_JSD_MARKER not in script:
+        return None
+    if not payload[end + len(b"</script>"):].lstrip().startswith(b"</body>"):
+        return None
+    return payload[:start] + payload[end + len(b"</script>"):]
 
 
 def _download(url, timeout, size_limit):
@@ -94,6 +116,7 @@ def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
                 files = release.get("files", {})
                 safe_files = isinstance(files, dict) and ESSENTIAL_CLIENT_FILES <= files.keys()
                 checked_files = []
+                transported_html = []
                 if safe_files:
                     for name, wanted_hash in sorted(files.items()):
                         parts = name.split("/")
@@ -109,10 +132,18 @@ def verify(base_url=DEFAULT_URL, *, expected_commit=None, timeout=20,
                         else:
                             actual = fetch(root + "/" + name, timeout, 10 * 1024 * 1024)
                         matches = hashlib.sha256(actual).hexdigest() == wanted_hash
-                        checked_files.append({"file": name, "status": "MATCH" if matches else "DIFFERENT"})
+                        status = "MATCH" if matches else "DIFFERENT"
+                        if not matches and name.endswith("/index.html"):
+                            recovered = _source_html_after_cloudflare_jsd(actual)
+                            if recovered is not None and hashlib.sha256(recovered).hexdigest() == wanted_hash:
+                                matches = True
+                                status = "MATCH_AFTER_CLOUDFLARE_REMOVAL"
+                                transported_html.append(name)
+                        checked_files.append({"file": name, "status": status})
                         if not matches:
                             safe_files = False
                 result["release_files_checked"] = checked_files
+                result["transport_html_injection_detected"] = transported_html
                 release_matches = (
                     bool(expected_commit)
                     and release.get("git_commit") == expected_commit
