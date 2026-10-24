@@ -71,6 +71,47 @@ def test_strict_release_matches_commit_and_downloaded_bundle_hashes():
     assert proof["release_manifest_matches"]
 
 
+def test_strict_release_recognizes_only_verified_cloudflare_html_injection():
+    from ops.release.verify_live import REPO
+    payload, info = make_bundle(REPO, all_engine=True, repository_commit="new-commit")
+    source_html = b"<!doctype html><html><body><main>Client</main></body></html>"
+    cloudflare_script = (b"<script>(function(){function c(){window.__CF$cv$params={};"
+                         b"var a='/cdn-cgi/challenge-platform/scripts/jsd/main.js';}"
+                         b"})();</script>")
+    injected_html = source_html.replace(b"</body>", cloudflare_script + b"</body>")
+    files = {
+        "client/villa-engine/engine.zip": payload,
+        "client/client-source.json": info,
+        "client/index.html": source_html,
+        "client/villa-engine/generate/automatic-runtime.js": b"runtime",
+    }
+    manifest = json.dumps({
+        "git_commit": "new-commit", "bundle_sha256": hashlib.sha256(payload).hexdigest(),
+        "files": {name: hashlib.sha256(value).hexdigest() for name, value in files.items()},
+    }).encode()
+
+    def fake_get(url, timeout, limit):
+        if url.endswith("release-manifest.json"):
+            return manifest
+        if url.endswith("client/index.html"):
+            return injected_html
+        return next(value for name, value in files.items() if url.endswith(name))
+
+    proof = verify("https://example.invalid", expected_commit="new-commit",
+                   strict_release=True, fetch=fake_get)
+    assert proof["status"] == "MATCH"
+    assert proof["transport_html_injection_detected"] == ["client/index.html"]
+    assert next(item for item in proof["release_files_checked"]
+                if item["file"] == "client/index.html")["status"] == "MATCH_AFTER_CLOUDFLARE_REMOVAL"
+
+    modified = injected_html.replace(b"Client", b"Tampered")
+    def tampered_get(url, timeout, limit):
+        return modified if url.endswith("client/index.html") else fake_get(url, timeout, limit)
+    rejected = verify("https://example.invalid", expected_commit="new-commit",
+                      strict_release=True, fetch=tampered_get)
+    assert rejected["status"] == "MISMATCH"
+
+
 def test_strict_release_rejects_tampered_client_script():
     from ops.release.verify_live import REPO
     payload, info = make_bundle(REPO, all_engine=True, repository_commit="new-commit")
