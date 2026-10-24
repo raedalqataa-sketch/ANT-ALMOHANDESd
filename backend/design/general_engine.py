@@ -299,10 +299,18 @@ def search(brief,family,policy='legacy',core_position='rear'):
             for cells,floor_halls in zip(floors,halls_by_floor):
                 cost,metrics=penalty([cells],floor_halls);massing_cost+=cost/len(floors);massing.extend(metrics)
             score*=1+massing_cost
-        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated))
+        sleeping_aspect=max((max(r['width']-brief.wall_thickness,r['depth']-brief.wall_thickness)/
+                             min(r['width']-brief.wall_thickness,r['depth']-brief.wall_thickness)
+                             for cells in floors for r in cells
+                             if r.get('request_id') and r['kind'] in ('master','bedroom')),default=1.)
+        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated,sleeping_aspect_ratio=sleeping_aspect))
         if best is None or score<best['score']:best=pool[-1]
     if best:
-        pool.sort(key=lambda r:r['score']);best=pool[0];best['attempts']=attempts
+        if brief.proposed_room_area_factor is not None:
+            from .design_selection import MAX_SLEEPING_ASPECT_RATIO
+            pool.sort(key=lambda r:(r['sleeping_aspect_ratio']>MAX_SLEEPING_ASPECT_RATIO,r['score']))
+        else:pool.sort(key=lambda r:r['score'])
+        best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
         if brief.massing_strategy=='coherent':
             fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position)

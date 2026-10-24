@@ -4,7 +4,7 @@ import pytest
 from backend.design.architect_planner import ClientIntent,propose,generate_automatic
 from backend.design.design_selection import difference,evaluate,select
 from backend.design.general_models import VillaBrief
-from backend.design.general_engine import validate_general,export_general_model
+from backend.design.general_engine import validate_general,export_general_model,search
 
 def intent(**kw):return ClientIntent(**{'width':24,'depth':32,'city':'الرياض','family':6,'street_edges':['bottom'],**kw})
 
@@ -84,10 +84,11 @@ def test_v4_does_not_select_elongated_sleeping_rooms_when_balanced_options_exist
             for m in result['candidates'])
  assert all(m['design_evaluation']['metrics']['program_excess_ratio']<=.30
             for m in result['candidates'])
+ assert min(m['design_evaluation']['metrics']['circulation_ratio']
+            for m in result['candidates'])<.20
  assert result['planning']['design_selection']['proposed_room_area_factor']==1.2
  rejected=[row for row in result['planning']['design_selection']['diagnostics']
            if row['reason'].startswith('استبعد بسبب استطالة')]
- assert rejected
  assert all(row['geometry_valid'] and not row['accepted'] for row in rejected)
 
 
@@ -102,3 +103,14 @@ def test_yemen_v4_uses_program_sized_rooms_without_silent_saudi_rules(tmp_path):
  assert all(m['release']['drawing_export_allowed'] and
             not any(c['status']=='FAIL' for c in m['checks'])
             for m in result['candidates'])
+
+
+def test_program_sized_search_prefers_a_sleeping_wing_with_balanced_proportions():
+ brief,_=propose(intent())
+ brief=brief.model_copy(update={'compact_core':True,'proposed_room_area_factor':1.2})
+ layout=search(brief,'spine','relationship_aware','rear')
+ assert layout is not None
+ sleeping=[max(room['width'],room['depth'])/min(room['width'],room['depth'])
+           for floor in layout['floors'] for room in floor
+           if room.get('request_id') and room['kind'] in ('master','bedroom')]
+ assert sleeping and max(sleeping)<=2.0
