@@ -125,6 +125,7 @@ class VillaBrief(Strict):
     wall_thickness: float = Field(default=.2, ge=.15, le=.4)
     corridor_width: float = Field(default=1.5, ge=1.2, le=2.4)
     compact_core: bool = False  # opt-in V4: reserve a program-sized stair, not the full room wing
+    proposed_room_area_factor: float | None = Field(default=None, ge=1, le=2.5)
     floor_height: float = Field(default=3.2, ge=2.8, le=3.8)
     rooms: list[SpaceRequest] = Field(min_length=1, max_length=30)
     country: Literal['SA','YE'] = 'SA'

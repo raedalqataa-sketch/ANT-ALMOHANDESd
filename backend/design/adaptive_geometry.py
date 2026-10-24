@@ -89,7 +89,7 @@ EXPANSION_MULTIPLIERS={
 }
 
 
-def moderate_room_expansion(cells, wall_thickness):
+def moderate_room_expansion(cells, wall_thickness, area_factor=None):
     """Trim oversized occupied wings *toward* the central corridor.
 
     Only regular room cells with actual program requirements are reduced.
@@ -101,7 +101,7 @@ def moderate_room_expansion(cells, wall_thickness):
     for original in cells:
         cell=dict(original)
         kind=cell.get("kind")
-        ratio=EXPANSION_MULTIPLIERS.get(kind)
+        ratio=area_factor if area_factor is not None else EXPANSION_MULTIPLIERS.get(kind)
         if ratio is None or not cell.get("request_id") or cell.get("door_side") not in ("east","west"):
             result.append(cell)
             continue
