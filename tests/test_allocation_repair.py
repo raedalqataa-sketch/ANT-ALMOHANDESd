@@ -1,5 +1,6 @@
 from backend.design.allocation_repair import reassign_bundles
 from backend.design.general_engine import allocate, length_for
+import backend.design.allocation_repair as repair_module
 
 
 def make_room(code, area=10):
@@ -42,3 +43,13 @@ def test_solver_does_not_split_guest_distributor_bundle():
     assert state is not None
     _,groups=state
     assert any({r['id'] for r in group}>={'M','W','H'} for group in groups)
+
+
+def test_browser_without_ortools_preserves_all_room_bundles(monkeypatch):
+    lanes=[dict(x=0.,y=0.,width=3.2,depth=8.,axis='y',door_side='east'),
+           dict(x=5.,y=0.,width=3.2,depth=8.,axis='y',door_side='west')]
+    bundles=[[make_room('a',12)],[make_room('b',12)],[make_room('c',8)]]
+    monkeypatch.setattr(repair_module,'cp_model',None)
+    used,groups=repair_module.reassign_bundles(bundles,lanes,.2,length_for)
+    assert sorted(r['id'] for group in groups for r in group)==['a','b','c']
+    assert all(value<=8 for value in used)

@@ -5,6 +5,7 @@ import pytest
 
 from backend.design.independent_audit import inspect
 from backend.design.engineering_selection import choose_distinct_subset
+import backend.design.engineering_selection as selection_module
 from backend.design.functional_program import checks
 
 
@@ -78,6 +79,14 @@ def test_cpsat_finds_three_instead_of_greedy_single_solution():
     assert indices == [1, 2, 3]
     assert details["optimality_proven"]
     assert details["selected_count"] == 3
+
+
+def test_browser_without_ortools_still_finds_maximum_distinct_portfolio(monkeypatch):
+    monkeypatch.setattr(selection_module,"cp_model",None)
+    indices,details=choose_distinct_subset(4,[(0,1),(0,2),(0,3)])
+    assert indices==[1,2,3]
+    assert details["optimality_proven"]
+    assert details["selected_count"]==3
 
 
 def test_cpsat_never_selects_conflicting_or_invalid_index_pairs():

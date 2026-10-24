@@ -3,7 +3,33 @@
 This solves the *portfolio selection* problem after geometry and program
 validation. It does not prove optimal room allocation or code compliance.
 """
-from ortools.sat.python import cp_model
+from itertools import combinations
+try:
+    from ortools.sat.python import cp_model
+except ImportError:  # Pyodide has no OR-Tools wheel; enumerate at most 64 choose 3.
+    cp_model = None
+
+
+def _exact_python_subset(candidate_count, incompatible_pairs, limit):
+    conflicts=set(incompatible_pairs)
+    for size in range(min(limit,candidate_count),0,-1):
+        best=None
+        for combo in combinations(range(candidate_count),size):
+            if any((left,right) in conflicts for left,right in combinations(combo,2)):
+                continue
+            rank=(sum(combo),combo)
+            if best is None or rank<best[0]:
+                best=(rank,combo)
+        if best is not None:
+            indices=list(best[1])
+            return indices,{
+                "status":"OPTIMAL","optimality_proven":True,
+                "eligible_count":candidate_count,"selected_count":len(indices),
+                "method":"exact bounded enumeration of up to three distinct plans",
+                "allocation_optimality_proven":False,
+            }
+    return [],{"status":"OPTIMAL","optimality_proven":True,
+               "eligible_count":candidate_count,"selected_count":0}
 
 
 def choose_distinct_subset(candidate_count, incompatible_pairs, *, limit=3):
@@ -19,6 +45,10 @@ def choose_distinct_subset(candidate_count, incompatible_pairs, *, limit=3):
                     "eligible_count": candidate_count, "selected_count": 0}
     if candidate_count > 64:
         raise ValueError("CP-SAT portfolio is limited to 64 validated candidates")
+    if any(not (0<=left<right<candidate_count) for left,right in incompatible_pairs):
+        raise ValueError("incompatible pair must be unique ordered valid indices")
+    if cp_model is None:
+        return _exact_python_subset(candidate_count,incompatible_pairs,limit)
     model = cp_model.CpModel()
     picked = [model.new_bool_var(f"plan_{index}") for index in range(candidate_count)]
     model.add(sum(picked) <= limit)
