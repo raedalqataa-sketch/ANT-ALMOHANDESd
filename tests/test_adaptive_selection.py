@@ -75,3 +75,14 @@ def test_failed_candidate_never_fills_third_slot_or_exports(real_results,tmp_pat
  assert select([m])==[]
  with pytest.raises(ValueError):export_general_model(m,VillaBrief(**m['brief']),tmp_path)
  assert not list(tmp_path.glob('*.pdf')) and not list(tmp_path.glob('*.dxf'))
+
+
+def test_v4_does_not_select_elongated_sleeping_rooms_when_balanced_options_exist(tmp_path):
+ result=generate_automatic(intent(),tmp_path,constitution_v2=True,generation_v4=True)
+ assert len(result['candidates'])==3
+ assert all(m['design_evaluation']['metrics']['max_sleeping_aspect_ratio']<=2.0
+            for m in result['candidates'])
+ rejected=[row for row in result['planning']['design_selection']['diagnostics']
+           if row['reason'].startswith('استبعد بسبب استطالة')]
+ assert rejected
+ assert all(row['geometry_valid'] and not row['accepted'] for row in rejected)

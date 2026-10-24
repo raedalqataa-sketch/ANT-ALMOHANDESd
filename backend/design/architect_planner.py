@@ -139,7 +139,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     generation_v3=generation_v3 or generation_v4
     constitution_v2=constitution_v2 or generation_v4
     from .general_engine import generate_general,export_general_model
-    from .design_selection import evaluate,select
+    from .design_selection import evaluate,select,MAX_SLEEPING_ASPECT_RATIO
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
     out.mkdir(parents=True,exist_ok=True)
     b,planning=propose(intent)
@@ -278,7 +278,10 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     diagnostics=[{'candidate_id':m['candidate_id'],'revision_id':m['model_revision_id'],
         'accepted':m in chosen,'geometry_valid':m['release']['drawing_export_allowed'],
         'score':m['design_evaluation']['heuristic_score'],'failed_checks':m['design_evaluation']['failed_checks'],
-        'reason':('اختير بعد تقييم الأولوية والتنوع' if m in chosen else 'فشل هندسي؛ الرسم محجوب' if not m['release']['drawing_export_allowed'] else 'لم يفضل في الترتيب أو لم يحقق اختلافًا كافيًا')}
+        'reason':('اختير بعد تقييم الأولوية والتنوع' if m in chosen else 'فشل هندسي؛ الرسم محجوب' if not m['release']['drawing_export_allowed']
+                  else f'استبعد بسبب استطالة غرفة نوم تتجاوز نسبة {MAX_SLEEPING_ASPECT_RATIO:.1f} إلى 1؛ حد جودة تصميمي وليس اشتراطًا نظاميًا'
+                  if m['design_evaluation']['metrics']['max_sleeping_aspect_ratio']>MAX_SLEEPING_ASPECT_RATIO
+                  else 'لم يفضل في الترتيب أو لم يحقق اختلافًا كافيًا')}
         for m in pool]
     from .reference_patterns import REVISION,PROJECTS,UNIQUE_IMAGES
     planning['reference_design']={'revision':REVISION,'project_count':len(PROJECTS),'unique_images':UNIQUE_IMAGES,'legal_rules_extracted':0,'status':'visual design preferences; not surveyed or code-certified','unsupported_reference_features':['basements','general double-height slabs','arbitrary four-level programs','chamfered plots']}
@@ -312,6 +315,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     planning['design_selection']={'strategy':'objective_ranked_geometry_v3_functional' if generation_v3 else 'objective_ranked_geometry_v2','user_level':intent.output_level,'user_priority':intent.design_priority,
         'families_examined':len(set(o['family'] for o in examined)),'search_variants_examined':len(examined),
         'search_expanded':expanded,'alternatives_returned':len(chosen),'validated_count':len(chosen),
+        'max_sleeping_aspect_ratio_design_limit':MAX_SLEEPING_ASPECT_RATIO,
         'library_limited':True,'diversity_rule':'normalized room displacement >= 0.065 plus changed functional order/quadrant',
         'executive_approval':False,'diagnostics':diagnostics}
     planning['reasoning'].append('البحث يغير عنقود الغرف وترتيب الاستقبال والأسرة وموضع الدرج، ويقارن مسارات الأبواب والمسطحات والكتلة. لا يفرض ثلاثة أشكال خارجية.')

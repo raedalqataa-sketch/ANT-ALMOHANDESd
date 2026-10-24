@@ -10,9 +10,10 @@ WEIGHTS={
  'usability':{'area':.10,'circulation':.25,'compactness':.10,'routes':.50,'social':.05},
  'prestige':{'area':.10,'circulation':.15,'compactness':.30,'routes':.15,'social':.30},
 }
+MAX_SLEEPING_ASPECT_RATIO = 2.0  # Design quality threshold, not a building-code rule.
 
 def measure(model):
-    rows={};route_lengths=[];social=0;ratios=[];functional=[]
+    rows={};route_lengths=[];social=0;ratios=[];sleeping_ratios=[];functional=[]
     for f in model['floors']:
         cells=f['cells'];x=min(r['x'] for r in cells);y=min(r['y'] for r in cells)
         w=max(r['x']+r['width'] for r in cells)-x;d=max(r['y']+r['depth'] for r in cells)-y
@@ -21,6 +22,8 @@ def measure(model):
             key=f['id']+':'+r['id'].removeprefix(f['id']+'-')
             rows[key]=((r['x']+r['width']/2-x)/w,(r['y']+r['depth']/2-y)/d,r['width']/w,r['depth']/d)
             ratios.append(max(r['width'],r['depth'])/min(r['width'],r['depth']))
+            if r['kind'] in ('master','bedroom'):
+                sleeping_ratios.append(ratios[-1])
             if r['kind'] in ('majlis','living','dining'):social+=r['width']*r['depth']
         # Door-graph distances use physical corridor cells and opening locations.
         by_id={r['id']:r for r in f['rooms']};graph={rid:{} for rid in by_id}
@@ -64,7 +67,9 @@ def measure(model):
       'envelope_fill':round(sum(q['envelope_fill'] for q in qs)/len(qs),5) if qs else .5,
       'mean_functional_route_m':round(sum(route_lengths)/len(route_lengths),3) if route_lengths else 0,
       'social_area_m2':round(social,3),'social_ratio':round(social/public_built,5),
-      'max_room_aspect_ratio':round(max(ratios,default=1),4),'functional_routes':functional,'normalized_rooms':rows}
+      'max_room_aspect_ratio':round(max(ratios,default=1),4),
+      'max_sleeping_aspect_ratio':round(max(sleeping_ratios,default=1),4),
+      'functional_routes':functional,'normalized_rooms':rows}
 
 def objective_score(metrics,priority):
     components={'area':metrics['total_built_m2']/250,'circulation':metrics['circulation_ratio']/.20,
@@ -134,7 +139,9 @@ def evaluate(model,intent):
         'method':'actual net rooms, gross mass and weighted hosted-door graph routes; disclosed design heuristics'}
 
 def select(models,limit=3,*,optimization='greedy'):
-    valid=sorted((m for m in models if m['release']['drawing_export_allowed']),
+    valid=sorted((m for m in models if m['release']['drawing_export_allowed']
+                  and m['design_evaluation']['metrics'].get('max_sleeping_aspect_ratio',1)
+                      <= MAX_SLEEPING_ASPECT_RATIO),
                  key=lambda m:(m['design_evaluation']['heuristic_score'],m['candidate_id']))
     if optimization not in ('greedy','cp_sat'):
         raise ValueError('Unknown architecture portfolio selection strategy')
