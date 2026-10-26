@@ -1,5 +1,9 @@
 # أنت المهندس — التكامل المعماري V2 التجريبي
 
+## تكامل Gemini API (اختياري)
+
+دليل إعداد المزوّد على الخادم: [GEMINI_SETUP_AR.md](GEMINI_SETUP_AR.md). الإعداد الافتراضي يحافظ على Ollama؛ اختر `AI_PROVIDER=gemini` واضبط `GEMINI_API_KEY` في أسرار الاستضافة فقط. لا يستبدل Gemini محرك الهندسة أو قواعد البناء ولا يعتمد المخططات.
+
 الدستور المعماري الموحَّد موجود في [ملف JSON الكامل](constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json) (143 قاعدة مستخلصة، 12 قيدًا مراجعًا من Manus، 28 علاقة وظيفية، و16 بوابة فحص).
 
 - يمكن الاطلاع على البوابات من `GET /api/v3/constitution-v2`.
