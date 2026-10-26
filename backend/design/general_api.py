@@ -31,10 +31,44 @@ def _provider() -> str:
 
 
 def _schema() -> dict:
+    # Keep the existing Ollama schema unchanged.
     return {
         'type': 'object',
         'properties': {
             'rooms': {'type': 'array', 'items': SpaceRequest.model_json_schema()},
+            'unresolved': {'type': 'array', 'items': {'type': 'string'}},
+        },
+        'required': ['rooms', 'unresolved'],
+        'additionalProperties': False,
+    }
+
+
+def _gemini_schema() -> dict:
+    # Use the documented JSON Schema subset; Pydantic performs full validation afterwards.
+    return {
+        'type': 'object',
+        'properties': {
+            'rooms': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'name': {'type': 'string'},
+                        'kind': {'type': 'string', 'enum': [
+                            'bedroom', 'master', 'majlis', 'living', 'dining',
+                            'kitchen', 'bathroom', 'office', 'storage', 'laundry'
+                        ]},
+                        'floor': {'type': 'integer', 'minimum': 0, 'maximum': 1},
+                        'count': {'type': 'integer', 'minimum': 1, 'maximum': 12},
+                        'min_area': {'type': 'number', 'minimum': 3, 'maximum': 100},
+                        'min_side': {'type': 'number', 'minimum': 1.4, 'maximum': 10},
+                        'capacity': {'type': 'integer', 'minimum': 0, 'maximum': 2},
+                    },
+                    'required': ['id', 'name', 'kind', 'floor', 'min_area', 'min_side'],
+                    'additionalProperties': False,
+                },
+            },
             'unresolved': {'type': 'array', 'items': {'type': 'string'}},
         },
         'required': ['rooms', 'unresolved'],
