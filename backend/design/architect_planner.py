@@ -161,6 +161,10 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
     if generation_v4:
         primary.insert(0,{'family':'cluster','policy':'relationship_aware','core_position':'rear'})
         primary.insert(1,{'family':'meander','policy':'relationship_aware','core_position':'rear'})
+        primary.append({'family':'adaptive','policy':'social_front','core_position':'front',
+                        'guest_strategy':'side_spine'})
+        primary.append({'family':'adaptive','policy':'social_front','core_position':'front',
+                        'guest_strategy':'compact_side'})
     pool=[];unavailable=[];examined=[];repair_history=[]
     def preflight_v4(candidate):
         # Evaluate actual room/furniture paths and attempt safe local repairs
@@ -182,6 +186,8 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                 failed=any(row['status']=='FAIL' for row in m['checks'])
                 m['release'].update(status='BLOCKED' if failed else 'DRAFT_REVIEW',drawing_export_allowed=not failed)
             m['candidate_id']='-'.join((m['search']['family'],m['search']['allocation_policy'],m['search']['core_position']))
+            if m['search'].get('guest_strategy')=='side_spine':m['candidate_id']+='-side-spine'
+            if m['search'].get('guest_strategy')=='compact_side':m['candidate_id']+='-compact-side'
             if generation_v3:
                 from .functional_intelligence import repair_reasons
                 m['generation_mode']='V3_ADAPTIVE'

@@ -12,6 +12,27 @@ on:
       - 'ops/release/**'
       - '.github/workflows/live-engine-proof.yml'
   workflow_dispatch:
+    inputs:
+      gemini_live:
+        description: 'Run the isolated Gemini experiment on feature/ai-auto-keys-002 only'
+        required: false
+        type: boolean
+        default: false
+      connection_only:
+        description: 'Only verify secret and models API; never run inference'
+        required: false
+        type: boolean
+        default: true
+      model:
+        description: 'Optional Gemini model identifier'
+        required: false
+        type: string
+        default: ''
+      free_tier_confirmed:
+        description: 'Owner confirms unbilled project and selected model free-tier eligibility'
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -52,3 +73,14 @@ jobs:
           path: live-engine-proof.json
           if-no-files-found: warn
           retention-days: 30
+
+  gemini-experiment:
+    name: Gemini Architectural Live Test
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref_name == 'feature/ai-auto-keys-002' && inputs.gemini_live }}
+    uses: ./.github/workflows/gemini-live-proof.yml
+    with:
+      connection_only: ${{ inputs.connection_only }}
+      model: ${{ inputs.model }}
+      free_tier_confirmed: ${{ inputs.free_tier_confirmed }}
+    secrets:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

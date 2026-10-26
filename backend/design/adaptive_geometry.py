@@ -102,7 +102,7 @@ def moderate_room_expansion(cells, wall_thickness, area_factor=None):
         cell=dict(original)
         kind=cell.get("kind")
         ratio=area_factor if area_factor is not None else EXPANSION_MULTIPLIERS.get(kind)
-        if ratio is None or not cell.get("request_id") or cell.get("door_side") not in ("east","west"):
+        if cell.get('guest_composition') or ratio is None or not cell.get("request_id") or cell.get("door_side") not in ("east","west"):
             result.append(cell)
             continue
         t=wall_thickness

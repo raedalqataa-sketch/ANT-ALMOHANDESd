@@ -78,8 +78,16 @@ def length_for(room,lane,t):
     return length+t
 
 
-def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south'):
+def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south',guest_strategy='linear',guest_area_factor=None):
     """Bounded beam search, rejecting area/width violations before placement."""
+    if guest_strategy=='compact_side':
+        from .guest_composition import allocate_compact_side
+        composed=allocate_compact_side(requests,lanes,t,guest_clear_width,coherent,policy,entry_face,guest_area_factor)
+        if composed is not None:return composed
+    if guest_strategy=='side_spine':
+        from .guest_composition import allocate_side_spine
+        composed=allocate_side_spine(requests,lanes,t,guest_clear_width,coherent,policy,entry_face,guest_area_factor)
+        if composed is not None:return composed
     capacities=[r['depth' if r['axis']=='y' else 'width'] for r in lanes]
     states=[([0.]*len(lanes),[[] for _ in lanes])]
     bundles={}
@@ -192,7 +200,7 @@ def expanded_program(brief,floor):
     return rows
 
 
-def search(brief,family,policy='legacy',core_position='rear'):
+def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear'):
     # Reserve clearance outside the mass for a balcony on a non-street facade.
     margin={face:(brief.automatic_features.balcony_depth_m+.15 if brief.automatic_features.balcony and brief.boundary_widths.get(face,0)<10 else 0) for face in ('north','south','east','west')}
     aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness-margin['west']-margin['east']
@@ -265,8 +273,9 @@ def search(brief,family,policy='legacy',core_position='rear'):
         lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
-            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face)
+            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face,guest_strategy if f==0 else 'linear',brief.proposed_room_area_factor)
             if cells is None:failed=True;break
+            if f==0 and guest_strategy!='linear' and not any(r.get('guest_composition')==guest_strategy for r in cells):failed=True;break
             if brief.proposed_room_area_factor is not None or (family in ('freeform','adaptive') and policy!='legacy'):
                 from .adaptive_geometry import moderate_room_expansion
                 cells=moderate_room_expansion(cells,brief.wall_thickness,brief.proposed_room_area_factor)
@@ -773,7 +782,11 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         if family not in FAMILIES or policy not in ('legacy','social_front','family_front','service_aligned','relationship_aware') or core_position not in ('rear','front'):
             raise ValueError('سياسة البحث غير مدعومة')
         label=FAMILIES[family]
-        result=search(brief,family,policy,core_position)
+        guest_strategy=option.get('guest_strategy','linear')
+        if guest_strategy not in ('linear','side_spine','compact_side'):raise ValueError('unsupported guest composition')
+        result=search(brief,family,policy,core_position,guest_strategy)
+        if not result and guest_strategy=='compact_side':result=search(brief,family,policy,core_position,'side_spine')
+        if not result and guest_strategy!='linear':result=search(brief,family,policy,core_position)
         if not result:
             evidence=search_feasibility_evidence(brief)
             impossibility=evidence['classification']=='PROVEN_ENVELOPE_SHORTFALL'
@@ -784,12 +797,50 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
                 reason='تعذر استيعاب مزايا المبنى الاختيارية مع البرنامج الحالي. '+reason
             unavailable.append({'family':family,'label':label,'reason':reason,'search_evidence':evidence});continue
         alternatives=[result]+result.get('alternatives',[]);model=None;failures=[];preflights=0
+        reference_movement=None
+        if guest_strategy!='linear':
+            if guest_strategy=='compact_side':
+                side_fallback=search(brief,family,policy,core_position,'side_spine')
+                if side_fallback:alternatives.extend({**r,'guest_strategy_fallback':True} for r in [side_fallback]+side_fallback.get('alternatives',[]))
+            fallback=search(brief,family,policy,core_position)
+            if fallback:
+                # Keep an original layout within the bounded preflight budget,
+                # even when new guest compositions repeatedly fail validation.
+                alternatives.extend({**r,'guest_strategy_fallback':True} for r in [fallback]+fallback.get('alternatives',[]))
+                from quality_review.space_efficiency import measure_candidate
+                # An unvalidated cheapest layout can have invalid door sweeps;
+                # it must not become the geometric savings reference.
+                for baseline in [fallback]+fallback.get('alternatives',[]):
+                    reference_model=materialize(brief,family,baseline)
+                    if any(c['status']=='FAIL' for c in validate_general(reference_model,brief)):continue
+                    reference=measure_candidate(reference_model)
+                    reference_movement=sum(f['gross_circulation_union_area_m2'] for f in reference['floors'])
+                    break
         if repair_layout:
             from .layout_mutations import mutation_variants
             mutations=list(mutation_variants(result,brief.wall_thickness,limit=4))
             alternatives=alternatives[:2]+mutations+alternatives[2:]
         for attempt,layout in enumerate(alternatives):
+            if guest_strategy!='linear' and candidate_validator is not None and preflights>=max(1,validation_budget-1) and not layout.get('guest_strategy_fallback'):
+                continue
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
+            actual_guest_strategy=next((c['guest_composition'] for f in trial['floors'] for c in f['cells'] if c.get('guest_composition')),None)
+            if actual_guest_strategy:
+                from quality_review.unallocated_geometry import measure_model
+                from quality_review.space_efficiency import measure_candidate
+                gaps=measure_model(trial)
+                trial['guest_composition_diagnostics']={'unallocated':gaps,'space_efficiency':measure_candidate(trial)}
+                trial['search']['guest_strategy']=actual_guest_strategy
+                trial['checks'].append(dict(check_id='guest-composition-unallocated',status='PASS' if all(f['unallocated_gross_area_m2']<=1e-5 for f in gaps['floors']) else 'FAIL',label='غياب الفراغات غير المخصصة ضمن نطاق الفحص التشخيصي'))
+                movement=sum(f['gross_circulation_union_area_m2'] for f in trial['guest_composition_diagnostics']['space_efficiency']['floors'])
+                trial['guest_composition_diagnostics']['reference_gross_movement_m2']=reference_movement
+                if reference_movement is not None:
+                    trial['checks'].append(dict(check_id='guest-composition-movement',status='PASS' if movement<=reference_movement+1e-5 else 'FAIL',label='عدم زيادة اتحاد الحركة عن مرجع البحث الخطي',evidence={'reference_m2':reference_movement,'actual_m2':movement}))
+                if actual_guest_strategy=='compact_side':
+                    from .guest_composition import compact_fit_check
+                    fit_check=compact_fit_check(trial)
+                    trial['guest_composition_diagnostics']['furnished_fit']=fit_check['evidence']
+                    trial['checks'].append(fit_check)
             if layout.get('local_reflow'):
                 trial['search']['local_room_mutation']=layout['local_reflow']
             errors=[c for c in trial['checks'] if c['status']=='FAIL']
@@ -802,6 +853,11 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
                 else:
                     preflights+=1
                     trial=candidate_validator(trial)
+                    if actual_guest_strategy=='compact_side':
+                        from .guest_composition import compact_fit_check
+                        fit_check=compact_fit_check(trial)
+                        trial['guest_composition_diagnostics']['furnished_fit']=fit_check['evidence']
+                        trial['checks']=[c for c in trial['checks'] if c['check_id']!=fit_check['check_id']]+[fit_check]
                 errors=[c for c in trial['checks'] if c['status']=='FAIL']
             trial['search']['preflight']={
                 'enabled':candidate_validator is not None,

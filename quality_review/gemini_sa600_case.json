@@ -1,0 +1,26 @@
+{
+  "case_id": "sa-600-north-villa",
+  "source": "ANT-GEMINI-LIVE-001 user test case; unspecified inputs disclosed below",
+  "intent": {
+    "width": 20,
+    "depth": 30,
+    "country": "SA",
+    "region": "الرياض",
+    "family": 6,
+    "street_edges": ["top"],
+    "main_street": "top",
+    "north_edge": "top",
+    "floors": "two",
+    "building": "villa",
+    "majlis": true,
+    "output_level": "standard",
+    "design_priority": "usability"
+  },
+  "assumptions": {
+    "family_size_not_supplied": "Six household members for this synthetic test only; not a user-approved bedroom count",
+    "location_not_supplied": "Riyadh region used for a synthetic Saudi test, not a parcel approval",
+    "north_interpretation": "North-facing principal street; north arrow at top",
+    "street_width_not_supplied": "Left unknown; repository assumptions and PENDING checks must remain visible",
+    "level_priority_not_supplied": "Standard output, usability priority; both engines receive identical inputs"
+  }
+}

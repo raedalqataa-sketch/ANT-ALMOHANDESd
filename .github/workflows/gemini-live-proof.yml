@@ -1,0 +1,214 @@
+name: Gemini Architectural Live Test
+on:
+  workflow_call:
+    inputs:
+      connection_only:
+        required: true
+        type: boolean
+        default: true
+      model:
+        required: false
+        type: string
+        default: ''
+      free_tier_confirmed:
+        required: true
+        type: boolean
+        default: false
+    secrets:
+      GEMINI_API_KEY:
+        required: true
+  workflow_dispatch:
+    inputs:
+      connection_only:
+        description: 'Metadata/secret verification only; no inference (recommended first run)'
+        required: true
+        type: boolean
+        default: true
+      model:
+        description: 'Optional model ID; otherwise discover an available stable Flash model'
+        required: false
+        type: string
+        default: ''
+      free_tier_confirmed:
+        description: 'Owner confirms an unbilled project and free eligibility for the selected model'
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  live-gemini:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_FREE_TIER_CONFIRMED: ${{ inputs.free_tier_confirmed }}
+      REQUESTED_GEMINI_MODEL: ${{ inputs.model }}
+      CONNECTION_ONLY: ${{ inputs.connection_only }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify secret availability without exposing it
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          root=Path('gemini-live-proof');root.mkdir(exist_ok=True)
+          present=bool(os.environ.get('GEMINI_API_KEY'))
+          (root/'secret-presence.json').write_text(json.dumps({'GEMINI_API_KEY_present':present}))
+          if not present:raise SystemExit('MISSING_CREDENTIAL: repository secret unavailable to this workflow')
+          print('GEMINI_API_KEY is available; its value is not displayed.')
+          PY
+      - name: Require existing experimental integration
+        shell: bash
+        run: |
+          test -f backend/design/ai_lab/providers.py
+          test -f backend/design/ai_lab/pipeline.py
+          test -f quality_review/gemini_sa600_case.json
+      - name: Install engine dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Discover actual Gemini models and record sanitized HTTP evidence
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os,re,json
+          from pathlib import Path
+          from backend.design.ai_lab.providers import Provider,ProviderConfig,ProviderError
+          root=Path('gemini-live-proof');root.mkdir(exist_ok=True)
+          provider=Provider(ProviderConfig.from_env('GEMINI','model-discovery'))
+          report={'origin':'LIVE_METADATA','secret_value_exposed':False,'inference_executed':False,
+              'http':[],'status':'NOT_CONNECTED','free_tier':'NOT_VERIFIABLE_FROM_MODELS_API'}
+          provider.client.event_hooks['response'].append(lambda r:report['http'].append(
+              {'method':r.request.method,'endpoint':'models.list','http_status':r.status_code}))
+          try:
+              available=[];token=None;seen=set()
+              for _ in range(10):
+                  body=provider._request('GET','https://generativelanguage.googleapis.com/v1beta/models',
+                      headers={'x-goog-api-key':provider.config.api_key},
+                      params={'pageToken':token} if token else {})
+                  if not isinstance(body,dict):raise ProviderError('INVALID_MODEL_CATALOG')
+                  available.extend(m['name'].removeprefix('models/') for m in body.get('models',[])
+                      if isinstance(m,dict) and isinstance(m.get('name'),str)
+                      and 'generateContent' in m.get('supportedGenerationMethods',[]))
+                  token=body.get('nextPageToken')
+                  if not token:break
+                  if not isinstance(token,str) or token in seen:raise ProviderError('INVALID_MODEL_CATALOG')
+                  seen.add(token)
+              else:raise ProviderError('MODEL_CATALOG_BUDGET_EXCEEDED')
+              available=sorted(set(m for m in available if re.fullmatch(r'[A-Za-z0-9_.-]{1,180}',m)))
+              requested=os.environ.get('REQUESTED_GEMINI_MODEL','').strip().removeprefix('models/')
+              candidates=[m for m in available if 'flash' in m.lower()
+                  and not any(term in m.lower() for term in ('preview','experimental','-exp','image','audio','live','tts'))]
+              model=requested or (candidates[-1] if candidates else '')
+              report.update(status='CONNECTED_METADATA_ONLY',available_models=available,
+                  selected_model=model if model in available else None,
+                  structured_json_support='not proven until actual schema-validated inference')
+              if model in available:
+                  with open(os.environ['GITHUB_ENV'],'a') as f:f.write('GEMINI_MODEL='+model+'\n')
+              elif os.environ.get('CONNECTION_ONLY')!='true':raise ProviderError('NO_SUPPORTED_MODEL_SELECTED')
+              print('Gemini metadata connection succeeded. No inference has been performed.')
+              with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+                  f.write('## Gemini metadata connection\n\nSecret available; models API returned valid JSON.\n\n')
+                  f.write('Inference: **not performed in this step**. Free tier: **requires separate owner confirmation**.\n')
+          except (ProviderError,KeyError,TypeError,AttributeError) as exc:
+              code=str(exc) if isinstance(exc,ProviderError) else 'INVALID_MODEL_CATALOG'
+              report.update(status='FAILED',error=code)
+              raise SystemExit(code) from None
+          finally:
+              report['request_count']=provider.metrics['request_count']
+              (root/'connection.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+              provider.close()
+          PY
+      - name: Require free-tier confirmation before inference
+        if: ${{ !inputs.connection_only }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          if os.environ.get('GEMINI_FREE_TIER_CONFIRMED')!='true':
+              raise SystemExit('FREE_TIER_UNCONFIRMED: stopped before inference; billing was not enabled')
+          PY
+      - name: Real Saudi 600m2 generation and identical-input comparison
+        if: ${{ !inputs.connection_only }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from backend.design.ai_lab.pipeline import run
+          from backend.design.ai_lab.schemas import LabRequest
+          from backend.design.ai_lab.providers import Provider,ProviderConfig
+          from backend.design.architect_planner import ClientIntent
+          root=Path('gemini-live-proof');root.mkdir(exist_ok=True);http=[]
+          case=json.loads(Path('quality_review/gemini_sa600_case.json').read_text())
+          (root/'test-case.json').write_text(json.dumps(case,ensure_ascii=False,indent=2))
+          intent=ClientIntent.model_validate(case['intent'])
+          def audited_provider(name,model):
+              p=Provider(ProviderConfig.from_env(name,model))
+              p.client.event_hooks['response'].append(lambda r:http.append(
+                  {'method':r.request.method,'endpoint':'generateContent','http_status':r.status_code}))
+              return p
+          try:
+              baseline=run(LabRequest(intent=intent,provider='EXISTING_ENGINE'),root/'EXISTING_ENGINE')
+              live=run(LabRequest(intent=intent,provider='GEMINI',model=os.environ['GEMINI_MODEL'],
+                  allow_remote_program=True,allow_engine_fallback=False,max_corrections=2),
+                  root/'GEMINI',provider_factory=audited_provider)
+              def measured(result):
+                  return {'status':result['status'],'origin':result['origin'],'accepted':len(result['candidates']),
+                      'missing':result['alternatives_missing'],'comparison':result['comparison'],
+                      'pairwise_diversity':result['pairwise_diversity'],'telemetry':result['telemetry'],
+                      'failed_or_rejected_candidates':sum(not row.get('accepted',False)
+                          for event in result['history'] for row in event.get('results',[])),
+                      'failure_count_basis':'per-stage diagnostic rows; not necessarily unique physical layouts'}
+              summary={'case':case['case_id'],'model':os.environ['GEMINI_MODEL'],
+                  'baseline':measured(baseline),'gemini':measured(live),'http':http,
+                  'bounded_ai_attempts':'initial proposal plus at most two correction rounds',
+                  'review_required':True,'quality_improvement':'not established by automated checks alone',
+                  'api_cost_basis':'operator-confirmed unbilled free-tier project; not an independent billing audit'}
+              (root/'comparison.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2))
+              with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+                  f.write('## اختبار Gemini المعماري الحي — السعودية 20×30 م\n\n')
+                  f.write(f"Model: `{summary['model']}` · Origin: `{live['origin']}`\n\n")
+                  f.write(f"Accepted: {len(live['candidates'])}/3 · Baseline: {len(baseline['candidates'])}/3\n\n")
+                  f.write('The engine alone builds geometry and validates it. Pending local checks and architectural review remain mandatory. No deployment.\n')
+              if live['origin']!='LIVE_API' or not live['candidates']:
+                  raise SystemExit('LIVE_TEST_NOT_ACCEPTED: inspect sanitized artifacts; no mock or fallback used')
+          finally:
+              (root/'inference-http.json').write_text(json.dumps(http,indent=2))
+          PY
+      - name: Validate PDF and AC1024 DXF, render accepted plans
+        if: ${{ success() && !inputs.connection_only }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,ezdxf,pypdfium2 as pdfium
+          from pypdf import PdfReader
+          rows=[]
+          for path in Path('gemini-live-proof').glob('*/*.pdf'):
+              dxf=path.with_suffix('.dxf');document=ezdxf.readfile(dxf)
+              if document.dxfversion!='AC1024':raise SystemExit('DXF_VERSION_INVALID')
+              if document.audit().has_errors:raise SystemExit('DXF_AUDIT_FAILED')
+              pages=len(PdfReader(path).pages)
+              if pages<2:raise SystemExit('PDF_PAGES_INVALID')
+              rows.append({'pdf':str(path),'pages':pages,'dxf':str(dxf),'version':document.dxfversion})
+              pdf=pdfium.PdfDocument(path)
+              try:
+                  for index in range(min(2,len(pdf))):
+                      page=pdf[index]
+                      try:page.render(scale=1.5).to_pil().save(path.with_name(path.stem+'-page-'+str(index+1)+'.png'))
+                      finally:page.close()
+              finally:pdf.close()
+          Path('gemini-live-proof/export-audit.json').write_text(json.dumps(rows,indent=2))
+          if not rows:raise SystemExit('NO_ACCEPTED_DRAWINGS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gemini-live-architectural-proof
+          path: gemini-live-proof/
+          if-no-files-found: warn
+          retention-days: 14
