@@ -56,7 +56,6 @@ def test_gemini_proposal_is_validated_and_requires_review(monkeypatch):
         }, ensure_ascii=False)
 
     monkeypatch.setattr(api, "generate_general", lambda *_: (_ for _ in ()).throw(AssertionError("engine must not run")))
-    monkeypatch.setattr("backend.design.gemini_provider.generate_gemini_json", fake_gemini, raising=False)
     # The API imports the provider function lazily, so replace the provider module directly.
     import backend.design.gemini_provider as provider
     monkeypatch.setattr(provider, "generate_gemini_json", fake_gemini)
@@ -71,7 +70,7 @@ def test_gemini_proposal_is_validated_and_requires_review(monkeypatch):
     assert body["unresolved"] == ["تأكيد خصوصية مدخل الضيوف"]
     assert body["source_text"] == "أضف غرفة نوم"
     assert captured["model"] == "gemini-2.5-flash"
-    assert "Saudi" not in captured["prompt"]
+    assert "لا تستنتج اشتراطات قانونية" in captured["prompt"]
 
 
 def test_gemini_invalid_rooms_are_rejected_without_mutation(monkeypatch):
