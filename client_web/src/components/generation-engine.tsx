@@ -1,0 +1,16 @@
+import {useEffect,useState} from 'react';
+export type EngineMode='legacy'|'intelligence'|'gemini';
+type Connection={configured:boolean;connected:boolean;freeTierConfirmed:boolean;model:string;detail?:string};
+export function GenerationEngine({mode,onChange,consent,onConsent}:{mode:EngineMode;onChange:(m:EngineMode)=>void;consent:boolean;onConsent:(v:boolean)=>void}){
+ const [state,setState]=useState<Connection|null>(null),[message,setMessage]=useState('جارٍ فحص خدمة Gemini…');
+ const check=async(live=false)=>{try{setMessage('جارٍ فحص الخدمة…');const r=await fetch('/api/client/gemini/'+(live?'connection':'status'),{cache:'no-store'});const d=await r.json();if(!r.ok)throw Error(d.detail||'تعذر الاتصال');setState(d);setMessage(d.connected?'اتصال حي ناجح؛ لم يُرسل طلب توليد.':!d.configured?'مفتاح Gemini غير مضاف إلى استضافة الموقع.':!d.freeTierConfirmed?'مفتاح مُعدّ؛ يلزم تأكيد الفئة المجانية والنموذج قبل التوليد.':'Gemini مُعدّ؛ تحقق من الاتصال قبل التجربة.')}catch(e){setMessage(e instanceof Error?e.message:'خدمة Gemini غير متاحة');}};
+ useEffect(()=>{void check()},[]);
+ return <section aria-label="اختيار محرك التصميم" className="mb-7 rounded-2xl border bg-card p-5 sm:p-7"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-display text-xl">محرك تصميم مسكنك</h2><a href="/reports/004/" className="text-sm text-primary underline">مقارنات التحديث المعماري</a></div><div className="mt-4 grid gap-3 sm:grid-cols-3">{([
+ ['intelligence','الذكاء المعماري المحدّث','بحث تكوينات وظيفية ونسب غرف موجّهة بالمرجعيات، وقياس اتحاد الحركة والجيوب.'],
+ ['gemini','Gemini + المحرك الهندسي','Gemini يقترح خيارات توزيع منظمة، والمحرك يبني الهندسة ويفحصها ويصدر المقبول.'],
+ ['legacy','المحرك المرجعي','مسار التوليد السابق للمقارنة بنفس المتطلبات.']
+ ] as const).map(([id,title,description])=><label key={id} className={'cursor-pointer rounded-xl border p-4 '+(mode===id?'border-primary bg-primary/5':'')}><input type="radio" name="generation-engine" value={id} checked={mode===id} onChange={()=>onChange(id)} className="ml-2 accent-primary"/><strong className="text-sm">{title}</strong><span className="mt-2 block text-xs leading-6 text-muted-foreground">{description}</span></label>)}</div>
+ <p role="status" className="mt-4 text-sm leading-7">{message}{state?.model?' · النموذج: '+state.model:''}</p><div className="mt-2 flex flex-wrap gap-4 text-sm"><button type="button" className="text-primary underline" onClick={()=>void check(true)}>اختبار اتصال Gemini</button><a href="/signin-with-chatgpt?return_to=/client/" target="_top" className="text-primary underline">تسجيل الدخول لاستخدام Gemini</a></div>
+ {mode==='gemini'&&<div className="mt-4 rounded-xl bg-muted p-4 text-sm leading-7"><label className="flex items-start gap-3"><input type="checkbox" checked={consent} onChange={e=>onConsent(e.target.checked)} className="mt-2"/><span>أوافق على إرسال أبعاد الأرض والبرنامج الوظيفي المقترح فقط إلى Gemini. الملاحظات الشخصية وبيانات الاتصال لا تُرسل. لا تُقبل مقترحات الخدمة قبل الفحص الهندسي.</span></label><p className="mt-2 text-xs">يتطلب هذا المسار مفتاحًا سريًا على الخادم ونموذجًا بفئة مجانية مؤكدة من صاحب المشروع. لن يُستبدل فشل الخدمة بنتيجة محلية منسوبة إلى Gemini.</p></div>}
+ </section>
+}

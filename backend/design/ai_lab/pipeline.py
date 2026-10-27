@@ -5,7 +5,6 @@ import time
 from itertools import combinations
 from pathlib import Path
 
-from .providers import Provider, ProviderConfig, ProviderError
 from .schemas import LabRequest
 from ..architect_planner import propose
 from ..auto_repair import ArchitectureAutoRepairEngine, fingerprint
@@ -28,6 +27,7 @@ BASELINE_OPTIONS = [
 
 
 def make_provider(name, model):
+    from .providers import Provider, ProviderConfig
     return Provider(ProviderConfig.from_env(name, model))
 
 
@@ -84,6 +84,7 @@ def _summary(model):
 
 
 def run(request: LabRequest, output_dir, *, provider_factory=make_provider):
+    from .providers import ProviderError
     if request.architectural_intelligence:
         from ..intelligence.engine import run_lab
         return run_lab(request,output_dir,provider_factory=provider_factory)

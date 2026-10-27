@@ -7,7 +7,7 @@ import argparse,hashlib,json,shutil,zipfile,subprocess
 ROOT=Path(__file__).resolve().parents[1]
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--runtime-source',type=Path,required=True);a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--runtime-source',type=Path,required=True);p.add_argument('--shared-runtime-url',default='');a=p.parse_args()
  target=a.output/'public/villa-engine';studio=target/'studio';generate=target/'generate';studio.mkdir(parents=True,exist_ok=True)
  for folder in ('runtime','wheels'):shutil.copytree(a.runtime_source/folder,studio/folder,dirs_exist_ok=True)
  (studio/'assets').mkdir(exist_ok=True)
@@ -15,6 +15,12 @@ def main():
   source=ROOT/'frontend'/name
   if source.exists():shutil.copyfile(source,studio/'assets'/name)
  for name in ('CPYTHON-LICENSE','PYODIDE-LICENSE','engine.zip','manifest.json'):shutil.copyfile(a.runtime_source/name,studio/name)
+ runtime_manifest=json.loads((studio/'manifest.json').read_text())
+ runtime_manifest['engineering_wasm_packages']=list(dict.fromkeys(runtime_manifest.get('engineering_wasm_packages',[])+['shapely']))
+ networkx_wheels=sorted((studio/'wheels').glob('networkx-*.whl'))
+ if not networkx_wheels:raise ValueError('networkx wheel required for architectural intelligence')
+ runtime_manifest['pure_wheels']=list(dict.fromkeys(runtime_manifest['pure_wheels']+[networkx_wheels[-1].name]))
+ (studio/'manifest.json').write_text(json.dumps(runtime_manifest,indent=2)+'\n')
  base_engine_sha=hashlib.sha256((studio/'engine.zip').read_bytes()).hexdigest()
  # Accept the previously approved site runtime or a freshly rebuilt runtime
  # whose architectural source bytes match this repository exactly.
@@ -30,6 +36,11 @@ def main():
   if mismatched:raise ValueError('Unreviewed base runtime; source mismatch: '+', '.join(mismatched))
  # Retain the verified runtime packages and overlay current reviewed source.
  for source in (ROOT/'backend').rglob('*.py'):entries[str(source.relative_to(ROOT))]=source.read_bytes()
+ # Browser-safe diagnostics/reference data used by architectural intelligence.
+ for name in ('space_efficiency.py','unallocated_geometry.py'):
+  entries['quality_review/'+name]=(ROOT/'quality_review'/name).read_bytes()
+ for path in (ROOT/'quality_review/reference_library').glob('*.json'):
+  entries[str(path.relative_to(ROOT))]=path.read_bytes()
  # V2 is data-driven: bundle the policy JSON alongside the Python validator.
  policy=ROOT/'constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json'
  if not policy.exists():raise ValueError('Missing V2 policy catalog: cannot build browser engine')
@@ -66,7 +77,7 @@ def main():
  assert old in client
  client=client.replace(old,"const nativeFetch=window.fetch.bind(window);const engine=window.AntWorkerSession.create({url:'./worker.js?v=062',store});window.AntStopEngine=reason=>engine.stop(reason);")
  client=client.replace("const path=typeof input==='string'?input:input.url;","const path=window.AntRequestPath(input,location.href);")
- client=client.replace("if(path==='/api/v3/design')","if(path==='/api/v3/auto-design')return Response.json(await call('automatic',{options:JSON.parse(options.body)}));if(path==='/api/v3/design')")
+ client=client.replace("if(path==='/api/v3/design')","if(path==='/api/v3/client-context')return Response.json(await call('client_context',{options:JSON.parse(options.body)}));if(path==='/api/v3/client-design')return Response.json(await call('client',{options:JSON.parse(options.body)}));if(path==='/api/v3/auto-design')return Response.json(await call('automatic',{options:JSON.parse(options.body)}));if(path==='/api/v3/design')")
  client=client.replace("const pending=new Map(),urls=new Map(),sessionFiles=new Map();let seq=0;", "const urls=new Map(),sessionFiles=new Map();")
  start=client.index('  function call(');end=client.index('  async function read(',start)
  client=client[:start]+"  const call=(operation,extra={})=>engine.call(operation,extra);\n"+client[end:]
@@ -76,11 +87,17 @@ def main():
  marker="    await ready;"
  assert marker in worker
  worker=worker.replace(marker,marker+"\n    if(data.operation==='initialize'){postMessage({id:data.id,ready:true});return;}")
- worker=worker.replace('from backend.design.general_engine import generate_general','from backend.design.general_engine import generate_general\nfrom backend.design.architect_planner import ClientIntent,generate_automatic')
- worker=worker.replace("data.operation==='general'", "(data.operation==='general'||data.operation==='automatic')")
- worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True,generation_v3=True,generation_v4=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
+ worker=worker.replace('from backend.design.general_engine import generate_general','from backend.design.general_engine import generate_general\nfrom backend.design.architect_planner import ClientIntent,generate_automatic\nfrom backend.design.client_generation import generate_client\nfrom backend.design.architect_planner import propose as propose_client\nfrom backend.design.ai_lab.pipeline import _context as client_context')
+ worker=worker.replace("data.operation==='general'", "(data.operation==='general'||data.operation==='automatic'||data.operation==='client'||data.operation==='client_context')")
+ worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='client_context'?'json.dumps(client_context(*propose_client(ClientIntent(**json.loads(options_json)))),ensure_ascii=False)':data.operation==='client'?'json.dumps(generate_client(json.loads(options_json)),ensure_ascii=False)':data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True,generation_v3=True,generation_v4=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
+ worker=worker.replace('for(const model of result.candidates)', 'for(const model of result.candidates||[])')
  (generate/'worker.js').write_text(worker)
  (generate/'static-client.js').write_text(client)
+ if a.shared_runtime_url:
+  if not a.shared_runtime_url.startswith('/') or not a.shared_runtime_url.endswith('/') or '..' in a.shared_runtime_url:raise ValueError('shared runtime URL must be an absolute same-origin directory')
+  for path in generate.iterdir():
+   if path.suffix in ('.js','.css','.html'):
+    path.write_text(path.read_text().replace('../studio/',a.shared_runtime_url))
  for file in ('app.js','static-client.js','embedded-runtime.js','client-bridge.js','worker-session.js','worker.js','automatic-runtime.js','telemetry.js'):subprocess.run(['node','--check',str(generate/file)],check=True)
  source=ROOT/'lovable_integration/lovable-src'
  if source.exists():shutil.copytree(source,a.output/'src',dirs_exist_ok=True)

@@ -15,8 +15,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 PYODIDE_VERSION='0.29.3'
 BASE=f'https://cdn.jsdelivr.net/pyodide/v{PYODIDE_VERSION}/full/'
-PACKAGES=['pydantic','numpy','pillow','fonttools','pyparsing','charset-normalizer','six']
-PURE={'reportlab':'4.4.3','python-bidi':'0.4.2','ezdxf':'1.4.5','openpyxl':'3.1.5','et-xmlfile':'2.0.0','arabic-reshaper':'3.0.0'}
+PACKAGES=['pydantic','numpy','pillow','fonttools','pyparsing','charset-normalizer','six','shapely']
+PURE={'reportlab':'4.4.3','python-bidi':'0.4.2','ezdxf':'1.4.5','openpyxl':'3.1.5','et-xmlfile':'2.0.0','arabic-reshaper':'3.0.0','networkx':'3.4.2'}
 
 
 def fetch(url,path,expected=None):
@@ -64,7 +64,7 @@ def main():
     for name in ('index.html','worker.js'):shutil.copyfile(ROOT/'mobile_probe'/name,out/name)
     manifest=dict(pyodide_version=PYODIDE_VERSION,python_version=lock['info']['python'],
                   runtime_packages={n:packages[n]['version'] for n in sorted(resolved)},pure_packages=pure_versions,
-                  pure_wheels=sorted(p.name for p in wheels.glob('*.whl')),runtime_network_required=False,
+                  pure_wheels=sorted(p.name for p in wheels.glob('*.whl')),engineering_wasm_packages=['shapely'],runtime_network_required=False,
                   target='Chromium/WebView feasibility; Android APK/device not yet verified',files=files)
     manifest['bundle_bytes']=sum(p.stat().st_size for p in out.rglob('*') if p.is_file())
     (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

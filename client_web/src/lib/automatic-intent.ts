@@ -7,7 +7,7 @@ export interface ArchitectIntent {
  family:number;building:'villa'|'house'|'investment';output_level:'economy'|'standard'|'luxury';design_priority:'efficiency'|'usability'|'prestige';floors:'auto'|'one'|'two';comfort:'compact'|'balanced'|'generous';majlis:boolean;office:boolean;accessible_bedroom:boolean;notes:string;
  site_evidence?:SiteEvidence;
 }
-export interface AutomaticDraft {mode:'automatic';intent:ArchitectIntent}
+export interface AutomaticDraft {mode:'automatic';intent:ArchitectIntent;generator?:'legacy'|'intelligence'|'gemini';remoteConsent?:boolean}
 
 const edge=z.enum(['top','right','bottom','left']);
 export const automaticIntentSchema=z.object({
