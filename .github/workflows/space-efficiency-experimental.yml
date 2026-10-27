@@ -8,7 +8,7 @@ on:
       - 'backend/design/space_efficiency_*.py'
       - 'backend/design/architectural_critic.py'
       - 'tests/test_space_efficiency_*.py'
-      - 'tests/test_architectural_critic.py'
+      - 'tests/test_architectural_critic.py tests/test_space_efficiency_benchmark.py tests/test_space_efficiency_cells.py'
   workflow_dispatch:
 jobs:
   focused-tests:
