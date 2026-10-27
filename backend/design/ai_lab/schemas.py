@@ -34,6 +34,9 @@ class LabRequest(Strict):
     allow_engine_fallback: bool = False
     max_corrections: int = Field(default=1, ge=0, le=2)
     allow_remote_program: bool = False
+    architectural_intelligence: bool = False
+    intelligence_search_budget: int = Field(default=12, ge=1, le=18)
+    reference_conditioning: bool = True
 
     @model_validator(mode='after')
     def configured(self):

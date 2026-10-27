@@ -84,6 +84,9 @@ def _summary(model):
 
 
 def run(request: LabRequest, output_dir, *, provider_factory=make_provider):
+    if request.architectural_intelligence:
+        from ..intelligence.engine import run_lab
+        return run_lab(request,output_dir,provider_factory=provider_factory)
     start = time.monotonic()
     out = Path(output_dir);out.mkdir(parents=True,exist_ok=True)
     brief, planning = propose(request.intent)

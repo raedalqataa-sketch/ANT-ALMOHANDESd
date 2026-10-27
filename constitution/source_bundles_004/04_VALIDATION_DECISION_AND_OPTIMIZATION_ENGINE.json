@@ -1,0 +1,1526 @@
+{
+  "bundle_metadata": {
+    "system": "ANT_ALMOHANDES",
+    "type": "PROJECT_SOURCE_BUNDLE",
+    "purpose": "Consolidated reference source preserving the original numbered artifacts 01-17 for use within a five-source Project limit.",
+    "preservation_policy": "Original JSON objects are embedded without semantic modification. The Markdown instruction file is embedded verbatim as plain text.",
+    "source_count": 4,
+    "source_files": [
+      "08_VALIDATION_PROTOCOL.json",
+      "11_MASTER_VALIDATION_SCHEMA.json",
+      "14_MASTER_DECISION_ENGINE.json",
+      "15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE.json"
+    ]
+  },
+  "sources": {
+    "08_VALIDATION_PROTOCOL.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "VALIDATION_PROTOCOL",
+        "version": "1.0.0",
+        "core_principle": "NO_VALIDATION_NO_DELIVERY"
+      },
+      "priority": [
+        "SAFETY_AND_CODE",
+        "CLIENT_REQUIREMENTS",
+        "SPATIAL_RELATIONS",
+        "PRIVACY",
+        "CIRCULATION",
+        "MULTI_FLOOR_CONSISTENCY",
+        "CONSTRUCTABILITY",
+        "OUTPUT_CONSISTENCY",
+        "AESTHETICS"
+      ],
+      "stages": [
+        "INPUT_VALIDATION",
+        "PROGRAM_VALIDATION",
+        "RELATION_GRAPH_VALIDATION",
+        "CODE_RULE_VALIDATION",
+        "GEOMETRY_VALIDATION",
+        "FLOOR_PLAN_VALIDATION",
+        "ELEVATION_VALIDATION",
+        "SECTION_VALIDATION",
+        "3D_VALIDATION",
+        "OUTPUT_CROSS_VALIDATION",
+        "FINAL_ACCEPTANCE"
+      ],
+      "critical_tests": [
+        {
+          "id": "CRIT-001",
+          "test": "Men Guest Bathroom Relationship",
+          "condition": [
+            "men_guest_bathroom MUST_CONNECT men_guest_council",
+            "men_guest_bathroom MUST_BE_SEPARATED family_living",
+            "access MUST_NOT_ROUTE_THROUGH family_living"
+          ],
+          "failure": "REJECT_AND_REGENERATE"
+        },
+        {
+          "id": "CRIT-002",
+          "test": "Required Space Preservation",
+          "condition": "every_required_space_exists_and_keeps_function",
+          "failure": "REJECT_AND_REGENERATE"
+        },
+        {
+          "id": "CRIT-003",
+          "test": "Multi Floor Continuity",
+          "condition": "major_vertical_elements_are_consistent_across_floors",
+          "failure": "REJECT_AND_REGENERATE"
+        },
+        {
+          "id": "CRIT-004",
+          "test": "Elevation Consistency",
+          "condition": "all_elevations_derive_from_same_validated_geometry",
+          "failure": "REJECT_AND_REGENERATE"
+        },
+        {
+          "id": "CRIT-005",
+          "test": "Output Consistency",
+          "condition": "all_outputs_represent_same_validated_building",
+          "failure": "REJECT_OUTPUT_PACKAGE"
+        }
+      ],
+      "status_logic": {
+        "VALIDATED": "critical_failures == 0 AND unresolved_high_failures == 0 AND all_required_outputs_exist",
+        "REJECTED": "critical_failures > 0",
+        "REVISION_REQUIRED": "critical_failures == 0 AND unresolved_high_failures > 0",
+        "DRAFT": "validation_not_completed"
+      },
+      "regeneration_policy": {
+        "principle": "FIX_ROOT_CAUSE_NOT_VISIBLE_SYMPTOM",
+        "forbidden": [
+          "تعديل صورة نهائية فقط لإخفاء الخطأ الهندسي",
+          "تحريك باب في الواجهة دون تحديث المصدر",
+          "إخفاء عدم التطابق بالـ rendering"
+        ]
+      },
+      "traceability": [
+        "requirement_id",
+        "space_id",
+        "relation_id",
+        "geometry_id",
+        "output_id",
+        "rule_id",
+        "validation_test_id"
+      ],
+      "final_gate": [
+        "INPUT_VALIDATION",
+        "PROGRAM_VALIDATION",
+        "RELATION_GRAPH_VALIDATION",
+        "GEOMETRY_VALIDATION",
+        "FLOOR_PLAN_VALIDATION",
+        "ELEVATION_VALIDATION",
+        "OUTPUT_CROSS_VALIDATION"
+      ],
+      "final_rule": "لا يتم تسليم أي مخرج نهائي إلا بعد اجتياز بوابة التحقق المناسبة وغياب المخالفات الحرجة."
+    },
+    "11_MASTER_VALIDATION_SCHEMA.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "MASTER_VALIDATION_SCHEMA",
+        "version": "1.0.0",
+        "status": "FOUNDATION",
+        "language": "Arabic",
+        "purpose": "Master validation and quality-gate schema for residential architectural generation, ensuring no final output is delivered unless critical requirements, spatial relations, geometry, vertical consistency, code-traceability, and cross-output consistency pass validation.",
+        "core_principle": "NO_VALIDATION_NO_FINAL_DELIVERY"
+      },
+      "source_hierarchy": [
+        "01_MASTER_CONTEXT.json",
+        "02_SBC_RESIDENTIAL_RULE_ENGINE.json",
+        "03_FLOOR_PLAN_GENERATION_RULES.json",
+        "04_SPATIAL_RELATION_RULES.json",
+        "05_ELEVATION_RULES.json",
+        "06_OUTPUT_SPECIFICATION.json",
+        "07_KNOWN_FAILURES_AND_FIXES.json",
+        "08_VALIDATION_PROTOCOL.json",
+        "09_MASTER_SYSTEM_INSTRUCTION.md",
+        "10_MASTER_GENERATION_WORKFLOW.json",
+        "VALIDATED_GEOMETRY"
+      ],
+      "status_values": [
+        "DRAFT",
+        "REVISION_REQUIRED",
+        "REJECTED",
+        "VALIDATED",
+        "FINAL"
+      ],
+      "severity_levels": {
+        "CRITICAL": {
+          "action": "REJECT",
+          "delivery_allowed": false,
+          "requires_root_cause_fix": true,
+          "requires_revalidation": true
+        },
+        "HIGH": {
+          "action": "CORRECT",
+          "delivery_allowed": false,
+          "requires_root_cause_fix": true,
+          "requires_revalidation": true
+        },
+        "MEDIUM": {
+          "action": "FLAG",
+          "delivery_allowed": false,
+          "requires_review": true,
+          "requires_revalidation": true
+        },
+        "LOW": {
+          "action": "OPTIONAL_IMPROVEMENT",
+          "delivery_allowed": true,
+          "requires_revalidation": false
+        }
+      },
+      "acceptance_policy": {
+        "final_delivery_requires": [
+          "all_required_spaces_present",
+          "all_critical_relations_pass",
+          "privacy_paths_pass",
+          "vertical_consistency_pass",
+          "geometry_consistency_pass",
+          "code_rules_used_are_traceable_or_explicitly_flagged",
+          "floor_plan_consistency_pass",
+          "elevation_consistency_pass",
+          "output_cross_validation_pass",
+          "no_critical_failures"
+        ],
+        "blocking_conditions": [
+          "CRITICAL_FAILURE",
+          "UNRESOLVED_HIGH_FAILURE",
+          "UNRESOLVED_REQUIRED_SPACE",
+          "UNRESOLVED_PRIVACY_VIOLATION",
+          "UNRESOLVED_VERTICAL_DISCONTINUITY",
+          "UNRESOLVED_OUTPUT_DRIFT"
+        ]
+      },
+      "validation_model": {
+        "entity_identity": {
+          "required_fields": [
+            "project_id",
+            "revision_id",
+            "source_geometry_id"
+          ],
+          "rule": "Every validation run must identify the exact project revision and geometry source being tested."
+        },
+        "traceability": {
+          "required_fields_for_major_elements": [
+            "element_id",
+            "element_type",
+            "source_geometry_id",
+            "floor_id"
+          ],
+          "rule": "Every major architectural element must be traceable to the validated geometry or a documented requirement."
+        }
+      },
+      "test_suite": [
+        {
+          "test_id": "VAL-001",
+          "name": "INPUT_COMPLETENESS",
+          "severity": "HIGH",
+          "stage": "INPUT_VALIDATION",
+          "objective": "Verify that all information required for the requested operation is present or explicitly marked as an assumption.",
+          "checks": [
+            "site_dimensions_available_or_marked_assumption",
+            "floor_count_available",
+            "required_spaces_identified",
+            "entry_requirements_identified",
+            "north_orientation_available_when_required",
+            "critical_constraints_identified"
+          ],
+          "pass_condition": "No unresolved critical input is silently invented.",
+          "fail_action": "REVISION_REQUIRED"
+        },
+        {
+          "test_id": "VAL-002",
+          "name": "REQUIRED_SPACE_COMPLETENESS",
+          "severity": "CRITICAL",
+          "stage": "PROGRAM_VALIDATION",
+          "objective": "Ensure every mandatory client space exists with the correct identity and function.",
+          "checks": [
+            "all_required_spaces_present",
+            "correct_room_function",
+            "correct_floor_assignment",
+            "no_function_drift"
+          ],
+          "pass_condition": "100 percent of mandatory spaces are present and correctly classified.",
+          "fail_action": "REJECT_AND_REGENERATE"
+        },
+        {
+          "test_id": "VAL-003",
+          "name": "SPACE_IDENTITY_INTEGRITY",
+          "severity": "HIGH",
+          "stage": "PROGRAM_VALIDATION",
+          "objective": "Prevent one requested room from being silently replaced by another function.",
+          "checks": [
+            "space_id_stable",
+            "space_name_consistent",
+            "space_function_consistent",
+            "revision_changes_explicit"
+          ],
+          "pass_condition": "No unauthorized functional replacement detected.",
+          "fail_action": "CORRECT_AND_REVALIDATE"
+        },
+        {
+          "test_id": "VAL-004",
+          "name": "RELATION_GRAPH_INTEGRITY",
+          "severity": "CRITICAL",
+          "stage": "RELATION_GRAPH_VALIDATION",
+          "objective": "Verify that all mandatory spatial relations are represented and satisfied.",
+          "checks": [
+            "must_connect_relations_pass",
+            "must_be_separated_relations_pass",
+            "direct_access_relations_pass",
+            "privacy_relations_pass",
+            "guest_access_relations_pass",
+            "service_access_relations_pass"
+          ],
+          "pass_condition": "Every critical relation passes.",
+          "fail_action": "REJECT_AND_REPLAN"
+        },
+        {
+          "test_id": "VAL-005",
+          "name": "MEN_GUEST_BATHROOM_CRITICAL_LOCK",
+          "severity": "CRITICAL",
+          "stage": "RELATION_GRAPH_VALIDATION",
+          "objective": "Prevent the known men's guest bathroom failure.",
+          "required_relations": [
+            "men_guest_entrance MUST_CONNECT men_guest_council",
+            "men_guest_council MUST_CONNECT men_guest_bathroom",
+            "men_guest_bathroom MUST_BE_SEPARATED_FROM family_living"
+          ],
+          "path_rule": "men_guest_entrance -> men_guest_council -> men_guest_bathroom must not traverse FAMILY or PRIVATE zones.",
+          "forbidden_conditions": [
+            "men_guest_bathroom_direct_opening_to_family_living",
+            "guest_path_through_family_zone",
+            "guest_bathroom_serving_family_system_by_default",
+            "bathroom_detached_from_guest_system"
+          ],
+          "pass_condition": "All required relations and path restrictions pass.",
+          "fail_action": "REJECT_AND_REPLAN"
+        },
+        {
+          "test_id": "VAL-006",
+          "name": "PRIVACY_PATH_VALIDATION",
+          "severity": "CRITICAL",
+          "stage": "RELATION_GRAPH_VALIDATION",
+          "objective": "Prevent public and guest circulation from violating family or private privacy.",
+          "checks": [
+            "guest_paths_do_not_cross_family",
+            "guest_paths_do_not_cross_private",
+            "service_paths_do_not_create_unintended_privacy_breach",
+            "private_access_requires_appropriate_transition"
+          ],
+          "pass_condition": "No forbidden privacy-zone crossing exists.",
+          "fail_action": "REJECT_AND_REPLAN"
+        },
+        {
+          "test_id": "VAL-007",
+          "name": "DOOR_DESTINATION_VALIDATION",
+          "severity": "CRITICAL",
+          "stage": "GEOMETRY_VALIDATION",
+          "objective": "Ensure every door connects the correct pair of spaces and preserves the intended access type.",
+          "checks": [
+            "door_from_space_exists",
+            "door_to_space_exists",
+            "door_type_matches_access_requirement",
+            "door_does_not_create_forbidden_path",
+            "bathroom_doors_checked_for_privacy"
+          ],
+          "pass_condition": "All critical doors resolve to the intended destination.",
+          "fail_action": "REJECT_AND_REPLAN"
+        },
+        {
+          "test_id": "VAL-008",
+          "name": "CIRCULATION_VALIDATION",
+          "severity": "HIGH",
+          "stage": "GEOMETRY_VALIDATION",
+          "objective": "Ensure primary circulation remains usable and unobstructed.",
+          "checks": [
+            "main_path_continuity",
+            "guest_path_continuity",
+            "family_path_continuity",
+            "service_path_continuity",
+            "kitchen_does_not_block_primary_path",
+            "garage_to_house_entry_path_exists"
+          ],
+          "pass_condition": "All required circulation paths exist without forbidden crossings or functional obstruction.",
+          "fail_action": "CORRECT_AND_REVALIDATE"
+        },
+        {
+          "test_id": "VAL-009",
+          "name": "STAIR_CONTINUITY",
+          "severity": "CRITICAL",
+          "stage": "VERTICAL_VALIDATION",
+          "objective": "Ensure stairs remain geometrically and functionally continuous across floors.",
+          "checks": [
+            "stair_exists_on_required_floors",
+            "top_and_bottom_connections_valid",
+            "orientation_consistent",
+            "landing_logic_consistent",
+            "no_floor_to_floor_discontinuity"
+          ],
+          "pass_condition": "The vertical circulation system is continuous and traceable.",
+          "fail_action": "REJECT_AND_REBUILD_VERTICAL_GEOMETRY"
+        },
+        {
+          "test_id": "VAL-010",
+          "name": "MULTI_FLOOR_GLOBAL_CONSISTENCY",
+          "severity": "CRITICAL",
+          "stage": "VERTICAL_VALIDATION",
+          "objective": "Ensure all floors belong to one building geometry rather than independently generated layouts.",
+          "checks": [
+            "same_building_geometry_source",
+            "floor_count_consistent",
+            "vertical_axes_consistent",
+            "stairs_consistent",
+            "shafts_consistent",
+            "major_walls_consistent",
+            "structural_alignment_checked_when_available"
+          ],
+          "pass_condition": "All floors remain consistent with the global building model.",
+          "fail_action": "REJECT_AND_REBUILD_GLOBAL_MODEL"
+        },
+        {
+          "test_id": "VAL-011",
+          "name": "WINDOW_SOURCE_VALIDATION",
+          "severity": "CRITICAL",
+          "stage": "ELEVATION_VALIDATION",
+          "objective": "Prevent invented windows in elevations or renders.",
+          "checks": [
+            "every_elevation_window_has_geometry_source",
+            "window_belongs_to_valid_wall",
+            "window_belongs_to_valid_space",
+            "floor_assignment_matches"
+          ],
+          "pass_condition": "No unsourced window exists.",
+          "fail_action": "REJECT_AND_REMOVE_OR_SOURCE_WINDOW"
+        },
+        {
+          "test_id": "VAL-012",
+          "name": "BALCONY_SOURCE_VALIDATION",
+          "severity": "CRITICAL",
+          "stage": "ELEVATION_VALIDATION",
+          "objective": "Prevent invented balconies and projections.",
+          "checks": [
+            "every_balcony_has_geometry_source",
+            "projection_exists_in_plan_or_geometry",
+            "floor_assignment_matches"
+          ],
+          "pass_condition": "Every balcony or projection is traceable.",
+          "fail_action": "REJECT_AND_REMOVE_OR_SOURCE_ELEMENT"
+        },
+        {
+          "test_id": "VAL-013",
+          "name": "FOUR_ELEVATION_GEOMETRY_MATCH",
+          "severity": "CRITICAL",
+          "stage": "ELEVATION_VALIDATION",
+          "objective": "Ensure north, south, east, and west elevations represent the exact same validated building.",
+          "checks": [
+            "floor_count_matches",
+            "floor_heights_match_when_available",
+            "roof_levels_match",
+            "massings_match",
+            "entrances_match",
+            "doors_match",
+            "windows_match",
+            "balconies_match",
+            "major_projections_match",
+            "vertical_elements_match"
+          ],
+          "pass_condition": "All four elevations are consistent with validated geometry.",
+          "fail_action": "REJECT_AND_DERIVE_ELEVATIONS_FROM_GEOMETRY"
+        },
+        {
+          "test_id": "VAL-014",
+          "name": "SECTION_GEOMETRY_MATCH",
+          "severity": "HIGH",
+          "stage": "SECTION_VALIDATION",
+          "objective": "Ensure sections do not contradict plans or building geometry.",
+          "checks": [
+            "floor_levels_match",
+            "stair_section_matches_geometry",
+            "roof_matches",
+            "vertical_spaces_match",
+            "openings_cross_checked"
+          ],
+          "pass_condition": "No contradiction between section and source geometry.",
+          "fail_action": "CORRECT_AND_REVALIDATE"
+        },
+        {
+          "test_id": "VAL-015",
+          "name": "3D_GEOMETRY_MATCH",
+          "severity": "CRITICAL",
+          "stage": "3D_VALIDATION",
+          "objective": "Ensure the 3D model is a faithful representation of validated geometry.",
+          "checks": [
+            "floor_count_match",
+            "massings_match",
+            "openings_match",
+            "balconies_match",
+            "roof_match",
+            "stairs_match",
+            "major_proportions_match"
+          ],
+          "pass_condition": "3D geometry contains no unauthorized architectural drift.",
+          "fail_action": "REJECT_AND_REBUILD_3D"
+        },
+        {
+          "test_id": "VAL-016",
+          "name": "OUTPUT_CROSS_VALIDATION",
+          "severity": "CRITICAL",
+          "stage": "OUTPUT_CROSS_VALIDATION",
+          "objective": "Verify that all outputs describe one and only one building.",
+          "checks": [
+            "plans_vs_geometry",
+            "elevations_vs_geometry",
+            "sections_vs_geometry",
+            "3d_vs_geometry",
+            "renders_vs_geometry",
+            "dwg_dxf_vs_geometry_when_available",
+            "pdf_vs_geometry_when_available"
+          ],
+          "pass_condition": "No material cross-output inconsistency exists.",
+          "fail_action": "REJECT_AND_REBUILD_DEPENDENT_OUTPUTS"
+        },
+        {
+          "test_id": "VAL-017",
+          "name": "CODE_TRACEABILITY",
+          "severity": "HIGH",
+          "stage": "CODE_RULE_VALIDATION",
+          "objective": "Ensure any code-based design decision is traceable to a documented source and edition.",
+          "checks": [
+            "source_reference_present",
+            "code_edition_identified",
+            "rule_scope_identified",
+            "unverified_rules_flagged"
+          ],
+          "pass_condition": "No invented code rule is presented as authoritative.",
+          "fail_action": "FLAG_OR_REMOVE_UNVERIFIED_CODE_CLAIM"
+        },
+        {
+          "test_id": "VAL-018",
+          "name": "FURNITURE_FUNCTIONALITY_CHECK",
+          "severity": "MEDIUM",
+          "stage": "FLOOR_PLAN_VALIDATION",
+          "objective": "Use furniture as a secondary usability test without allowing it to hide geometry errors.",
+          "checks": [
+            "basic_furniture_fit",
+            "door_operation_space",
+            "circulation_space",
+            "access_to_key_elements"
+          ],
+          "pass_condition": "Major room functions remain usable.",
+          "fail_action": "FLAG_AND_REVIEW"
+        },
+        {
+          "test_id": "VAL-019",
+          "name": "GARAGE_ACCESS_VALIDATION",
+          "severity": "HIGH",
+          "stage": "CIRCULATION_VALIDATION",
+          "objective": "Ensure vehicle access and house entry relationships are preserved.",
+          "checks": [
+            "vehicle_access_to_garage",
+            "garage_to_house_entry",
+            "no_unintended_private_zone_crossing"
+          ],
+          "pass_condition": "Garage system is functionally connected and privacy-safe.",
+          "fail_action": "CORRECT_AND_REVALIDATE"
+        },
+        {
+          "test_id": "VAL-020",
+          "name": "ASSUMPTION_AUDIT",
+          "severity": "MEDIUM",
+          "stage": "FINAL_ACCEPTANCE",
+          "objective": "Ensure assumptions are visible and not confused with client requirements or official code requirements.",
+          "checks": [
+            "assumptions_recorded",
+            "assumptions_not_presented_as_requirements",
+            "assumptions_not_presented_as_code"
+          ],
+          "pass_condition": "All assumptions are explicitly classified.",
+          "fail_action": "FLAG_AND_REVIEW"
+        },
+        {
+          "test_id": "VAL-021",
+          "name": "OUTPUT_DRIFT_CHECK",
+          "severity": "CRITICAL",
+          "stage": "OUTPUT_CROSS_VALIDATION",
+          "objective": "Detect unintended geometric or functional changes between revisions and outputs.",
+          "checks": [
+            "space_identity_stable",
+            "geometry_delta_explained",
+            "door_delta_explained",
+            "window_delta_explained",
+            "balcony_delta_explained",
+            "floor_count_delta_explained"
+          ],
+          "pass_condition": "Every material change has a documented cause.",
+          "fail_action": "REJECT_AND_RESTORE_SOURCE_CONSISTENCY"
+        },
+        {
+          "test_id": "VAL-022",
+          "name": "FINAL_CRITICAL_FAILURE_SCAN",
+          "severity": "CRITICAL",
+          "stage": "FINAL_ACCEPTANCE",
+          "objective": "Perform one final blocking scan immediately before final delivery.",
+          "checks": [
+            "no_critical_failures",
+            "no_unresolved_required_space_failure",
+            "no_guest_privacy_violation",
+            "no_men_guest_bathroom_failure",
+            "no_stair_discontinuity",
+            "no_floor_count_mismatch",
+            "no_elevation_geometry_mismatch",
+            "no_unsourced_openings",
+            "no_output_drift"
+          ],
+          "pass_condition": "All critical scans pass.",
+          "fail_action": "REJECT_FINAL_DELIVERY"
+        }
+      ],
+      "known_failure_mapping": {
+        "FAIL-001": "VAL-005",
+        "FAIL-002": "VAL-013",
+        "FAIL-003": "VAL-010",
+        "FAIL-004": "VAL-010",
+        "FAIL-005": "VAL-002",
+        "FAIL-006": "VAL-003",
+        "FAIL-007": "VAL-007",
+        "FAIL-008": "VAL-006",
+        "FAIL-009": "VAL-008",
+        "FAIL-010": "VAL-009",
+        "FAIL-011": "VAL-019",
+        "FAIL-012": "VAL-011",
+        "FAIL-013": "VAL-012",
+        "FAIL-014": "VAL-018",
+        "FAIL-015": "VAL-010",
+        "FAIL-016": "VAL-016",
+        "FAIL-017": "VAL-017",
+        "FAIL-018": "VAL-021",
+        "FAIL-019": "VAL-018",
+        "FAIL-020": "VAL-001"
+      },
+      "validation_record_schema": {
+        "project_id": "string",
+        "revision_id": "string",
+        "validation_run_id": "string",
+        "source_geometry_id": "string",
+        "timestamp": "ISO-8601",
+        "overall_status": "DRAFT | REVISION_REQUIRED | REJECTED | VALIDATED | FINAL",
+        "tests": [
+          {
+            "test_id": "string",
+            "status": "PASS | FAIL | FLAG | NOT_APPLICABLE",
+            "severity": "CRITICAL | HIGH | MEDIUM | LOW",
+            "evidence": "string or structured reference",
+            "related_element_ids": [
+              "string"
+            ],
+            "notes": "string"
+          }
+        ],
+        "critical_failures": [
+          {
+            "test_id": "string",
+            "element_ids": [
+              "string"
+            ],
+            "root_cause": "string",
+            "required_action": "string"
+          }
+        ],
+        "assumptions": [
+          "string"
+        ],
+        "warnings": [
+          "string"
+        ],
+        "approval": {
+          "status": "PENDING | APPROVED | BLOCKED",
+          "basis": "string"
+        }
+      },
+      "decision_engine": {
+        "rules": [
+          {
+            "condition": "any critical test FAIL",
+            "result": "REJECTED"
+          },
+          {
+            "condition": "any high test FAIL and unresolved",
+            "result": "REVISION_REQUIRED"
+          },
+          {
+            "condition": "medium issues remain",
+            "result": "REVISION_REQUIRED"
+          },
+          {
+            "condition": "all mandatory tests PASS and no critical failures",
+            "result": "VALIDATED"
+          },
+          {
+            "condition": "validated output plus final acceptance approval",
+            "result": "FINAL"
+          }
+        ]
+      },
+      "regeneration_policy": {
+        "principles": [
+          "Fix the source, not only the visible symptom.",
+          "Rebuild dependent outputs after source geometry changes.",
+          "Never preserve an attractive but invalid output just because it looks better.",
+          "After every critical fix, rerun all affected tests.",
+          "After any geometry revision, rerun cross-output validation."
+        ],
+        "minimum_revalidation_after_changes": {
+          "space_change": [
+            "VAL-002",
+            "VAL-003",
+            "VAL-004",
+            "VAL-006",
+            "VAL-007",
+            "VAL-008",
+            "VAL-016"
+          ],
+          "door_change": [
+            "VAL-004",
+            "VAL-005",
+            "VAL-006",
+            "VAL-007",
+            "VAL-013",
+            "VAL-016"
+          ],
+          "window_change": [
+            "VAL-011",
+            "VAL-013",
+            "VAL-015",
+            "VAL-016"
+          ],
+          "stair_change": [
+            "VAL-009",
+            "VAL-010",
+            "VAL-014",
+            "VAL-015",
+            "VAL-016"
+          ],
+          "global_geometry_change": [
+            "VAL-002",
+            "VAL-004",
+            "VAL-005",
+            "VAL-006",
+            "VAL-007",
+            "VAL-008",
+            "VAL-009",
+            "VAL-010",
+            "VAL-011",
+            "VAL-012",
+            "VAL-013",
+            "VAL-014",
+            "VAL-015",
+            "VAL-016",
+            "VAL-021",
+            "VAL-022"
+          ]
+        }
+      },
+      "final_gate": {
+        "gate_id": "FINAL-GATE-001",
+        "required": true,
+        "conditions": [
+          "overall_status == VALIDATED",
+          "no critical failures",
+          "all required spaces verified",
+          "guest privacy verified",
+          "men guest bathroom lock verified",
+          "multi-floor consistency verified when applicable",
+          "four elevations verified when applicable",
+          "3d consistency verified when applicable",
+          "cross-output consistency verified",
+          "assumptions and warnings disclosed"
+        ],
+        "allowed_result": "FINAL",
+        "failure_result": "REJECTED_OR_REVISION_REQUIRED"
+      },
+      "machine_behavior": {
+        "never_silently_pass": true,
+        "never_invent_code_rule": true,
+        "never_hide_critical_failure": true,
+        "never_generate_independent_elevations": true,
+        "never_generate_independent_floors": true,
+        "never_treat_visual_beauty_as_validation": true,
+        "never_change_room_function_without_authorization": true,
+        "always_preserve_validated_geometry_as_source_of_truth": true,
+        "always_revalidate_after_geometry_change": true
+      },
+      "final_rule": "A design is not accepted because it looks correct. It is accepted only when its requirements, relationships, geometry, privacy, vertical consistency, traceability, and outputs pass the applicable validation gates."
+    },
+    "14_MASTER_DECISION_ENGINE.json": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "system": {
+        "name": "ANT_ALMOHANDES_MASTER_DECISION_ENGINE",
+        "project": "أنت المهندس",
+        "version": "1.0.0",
+        "status": "FOUNDATION",
+        "purpose": "Deterministic architectural decision, conflict-resolution, repair, scoring and pre-delivery control engine",
+        "language": "Arabic",
+        "operating_principle": "Never select the prettiest solution first; select the highest-confidence valid solution that satisfies requirements, relations, privacy, circulation, vertical consistency, constructability and traceability.",
+        "source_of_truth": "VALIDATED_GEOMETRY"
+      },
+      "dependency_chain": {
+        "required_modules": [
+          "01_MASTER_CONTEXT.json",
+          "02_SBC_RESIDENTIAL_RULE_ENGINE.json",
+          "03_FLOOR_PLAN_GENERATION_RULES.json",
+          "04_SPATIAL_RELATION_RULES.json",
+          "05_ELEVATION_RULES.json",
+          "06_OUTPUT_SPECIFICATION.json",
+          "07_KNOWN_FAILURES_AND_FIXES.json",
+          "08_VALIDATION_PROTOCOL.json",
+          "09_MASTER_SYSTEM_INSTRUCTION.md",
+          "10_MASTER_GENERATION_WORKFLOW.json",
+          "11_MASTER_VALIDATION_SCHEMA.json",
+          "12_MASTER_PROJECT_SCHEMA.json",
+          "13_MASTER_PROJECT_JSON_SCHEMA.json"
+        ],
+        "read_order": "01 -> 02 -> 03 -> 04 -> 05 -> 06 -> 07 -> 08 -> 09 -> 10 -> 11 -> 12 -> 13 -> 14"
+      },
+      "decision_hierarchy": {
+        "absolute_order": [
+          "SAFETY_AND_DOCUMENTED_CODE_RULES",
+          "EXPLICIT_CLIENT_REQUIREMENTS",
+          "CRITICAL_SPATIAL_RELATIONS",
+          "PRIVACY_AND_ACCESS_CONTROL",
+          "CIRCULATION_AND_DOOR_LOGIC",
+          "MULTI_FLOOR_AND_VERTICAL_CONSISTENCY",
+          "CONSTRUCTABILITY",
+          "CROSS_OUTPUT_CONSISTENCY",
+          "FUNCTIONAL_QUALITY",
+          "AESTHETICS"
+        ],
+        "rule": "A lower-priority criterion must never repair or justify a violation of a higher-priority criterion."
+      },
+      "hard_invariants": {
+        "must_always_hold": [
+          {
+            "id": "INV-001",
+            "statement": "Every required space must exist with the requested function unless explicitly changed by the client.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-002",
+            "statement": "men_guest_council MUST_CONNECT men_guest_bathroom.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-003",
+            "statement": "men_guest_bathroom MUST_BE_SEPARATED_FROM family_living.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-004",
+            "statement": "Male guest circulation must not require passage through family or private zones.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-005",
+            "statement": "All floors belong to one global building model and share coherent vertical relations.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-006",
+            "statement": "Every elevation element must be traceable to validated geometry.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-007",
+            "statement": "No invented door, window, balcony, room, entrance or massing element may enter a final output.",
+            "failure_action": "REJECT"
+          },
+          {
+            "id": "INV-008",
+            "statement": "No final output may be delivered while a critical validation failure remains open.",
+            "failure_action": "BLOCK_DELIVERY"
+          }
+        ]
+      },
+      "decision_pipeline": {
+        "steps": [
+          {
+            "step": 1,
+            "name": "NORMALIZE_INPUT",
+            "purpose": "Convert client language, sketches and source files into normalized requirements without silently changing intent."
+          },
+          {
+            "step": 2,
+            "name": "LOCK_REQUIREMENTS",
+            "purpose": "Separate hard requirements, preferences, optional items and unknowns."
+          },
+          {
+            "step": 3,
+            "name": "BUILD_PROGRAM",
+            "purpose": "Create the required space program with stable IDs and functional ownership."
+          },
+          {
+            "step": 4,
+            "name": "BUILD_RELATION_GRAPH",
+            "purpose": "Translate functional relationships into machine-checkable constraints."
+          },
+          {
+            "step": 5,
+            "name": "BUILD_ACCESS_GRAPH",
+            "purpose": "Model guest, family, service and vehicle paths and forbidden zones."
+          },
+          {
+            "step": 6,
+            "name": "BUILD_GLOBAL_GEOMETRY",
+            "purpose": "Construct one building model before deriving floors and outputs."
+          },
+          {
+            "step": 7,
+            "name": "GENERATE_CANDIDATES",
+            "purpose": "Create one or more spatial candidates without weakening hard invariants."
+          },
+          {
+            "step": 8,
+            "name": "HARD_FILTER",
+            "purpose": "Immediately eliminate candidates with critical violations."
+          },
+          {
+            "step": 9,
+            "name": "SCORE_SURVIVORS",
+            "purpose": "Rank valid candidates by functional and quality criteria."
+          },
+          {
+            "step": 10,
+            "name": "REPAIR",
+            "purpose": "Repair the root causes of non-critical defects before final selection."
+          },
+          {
+            "step": 11,
+            "name": "REVALIDATE",
+            "purpose": "Run the master validation protocol after every geometry-changing repair."
+          },
+          {
+            "step": 12,
+            "name": "DERIVE_OUTPUTS",
+            "purpose": "Generate plans, elevations, sections, 3D and documents only from validated geometry."
+          },
+          {
+            "step": 13,
+            "name": "CROSS_VALIDATE_OUTPUTS",
+            "purpose": "Verify all outputs represent the same building."
+          },
+          {
+            "step": 14,
+            "name": "FINAL_GATE",
+            "purpose": "Permit FINAL only when no blocking condition remains."
+          }
+        ]
+      },
+      "candidate_scoring": {
+        "purpose": "Rank only candidates that pass all hard invariants.",
+        "weights": {
+          "requirements_satisfaction": 0.22,
+          "critical_relations_quality": 0.18,
+          "privacy": 0.14,
+          "circulation": 0.12,
+          "multi_floor_consistency": 0.1,
+          "constructability": 0.08,
+          "functional_efficiency": 0.07,
+          "output_consistency": 0.05,
+          "aesthetics": 0.04
+        },
+        "constraints": {
+          "weight_sum": 1.0,
+          "score_range": [
+            0,
+            100
+          ],
+          "critical_violation": "candidate_disqualified_before_scoring",
+          "unverified_code_rule": "candidate_flagged_and_not_presented_as_compliant"
+        },
+        "tie_breakers": [
+          "higher_privacy",
+          "shorter_valid_guest_path",
+          "fewer_circulation_conflicts",
+          "better_vertical_alignment",
+          "fewer_assumptions",
+          "simpler_geometry",
+          "better_output_traceability"
+        ]
+      },
+      "conflict_resolution": {
+        "algorithm": [
+          "Identify conflicting requirements or constraints.",
+          "Mark each item as hard, critical, preferred, optional or unknown.",
+          "Apply decision_hierarchy.",
+          "Preserve all hard and critical constraints.",
+          "Relax only lower-priority preferences when necessary.",
+          "Generate alternative spatial arrangements.",
+          "Validate each alternative independently.",
+          "Select the highest-ranked valid alternative.",
+          "If no valid alternative exists, return CONFLICT_UNRESOLVED rather than silently violating a rule."
+        ],
+        "forbidden_behaviors": [
+          "silent_requirement_override",
+          "silent_function_change",
+          "silent_privacy_break",
+          "silent_code_claim",
+          "cosmetic_fix_as_root_cause_fix",
+          "shortest_path_bias_when_privacy_is_broken"
+        ]
+      },
+      "repair_engine": {
+        "repair_order": [
+          "RELATION_GRAPH",
+          "ZONING",
+          "ACCESS_PATHS",
+          "SPACE_PLACEMENT",
+          "DOOR_PLACEMENT",
+          "CIRCULATION",
+          "VERTICAL_ELEMENTS",
+          "OPENINGS",
+          "MASSING",
+          "AESTHETICS"
+        ],
+        "root_cause_rule": "Always repair the earliest layer that caused the failure.",
+        "mandatory_after_repair": [
+          "update_VALIDATED_GEOMETRY",
+          "increment_revision",
+          "rerun_affected_validations",
+          "rerun_cross_output_validation_when_outputs_exist"
+        ],
+        "critical_repair_examples": {
+          "men_guest_bathroom_wrong_access": [
+            "repair guest/family zoning",
+            "repair council-bathroom relation",
+            "repair guest path",
+            "repair bathroom door destination",
+            "revalidate privacy",
+            "revalidate geometry"
+          ],
+          "elevation_mismatch": [
+            "do_not_patch_elevation_only",
+            "inspect_validated_geometry",
+            "derive elevation again",
+            "cross_validate"
+          ]
+        }
+      },
+      "privacy_engine": {
+        "zones": [
+          "PUBLIC",
+          "GUEST",
+          "FAMILY",
+          "PRIVATE",
+          "SERVICE",
+          "CIRCULATION",
+          "EXTERNAL",
+          "UTILITY"
+        ],
+        "hard_rules": [
+          "GUEST_PATH_MUST_NOT_ENTER_PRIVATE_ZONE",
+          "MALE_GUEST_PATH_MUST_NOT_REQUIRE_FAMILY_LIVING_CROSSING",
+          "MEN_GUEST_BATHROOM_MUST_REMAIN_WITHIN_GUEST_SYSTEM",
+          "SERVICE_PATH_SHOULD_NOT_CREATE_UNINTENDED_PRIVATE_ACCESS"
+        ],
+        "path_test": {
+          "method": "graph_search_with_zone_restrictions",
+          "pass_condition": "A valid path exists without traversing forbidden zones.",
+          "failure": "REJECT"
+        }
+      },
+      "geometry_integrity_engine": {
+        "checks": [
+          "closed_building_boundary",
+          "space_inside_boundary",
+          "non_overlapping_required_spaces",
+          "door_connectivity",
+          "window_wall_membership",
+          "stair_connectivity",
+          "vertical_alignment",
+          "floor_identity",
+          "stable_element_ids",
+          "traceability_links"
+        ],
+        "source_rule": "No downstream output may invent geometry absent from VALIDATED_GEOMETRY."
+      },
+      "output_derivation_engine": {
+        "derivation_order": [
+          "VALIDATED_GEOMETRY",
+          "FLOOR_PLANS",
+          "ELEVATIONS",
+          "SECTIONS",
+          "3D_MODEL",
+          "RENDERS",
+          "DWG_DXF",
+          "PDF"
+        ],
+        "forbidden": [
+          "independent_elevation_generation",
+          "independent_floor_generation",
+          "render_driven_geometry_changes",
+          "aesthetic_elements_without_geometry_source"
+        ]
+      },
+      "revision_engine": {
+        "revision_format": "R{major}.{minor}",
+        "rules": [
+          "Every geometry-changing change increments revision.",
+          "Every dependent output is marked stale after its source changes.",
+          "Stale outputs cannot be final.",
+          "Validation results belong to a specific revision.",
+          "Rollback must restore the matching geometry and validation state."
+        ],
+        "stale_output_rule": "SOURCE_CHANGED -> DEPENDENTS_STALE -> REGENERATE -> REVALIDATE"
+      },
+      "failure_memory": {
+        "enabled": true,
+        "source": "07_KNOWN_FAILURES_AND_FIXES.json",
+        "pre_generation_action": "Load relevant failure patterns and add prevention checks before candidate generation.",
+        "post_generation_action": "Search the result for known failure signatures before final acceptance.",
+        "learning_rule": "A repeated failure must trigger a stronger upstream constraint or validation rule, not merely another visual correction."
+      },
+      "validation_gate": {
+        "required_status": "VALIDATED",
+        "blocking_conditions": [
+          "any_CRITICAL_failure",
+          "missing_required_space",
+          "broken_critical_relation",
+          "guest_path_privacy_violation",
+          "multi_floor_discontinuity",
+          "elevation_geometry_mismatch",
+          "invented_geometry_element",
+          "unresolved_code_claim",
+          "stale_dependent_output",
+          "missing_traceability"
+        ],
+        "final_status": "FINAL_ALLOWED_ONLY_IF_ALL_BLOCKERS_CLEAR"
+      },
+      "decision_trace": {
+        "required_fields": [
+          "project_id",
+          "revision_id",
+          "decision_id",
+          "candidate_id",
+          "decision_layer",
+          "input_requirements",
+          "constraints_considered",
+          "rules_applied",
+          "conflicts_detected",
+          "repairs_applied",
+          "validation_results",
+          "selected_candidate",
+          "rejected_candidates",
+          "assumptions",
+          "warnings",
+          "final_status"
+        ],
+        "purpose": "Make every major architectural decision auditable and reproducible."
+      },
+      "execution_pseudocode": [
+        "LOAD 01-13",
+        "NORMALIZE client requirements",
+        "CLASSIFY requirements by priority",
+        "BUILD space program",
+        "BUILD relation graph",
+        "BUILD access/privacy graph",
+        "BUILD global geometry",
+        "LOAD known failure patterns",
+        "GENERATE valid candidates",
+        "FOR each candidate: RUN hard invariant checks",
+        "DISCARD candidates with critical violations",
+        "SCORE surviving candidates",
+        "SELECT best valid candidate",
+        "RUN validation protocol",
+        "IF failures exist: IDENTIFY root cause -> REPAIR -> UPDATE geometry -> REVALIDATE",
+        "WHEN VALIDATED: DERIVE all outputs",
+        "CROSS-VALIDATE all outputs",
+        "IF any output mismatch: MARK stale -> regenerate from geometry -> revalidate",
+        "IF no blockers remain: FINAL",
+        "ELSE: REVISION_REQUIRED or REJECTED"
+      ],
+      "response_control": {
+        "when_internal_processing_is_possible": "Perform the decision process internally and expose only the useful engineering result unless the user asks for the reasoning record.",
+        "when_user_requests_validation": "Return status, blocking failures, affected elements, root causes and required corrections.",
+        "when_user_requests_generation": "Generate only from the latest validated source and preserve all locked constraints.",
+        "when_user_requests_prompt": "Encode the same hard constraints and negative constraints into the prompt without weakening them.",
+        "when_user_requests_json": "Return schema-valid structured data with stable IDs and explicit status fields."
+      },
+      "final_principles": [
+        "VALIDITY_BEATS_APPEARANCE",
+        "ROOT_CAUSE_BEATS_COSMETIC_FIX",
+        "ONE_BUILDING_BEATS_INDEPENDENT_OUTPUTS",
+        "TRACEABILITY_BEATS_GUESSING",
+        "DOCUMENTED_RULES_BEAT_INVENTED_RULES",
+        "CRITICAL_CONSTRAINTS_BEAT_SPACE_SHORTCUTS",
+        "VALIDATION_PRECEDES_FINAL_DELIVERY"
+      ]
+    },
+    "15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE.json": {
+      "module": "MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE",
+      "version": "1.0.0",
+      "language": "Arabic",
+      "purpose": "توليد عدة حلول تخطيطية مرشحة، استبعاد الحلول المخالفة، تحسين الحلول المقبولة، ثم اختيار الحل الأفضل وفق قيود المشروع وأولويات أنت المهندس.",
+      "core_principle": "GENERATE MULTIPLE VALID CANDIDATES -> HARD FILTER -> SCORE -> REPAIR -> REVALIDATE -> SELECT",
+      "depends_on": [
+        "01_MASTER_CONTEXT.json",
+        "02_SBC_RESIDENTIAL_RULE_ENGINE.json",
+        "03_FLOOR_PLAN_GENERATION_RULES.json",
+        "04_SPATIAL_RELATION_RULES.json",
+        "05_ELEVATION_RULES.json",
+        "06_OUTPUT_SPECIFICATION.json",
+        "07_KNOWN_FAILURES_AND_FIXES.json",
+        "08_VALIDATION_PROTOCOL.json",
+        "09_MASTER_SYSTEM_INSTRUCTION.md",
+        "10_MASTER_GENERATION_WORKFLOW.json",
+        "11_MASTER_VALIDATION_SCHEMA.json",
+        "12_MASTER_PROJECT_SCHEMA.json",
+        "13_MASTER_PROJECT_JSON_SCHEMA.json",
+        "14_MASTER_DECISION_ENGINE.json"
+      ],
+      "authority_model": {
+        "source_of_truth": "VALIDATED_GEOMETRY",
+        "hard_constraints": [
+          "documented_code_constraints",
+          "explicit_client_requirements",
+          "critical_spatial_relations",
+          "privacy_barriers",
+          "vertical_consistency",
+          "required_space_presence"
+        ],
+        "soft_constraints": [
+          "circulation_quality",
+          "daylight_quality",
+          "service_efficiency",
+          "structural_regularities",
+          "furniture_feasibility",
+          "aesthetic_quality"
+        ],
+        "optimization_rule": "NO_SOFT_SCORE_MAY_OVERRIDE_A_HARD_CONSTRAINT"
+      },
+      "candidate_generation": {
+        "minimum_candidates": 5,
+        "recommended_candidates": 8,
+        "maximum_candidates": 20,
+        "strategies": [
+          "zoning_variation",
+          "entrance_variation",
+          "circulation_variation",
+          "room_cluster_variation",
+          "stair_position_variation",
+          "service_core_variation",
+          "orientation_variation"
+        ],
+        "preserve_invariants": [
+          "site_boundary",
+          "required_spaces",
+          "required_functions",
+          "critical_relations",
+          "floor_count",
+          "client_locked_elements"
+        ],
+        "seed_reproducibility": {
+          "enabled": true,
+          "field": "generation_seed"
+        },
+        "candidate_identity_fields": [
+          "candidate_id",
+          "parent_candidate_id",
+          "generation_method",
+          "generation_seed",
+          "revision_id"
+        ]
+      },
+      "hard_filter": {
+        "order": [
+          "input_completeness",
+          "required_spaces",
+          "critical_relations",
+          "privacy",
+          "access_paths",
+          "vertical_continuity",
+          "documented_code_rules",
+          "geometry_integrity",
+          "output_traceability"
+        ],
+        "reject_conditions": [
+          "missing_required_space",
+          "wrong_room_function",
+          "men_guest_bathroom_not_serving_men_guest_council",
+          "men_guest_bathroom_connected_to_family_living_as_guest_access",
+          "guest_path_crosses_family_or_private_zone",
+          "stair_discontinuity",
+          "floor_count_mismatch",
+          "invented_major_opening",
+          "invented_balcony",
+          "untraceable_output_element",
+          "unverified_code_rule_presented_as_verified"
+        ],
+        "status_after_filter": [
+          "REJECTED",
+          "ELIGIBLE_FOR_SCORING"
+        ]
+      },
+      "scoring": {
+        "method": "weighted_multi_criteria",
+        "weights": {
+          "requirement_satisfaction": 0.25,
+          "critical_spatial_relations_quality": 0.2,
+          "privacy": 0.15,
+          "circulation": 0.1,
+          "multi_floor_consistency": 0.1,
+          "constructability": 0.07,
+          "service_efficiency": 0.05,
+          "furniture_feasibility": 0.03,
+          "aesthetics": 0.05
+        },
+        "score_range": [
+          0,
+          100
+        ],
+        "hard_constraint_rule": "A candidate with any unresolved CRITICAL failure receives score=null and cannot be selected.",
+        "tie_breakers": [
+          "fewer_assumptions",
+          "fewer_special_cases",
+          "simpler_circulation",
+          "better_structural_regularity",
+          "higher_traceability"
+        ],
+        "pareto_analysis": {
+          "enabled": true,
+          "objectives": [
+            "privacy",
+            "circulation",
+            "constructability",
+            "space_efficiency",
+            "aesthetics"
+          ],
+          "use_before_final_selection": true
+        }
+      },
+      "space_efficiency": {
+        "goal": "maximize useful program area without sacrificing critical relationships or circulation.",
+        "penalties": [
+          "excessive_corridor_area",
+          "dead_spaces",
+          "awkward_residual_spaces",
+          "duplicated_circulation",
+          "unusable_furniture_zones"
+        ],
+        "never_trade_for": [
+          "critical_privacy",
+          "critical_access",
+          "documented_code_rules",
+          "required_space_presence"
+        ]
+      },
+      "optimization_loop": {
+        "max_iterations": 10,
+        "steps": [
+          "evaluate",
+          "identify_lowest_scoring_constraint",
+          "apply_local_repair",
+          "recompute_geometry",
+          "rerun_hard_filter",
+          "rescore",
+          "compare_with_previous_best"
+        ],
+        "stop_conditions": [
+          "validated_candidate_improves_no_further",
+          "iteration_limit_reached",
+          "all_critical_and_high_priority_constraints_satisfied"
+        ],
+        "rollback_on_regression": true
+      },
+      "repair_engine": {
+        "priority_order": [
+          "relation_violation",
+          "privacy_violation",
+          "missing_space",
+          "circulation_violation",
+          "vertical_violation",
+          "geometry_violation",
+          "service_conflict",
+          "furniture_conflict",
+          "aesthetic_issue"
+        ],
+        "repair_principles": [
+          "repair_root_cause_not_visual_symptom",
+          "change_smallest_necessary_set_of_variables",
+          "preserve_locked_client_requirements",
+          "preserve_validated_elements_when_possible",
+          "revalidate_after_every_structural_repair"
+        ],
+        "forbidden_repairs": [
+          "hiding_violation_with_furniture",
+          "moving_only_the_render_element",
+          "changing_room_function_silently",
+          "breaking_critical_relation_to_gain_area",
+          "inventing_openings_to_improve_facade"
+        ]
+      },
+      "men_guest_bathroom_special_test": {
+        "enabled": true,
+        "must_connect": [
+          "men_guest_council"
+        ],
+        "must_be_separated_from": [
+          "family_living"
+        ],
+        "guest_access_path": [
+          "men_guest_entrance",
+          "men_guest_council",
+          "men_guest_bathroom"
+        ],
+        "forbidden_intermediate_zones": [
+          "family",
+          "private"
+        ],
+        "failure_action": "REJECT_CANDIDATE"
+      },
+      "multi_floor_optimization": {
+        "model_scope": "GLOBAL_BUILDING_FIRST",
+        "shared_elements": [
+          "stairs",
+          "elevator",
+          "shafts",
+          "structural_axes",
+          "major_walls",
+          "major_openings",
+          "vertical_masses"
+        ],
+        "checks": [
+          "vertical_alignment",
+          "floor_to_floor_access",
+          "shaft_continuity",
+          "opening_alignment",
+          "mass_consistency"
+        ],
+        "forbidden": "optimizing_each_floor_as_an_independent_problem"
+      },
+      "candidate_comparison": {
+        "compare_only_eligible_candidates": true,
+        "required_comparison_fields": [
+          "candidate_id",
+          "validation_status",
+          "hard_failures",
+          "score_total",
+          "requirement_score",
+          "relation_score",
+          "privacy_score",
+          "circulation_score",
+          "constructability_score",
+          "assumptions_count"
+        ],
+        "selection_rule": "select highest scoring eligible candidate after Pareto and tie-break analysis",
+        "minimum_final_status": "VALIDATED"
+      },
+      "diversity_control": {
+        "purpose": "avoid generating near-duplicate candidates.",
+        "measures": [
+          "zoning_signature",
+          "circulation_signature",
+          "stair_signature",
+          "entrance_signature",
+          "space_cluster_signature"
+        ],
+        "minimum_novelty_threshold": 0.15,
+        "rule": "discard candidate if structural and spatial signature is too similar to an already retained candidate unless it scores materially better."
+      },
+      "uncertainty_management": {
+        "assumption_penalty": true,
+        "unverified_rule_penalty": null,
+        "rule": "unverified code claims are not treated as scoring penalties only; they are validation blockers when presented as verified requirements.",
+        "document_assumptions": true
+      },
+      "output_contract": {
+        "candidate_package_fields": [
+          "candidate_id",
+          "generation_summary",
+          "space_program",
+          "relation_graph",
+          "zoning",
+          "geometry",
+          "validation",
+          "score",
+          "assumptions",
+          "warnings",
+          "traceability"
+        ],
+        "final_selection_fields": [
+          "selected_candidate_id",
+          "rejected_candidate_ids",
+          "selection_reason",
+          "validation_status",
+          "revision_id"
+        ],
+        "derived_outputs": [
+          "floor_plans",
+          "elevations",
+          "sections",
+          "3d",
+          "renders",
+          "dwg",
+          "dxf",
+          "pdf"
+        ],
+        "source_rule": "all derived outputs must reference selected VALIDATED_GEOMETRY"
+      },
+      "decision_log": {
+        "required": true,
+        "record": [
+          "timestamp",
+          "project_id",
+          "revision_id",
+          "candidate_id",
+          "generation_method",
+          "hard_filter_result",
+          "score_breakdown",
+          "repairs_applied",
+          "validation_result",
+          "selection_decision"
+        ],
+        "purpose": "make candidate selection auditable and reproducible"
+      },
+      "acceptance_gate": {
+        "final_candidate_must_be": [
+          "VALIDATED",
+          "all_required_spaces_present",
+          "all_critical_relations_satisfied",
+          "privacy_validated",
+          "vertical_consistency_validated",
+          "output_traceability_validated"
+        ],
+        "blocked_if": [
+          "any_CRITICAL_failure",
+          "unresolved_high_priority_failure",
+          "unverified_rule_claimed_as_verified",
+          "geometry_output_mismatch"
+        ],
+        "final_rule": "THE BEST CANDIDATE IS THE BEST VALIDATED CANDIDATE, NOT THE PRETTIEST CANDIDATE."
+      },
+      "operational_sequence": [
+        "LOAD_PROJECT",
+        "LOCK_REQUIREMENTS",
+        "BUILD_RELATIONS",
+        "GENERATE_CANDIDATES",
+        "HARD_FILTER",
+        "SCORE_ELIGIBLE",
+        "PARETO_ANALYSIS",
+        "REPAIR_TOP_CANDIDATES",
+        "REVALIDATE",
+        "SELECT_FINAL",
+        "DERIVE_OUTPUTS",
+        "CROSS_VALIDATE",
+        "DELIVER"
+      ],
+      "anti_failure_rules": {
+        "never_select_first_candidate_by_default": true,
+        "never_accept_visual_quality_as_functional_proof": true,
+        "never_relax_critical_constraints_to_increase_score": true,
+        "never_generate_final_outputs_from_rejected_candidate": true,
+        "never_allow_revision_without_revalidation": true
+      },
+      "final_operating_principle": "GENERATE BROADLY, FILTER STRICTLY, OPTIMIZE SCIENTIFICALLY, VALIDATE REPEATEDLY, DELIVER ONLY THE BEST VALIDATED GEOMETRY."
+    }
+  }
+}

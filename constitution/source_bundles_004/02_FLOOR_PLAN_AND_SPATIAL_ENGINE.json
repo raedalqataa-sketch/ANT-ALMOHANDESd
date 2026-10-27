@@ -1,0 +1,245 @@
+{
+  "bundle_metadata": {
+    "system": "ANT_ALMOHANDES",
+    "type": "PROJECT_SOURCE_BUNDLE",
+    "purpose": "Consolidated reference source preserving the original numbered artifacts 01-17 for use within a five-source Project limit.",
+    "preservation_policy": "Original JSON objects are embedded without semantic modification. The Markdown instruction file is embedded verbatim as plain text.",
+    "source_count": 2,
+    "source_files": [
+      "03_FLOOR_PLAN_GENERATION_RULES.json",
+      "04_SPATIAL_RELATION_RULES.json"
+    ]
+  },
+  "sources": {
+    "03_FLOOR_PLAN_GENERATION_RULES.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "FLOOR_PLAN_GENERATION_RULES",
+        "version": "1.0.0",
+        "core_concept": "CONSTRAINT_FIRST_ARCHITECTURE"
+      },
+      "pipeline": [
+        "SITE_ANALYSIS",
+        "PROGRAM_ANALYSIS",
+        "SPACE_CLASSIFICATION",
+        "RELATION_GRAPH",
+        "ZONING",
+        "SPATIAL_LAYOUT",
+        "DOOR_ANALYSIS",
+        "CIRCULATION_ANALYSIS",
+        "VERTICAL_ANALYSIS",
+        "VALIDATION"
+      ],
+      "space_classes": [
+        "PUBLIC",
+        "GUEST",
+        "FAMILY",
+        "PRIVATE",
+        "SERVICE",
+        "CIRCULATION",
+        "EXTERNAL",
+        "UTILITY"
+      ],
+      "relation_types": [
+        "MUST_CONNECT",
+        "SHOULD_CONNECT",
+        "MUST_BE_SEPARATED",
+        "SHOULD_BE_NEAR",
+        "SHOULD_BE_FAR",
+        "DIRECT_ACCESS",
+        "INDIRECT_ACCESS",
+        "PRIVATE_ACCESS",
+        "GUEST_ACCESS",
+        "SERVICE_ACCESS",
+        "VISUAL_SEPARATION",
+        "VERTICAL_ALIGNMENT"
+      ],
+      "critical_rules": [
+        {
+          "rule_id": "FP-001",
+          "statement": "men_guest_council MUST_CONNECT men_guest_bathroom",
+          "severity": "CRITICAL"
+        },
+        {
+          "rule_id": "FP-002",
+          "statement": "men_guest_bathroom MUST_BE_SEPARATED_FROM family_living",
+          "severity": "CRITICAL"
+        },
+        {
+          "rule_id": "FP-003",
+          "statement": "guest paths MUST_NOT cross family/private zones unless explicitly required and validated",
+          "severity": "CRITICAL"
+        },
+        {
+          "rule_id": "FP-004",
+          "statement": "stairs are critical vertical circulation and must align across floors",
+          "severity": "CRITICAL"
+        },
+        {
+          "rule_id": "FP-005",
+          "statement": "kitchen should be near dining and must not block main circulation",
+          "severity": "HIGH"
+        },
+        {
+          "rule_id": "FP-006",
+          "statement": "garage MUST_CONNECT vehicle access and should connect house entry",
+          "severity": "HIGH"
+        }
+      ],
+      "entrances": [
+        "MAIN_ENTRANCE",
+        "MEN_GUEST_ENTRANCE",
+        "FAMILY_ENTRANCE",
+        "SERVICE_ENTRANCE",
+        "GARAGE_ENTRANCE"
+      ],
+      "multi_floor": {
+        "principle": "BUILDING_FIRST_THEN_FLOORS",
+        "forbidden": "GENERATE_EACH_FLOOR_INDEPENDENTLY",
+        "shared_elements": [
+          "stairs",
+          "columns",
+          "structural_axes",
+          "shafts",
+          "major_walls",
+          "major_openings"
+        ]
+      },
+      "validation": [
+        "ALL_REQUIRED_SPACES",
+        "MEN_BATHROOM_ACCESS_AND_SEPARATION",
+        "GUEST_PATH",
+        "STAIR_CONTINUITY",
+        "VERTICAL_ALIGNMENT",
+        "FURNITURE_FEASIBILITY",
+        "CODE_RULES",
+        "ELEVATION_COMPATIBILITY"
+      ],
+      "failure_policy": {
+        "critical": "REJECT_AND_REGENERATE"
+      }
+    },
+    "04_SPATIAL_RELATION_RULES.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "SPATIAL_RELATION_RULES",
+        "version": "1.0.0",
+        "core_concept": "SPACE_RELATION_GRAPH"
+      },
+      "privacy_levels": {
+        "PUBLIC": 1,
+        "GUEST": 2,
+        "FAMILY": 3,
+        "PRIVATE": 4,
+        "SERVICE": 5
+      },
+      "relations": [
+        "MUST_CONNECT",
+        "SHOULD_CONNECT",
+        "MUST_BE_SEPARATED",
+        "SHOULD_BE_NEAR",
+        "SHOULD_BE_FAR",
+        "DIRECT_ACCESS",
+        "INDIRECT_ACCESS",
+        "PRIVATE_ACCESS",
+        "GUEST_ACCESS",
+        "SERVICE_ACCESS",
+        "VISUAL_SEPARATION",
+        "VERTICAL_ALIGNMENT"
+      ],
+      "guest_system": [
+        {
+          "from": "men_guest_entrance",
+          "relation": "MUST_CONNECT",
+          "to": "men_guest_council"
+        },
+        {
+          "from": "men_guest_council",
+          "relation": "MUST_CONNECT",
+          "to": "men_guest_bathroom"
+        },
+        {
+          "from": "men_guest_bathroom",
+          "relation": "MUST_BE_SEPARATED",
+          "to": "family_living"
+        }
+      ],
+      "family_system": [
+        {
+          "from": "family_entrance",
+          "relation": "MUST_CONNECT",
+          "to": "family_living"
+        },
+        {
+          "from": "family_living",
+          "relation": "SHOULD_CONNECT",
+          "to": "dining"
+        },
+        {
+          "from": "kitchen",
+          "relation": "SHOULD_BE_NEAR",
+          "to": "dining"
+        }
+      ],
+      "garage_system": [
+        {
+          "from": "vehicle_access",
+          "relation": "MUST_CONNECT",
+          "to": "garage"
+        },
+        {
+          "from": "garage",
+          "relation": "SHOULD_CONNECT",
+          "to": "house_entry"
+        },
+        {
+          "from": "garage",
+          "relation": "MUST_BE_SEPARATED",
+          "to": "family_living"
+        }
+      ],
+      "path_rules": [
+        {
+          "path_id": "PATH-MEN-001",
+          "start": "men_guest_entrance",
+          "destination": "men_guest_bathroom",
+          "allowed_zones": [
+            "PUBLIC",
+            "GUEST"
+          ],
+          "forbidden_zones": [
+            "FAMILY",
+            "PRIVATE"
+          ]
+        },
+        {
+          "path_id": "PATH-FAMILY-001",
+          "start": "family_entrance",
+          "destination": "family_living",
+          "allowed_zones": [
+            "PUBLIC",
+            "FAMILY"
+          ]
+        },
+        {
+          "path_id": "PATH-GARAGE-001",
+          "start": "garage",
+          "destination": "house_entry",
+          "allowed_zones": [
+            "VEHICLE",
+            "PUBLIC",
+            "FAMILY"
+          ],
+          "forbidden_zones": [
+            "PRIVATE"
+          ]
+        }
+      ],
+      "door_graph": {
+        "rule": "كل باب Edge له from/to/type/access/privacy_effect ويتم التحقق منه."
+      },
+      "conflict_policy": "لا يتم كسر علاقة حرجة بسبب ضيق المساحة أو الرغبة الجمالية؛ يعاد توزيع الفراغات.",
+      "final_rule": "NO_RELATION_NO_GENERATION"
+    }
+  }
+}

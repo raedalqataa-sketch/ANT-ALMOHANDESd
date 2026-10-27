@@ -1,0 +1,262 @@
+{
+  "baseline": "32be0b0",
+  "no_historical_content_invented": true,
+  "rows": [
+    {
+      "source": "constitution/source_bundles_004/05_FAILURE_MEMORY_SYSTEM_INSTRUCTION_AND_MASTER_SCHEMA.json",
+      "status": "FOUND_USER_ATTACHMENT",
+      "implementation": "PARTIAL; mapped modules and explicit unsupported outputs below",
+      "conflict": "cannot reconstruct historical instructions or declare implemented",
+      "previous_status": "MISSING before user supplied bundles"
+    },
+    {
+      "source": "constitution/source_bundles_004/03_OUTPUT_CONSISTENCY_AND_GEOMETRY_ENGINE.json",
+      "status": "FOUND_USER_ATTACHMENT",
+      "implementation": "PARTIAL; mapped modules and explicit unsupported outputs below",
+      "conflict": "cannot reconstruct historical instructions or declare implemented",
+      "previous_status": "MISSING before user supplied bundles"
+    },
+    {
+      "source": "constitution/source_bundles_004/04_VALIDATION_DECISION_AND_OPTIMIZATION_ENGINE.json",
+      "status": "FOUND_USER_ATTACHMENT",
+      "implementation": "PARTIAL; mapped modules and explicit unsupported outputs below",
+      "conflict": "cannot reconstruct historical instructions or declare implemented",
+      "previous_status": "MISSING before user supplied bundles"
+    },
+    {
+      "source": "constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json",
+      "sha256": "a16530fa6ed5af5ca9840479011b2c2d94b36df24f2bb84ace18b5fe5f050d30",
+      "role": "current constitution",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "assess_candidate checks, hard failures and REVIEW",
+      "remaining": "legal completeness and old-vs-new text comparison not provable"
+    },
+    {
+      "source": "constitution/runtime_coverage_v04.json",
+      "sha256": "7680d239558604bcf74bd963895c388743241f8e9cbe2af4c3cf796d7cdbfc66",
+      "role": "current coverage",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "scope inventory, not source legal approval",
+      "remaining": "partial checks and PENDING remain"
+    },
+    {
+      "source": "backend/design/functional_program.py",
+      "sha256": "d2ccbe4e28283f995464e176723dbc0f870528cdfde65cedd10e0b32c5242321",
+      "role": "function",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "program validator, body/furniture aware movement, independent overlaps",
+      "remaining": "raster accuracy; no full MEP approval"
+    },
+    {
+      "source": "backend/design/design_selection.py",
+      "sha256": "7afa2141c866523cca2009ebc4ee3a34ecadc7154c133cb614f85126431d2276",
+      "role": "portfolio",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "coordinate displacement/order heuristic; interchangeable semantic duplicate filter",
+      "remaining": "no structural adjacency graph incompatibility"
+    },
+    {
+      "source": "backend/design/reference_patterns.py",
+      "sha256": "d46c0f6271030b79356bc3dcb5eb1dda2bf6eacf4328c9ac3150f49dda222a5e",
+      "role": "reference patterns",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "guest invariant, door routes, wet stacking and outlook influence rank",
+      "remaining": "no calibrated image coordinates, no true training"
+    },
+    {
+      "source": "quality_review/reference_library/catalog.json",
+      "sha256": "449c94e411706871aab1eb7929625ffef08b8cc7128996005747cd3232d5b400",
+      "role": "user images",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "six retained projects, P02/P05 excluded, 19 unique images",
+      "remaining": "country/city unverified; quantitative polygon adjacency unknown"
+    },
+    {
+      "source": "quality_review/space_efficiency.py",
+      "sha256": "13a9e0c978f4042eff8ddd2bab1cc5650f1c46a7ba46f423144fff8e81f6c6dc",
+      "role": "diagnostics",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "gross circulation geometric union plus legacy net ratio",
+      "remaining": "room internal travel polygons not represented"
+    },
+    {
+      "source": "quality_review/unallocated_geometry.py",
+      "sha256": "d6dca97d00e204bf30f008a0d49ad1dc8eef2c6893dc93e0db0b067e7be6148f",
+      "role": "voids",
+      "status": "PRESENT_PARTIAL",
+      "implemented": "0.5m morphological diagnostic, intentional void exclusion",
+      "remaining": "wide exterior recesses cannot be globally certified"
+    },
+    {
+      "source": "floor_plan_rules_v1.json:SRC-06/modules/master_schema",
+      "status": "FOUND_EMBEDDED_FUNCTIONAL_EQUIVALENT",
+      "keys": [
+        "$schema",
+        "$id",
+        "title",
+        "description",
+        "type",
+        "additionalProperties",
+        "required",
+        "properties",
+        "$defs",
+        "x_ant_almohandes_engine_contract"
+      ],
+      "original_file_identity_verified": false
+    },
+    {
+      "source": "floor_plan_rules_v1.json:SRC-06/modules/rules_engine",
+      "status": "FOUND_EMBEDDED_FUNCTIONAL_EQUIVALENT",
+      "keys": [
+        "engine_meta",
+        "legal_and_evidence_firewall",
+        "execution_model",
+        "data_binding",
+        "evaluator_library",
+        "executable_design_rules",
+        "mandatory_relation_rules",
+        "validation_gates",
+        "rule_conflict_resolver",
+        "proposal_scoring",
+        "auto_remediation_router",
+        "minimum_evidence_per_result",
+        "numeric_policy",
+        "release_algorithm",
+        "self_test_requirements",
+        "final_principle"
+      ],
+      "original_file_identity_verified": false
+    },
+    {
+      "source": "floor_plan_rules_v1.json:SRC-06/modules/project_memory",
+      "status": "FOUND_EMBEDDED_FUNCTIONAL_EQUIVALENT",
+      "keys": [
+        "schema_meta",
+        "authority_and_work_style",
+        "precedence",
+        "information_statuses",
+        "source_of_truth",
+        "generalized_lessons",
+        "edit_existing_plan_protocol",
+        "project_specific_profiles"
+      ],
+      "original_file_identity_verified": false
+    },
+    {
+      "source": "floor_plan_rules_v1.json:SRC-06/modules/planning_engine",
+      "status": "FOUND_EMBEDDED_FUNCTIONAL_EQUIVALENT",
+      "keys": [
+        "schema",
+        "role",
+        "source_of_truth",
+        "information_status",
+        "yemen_context",
+        "input_contract",
+        "workflow",
+        "program_rules",
+        "mandatory_relation_graph",
+        "geometry_engine",
+        "floor_plan_output",
+        "validation_gates",
+        "output_status",
+        "response_protocol",
+        "hard_prohibitions",
+        "installed_extensions",
+        "final_principle"
+      ],
+      "original_file_identity_verified": false
+    },
+    {
+      "source": "floor_plan_rules_v1.json:SRC-06/modules/cad_output_contract",
+      "status": "FOUND_EMBEDDED_FUNCTIONAL_EQUIVALENT",
+      "keys": [
+        "schema_meta",
+        "source_of_truth",
+        "units_and_coordinates",
+        "required_layers",
+        "geometry_requirements",
+        "block_policy",
+        "dimensioning_policy",
+        "deliverable_variants",
+        "release_checks",
+        "prohibitions"
+      ],
+      "original_file_identity_verified": false
+    }
+  ],
+  "historical_search": {
+    "methods": [
+      "git fetch all advertised branches; all-ref JSON path history",
+      "all-ref content regex search",
+      "workspace JSON content search",
+      "ZIP member inventories",
+      "embedded source_documents content + canonical hash verification"
+    ],
+    "matching_commit": "99f7e3d",
+    "embedded_source": "constitution/references/floor_plan_rules_v1.json#/source_documents/SRC-06/content",
+    "source_version": "2.0.0",
+    "hash_verified": true,
+    "original_three_filenames_found": false,
+    "identity_with_missing_originals": "NOT_ESTABLISHED",
+    "functional_equivalents": {
+      "output_consistency_geometry": [
+        "master_schema",
+        "planning_engine",
+        "cad_output_contract"
+      ],
+      "validation_decision_optimization": [
+        "rules_engine",
+        "orchestrator",
+        "workflow"
+      ],
+      "failure_memory_instruction_schema": [
+        "project_memory",
+        "master_schema"
+      ]
+    }
+  },
+  "current_source_status": "Original five user-provided bundles now available; supersedes earlier missing-file finding, historical identity search preserved.",
+  "new_original_coverage": [
+    {
+      "source": "02/03_FLOOR_PLAN_GENERATION_RULES:FP-001..005",
+      "implementation": "program_graph / guest distributor geometry / functional_program V4 / stair continuity",
+      "status": "IMPLEMENTED_WITH_SCOPE_LIMITS"
+    },
+    {
+      "source": "03/16_MASTER_GEOMETRY_RECONSTRUCTION_ENGINE:GEO-CRIT-001..005",
+      "implementation": "immutable baseline copies; materialize rebuild; fingerprint before export; DXF/PDF coordinate checks",
+      "status": "PARTIAL",
+      "gap": "global 3D/sections/facades not generated in this task"
+    },
+    {
+      "source": "04/15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE:space_efficiency",
+      "implementation": "gross and internal sampled movement union, void polygons, program/furniture/path gates, constrained reference shapes",
+      "status": "IMPLEMENTED_WITH_SCOPE_LIMITS",
+      "gap": "all furnished dead area unknown/REVIEW; not every internal journey modeled"
+    },
+    {
+      "source": "04/15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE:scoring",
+      "implementation": "existing rules hard-filter first; explicit geometric trade-off score and measured Pareto diagnostics",
+      "status": "PARTIAL",
+      "gap": "source 0..100 weights not asserted implemented; constructability/aesthetic global scores unverified"
+    },
+    {
+      "source": "05/17_MASTER_FAILURE_LEARNING_MEMORY_ENGINE",
+      "implementation": "bounded per-candidate failure ledger; root cause/repair evidence; mappings to known failures; no automatic global rules",
+      "status": "PARTIAL",
+      "gap": "cross-project persistent learning database not implemented"
+    },
+    {
+      "source": "01/02_SBC_RESIDENTIAL_RULE_ENGINE",
+      "implementation": "existing verified rules unchanged; source/version tracking; numeric placeholders never activated",
+      "status": "PARTIAL",
+      "gap": "no full official SBC corpus/parcel approval"
+    },
+    {
+      "source": "05/13_MASTER_PROJECT_JSON_SCHEMA",
+      "implementation": "legacy JSON compatibility preserved; experimental additive fields",
+      "status": "NOT_MIGRATED",
+      "gap": "full project-schema migration outside this bounded experiment"
+    }
+  ]
+}

@@ -88,6 +88,12 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         from .guest_composition import allocate_side_spine
         composed=allocate_side_spine(requests,lanes,t,guest_clear_width,coherent,policy,entry_face,guest_area_factor)
         if composed is not None:return composed
+    def planned_length(room,lane,thickness):
+        if policy=='reference_hub':
+            from .intelligence.references import preferred_shape
+            shape=preferred_shape(room,lane,thickness,guest_area_factor)
+            if shape:return shape['net_depth' if lane['axis']=='y' else 'net_width']+thickness
+        return length_for(room,lane,thickness)
     capacities=[r['depth' if r['axis']=='y' else 'width'] for r in lanes]
     states=[([0.]*len(lanes),[[] for _ in lanes])]
     bundles={}
@@ -100,7 +106,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
     def bundle_order(rs):
         size=(-max(r['min_side'] for r in rs),-sum(r['min_area'] for r in rs),rs[0]['id'])
         if policy=='legacy':return size
-        if policy=='relationship_aware':
+        if policy in ('relationship_aware','functional_hub','reference_hub'):
             rank={'majlis':0,'kitchen':1,'dining':2,'living':3,'master':4,
                   'bedroom':5,'bathroom':6,'office':7,'laundry':8,'storage':9}
             return (min(rank.get(r['kind'],10) for r in rs),*size)
@@ -109,7 +115,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         return (min(rank.get(r['kind'],10) for r in rs),*size)
     ordered=sorted(bundles.values(),key=bundle_order)
     def relationship_cost(groups):
-        if policy!='relationship_aware':return 0.
+        if policy not in ('relationship_aware','functional_hub','reference_hub'):return 0.
         kinds=[{r['kind'] for r in group if not r.get('guest_distributor')} for group in groups]
         present=set().union(*kinds) if kinds else set()
         def detached(first,second):
@@ -128,7 +134,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         expanded=[]
         for used,groups in states:
             for i,lane in enumerate(lanes):
-                length=sum(length_for(room,lane,t) for room in bundle)
+                length=sum(planned_length(room,lane,t) for room in bundle)
                 if used[i]+length>capacities[i]+EPS:continue
                 u=used.copy();u[i]+=length;g=[row.copy() for row in groups];g[i].extend(bundle)
                 # Best-fit plus load balance; not an architectural quality score.
@@ -137,7 +143,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 expanded.append((score,u,g))
         if not expanded:
             from .allocation_repair import reassign_bundles
-            fallback_allocation=reassign_bundles(ordered,lanes,t,length_for)
+            fallback_allocation=reassign_bundles(ordered,lanes,t,planned_length)
             if fallback_allocation is None:return None
             break
         expanded.sort(key=lambda state:state[0]);states=[(u,g) for _,u,g in expanded[:20]]
@@ -154,7 +160,7 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         # Functional sequencing along a wing: services then social spaces, bedrooms together.
         order={'bathroom':0,'storage':1,'laundry':2,'kitchen':3,'dining':4,'living':5,'majlis':6,'office':7,'master':8,'bedroom':9}
         sequence=sorted(groups[i],key=lambda q:((0,q.get('guest_parent') or q['id'],(1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)) if q.get('zone')=='guest' else (1,str(order[q['kind']]),q['id'])))
-        if policy=='relationship_aware':
+        if policy in ('relationship_aware','functional_hub','reference_hub'):
             rank={'kitchen':0,'dining':1,'living':2,'office':3,'master':4,
                   'bedroom':5,'bathroom':6,'laundry':7,'storage':8,'majlis':9}
             sequence=sorted(sequence,key=lambda q:(
@@ -168,17 +174,34 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         elif policy=='family_front':
             sequence=sorted(sequence,key=lambda q:q.get('zone')=='guest')
         for r in sequence:
-            base=length_for(r,lane,t)
+            base=planned_length(r,lane,t)
             growth=min(extra*r['min_area']/weights,base*(.75 if coherent else .15))
             if coherent:
                 cross=lane['width' if axis=='y' else 'depth']-t
                 growth=min(growth,max(0,2.8*cross+t-base))
+            if policy in ('functional_hub','reference_hub'):
+                from .intelligence.allocation import bounded_growth
+                growth=bounded_growth(r,lane,t,base,growth,guest_area_factor)
             length=base+growth
             cell=box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else length,length if axis=='y' else lane['depth'],**copy.deepcopy(r),door_side=lane['door_side'])
+            if policy=='reference_hub':
+                from .intelligence.references import preferred_shape
+                shape=preferred_shape(r,lane,t,guest_area_factor)
+                if shape:
+                    # Keep the host edge attached; external strip is unoccupied,
+                    # never added to the room's usable area or silently reserved.
+                    nw,nd=shape['net_width']+t,shape['net_depth']+t
+                    if axis=='y':
+                        if lane['door_side']=='east':cell['x']+=cell['width']-nw
+                        cell['width']=nw;cell['depth']=nd;length=nd
+                    else:
+                        if lane['door_side']=='south':cell['y']+=cell['depth']-nd
+                        cell['depth']=nd;cell['width']=nw;length=nw
+                    cell['reference_shape']=shape
             cells.append(cell);start+=length
         remaining=lane['y' if axis=='y' else 'x']+capacities[i]-start
         if remaining>t+.05:
-            if remaining<1.6 and cells and cells[-1].get('request_id'):
+            if remaining<1.6 and cells and cells[-1].get('request_id') and not cells[-1].get('reference_shape'):
                 cells[-1]['depth' if axis=='y' else 'width']+=remaining
             else:
                 cells.append(box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else remaining,remaining if axis=='y' else lane['depth'],kind='reserve',name='مساحة مرنة مقترحة',door_side=lane['door_side']))
@@ -779,7 +802,7 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
     options=search_options or [{'family':family,'policy':'legacy','core_position':'rear'} for family in families]
     for option in options:
         family=option['family'];policy=option.get('policy','legacy');core_position=option.get('core_position','rear')
-        if family not in FAMILIES or policy not in ('legacy','social_front','family_front','service_aligned','relationship_aware') or core_position not in ('rear','front'):
+        if family not in FAMILIES or policy not in ('legacy','social_front','family_front','service_aligned','relationship_aware','functional_hub','reference_hub') or core_position not in ('rear','front'):
             raise ValueError('سياسة البحث غير مدعومة')
         label=FAMILIES[family]
         guest_strategy=option.get('guest_strategy','linear')
