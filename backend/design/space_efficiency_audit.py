@@ -47,9 +47,21 @@ def audit_floor(floor, footprint, *, pocket_threshold_m2=0.5, ratio_review=1.8):
         if ratio > ratio_review:
             ratios.append({"room_id": rid, "ratio": round(ratio, 3),
                            "status": "REVIEW_FURNITURE_FIT"})
-    occupied = unary_union(list(shapes.values())) if shapes else boundary.difference(boundary)
-    corridor = unary_union([shapes[str(r["id"])] for r in rooms
-                            if r.get("kind") == "corridor" and str(r.get("id")) in shapes])
+    # Real generated layouts include corridor cells that are not in rooms.
+    cells = floor.get("cells", [])
+    cell_shapes = []
+    invalid_cells = []
+    for i, cell in enumerate(cells):
+        try:
+            cell_shapes.append((cell, _rect(cell)))
+        except (KeyError, TypeError, ValueError, OverflowError):
+            invalid_cells.append(i)
+    coverage = list(shapes.values()) + [p for _, p in cell_shapes]
+    occupied = unary_union(coverage) if coverage else boundary.difference(boundary)
+    corridors = [shapes[str(r.get("id"))] for r in rooms
+                 if r.get("kind") == "corridor" and str(r.get("id")) in shapes]
+    corridors += [p for c, p in cell_shapes if c.get("kind") == "corridor"]
+    corridor = unary_union(corridors) if corridors else boundary.difference(boundary)
     overlaps = []
     keys = list(shapes)
     for i, a in enumerate(keys):
@@ -75,9 +87,11 @@ def audit_floor(floor, footprint, *, pocket_threshold_m2=0.5, ratio_review=1.8):
         "leftover_review_regions": pockets,
         "elongated_room_reviews": ratios,
         "invalid_rooms": invalid,
+        "invalid_cells": invalid_cells,
+        "corridor_geometry_source": "rooms_and_cells" if cells else "rooms_only",
         "room_overlaps": overlaps,
         "rooms_outside_envelope": outside,
-        "status": "INVALID_GEOMETRY" if invalid or overlaps or outside else
+        "status": "INVALID_GEOMETRY" if invalid or invalid_cells or overlaps or outside else
                   "REVIEW" if pockets or ratios else "MEASURED",
         "limitations": [
             "Leftover area includes possible wall thickness and intentional voids",
