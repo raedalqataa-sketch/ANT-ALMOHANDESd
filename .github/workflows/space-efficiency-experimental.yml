@@ -1,0 +1,27 @@
+name: Experimental Space Efficiency Tests
+on:
+  push:
+    branches:
+      - feature/space-efficiency-architectural-critic-005
+  pull_request:
+    paths:
+      - 'backend/design/space_efficiency_*.py'
+      - 'backend/design/architectural_critic.py'
+      - 'tests/test_space_efficiency_*.py'
+      - 'tests/test_architectural_critic.py'
+  workflow_dispatch:
+jobs:
+  focused-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Focused tests
+        run: python -m pytest -q tests/test_space_efficiency_audit.py tests/test_space_efficiency_ranking.py tests/test_architectural_critic.py
+      - name: Existing regression suite
+        run: python -m pytest -q
