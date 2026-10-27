@@ -1,0 +1,197 @@
+{
+  "bundle_metadata": {
+    "system": "ANT_ALMOHANDES",
+    "type": "PROJECT_SOURCE_BUNDLE",
+    "purpose": "Consolidated reference source preserving the original numbered artifacts 01-17 for use within a five-source Project limit.",
+    "preservation_policy": "Original JSON objects are embedded without semantic modification. The Markdown instruction file is embedded verbatim as plain text.",
+    "source_count": 2,
+    "source_files": [
+      "01_MASTER_CONTEXT.json",
+      "02_SBC_RESIDENTIAL_RULE_ENGINE.json"
+    ]
+  },
+  "sources": {
+    "01_MASTER_CONTEXT.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "project_name": "أنت المهندس",
+        "version": "1.0.0",
+        "language": "Arabic",
+        "purpose": "نظام هندسي مساعد لتوليد حلول سكنية مقيدة بالمتطلبات والعلاقات والقواعد والتحقق."
+      },
+      "markets": [
+        "Saudi Arabia",
+        "Yemen"
+      ],
+      "principles": [
+        "REQUIREMENTS_FIRST",
+        "SPATIAL_RELATIONS_OVER_APPEARANCE",
+        "VALIDATE_BEFORE_DELIVERY",
+        "SINGLE_SOURCE_OF_TRUTH",
+        "NO_INVENTED_CODE_RULES"
+      ],
+      "workflow": [
+        "requirements",
+        "program",
+        "constraints",
+        "spatial_solution",
+        "geometry",
+        "validation",
+        "output",
+        "final_review"
+      ],
+      "priority": [
+        "SAFETY_AND_CODE",
+        "CLIENT_REQUIREMENTS",
+        "SPATIAL_RELATIONS",
+        "PRIVACY",
+        "CIRCULATION",
+        "MULTI_FLOOR_CONSISTENCY",
+        "CONSTRUCTABILITY",
+        "AESTHETICS"
+      ],
+      "services": [
+        "صمم منزلك",
+        "صمم منزلك بالمبلغ الذي تريد",
+        "توليد المخططات التنفيذية",
+        "توليد فيديو",
+        "الديكور الداخلي",
+        "حاسبة البناء",
+        "المكتبة المعمارية",
+        "المراجعة الهندسية",
+        "تحليل التربة",
+        "مساعد التصميم AI",
+        "الإرشاد الصوتي",
+        "أسعار المواد",
+        "المصادقة على المخططات",
+        "السوق المعماري"
+      ],
+      "code_framework": {
+        "primary_edition": "SBC 2024",
+        "references": [
+          "SBC 1101",
+          "SBC 1102",
+          "SBC 201"
+        ],
+        "warning": "هذا الملف ليس بديلًا عن النص الرسمي للكود؛ القواعد الرقمية الملزمة يجب أن تكون موثقة في محرك القواعد بمصدر ونسخة."
+      },
+      "ai_behavior": {
+        "must": [
+          "تحليل المتطلبات",
+          "بناء القيود والعلاقات",
+          "تطبيق القواعد الموثقة",
+          "كشف التعارضات",
+          "التحقق متعدد الأدوار",
+          "استخدام VALIDATED_GEOMETRY",
+          "الحفاظ على وظائف الفراغات"
+        ],
+        "must_not": [
+          "اختراع قيم كودية",
+          "تجاوز علاقة حرجة لأجل الشكل",
+          "توليد كل دور بمعزل عن المبنى",
+          "تسليم مخرج غير متحقق منه"
+        ]
+      },
+      "single_source_of_truth": "VALIDATED_GEOMETRY",
+      "knowledge_transfer": "يجب رفع ملفات المعرفة إلى مشروع ChatGPT وعدم الاعتماد على ذاكرة المحادثة وحدها."
+    },
+    "02_SBC_RESIDENTIAL_RULE_ENGINE.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "SBC_RESIDENTIAL_RULE_ENGINE",
+        "version": "1.0.0",
+        "status": "FOUNDATION",
+        "purpose": "قواعد قابلة للتتبع مستندة إلى الكود السعودي مع منع اختراع القيم."
+      },
+      "codes": [
+        {
+          "code": "SBC 1101",
+          "edition": "2024"
+        },
+        {
+          "code": "SBC 1102",
+          "edition": "2024"
+        },
+        {
+          "code": "SBC 201",
+          "edition": "2024"
+        }
+      ],
+      "schema": [
+        "rule_id",
+        "title",
+        "category",
+        "statement",
+        "scope",
+        "code",
+        "edition",
+        "source_reference",
+        "severity",
+        "validation_method",
+        "exceptions",
+        "confidence"
+      ],
+      "application": [
+        "BEFORE_GENERATION",
+        "DURING_GENERATION",
+        "AFTER_GENERATION"
+      ],
+      "rules": [
+        {
+          "rule_id": "SBC-201-001",
+          "title": "Occupancy classification",
+          "category": "OCCUPANCY",
+          "statement": "يجب تحديد تصنيف الإشغال المناسب قبل تطبيق متطلبات الإخلاء والوصول.",
+          "code": "SBC 201",
+          "severity": "CRITICAL",
+          "validation_method": "CHECK_OCCUPANCY_CLASSIFICATION",
+          "confidence": "HIGH"
+        },
+        {
+          "rule_id": "SBC-201-002",
+          "title": "Means of egress",
+          "category": "EGRESS",
+          "statement": "يجب تقييم مسارات الإخلاء وفق متطلبات الجزء المعتمد من SBC 201 للمشروع.",
+          "code": "SBC 201",
+          "severity": "CRITICAL",
+          "validation_method": "CHECK_EGRESS",
+          "confidence": "HIGH"
+        },
+        {
+          "rule_id": "SBC-1101-001",
+          "title": "Bathroom ventilation",
+          "category": "VENTILATION",
+          "statement": "يجب تقييم الإضاءة والتهوية للحمامات وفق القواعد المعتمدة في SBC 1101/1102 وحالة الفراغ.",
+          "code": "SBC 1101/SBC 1102",
+          "severity": "HIGH",
+          "validation_method": "CHECK_BATHROOM_VENTILATION",
+          "confidence": "HIGH"
+        },
+        {
+          "rule_id": "SBC-1101-002",
+          "title": "Windowless bathroom exception",
+          "category": "VENTILATION",
+          "statement": "عند عدم وجود نافذة، يجب التحقق من الاستثناء ومتطلبات التهوية الميكانيكية المطبقة بدل افتراض السماح تلقائيًا.",
+          "code": "SBC 1101/SBC 1102",
+          "severity": "HIGH",
+          "validation_method": "CHECK_WINDOWLESS_BATHROOM_RULE",
+          "confidence": "HIGH"
+        },
+        {
+          "rule_id": "SBC-UNVERIFIED-001",
+          "title": "Numeric rule placeholder",
+          "category": "TRACEABILITY",
+          "statement": "أي قيمة رقمية غير موثقة بمصدر رسمي لا تستخدم كاشتراط كودي إلزامي.",
+          "scope": "ALL",
+          "severity": "CRITICAL",
+          "validation_method": "CHECK_RULE_SOURCE",
+          "confidence": "HIGH"
+        }
+      ],
+      "source_policy": {
+        "rule": "لا تذكر القاعدة على أنها من SBC إلا مع مصدر/قسم/نسخة قابلة للتتبع.",
+        "unverified_action": "FLAG_AS_UNVERIFIED"
+      }
+    }
+  }
+}

@@ -1,0 +1,571 @@
+{
+  "bundle_metadata": {
+    "system": "ANT_ALMOHANDES",
+    "type": "PROJECT_SOURCE_BUNDLE",
+    "purpose": "Consolidated reference source preserving the original numbered artifacts 01-17 for use within a five-source Project limit.",
+    "preservation_policy": "Original JSON objects are embedded without semantic modification. The Markdown instruction file is embedded verbatim as plain text.",
+    "source_count": 3,
+    "source_files": [
+      "05_ELEVATION_RULES.json",
+      "06_OUTPUT_SPECIFICATION.json",
+      "16_MASTER_GEOMETRY_RECONSTRUCTION_ENGINE.json"
+    ]
+  },
+  "sources": {
+    "05_ELEVATION_RULES.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "ELEVATION_RULES",
+        "version": "1.0.0",
+        "core_principle": "SINGLE_SOURCE_OF_TRUTH",
+        "source_of_geometry": "VALIDATED_GEOMETRY"
+      },
+      "required_views": [
+        "NORTH",
+        "SOUTH",
+        "EAST",
+        "WEST"
+      ],
+      "locked_elements": [
+        "building_footprint",
+        "floor_count",
+        "floor_heights",
+        "roof_levels",
+        "wall_positions",
+        "structural_axes",
+        "columns",
+        "stairs",
+        "major_openings",
+        "doors",
+        "windows",
+        "balconies",
+        "projections",
+        "setbacks",
+        "entrance_positions",
+        "garage_openings"
+      ],
+      "rules": [
+        {
+          "id": "ELV-FLR-001",
+          "rule": "عدد الأدوار في كل واجهة يجب أن يطابق VALIDATED_GEOMETRY",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "ELV-OPEN-001",
+          "rule": "كل باب ونافذة ظاهر في الواجهة يجب أن يكون له مصدر في المسقط والهندسة",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "ELV-BAL-001",
+          "rule": "لا تنشأ بلكونة إلا إذا كانت موجودة في VALIDATED_GEOMETRY",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "ELV-VERT-001",
+          "rule": "العناصر الرأسية المهمة يجب أن تتطابق عبر الأدوار",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "ELV-STYLE-001",
+          "rule": "يمكن تغيير الخامات والألوان والإضاءة، ولا يجوز تغيير الهندسة",
+          "severity": "HIGH"
+        }
+      ],
+      "traceability": [
+        "elevation_element_id",
+        "source_geometry_id",
+        "source_plan_id",
+        "floor",
+        "wall_id",
+        "space_id"
+      ],
+      "multi_floor": {
+        "principle": "BUILDING_FIRST_THEN_ELEVATIONS",
+        "forbidden": [
+          "GENERATE_EACH_ELEVATION_INDEPENDENTLY",
+          "GENERATE_FACADE_FROM_TEXT_ONLY"
+        ]
+      },
+      "validation": [
+        "COMPARE_ALL_ELEVATIONS_WITH_GEOMETRY",
+        "CHECK_FLOOR_COUNT",
+        "CHECK_DOORS",
+        "CHECK_WINDOWS",
+        "CHECK_BALCONIES",
+        "CHECK_ENTRANCES",
+        "CHECK_ROOF",
+        "CHECK_STRUCTURAL_ALIGNMENT"
+      ],
+      "final_rule": "الواجهة إسقاط هندسي للمبنى المعتمد وليست تصميمًا مستقلًا."
+    },
+    "06_OUTPUT_SPECIFICATION.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "OUTPUT_SPECIFICATION",
+        "version": "1.0.0",
+        "core_principle": "ONE_BUILDING_ONE_SOURCE_OF_TRUTH"
+      },
+      "pipeline": [
+        "CLIENT_REQUIREMENTS",
+        "SPACE_PROGRAM",
+        "SPATIAL_RELATIONS",
+        "BUILDING_GEOMETRY",
+        "VALIDATION",
+        "FLOOR_PLANS",
+        "ELEVATIONS",
+        "SECTIONS",
+        "3D_MODEL",
+        "RENDERS",
+        "DOCUMENT_PACKAGE"
+      ],
+      "units": {
+        "primary": "meter",
+        "secondary": "millimeter",
+        "internal_precision": "millimeter"
+      },
+      "floor_plan": {
+        "required": true,
+        "required_elements": [
+          "external_walls",
+          "internal_walls",
+          "doors",
+          "windows",
+          "stairs",
+          "rooms",
+          "room_names",
+          "dimensions",
+          "entrances",
+          "garage",
+          "kitchen",
+          "bathrooms",
+          "balconies",
+          "shafts",
+          "north_arrow",
+          "scale"
+        ]
+      },
+      "elevations": {
+        "required_views": [
+          "NORTH",
+          "SOUTH",
+          "EAST",
+          "WEST"
+        ],
+        "source": "VALIDATED_GEOMETRY"
+      },
+      "sections": {
+        "required": "WHEN_REQUESTED",
+        "types": [
+          "LONGITUDINAL_SECTION",
+          "TRANSVERSE_SECTION"
+        ]
+      },
+      "3d": {
+        "source": "VALIDATED_GEOMETRY",
+        "must_match": [
+          "floor_plans",
+          "elevations",
+          "sections",
+          "building_mass",
+          "openings",
+          "roof",
+          "stairs",
+          "balconies"
+        ]
+      },
+      "render": {
+        "source": "VALIDATED_3D_MODEL",
+        "allowed_changes": [
+          "materials",
+          "colors",
+          "lighting",
+          "environment",
+          "camera",
+          "landscape",
+          "furniture"
+        ],
+        "forbidden_changes": [
+          "moving_windows",
+          "moving_doors",
+          "changing_building_mass",
+          "changing_floor_count",
+          "changing_balconies",
+          "changing_entrances"
+        ]
+      },
+      "dwg": {
+        "required": "WHEN_EXECUTION_DRAWINGS_ARE_REQUESTED",
+        "source": "VALIDATED_GEOMETRY",
+        "requirements": [
+          "true_scale",
+          "consistent_units",
+          "editable_geometry",
+          "layered_objects"
+        ]
+      },
+      "dxf": {
+        "required": "WHEN_REQUESTED",
+        "source": "VALIDATED_GEOMETRY",
+        "requirements": [
+          "true_scale",
+          "correct_units",
+          "editable_entities",
+          "consistent_layers"
+        ]
+      },
+      "pdf": {
+        "required": true,
+        "document_structure": [
+          "cover",
+          "project_information",
+          "site_information",
+          "ground_floor_plan",
+          "upper_floor_plans",
+          "roof_plan",
+          "four_elevations",
+          "sections",
+          "3d_views",
+          "dimensions",
+          "notes",
+          "validation_summary"
+        ]
+      },
+      "file_naming": {
+        "pattern": "PROJECT_ID_DISCIPLINE_OUTPUT_REVISION",
+        "examples": [
+          "YES-000_ARCH_GROUND_FLOOR_R01",
+          "YES-000_ARCH_NORTH_ELEVATION_R01",
+          "YES-000_ARCH_DRAWINGS_R01"
+        ]
+      },
+      "identity": {
+        "rule": "كل عنصر هندسي رئيسي يمتلك ID ثابتًا عبر المخرجات"
+      },
+      "cross_output_validation": [
+        "FLOOR_PLAN_VS_GEOMETRY",
+        "ELEVATION_VS_GEOMETRY",
+        "SECTION_VS_GEOMETRY",
+        "3D_VS_GEOMETRY",
+        "DWG_VS_GEOMETRY",
+        "DXF_VS_GEOMETRY",
+        "PDF_VS_MASTER_DRAWINGS"
+      ],
+      "critical_rejections": [
+        "missing_required_space",
+        "wrong_room_identity",
+        "men_guest_bathroom_connected_to_family_living",
+        "elevation_does_not_match_plan",
+        "wrong_floor_count",
+        "wrong_floor_levels",
+        "misaligned_vertical_elements",
+        "invented_openings",
+        "wrong_entrance_location",
+        "wrong_garage_location",
+        "wrong_stair_position",
+        "3d_model_does_not_match_geometry"
+      ]
+    },
+    "16_MASTER_GEOMETRY_RECONSTRUCTION_ENGINE.json": {
+      "system": {
+        "name": "ANT_ALMOHANDES",
+        "module": "MASTER_GEOMETRY_RECONSTRUCTION_ENGINE",
+        "version": "1.0.0",
+        "status": "FOUNDATION",
+        "purpose": "Convert an approved candidate solution into a deterministic, traceable, validated global building geometry model that becomes the source for plans, elevations, sections, 3D and downstream outputs.",
+        "language": "Arabic",
+        "core_principle": "GLOBAL_GEOMETRY_FIRST",
+        "source_of_truth": "VALIDATED_GEOMETRY"
+      },
+      "dependencies": [
+        "01_MASTER_CONTEXT.json",
+        "02_SBC_RESIDENTIAL_RULE_ENGINE.json",
+        "03_FLOOR_PLAN_GENERATION_RULES.json",
+        "04_SPATIAL_RELATION_RULES.json",
+        "05_ELEVATION_RULES.json",
+        "06_OUTPUT_SPECIFICATION.json",
+        "07_KNOWN_FAILURES_AND_FIXES.json",
+        "08_VALIDATION_PROTOCOL.json",
+        "09_MASTER_SYSTEM_INSTRUCTION.md",
+        "10_MASTER_GENERATION_WORKFLOW.json",
+        "11_MASTER_VALIDATION_SCHEMA.json",
+        "12_MASTER_PROJECT_SCHEMA.json",
+        "13_MASTER_PROJECT_JSON_SCHEMA.json",
+        "14_MASTER_DECISION_ENGINE.json",
+        "15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE.json"
+      ],
+      "operating_sequence": [
+        "APPROVED_CANDIDATE",
+        "PROGRAM_LOCK",
+        "RELATION_LOCK",
+        "GLOBAL_COORDINATE_SYSTEM",
+        "SITE_AND_SETBACK_MODEL",
+        "BUILDING_FOOTPRINT",
+        "FLOOR_VOLUME_MODEL",
+        "VERTICAL_CORE_MODEL",
+        "SPACE_GEOMETRY",
+        "WALL_GRAPH",
+        "DOOR_GRAPH",
+        "WINDOW_GRAPH",
+        "STAIR_AND_SHAFT_MODEL",
+        "BALCONY_AND_PROJECTION_MODEL",
+        "ROOF_MODEL",
+        "GEOMETRY_VALIDATION",
+        "FREEZE_VALIDATED_GEOMETRY",
+        "DERIVE_OUTPUTS"
+      ],
+      "coordinate_system": {
+        "requirement": "Every project must use one global coordinate system for all floors and outputs.",
+        "origin_policy": "Define a stable project origin and do not silently move it between revisions.",
+        "axes": [
+          "X",
+          "Y",
+          "Z"
+        ],
+        "north_reference": "Required when orientation affects the design.",
+        "units": {
+          "primary": "meter",
+          "engineering_precision": "millimeter"
+        }
+      },
+      "geometry_identity": {
+        "project_geometry_id": "Required",
+        "building_id": "Required",
+        "floor_ids": "Stable across outputs",
+        "space_ids": "Stable across outputs",
+        "wall_ids": "Stable across outputs",
+        "door_ids": "Stable across outputs",
+        "window_ids": "Stable across outputs",
+        "stair_ids": "Stable across outputs",
+        "shaft_ids": "Stable across outputs",
+        "balcony_ids": "Stable across outputs"
+      },
+      "geometry_model": {
+        "site": {
+          "required_fields": [
+            "boundary",
+            "orientation",
+            "north",
+            "street_edges",
+            "access_points",
+            "setbacks_if_known"
+          ]
+        },
+        "building": {
+          "required_fields": [
+            "footprint",
+            "floor_count",
+            "floor_levels",
+            "roof_level",
+            "major_masses"
+          ]
+        },
+        "floor": {
+          "required_fields": [
+            "floor_id",
+            "level",
+            "height",
+            "spaces",
+            "walls",
+            "openings",
+            "vertical_elements"
+          ]
+        },
+        "space": {
+          "required_fields": [
+            "space_id",
+            "function",
+            "classification",
+            "boundary",
+            "floor_id",
+            "access_relations",
+            "adjacency_relations"
+          ]
+        }
+      },
+      "construction_logic": {
+        "wall_continuity": "Walls must form a topologically coherent boundary system.",
+        "opening_integrity": "Doors and windows must cut valid wall boundaries and have a valid destination or serving space.",
+        "space_closure": "Every enclosed room must have a coherent boundary unless intentionally open by design.",
+        "circulation_connectivity": "Required circulation paths must remain geometrically connected.",
+        "vertical_connectivity": "Stairs and shafts must connect intended levels.",
+        "overlap_policy": "Unintended room, wall, mass or opening overlaps are forbidden.",
+        "intersection_policy": "Geometry intersections must be intentional and traceable."
+      },
+      "critical_geometry_invariants": [
+        {
+          "id": "GEO-CRIT-001",
+          "name": "MEN_GUEST_BATHROOM_RELATION",
+          "rule": "men_guest_council must connect to men_guest_bathroom and men_guest_bathroom must be separated from family_living.",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "GEO-CRIT-002",
+          "name": "GUEST_PRIVACY_PATH",
+          "rule": "Guest circulation must not require passage through family or private zones.",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "GEO-CRIT-003",
+          "name": "REQUIRED_SPACE_PRESENCE",
+          "rule": "Every required space must exist with the correct function and floor assignment.",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "GEO-CRIT-004",
+          "name": "MULTI_FLOOR_VERTICAL_CONTINUITY",
+          "rule": "Stairs, shafts and other locked vertical elements must remain coherent across applicable floors.",
+          "severity": "CRITICAL"
+        },
+        {
+          "id": "GEO-CRIT-005",
+          "name": "OUTPUT_TRACEABILITY",
+          "rule": "Every downstream geometric element must be traceable to this model.",
+          "severity": "CRITICAL"
+        }
+      ],
+      "men_guest_bathroom_geometry_lock": {
+        "status": "HARD_LOCK",
+        "required": [
+          "bathroom_belongs_to_guest_system",
+          "bathroom_is_reachable_from_men_guest_council",
+          "bathroom_is_not_open_to_family_living",
+          "guest_path_does_not_cross_family_or_private_zones"
+        ],
+        "failure_action": "REBUILD_LOCAL_GEOMETRY_AND_REVALIDATE"
+      },
+      "global_building_reconstruction": {
+        "principle": "BUILD_THE_WHOLE_BUILDING_BEFORE_DERIVING_FLOORS",
+        "forbidden": [
+          "independent_floor_generation",
+          "independent_elevation_generation",
+          "independent_3d_generation",
+          "local_visual_fix_without_geometry_update"
+        ],
+        "shared_elements": [
+          "coordinate_system",
+          "structural_axes_if_available",
+          "stairs",
+          "shafts",
+          "major_walls",
+          "major_openings",
+          "building_massing"
+        ]
+      },
+      "topology_validation": {
+        "tests": [
+          "NO_UNINTENDED_SELF_INTERSECTIONS",
+          "NO_UNINTENDED_ROOM_OVERLAPS",
+          "NO_UNINTENDED_WALL_OVERLAPS",
+          "NO_ORPHAN_DOORS",
+          "NO_ORPHAN_WINDOWS",
+          "NO_DISCONNECTED_REQUIRED_SPACES",
+          "NO_DISCONNECTED_CIRCULATION_PATHS",
+          "NO_BROKEN_VERTICAL_CORE",
+          "NO_DANGLING_GEOMETRY"
+        ]
+      },
+      "dimensional_validation": {
+        "principle": "Use only dimensions supported by project requirements, documented code rules, engineering constraints or explicit assumptions.",
+        "checks": [
+          "site_fit",
+          "setback_fit_if_known",
+          "floor_level_consistency",
+          "space_boundary_integrity",
+          "opening_fit",
+          "stair_fit",
+          "shaft_fit",
+          "circulation_clearance_if_specified"
+        ],
+        "unknown_dimension_policy": "FLAG_AS_ASSUMPTION_OR_UNVERIFIED"
+      },
+      "revision_management": {
+        "rule": "Any geometry-affecting revision must create or update a geometry revision before dependent outputs are regenerated.",
+        "required_fields": [
+          "revision_id",
+          "parent_revision",
+          "change_set",
+          "affected_ids",
+          "validation_status"
+        ],
+        "rollback_rule": "Rollback to the last validated geometry when a revision introduces unresolved critical failures."
+      },
+      "freeze_protocol": {
+        "preconditions": [
+          "all_required_spaces_present",
+          "critical_relations_valid",
+          "privacy_paths_valid",
+          "vertical_continuity_valid",
+          "geometry_topology_valid",
+          "traceability_valid"
+        ],
+        "action": "LOCK_AS_VALIDATED_GEOMETRY",
+        "post_freeze_rule": "Downstream output generation may read from VALIDATED_GEOMETRY but may not silently alter it."
+      },
+      "downstream_derivation": {
+        "floor_plans": "PROJECT_VALIDATED_GEOMETRY_TO_FLOOR_PLAN",
+        "elevations": "PROJECT_VALIDATED_GEOMETRY_TO_ELEVATION",
+        "sections": "PROJECT_VALIDATED_GEOMETRY_TO_SECTION",
+        "3d": "PROJECT_VALIDATED_GEOMETRY_TO_3D",
+        "renders": "VALIDATED_3D_WITH_GEOMETRY_LOCK",
+        "dwg": "PROJECT_VALIDATED_GEOMETRY_TO_CAD",
+        "dxf": "PROJECT_VALIDATED_GEOMETRY_TO_CAD",
+        "pdf": "PROJECT_VALIDATED_OUTPUT_PACKAGE"
+      },
+      "failure_memory": {
+        "source": "07_KNOWN_FAILURES_AND_FIXES.json",
+        "required_behavior": "Before freezing geometry, check known failure signatures and prevent their recurrence.",
+        "high_priority_failures": [
+          "FAIL-001",
+          "FAIL-002",
+          "FAIL-003",
+          "FAIL-004",
+          "FAIL-005",
+          "FAIL-007",
+          "FAIL-008",
+          "FAIL-009",
+          "FAIL-010",
+          "FAIL-011",
+          "FAIL-012",
+          "FAIL-013",
+          "FAIL-015",
+          "FAIL-016",
+          "FAIL-017",
+          "FAIL-018"
+        ]
+      },
+      "acceptance_gate": {
+        "status_values": [
+          "DRAFT",
+          "REVISION_REQUIRED",
+          "REJECTED",
+          "VALIDATED",
+          "FINAL"
+        ],
+        "final_rule": "FINAL is forbidden unless VALIDATED_GEOMETRY exists and all critical geometry invariants pass.",
+        "hard_stop_conditions": [
+          "critical_geometry_invariant_failed",
+          "required_space_missing",
+          "guest_privacy_path_failed",
+          "men_guest_bathroom_rule_failed",
+          "vertical_continuity_failed",
+          "untraceable_geometry",
+          "unintended_geometry_overlap"
+        ]
+      },
+      "audit_log": {
+        "required": true,
+        "record_fields": [
+          "timestamp",
+          "revision_id",
+          "candidate_id",
+          "operation",
+          "affected_geometry_ids",
+          "validation_result",
+          "failure_ids",
+          "decision_reference"
+        ]
+      },
+      "master_rule": "NEVER_DERIVE_OUTPUTS_FROM_UNVALIDATED_GEOMETRY"
+    }
+  }
+}

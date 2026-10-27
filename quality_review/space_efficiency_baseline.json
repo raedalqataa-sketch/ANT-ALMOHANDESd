@@ -1,0 +1,310 @@
+{
+  "schema_version": "space-efficiency-baseline-1",
+  "source_code_commit": "e34aa20e41b9f987e5f59bb1b32bf06e8a796fec",
+  "source_generation": "quality_review.v4_benchmark CASES, generation_v4=True; results captured from identical feature branch before squash merge",
+  "status": "DESIGN_DIAGNOSTIC_NOT_STATUTORY",
+  "denominator": "sum of net rooms except reserve, including stair and corridors",
+  "dead_end_method": "gross corridor centerline tail to nearest hosted door or corridor junction; screening proxy",
+  "cases": [
+    {
+      "case": "sa-small",
+      "input": {
+        "width": 12,
+        "depth": 18,
+        "country": "SA",
+        "region": "الرياض",
+        "family": 4,
+        "street_edges": [
+          "bottom"
+        ],
+        "floors": "two"
+      },
+      "accepted_alternatives": 0,
+      "alternatives": []
+    },
+    {
+      "case": "sa-corner",
+      "input": {
+        "width": 20,
+        "depth": 25,
+        "country": "SA",
+        "region": "مكة المكرمة",
+        "family": 6,
+        "street_edges": [
+          "bottom",
+          "left"
+        ],
+        "street_widths": {
+          "bottom": 15,
+          "left": 15
+        },
+        "accessible_bedroom": true
+      },
+      "accepted_alternatives": 3,
+      "alternatives": [
+        {
+          "candidate_id": "adaptive-social_front-front",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 170.83027,
+              "corridor_area_m2": 32.06496,
+              "corridor_share_of_usable": 0.1877,
+              "guest_distributor_area_m2": 7.39596,
+              "potential_dead_end_length_m": 0.6,
+              "max_room_aspect_ratio": 1.72743,
+              "total_room_area_delta_vs_target_m2": -4.35469
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 78.45872,
+              "corridor_area_m2": 20.54709,
+              "corridor_share_of_usable": 0.26188,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 6.27736,
+              "max_room_aspect_ratio": 2.55003,
+              "total_room_area_delta_vs_target_m2": 1.19163
+            }
+          ]
+        },
+        {
+          "candidate_id": "adaptive-relationship_aware-rear",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 162.39838,
+              "corridor_area_m2": 32.30255,
+              "corridor_share_of_usable": 0.19891,
+              "guest_distributor_area_m2": 7.63355,
+              "potential_dead_end_length_m": 0.73,
+              "max_room_aspect_ratio": 1.59368,
+              "total_room_area_delta_vs_target_m2": -13.02418
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 76.87424,
+              "corridor_area_m2": 20.094,
+              "corridor_share_of_usable": 0.26139,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 2.123,
+              "max_room_aspect_ratio": 1.88088,
+              "total_room_area_delta_vs_target_m2": 0.06024
+            }
+          ]
+        },
+        {
+          "candidate_id": "freeform-relationship_aware-rear",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 180.5599,
+              "corridor_area_m2": 38.71226,
+              "corridor_share_of_usable": 0.2144,
+              "guest_distributor_area_m2": 8.56226,
+              "potential_dead_end_length_m": 0.73,
+              "max_room_aspect_ratio": 1.45042,
+              "total_room_area_delta_vs_target_m2": -4.19001
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 80.89418,
+              "corridor_area_m2": 21.25653,
+              "corridor_share_of_usable": 0.26277,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 5.77202,
+              "max_room_aspect_ratio": 1.72201,
+              "total_room_area_delta_vs_target_m2": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "ye-medium",
+      "input": {
+        "width": 24,
+        "depth": 32,
+        "country": "YE",
+        "region": "الحديدة",
+        "family": 6,
+        "street_edges": [
+          "bottom"
+        ]
+      },
+      "accepted_alternatives": 3,
+      "alternatives": [
+        {
+          "candidate_id": "adaptive-social_front-front",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 151.76445,
+              "corridor_area_m2": 38.64445,
+              "corridor_share_of_usable": 0.25463,
+              "guest_distributor_area_m2": 11.85445,
+              "potential_dead_end_length_m": 0.73,
+              "max_room_aspect_ratio": 2.18185,
+              "total_room_area_delta_vs_target_m2": 0
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 104.2973,
+              "corridor_area_m2": 23.5245,
+              "corridor_share_of_usable": 0.22555,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 5.95,
+              "max_room_aspect_ratio": 2.36437,
+              "total_room_area_delta_vs_target_m2": 0.0528
+            }
+          ]
+        },
+        {
+          "candidate_id": "adaptive-relationship_aware-rear",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 148.85562,
+              "corridor_area_m2": 35.35831,
+              "corridor_share_of_usable": 0.23753,
+              "guest_distributor_area_m2": 8.44855,
+              "potential_dead_end_length_m": 0.6,
+              "max_room_aspect_ratio": 2.28039,
+              "total_room_area_delta_vs_target_m2": 0.37731
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 105.17,
+              "corridor_area_m2": 24.45,
+              "corridor_share_of_usable": 0.23248,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 3.73209,
+              "max_room_aspect_ratio": 1.91442,
+              "total_room_area_delta_vs_target_m2": 0
+            }
+          ]
+        },
+        {
+          "candidate_id": "spine-relationship_aware-rear",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 143.072,
+              "corridor_area_m2": 29.952,
+              "corridor_share_of_usable": 0.20935,
+              "guest_distributor_area_m2": 7.032,
+              "potential_dead_end_length_m": 0.73,
+              "max_room_aspect_ratio": 1.62863,
+              "total_room_area_delta_vs_target_m2": 0
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 103.64,
+              "corridor_area_m2": 22.92,
+              "corridor_share_of_usable": 0.22115,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 4.73,
+              "max_room_aspect_ratio": 1.45042,
+              "total_room_area_delta_vs_target_m2": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case": "sa-large",
+      "input": {
+        "width": 32,
+        "depth": 40,
+        "country": "SA",
+        "region": "المنطقة الشرقية",
+        "family": 10,
+        "street_edges": [
+          "top",
+          "right"
+        ],
+        "main_street": "top",
+        "north_edge": "left",
+        "output_level": "luxury",
+        "design_priority": "prestige"
+      },
+      "accepted_alternatives": 3,
+      "alternatives": [
+        {
+          "candidate_id": "adaptive-relationship_aware-rear",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 193.97123,
+              "corridor_area_m2": 41.87523,
+              "corridor_share_of_usable": 0.21588,
+              "guest_distributor_area_m2": 10.67373,
+              "potential_dead_end_length_m": 5.30456,
+              "max_room_aspect_ratio": 1.31234,
+              "total_room_area_delta_vs_target_m2": 0
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 169.8575,
+              "corridor_area_m2": 31.2015,
+              "corridor_share_of_usable": 0.18369,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 1.79901,
+              "max_room_aspect_ratio": 1.55478,
+              "total_room_area_delta_vs_target_m2": 0
+            }
+          ]
+        },
+        {
+          "candidate_id": "spine-service_aligned-rear",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 178.71915,
+              "corridor_area_m2": 45.39314,
+              "corridor_share_of_usable": 0.25399,
+              "guest_distributor_area_m2": 8.78624,
+              "potential_dead_end_length_m": 4.73,
+              "max_room_aspect_ratio": 2.05377,
+              "total_room_area_delta_vs_target_m2": -18.76999
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 171.7244,
+              "corridor_area_m2": 36.6069,
+              "corridor_share_of_usable": 0.21317,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 4.73,
+              "max_room_aspect_ratio": 1.5425,
+              "total_room_area_delta_vs_target_m2": -3.5385
+            }
+          ]
+        },
+        {
+          "candidate_id": "adaptive-social_front-front",
+          "floors": [
+            {
+              "floor_id": "GF",
+              "net_usable_area_m2": 195.13082,
+              "corridor_area_m2": 43.03482,
+              "corridor_share_of_usable": 0.22054,
+              "guest_distributor_area_m2": 11.83332,
+              "potential_dead_end_length_m": 2.72975,
+              "max_room_aspect_ratio": 1.50036,
+              "total_room_area_delta_vs_target_m2": 0
+            },
+            {
+              "floor_id": "FF",
+              "net_usable_area_m2": 169.8575,
+              "corridor_area_m2": 31.2015,
+              "corridor_share_of_usable": 0.18369,
+              "guest_distributor_area_m2": 0,
+              "potential_dead_end_length_m": 4.29975,
+              "max_room_aspect_ratio": 1.41495,
+              "total_room_area_delta_vs_target_m2": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

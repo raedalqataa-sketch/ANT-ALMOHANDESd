@@ -1,0 +1,28 @@
+name: Architectural Intelligence 004 Offline Evidence
+on:
+  push:
+    branches: [feature/architectural-intelligence-space-efficiency-004]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  engineering-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pip check
+      - name: All regression and new engineering tests
+        run: python -m pytest -q
+      - name: Paired deterministic cases (no API credentials or inference)
+        run: python -m quality_review.intelligence_004.benchmark --output intelligence-004-proof --budget 6
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intelligence-004-offline-evidence
+          path: intelligence-004-proof/
+          if-no-files-found: warn

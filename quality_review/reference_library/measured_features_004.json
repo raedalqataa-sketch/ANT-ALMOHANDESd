@@ -1,0 +1,212 @@
+{
+  "version": "reference-measured-features-004",
+  "observations": [
+    {
+      "project": "P04",
+      "image_id": "P04-GF",
+      "source_filename": "2-IMG_20261019_022935_282.jpg",
+      "source_sha256": "9bb9b62574a9397909d178d7f9ab03e9159adfb025c0a6b8bfc6093f713658e2",
+      "kind": "majlis",
+      "printed_dimensions_m": [
+        6.0,
+        4.5
+      ],
+      "aspect_ratio": 1.333333,
+      "area_from_printed_dimensions_m2": 27.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-GF",
+      "source_filename": "2-IMG_20261019_022935_282.jpg",
+      "source_sha256": "9bb9b62574a9397909d178d7f9ab03e9159adfb025c0a6b8bfc6093f713658e2",
+      "kind": "living",
+      "printed_dimensions_m": [
+        6.1,
+        5.2
+      ],
+      "aspect_ratio": 1.173077,
+      "area_from_printed_dimensions_m2": 31.72,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-GF",
+      "source_filename": "2-IMG_20261019_022935_282.jpg",
+      "source_sha256": "9bb9b62574a9397909d178d7f9ab03e9159adfb025c0a6b8bfc6093f713658e2",
+      "kind": "dining",
+      "printed_dimensions_m": [
+        6.0,
+        4.0
+      ],
+      "aspect_ratio": 1.5,
+      "area_from_printed_dimensions_m2": 24.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-GF",
+      "source_filename": "2-IMG_20261019_022935_282.jpg",
+      "source_sha256": "9bb9b62574a9397909d178d7f9ab03e9159adfb025c0a6b8bfc6093f713658e2",
+      "kind": "kitchen",
+      "printed_dimensions_m": [
+        4.0,
+        6.0
+      ],
+      "aspect_ratio": 1.5,
+      "area_from_printed_dimensions_m2": 24.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-FF",
+      "source_filename": "1-IMG_20261019_022935_008.jpg",
+      "source_sha256": "07f2a7fa04267099891ac1189ce252ee3659ea7c2bccece74fdda29c1271fce4",
+      "kind": "living",
+      "printed_dimensions_m": [
+        4.0,
+        6.0
+      ],
+      "aspect_ratio": 1.5,
+      "area_from_printed_dimensions_m2": 24.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-FF",
+      "source_filename": "1-IMG_20261019_022935_008.jpg",
+      "source_sha256": "07f2a7fa04267099891ac1189ce252ee3659ea7c2bccece74fdda29c1271fce4",
+      "kind": "master",
+      "printed_dimensions_m": [
+        4.5,
+        6.0
+      ],
+      "aspect_ratio": 1.333333,
+      "area_from_printed_dimensions_m2": 27.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-FF",
+      "source_filename": "1-IMG_20261019_022935_008.jpg",
+      "source_sha256": "07f2a7fa04267099891ac1189ce252ee3659ea7c2bccece74fdda29c1271fce4",
+      "kind": "bedroom",
+      "printed_dimensions_m": [
+        4.0,
+        6.0
+      ],
+      "aspect_ratio": 1.5,
+      "area_from_printed_dimensions_m2": 24.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P04",
+      "image_id": "P04-FF",
+      "source_filename": "1-IMG_20261019_022935_008.jpg",
+      "source_sha256": "07f2a7fa04267099891ac1189ce252ee3659ea7c2bccece74fdda29c1271fce4",
+      "kind": "bedroom",
+      "printed_dimensions_m": [
+        4.0,
+        5.2
+      ],
+      "aspect_ratio": 1.3,
+      "area_from_printed_dimensions_m2": 20.8,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P08",
+      "image_id": "P08-FF",
+      "source_filename": "3-IMG_20261018_165056_173.jpg",
+      "source_sha256": "056f5e68049d88f54367ecda9dbaf214f3d221408eb00f3b2ac215650a328abe",
+      "kind": "bedroom",
+      "printed_dimensions_m": [
+        5.4,
+        4.6
+      ],
+      "aspect_ratio": 1.173913,
+      "area_from_printed_dimensions_m2": 24.84,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P08",
+      "image_id": "P08-FF",
+      "source_filename": "3-IMG_20261018_165056_173.jpg",
+      "source_sha256": "056f5e68049d88f54367ecda9dbaf214f3d221408eb00f3b2ac215650a328abe",
+      "kind": "bedroom",
+      "printed_dimensions_m": [
+        5.8,
+        4.4
+      ],
+      "aspect_ratio": 1.318182,
+      "area_from_printed_dimensions_m2": 25.52,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    },
+    {
+      "project": "P08",
+      "image_id": "P08-FF",
+      "source_filename": "3-IMG_20261018_165056_173.jpg",
+      "source_sha256": "056f5e68049d88f54367ecda9dbaf214f3d221408eb00f3b2ac215650a328abe",
+      "kind": "bedroom",
+      "printed_dimensions_m": [
+        5.0,
+        4.0
+      ],
+      "aspect_ratio": 1.25,
+      "area_from_printed_dimensions_m2": 20.0,
+      "basis": "manual reading of visible printed dimensions in user conversation attachments; not pixel tracing",
+      "confidence": "readable_label",
+      "survey_verified": false,
+      "source_bytes_available_in_current_workspace": false,
+      "legal_rule": false
+    }
+  ],
+  "excluded_projects": [
+    "P02",
+    "P05"
+  ],
+  "country_verified": false,
+  "policy": "scale ratios to actual required program area; never copy reference area or statutory setbacks",
+  "corridor_lengths_m": null,
+  "door_coordinates_m": null,
+  "limits": "No surveyed corridor lengths or doorway coordinates available; do not fabricate these. Small visual sample; architectural review required."
+}

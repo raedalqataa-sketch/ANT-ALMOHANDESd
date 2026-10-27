@@ -1,0 +1,81 @@
+{
+  "status": "USER_PROVIDED_ORIGINAL_BUNDLES",
+  "received_date": "2026-10-27",
+  "files": [
+    {
+      "path": "constitution/source_bundles_004/01_CORE_CONTEXT_AND_SBC.json",
+      "sha256": "f39bcd83d08a98d3c2f0204b83ae0f4dd30f4a5ce0558a3d395fd7bbe89f2123",
+      "embedded_sources": [
+        "01_MASTER_CONTEXT.json",
+        "02_SBC_RESIDENTIAL_RULE_ENGINE.json"
+      ],
+      "source_versions": {
+        "01_MASTER_CONTEXT.json": "1.0.0",
+        "02_SBC_RESIDENTIAL_RULE_ENGINE.json": "1.0.0"
+      }
+    },
+    {
+      "path": "constitution/source_bundles_004/02_FLOOR_PLAN_AND_SPATIAL_ENGINE.json",
+      "sha256": "35e1be195b649ed67c1653a7547a3b1abd350597186e0ffb59f020dabec4bfd8",
+      "embedded_sources": [
+        "03_FLOOR_PLAN_GENERATION_RULES.json",
+        "04_SPATIAL_RELATION_RULES.json"
+      ],
+      "source_versions": {
+        "03_FLOOR_PLAN_GENERATION_RULES.json": "1.0.0",
+        "04_SPATIAL_RELATION_RULES.json": "1.0.0"
+      }
+    },
+    {
+      "path": "constitution/source_bundles_004/03_OUTPUT_CONSISTENCY_AND_GEOMETRY_ENGINE.json",
+      "sha256": "aa40e47caf8137ffa6d2b3768585667201b434c42fdc15728a1b62cd63573bb4",
+      "embedded_sources": [
+        "05_ELEVATION_RULES.json",
+        "06_OUTPUT_SPECIFICATION.json",
+        "16_MASTER_GEOMETRY_RECONSTRUCTION_ENGINE.json"
+      ],
+      "source_versions": {
+        "05_ELEVATION_RULES.json": "1.0.0",
+        "06_OUTPUT_SPECIFICATION.json": "1.0.0",
+        "16_MASTER_GEOMETRY_RECONSTRUCTION_ENGINE.json": "1.0.0"
+      }
+    },
+    {
+      "path": "constitution/source_bundles_004/04_VALIDATION_DECISION_AND_OPTIMIZATION_ENGINE.json",
+      "sha256": "989747c9f7b714c7d92464b62db64953bd65d82a86dc58ae3436f6e6fa4baf33",
+      "embedded_sources": [
+        "08_VALIDATION_PROTOCOL.json",
+        "11_MASTER_VALIDATION_SCHEMA.json",
+        "14_MASTER_DECISION_ENGINE.json",
+        "15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE.json"
+      ],
+      "source_versions": {
+        "08_VALIDATION_PROTOCOL.json": "1.0.0",
+        "11_MASTER_VALIDATION_SCHEMA.json": "1.0.0",
+        "14_MASTER_DECISION_ENGINE.json": "1.0.0",
+        "15_MASTER_CANDIDATE_GENERATION_OPTIMIZATION_ENGINE.json": "1.0.0"
+      }
+    },
+    {
+      "path": "constitution/source_bundles_004/05_FAILURE_MEMORY_SYSTEM_INSTRUCTION_AND_MASTER_SCHEMA.json",
+      "sha256": "f88520546e65f8f1e601f369be1d112ebd3d178b4726edf6ed8183ad78a44537",
+      "embedded_sources": [
+        "07_KNOWN_FAILURES_AND_FIXES.json",
+        "10_MASTER_GENERATION_WORKFLOW.json",
+        "12_MASTER_PROJECT_SCHEMA.json",
+        "13_MASTER_PROJECT_JSON_SCHEMA.json",
+        "17_MASTER_FAILURE_LEARNING_MEMORY_ENGINE.json",
+        "09_MASTER_SYSTEM_INSTRUCTION.md"
+      ],
+      "source_versions": {
+        "07_KNOWN_FAILURES_AND_FIXES.json": "1.0.0",
+        "10_MASTER_GENERATION_WORKFLOW.json": "1.0.0",
+        "12_MASTER_PROJECT_SCHEMA.json": "1.0.0",
+        "13_MASTER_PROJECT_JSON_SCHEMA.json": null,
+        "17_MASTER_FAILURE_LEARNING_MEMORY_ENGINE.json": "1.0.0"
+      }
+    }
+  ],
+  "source_count": 17,
+  "automatic_legal_rule_activation": false
+}
