@@ -17,7 +17,7 @@ jobs:
           python-version: '3.11'
       - run: pip install -r requirements.txt
       - run: python -m quality_review.v4_benchmark /tmp/v4-matrix
-      - uses: actions/upload-artifact@v4
+      - name: Compare generated V3 and V4 candidates\n        run: python -m quality_review.compare_generated_candidates /tmp/v4-matrix/matrix.json /tmp/v4-matrix/generated-comparison.json\n      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: v4-measured-designs-not-executive
