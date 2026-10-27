@@ -8,6 +8,7 @@ pytest
 httpx
 arabic-reshaper
 python-bidi
+google-genai>=1.0,<2
 
 # Computational geometry, adjacency graphs and constraint optimization
 ortools>=9.11,<10
