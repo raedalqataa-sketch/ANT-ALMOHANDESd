@@ -1,0 +1,1905 @@
+[
+  {
+    "case": "sa600",
+    "input": {
+      "width": 20.0,
+      "depth": 30.0,
+      "country": "SA",
+      "region": "الرياض",
+      "city": "",
+      "district": "",
+      "neighborhood": "",
+      "investment_units": 4,
+      "investment_unit_area": 100,
+      "north_edge": "top",
+      "street_edges": [
+        "top"
+      ],
+      "main_street": "top",
+      "street_widths": {},
+      "family": 6,
+      "building": "villa",
+      "output_level": "standard",
+      "design_priority": "usability",
+      "floors": "two",
+      "comfort": "balanced",
+      "majlis": true,
+      "office": false,
+      "accessible_bedroom": false,
+      "notes": "",
+      "site_evidence": null
+    },
+    "before_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          55.5288,
+          79.54814,
+          64.47578
+        ],
+        "median": 64.47578,
+        "minimum": 55.5288,
+        "maximum": 79.54814
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          273.99,
+          305.89,
+          294.03
+        ],
+        "median": 294.03,
+        "minimum": 273.99,
+        "maximum": 305.89
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          17.2,
+          15.6,
+          20.6
+        ],
+        "median": 17.2,
+        "minimum": 15.6,
+        "maximum": 20.6
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          165.30185,
+          165.08861,
+          169.2
+        ],
+        "median": 165.30185,
+        "minimum": 165.08861,
+        "maximum": 169.2
+      }
+    },
+    "after_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          52.56029,
+          55.5288,
+          64.47578
+        ],
+        "median": 55.5288,
+        "minimum": 52.56029,
+        "maximum": 64.47578
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          254.98,
+          273.99,
+          294.03
+        ],
+        "median": 273.99,
+        "minimum": 254.98,
+        "maximum": 294.03
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          13.6,
+          17.2,
+          20.6
+        ],
+        "median": 17.2,
+        "minimum": 13.6,
+        "maximum": 20.6
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          149.47889,
+          165.30185,
+          169.2
+        ],
+        "median": 165.30185,
+        "minimum": 149.47889,
+        "maximum": 169.2
+      }
+    },
+    "stages": {
+      "before": [
+        {
+          "candidate": "spine-service_aligned-front-",
+          "revision": "1435a738f94847f687163c42a3f75527",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 273.99,
+            "net_usable_room_area_m2": 165.30185,
+            "circulation_union_m2_total": 55.5288,
+            "movement_with_measured_internal_paths_m2_total": 73.08582,
+            "net_corridor_area_m2": 48.1416,
+            "net_corridor_ratio": 0.20220473115623955,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 17.2,
+            "guest_route_length_m": 5.2,
+            "family_route_length_m": 17.4,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.05335,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "56827b303b3bca1b15b9d56c98492577",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 22,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "freeform-relationship_aware-rear-",
+          "revision": "42f3051599e04d8fbc1ac864cc020354",
+          "checks": {
+            "PASS": 51,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 305.89,
+            "net_usable_room_area_m2": 165.08861,
+            "circulation_union_m2_total": 79.54814,
+            "movement_with_measured_internal_paths_m2_total": 96.08083,
+            "net_corridor_area_m2": 69.34346,
+            "net_corridor_ratio": 0.2628830531308135,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 15.6,
+            "guest_route_length_m": 7.6,
+            "family_route_length_m": 19.2,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.84168,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "b7e67d65f04e80293943ff3b56202e5d",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "central"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 22,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:central",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear-",
+          "revision": "40d45151871142ca8e7ccffacaf69e9c",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 294.03,
+            "net_usable_room_area_m2": 169.2,
+            "circulation_union_m2_total": 64.47578,
+            "movement_with_measured_internal_paths_m2_total": 82.1224,
+            "net_corridor_area_m2": 56.04491,
+            "net_corridor_ratio": 0.21927260846245347,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 20.6,
+            "guest_route_length_m": 7.4,
+            "family_route_length_m": 18.0,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.83198,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "db7e47d5542145990959a22bafdf2662",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 21,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        }
+      ],
+      "after": [
+        {
+          "candidate": "intelligence-3-1.0-spine",
+          "revision": "ad44172ba8934ee8ac82dbd390fb304b",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 254.98,
+            "net_usable_room_area_m2": 149.47889,
+            "circulation_union_m2_total": 52.56029,
+            "movement_with_measured_internal_paths_m2_total": 68.90229,
+            "net_corridor_area_m2": 45.56572,
+            "net_corridor_ratio": 0.20741425628313245,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 13.6,
+            "guest_route_length_m": 7.0,
+            "family_route_length_m": 16.4,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.97487,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "8f9bb1335c04481db3a1777584172cef",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 19,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "spine-service_aligned-front-",
+          "revision": "1435a738f94847f687163c42a3f75527",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 273.99,
+            "net_usable_room_area_m2": 165.30185,
+            "circulation_union_m2_total": 55.5288,
+            "movement_with_measured_internal_paths_m2_total": 73.08582,
+            "net_corridor_area_m2": 48.1416,
+            "net_corridor_ratio": 0.20220473115623955,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 17.2,
+            "guest_route_length_m": 5.2,
+            "family_route_length_m": 17.4,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.05335,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "56827b303b3bca1b15b9d56c98492577",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 22,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear-",
+          "revision": "40d45151871142ca8e7ccffacaf69e9c",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 294.03,
+            "net_usable_room_area_m2": 169.2,
+            "circulation_union_m2_total": 64.47578,
+            "movement_with_measured_internal_paths_m2_total": 82.1224,
+            "net_corridor_area_m2": 56.04491,
+            "net_corridor_ratio": 0.21927260846245347,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 20.6,
+            "guest_route_length_m": 7.4,
+            "family_route_length_m": 18.0,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.83198,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "db7e47d5542145990959a22bafdf2662",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 21,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        }
+      ]
+    },
+    "reference_ablation_without_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          52.56029,
+          55.5288,
+          54.546
+        ],
+        "median": 54.546,
+        "minimum": 52.56029,
+        "maximum": 55.5288
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          254.98,
+          273.99,
+          251.77
+        ],
+        "median": 254.98,
+        "minimum": 251.77,
+        "maximum": 273.99
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          13.6,
+          17.2,
+          17.4
+        ],
+        "median": 17.2,
+        "minimum": 13.6,
+        "maximum": 17.4
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          149.47889,
+          165.30185,
+          144.41822
+        ],
+        "median": 149.47889,
+        "minimum": 144.41822,
+        "maximum": 165.30185
+      }
+    }
+  },
+  {
+    "case": "sa-corner",
+    "input": {
+      "width": 20.0,
+      "depth": 25.0,
+      "country": "SA",
+      "region": "مكة المكرمة",
+      "city": "",
+      "district": "",
+      "neighborhood": "",
+      "investment_units": 4,
+      "investment_unit_area": 100,
+      "north_edge": "top",
+      "street_edges": [
+        "bottom",
+        "left"
+      ],
+      "main_street": "bottom",
+      "street_widths": {
+        "bottom": 15.0,
+        "left": 15.0
+      },
+      "family": 6,
+      "building": "villa",
+      "output_level": "standard",
+      "design_priority": "usability",
+      "floors": "auto",
+      "comfort": "balanced",
+      "majlis": true,
+      "office": false,
+      "accessible_bedroom": true,
+      "notes": "",
+      "site_evidence": null
+    },
+    "before_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          63.529,
+          60.35914,
+          100.23714
+        ],
+        "median": 63.529,
+        "minimum": 60.35914,
+        "maximum": 100.23714
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          295.32,
+          276.75,
+          342.0
+        ],
+        "median": 295.32,
+        "minimum": 276.75,
+        "maximum": 342.0
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          16.0,
+          19.0,
+          22.0
+        ],
+        "median": 19.0,
+        "minimum": 16.0,
+        "maximum": 22.0
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          176.04,
+          162.23607,
+          175.2
+        ],
+        "median": 175.2,
+        "minimum": 162.23607,
+        "maximum": 176.04
+      }
+    },
+    "after_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          58.02537,
+          60.35914,
+          63.529
+        ],
+        "median": 60.35914,
+        "minimum": 58.02537,
+        "maximum": 63.529
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          261.87,
+          276.75,
+          295.32
+        ],
+        "median": 276.75,
+        "minimum": 261.87,
+        "maximum": 295.32
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          18.2,
+          19.0,
+          16.0
+        ],
+        "median": 18.2,
+        "minimum": 16.0,
+        "maximum": 19.0
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          149.398,
+          162.23607,
+          176.04
+        ],
+        "median": 162.23607,
+        "minimum": 149.398,
+        "maximum": 176.04
+      }
+    },
+    "stages": {
+      "before": [
+        {
+          "candidate": "spine-service_aligned-front-",
+          "revision": "d43a9f89f07042eca811dd16b53fe27d",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 295.32,
+            "net_usable_room_area_m2": 176.04,
+            "circulation_union_m2_total": 63.529,
+            "movement_with_measured_internal_paths_m2_total": 81.199,
+            "net_corridor_area_m2": 55.215,
+            "net_corridor_ratio": 0.21577209402293912,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 16.0,
+            "guest_route_length_m": 8.8,
+            "family_route_length_m": 19.4,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.67188,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 10,
+              "required_rooms": 10,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "8666a2e769e4c2c20270f5f6083d78f4",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 17,
+              "edges": 23,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:stair:family",
+                "GF:bathroom:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:master:family",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear-",
+          "revision": "8eeb14f53eaf4950a220bfdd2e7cc996",
+          "checks": {
+            "PASS": 53,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 276.75,
+            "net_usable_room_area_m2": 162.23607,
+            "circulation_union_m2_total": 60.35914,
+            "movement_with_measured_internal_paths_m2_total": 77.42076,
+            "net_corridor_area_m2": 52.39655,
+            "net_corridor_ratio": 0.21898263996942063,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 19.0,
+            "guest_route_length_m": 7.6,
+            "family_route_length_m": 19.8,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.88088,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 10,
+              "required_rooms": 10,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "fd410b134fb7483a915f5555ae3fd2d5",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 17,
+              "edges": 23,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:stair:family",
+                "GF:bathroom:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:master:family",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "cross-family_front-front-",
+          "revision": "3af6461c123a486d971cd69c31012986",
+          "checks": {
+            "PASS": 51,
+            "FAIL": 0,
+            "PENDING": 29,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 342.0,
+            "net_usable_room_area_m2": 175.2,
+            "circulation_union_m2_total": 100.23714,
+            "movement_with_measured_internal_paths_m2_total": 118.58864,
+            "net_corridor_area_m2": 86.39103,
+            "net_corridor_ratio": 0.29235639115295914,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 22.0,
+            "guest_route_length_m": 7.0,
+            "family_route_length_m": 25.6,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.10967,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 10,
+              "required_rooms": 10,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "eeebaac9146bd89ba6ebaef78f0cc67a",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 17,
+              "edges": 19,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:stair:family",
+                "GF:bathroom:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:master:family",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        }
+      ],
+      "after": [
+        {
+          "candidate": "intelligence-3-1.0-spine",
+          "revision": "022dea6e97ff4898a0a527c2fa4d4d0d",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 261.87,
+            "net_usable_room_area_m2": 149.398,
+            "circulation_union_m2_total": 58.02537,
+            "movement_with_measured_internal_paths_m2_total": 73.85737,
+            "net_corridor_area_m2": 50.40191,
+            "net_corridor_ratio": 0.22456750227711283,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 18.2,
+            "guest_route_length_m": 6.0,
+            "family_route_length_m": 19.0,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.24703,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 10,
+              "required_rooms": 10,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "aa96a2972420bb1b33ef03a1ecffca6c",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 17,
+              "edges": 23,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:stair:family",
+                "GF:bathroom:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:master:family",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear-",
+          "revision": "8eeb14f53eaf4950a220bfdd2e7cc996",
+          "checks": {
+            "PASS": 53,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 276.75,
+            "net_usable_room_area_m2": 162.23607,
+            "circulation_union_m2_total": 60.35914,
+            "movement_with_measured_internal_paths_m2_total": 77.42076,
+            "net_corridor_area_m2": 52.39655,
+            "net_corridor_ratio": 0.21898263996942063,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 19.0,
+            "guest_route_length_m": 7.6,
+            "family_route_length_m": 19.8,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.88088,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 10,
+              "required_rooms": 10,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "fd410b134fb7483a915f5555ae3fd2d5",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 17,
+              "edges": 23,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:stair:family",
+                "GF:bathroom:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:master:family",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "spine-service_aligned-front-",
+          "revision": "d43a9f89f07042eca811dd16b53fe27d",
+          "checks": {
+            "PASS": 52,
+            "FAIL": 0,
+            "PENDING": 28,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 295.32,
+            "net_usable_room_area_m2": 176.04,
+            "circulation_union_m2_total": 63.529,
+            "movement_with_measured_internal_paths_m2_total": 81.199,
+            "net_corridor_area_m2": 55.215,
+            "net_corridor_ratio": 0.21577209402293912,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 16.0,
+            "guest_route_length_m": 8.8,
+            "family_route_length_m": 19.4,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.67188,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 10,
+              "required_rooms": 10,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "8666a2e769e4c2c20270f5f6083d78f4",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 17,
+              "edges": 23,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:stair:family",
+                "GF:bathroom:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:master:family",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        }
+      ]
+    },
+    "reference_ablation_without_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          58.02537,
+          60.35914,
+          63.529
+        ],
+        "median": 60.35914,
+        "minimum": 58.02537,
+        "maximum": 63.529
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          261.87,
+          276.75,
+          295.32
+        ],
+        "median": 276.75,
+        "minimum": 261.87,
+        "maximum": 295.32
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          18.2,
+          19.0,
+          16.0
+        ],
+        "median": 18.2,
+        "minimum": 16.0,
+        "maximum": 19.0
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          149.398,
+          162.23607,
+          176.04
+        ],
+        "median": 162.23607,
+        "minimum": 149.398,
+        "maximum": 176.04
+      }
+    }
+  },
+  {
+    "case": "ye-medium",
+    "input": {
+      "width": 24.0,
+      "depth": 32.0,
+      "country": "YE",
+      "region": "الحديدة",
+      "city": "",
+      "district": "",
+      "neighborhood": "",
+      "investment_units": 4,
+      "investment_unit_area": 100,
+      "north_edge": "top",
+      "street_edges": [
+        "bottom"
+      ],
+      "main_street": "bottom",
+      "street_widths": {},
+      "family": 6,
+      "building": "villa",
+      "output_level": "standard",
+      "design_priority": "usability",
+      "floors": "auto",
+      "comfort": "balanced",
+      "majlis": true,
+      "office": false,
+      "accessible_bedroom": false,
+      "notes": "",
+      "site_evidence": null
+    },
+    "before_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          60.903,
+          61.89077,
+          70.15286
+        ],
+        "median": 61.89077,
+        "minimum": 60.903,
+        "maximum": 70.15286
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          283.67,
+          287.27,
+          296.11
+        ],
+        "median": 287.27,
+        "minimum": 283.67,
+        "maximum": 296.11
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          16.4,
+          18.2,
+          18.2
+        ],
+        "median": 18.2,
+        "minimum": 16.4,
+        "maximum": 18.2
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          169.2,
+          169.2528,
+          169.29495
+        ],
+        "median": 169.2528,
+        "minimum": 169.2,
+        "maximum": 169.29495
+      }
+    },
+    "after_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          60.903,
+          61.89077,
+          60.30609
+        ],
+        "median": 60.903,
+        "minimum": 60.30609,
+        "maximum": 61.89077
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          283.67,
+          287.27,
+          266.89
+        ],
+        "median": 283.67,
+        "minimum": 266.89,
+        "maximum": 287.27
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          16.4,
+          18.2,
+          17.8
+        ],
+        "median": 17.8,
+        "minimum": 16.4,
+        "maximum": 18.2
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          169.2,
+          169.2528,
+          152.93206
+        ],
+        "median": 169.2,
+        "minimum": 152.93206,
+        "maximum": 169.2528
+      }
+    },
+    "stages": {
+      "before": [
+        {
+          "candidate": "spine-service_aligned-front-",
+          "revision": "275a347b24724009aa4317e07a03dbb4",
+          "checks": {
+            "PASS": 40,
+            "FAIL": 0,
+            "PENDING": 12,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 283.67,
+            "net_usable_room_area_m2": 169.2,
+            "circulation_union_m2_total": 60.903,
+            "movement_with_measured_internal_paths_m2_total": 77.74948,
+            "net_corridor_area_m2": 52.872,
+            "net_corridor_ratio": 0.21430655987548236,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 16.4,
+            "guest_route_length_m": 5.8,
+            "family_route_length_m": 19.0,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.62863,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "512d820d9e17adf52cc192fdee970b4e",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 20,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-social_front-front-compact_side",
+          "revision": "3b8e86643c6d49178fa76842cdfe4c19",
+          "checks": {
+            "PASS": 40,
+            "FAIL": 0,
+            "PENDING": 12,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 287.27,
+            "net_usable_room_area_m2": 169.2528,
+            "circulation_union_m2_total": 61.89077,
+            "movement_with_measured_internal_paths_m2_total": 77.91055,
+            "net_corridor_area_m2": 53.85973,
+            "net_corridor_ratio": 0.2173932593140421,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 18.2,
+            "guest_route_length_m": 7.2,
+            "family_route_length_m": 19.6,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.36437,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "357e1d99642ae4b25477bc3498fe862c",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 19,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-social_front-front-side_spine",
+          "revision": "0e17715f9f984867948161e1edf0ad5f",
+          "checks": {
+            "PASS": 40,
+            "FAIL": 0,
+            "PENDING": 12,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 296.11,
+            "net_usable_room_area_m2": 169.29495,
+            "circulation_union_m2_total": 70.15286,
+            "movement_with_measured_internal_paths_m2_total": 86.32631,
+            "net_corridor_area_m2": 61.06095,
+            "net_corridor_ratio": 0.23945855600031218,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 18.2,
+            "guest_route_length_m": 8.4,
+            "family_route_length_m": 20.0,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.38084,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "618988e4ab6c409b62c7b3ef7ce4130f",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 19,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        }
+      ],
+      "after": [
+        {
+          "candidate": "spine-service_aligned-front-",
+          "revision": "275a347b24724009aa4317e07a03dbb4",
+          "checks": {
+            "PASS": 40,
+            "FAIL": 0,
+            "PENDING": 12,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 283.67,
+            "net_usable_room_area_m2": 169.2,
+            "circulation_union_m2_total": 60.903,
+            "movement_with_measured_internal_paths_m2_total": 77.74948,
+            "net_corridor_area_m2": 52.872,
+            "net_corridor_ratio": 0.21430655987548236,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 16.4,
+            "guest_route_length_m": 5.8,
+            "family_route_length_m": 19.0,
+            "dead_space_m2": null,
+            "max_room_aspect": 1.62863,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "512d820d9e17adf52cc192fdee970b4e",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "rear"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 20,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:rear",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "adaptive-social_front-front-compact_side",
+          "revision": "3b8e86643c6d49178fa76842cdfe4c19",
+          "checks": {
+            "PASS": 40,
+            "FAIL": 0,
+            "PENDING": 12,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 287.27,
+            "net_usable_room_area_m2": 169.2528,
+            "circulation_union_m2_total": 61.89077,
+            "movement_with_measured_internal_paths_m2_total": 77.91055,
+            "net_corridor_area_m2": 53.85973,
+            "net_corridor_ratio": 0.2173932593140421,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 18.2,
+            "guest_route_length_m": 7.2,
+            "family_route_length_m": 19.6,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.36437,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "357e1d99642ae4b25477bc3498fe862c",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 19,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        },
+        {
+          "candidate": "intelligence-3-1.0-spine",
+          "revision": "19631709f117459ebbefa176f628061a",
+          "checks": {
+            "PASS": 40,
+            "FAIL": 0,
+            "PENDING": 12,
+            "REVIEW": 0
+          },
+          "metrics": {
+            "gross_floor_area_m2": 266.89,
+            "net_usable_room_area_m2": 152.93206,
+            "circulation_union_m2_total": 60.30609,
+            "movement_with_measured_internal_paths_m2_total": 75.69469,
+            "net_corridor_area_m2": 52.41645,
+            "net_corridor_ratio": 0.22790899423627725,
+            "unassigned_area_m2": 0.0,
+            "unassigned_sliver_area_m2": 0,
+            "longest_required_travel_path_m": 17.8,
+            "guest_route_length_m": 5.2,
+            "family_route_length_m": 18.8,
+            "dead_space_m2": null,
+            "max_room_aspect": 2.8,
+            "natural_light_ventilation": {
+              "rooms_with_modeled_window": 9,
+              "required_rooms": 9,
+              "coverage_ratio": 1.0,
+              "rooms_without_modeled_window": [],
+              "adequacy": "REVIEW",
+              "scope": "modeled exterior-window presence only, not daylight factor, airflow or legal sufficiency"
+            },
+            "structural_signature": {
+              "hash": "66e794dd53dc7f16d0ec02c086b01d49",
+              "method": "functional adjacency/access WL4 + relative core entrance band; halls dissolved",
+              "floors": [
+                {
+                  "floor": "GF",
+                  "hall_components": 1,
+                  "guest_components": 1,
+                  "core_entry_bands": [
+                    "front"
+                  ]
+                },
+                {
+                  "floor": "FF",
+                  "hall_components": 1,
+                  "guest_components": 0,
+                  "core_entry_bands": []
+                }
+              ],
+              "nodes": 16,
+              "edges": 20,
+              "labels": [
+                "FF:bathroom:family",
+                "FF:bedroom:family",
+                "FF:bedroom:family",
+                "FF:family_movement",
+                "FF:master:family",
+                "FF:stair:family",
+                "GF:bathroom:guest",
+                "GF:dining:family",
+                "GF:family_movement",
+                "GF:guest_movement",
+                "GF:kitchen:family",
+                "GF:living:family",
+                "GF:majlis:guest",
+                "GF:stair:family:front",
+                "family_entry",
+                "guest_entry"
+              ],
+              "legal_rule": false
+            },
+            "privacy": {
+              "sampled_exposed_rooms": [],
+              "certified": false
+            }
+          }
+        }
+      ]
+    },
+    "reference_ablation_without_distribution": {
+      "circulation_union_m2_total": {
+        "values": [
+          58.1063,
+          60.903,
+          61.89077
+        ],
+        "median": 60.903,
+        "minimum": 58.1063,
+        "maximum": 61.89077
+      },
+      "gross_floor_area_m2": {
+        "values": [
+          252.26,
+          283.67,
+          287.27
+        ],
+        "median": 283.67,
+        "minimum": 252.26,
+        "maximum": 287.27
+      },
+      "longest_required_travel_path_m": {
+        "values": [
+          15.8,
+          16.4,
+          18.2
+        ],
+        "median": 16.4,
+        "minimum": 15.8,
+        "maximum": 18.2
+      },
+      "net_usable_room_area_m2": {
+        "values": [
+          141.74286,
+          169.2,
+          169.2528
+        ],
+        "median": 169.2,
+        "minimum": 141.74286,
+        "maximum": 169.2528
+      }
+    }
+  }
+]

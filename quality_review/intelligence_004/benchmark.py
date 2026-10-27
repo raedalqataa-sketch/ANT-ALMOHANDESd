@@ -57,7 +57,9 @@ def main():
         before=result['baseline_candidates'];after=result['candidates'];exports=[]
         for model in after:
             rev=model['model_revision_id'];doc=ezdxf.readfile(target/(rev+'.dxf'));pdf=PdfReader(target/(rev+'.pdf'))
-            assert not doc.audit().errors and doc.header['$INSUNITS']==6 and len(pdf.pages)==5
+            from backend.design.general_drawing import review_pages
+            expected_pages=len(model['floors'])+1+len(review_pages(model))
+            assert not doc.audit().errors and doc.header['$INSUNITS']==6 and len(pdf.pages)==expected_pages
             saved=json.loads((target/(rev+'.json')).read_text());assert saved['geometry_sha256']==model['geometry_sha256']
             exports.append(dict(revision=rev,pdf_pages=len(pdf.pages),dxf_errors=0,units='metres',geometry_sha256=model['geometry_sha256'],export_audit=model.get('export_audit')))
         row=dict(case=name,input=intent.model_dump(),seed=0,baseline_sha='32be0b0',before=[summary(m) for m in before],after=[summary(m) for m in after],

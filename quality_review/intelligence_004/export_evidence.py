@@ -10,7 +10,7 @@ import ezdxf
 from backend.design.general_drawing import drawing
 
 
-def point_key(p):return tuple(round(v,5) for v in p[:2])
+def point_key(p):return tuple(round(v,5) for v in tuple(p)[:2])
 def segment(a,b):return tuple(sorted((point_key(a),point_key(b))))
 
 
