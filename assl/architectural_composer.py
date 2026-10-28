@@ -83,38 +83,57 @@ def facade_exposure(room,others):
     return max(widths) if widths else 0.
 
 
-def architectural_length(room,lane,t):
-    """Requested area and proportions BEFORE packing; no furniture assumptions.
+def architectural_profile(room,lane,t):
+    """Choose a room-sized width within a wing without occupying its full strip.
 
-    Reject very wide strips that can only be used by dramatically inflating a
-    small room. Reject narrow wings that force extremely elongated rooms.
+    The room remains anchored on the hallway-facing edge. Freed side width is
+    treated as an OUTDOOR MASSING RECESS, not automatically expanded into other
+    rooms. No furniture or rendered objects participate in this decision.
     """
-    cross=lane['width' if lane['axis']=='y' else 'depth']-t
-    if cross<=EPS or cross+EPS<room.get('min_side',0):
-        return math.inf
+    available=lane['width' if lane['axis']=='y' else 'depth']-t
+    minimum=room.get('min_side',0)
+    if available+EPS<minimum or available<=EPS:return None
     if room.get('guest_distributor'):
-        return room['min_side']+t
-    requested=room.get('min_area',0)
-    if not _num(requested):return math.inf
-    min_length=max(room.get('min_side',0),requested/cross)
-    preferred,limit=ASPECTS.get(room.get('kind'),(2.0,2.7))
-    # No room may exceed its design aspect upper bound merely because
-    # the selected strip happens to be unusually wide.
-    length=max(min_length,cross/limit)
-    aspect=max(length,cross)/min(length,cross)
-    if aspect>limit+EPS:
-        return math.inf
-    if room.get('request_id') and cross*length>requested*1.40+EPS:
-        return math.inf
-    return length+t
+        return {'gross_cross':available+t,'gross_length':minimum+t,
+                'source':'full_width_guest_distributor'}
+    requested=room.get('min_area')
+    if not _num(requested) or requested<=0 or minimum<=0:return None
+    soft,hard=ASPECTS.get(room.get('kind'),(2.,2.7))
+    ideal=math.sqrt(requested)
+    values={available,minimum}
+    for multiplier in (.8,.9,1.,1.08,1.2,1.35,1.5):
+        values.add(ideal*multiplier)
+    candidates=[]
+    for net_width in sorted(values):
+        if net_width<minimum-EPS or net_width>available+EPS:continue
+        net_depth=max(minimum,requested/net_width)
+        ratio=max(net_width,net_depth)/min(net_width,net_depth)
+        if ratio>hard+EPS:continue
+        net_area=net_width*net_depth
+        if net_area>requested*1.40+EPS:continue
+        excess=max(0.,net_area/requested-1.)
+        score=(max(0.,ratio-soft)**2*30.0 + excess*8.0 +
+               .07*(available-net_width) + .045*net_depth)
+        candidates.append((score,net_depth,net_width))
+    if not candidates:return None
+    _,net_depth,net_width=min(candidates)
+    return {'gross_cross':net_width+t,'gross_length':net_depth+t,
+            'net_cross':net_width,'net_length':net_depth,
+            'source':'request_sized_architectural_wing_recess'}
+
+
+def architectural_length(room,lane,t):
+    profile=architectural_profile(room,lane,t)
+    return profile['gross_length'] if profile else math.inf
 
 
 def limit_growth(room,lane,t,base,proposed_growth,*,area_factor=1.08):
     """Prevent unused wing capacity from silently bloating customer rooms."""
     if not room.get('request_id') or room.get('guest_distributor'):
         return 0.
-    cross=lane['width' if lane['axis']=='y' else 'depth']-t
-    if cross<=EPS:return 0.
+    profile=architectural_profile(room,lane,t)
+    if profile is None:return 0.
+    cross=profile['net_cross']
     requested=room['min_area']
     allowed=max(0.,requested*area_factor/cross+t-base)
     return min(max(0.,proposed_growth),allowed)
@@ -134,7 +153,7 @@ def assess_layout(layout,t,*,facade_clear_m=.90):
         halls=halls_by_floor[fi] if fi<len(halls_by_floor) else []
         all_rects=list(cells)+list(halls)
         total_gross+=sum(r['width']*r['depth'] for r in all_rects)
-        total_halls+=sum(r['width']*r['depth'] for r in halls)
+        total_halls+=sum(r['width']*r['depth'] for r in halls) + sum(r['width']*r['depth'] for r in cells if r.get('guest_distributor'))
         elongated_halls+=sum(max(h['width'],h['depth'])>6.0 and
                              max(h['width'],h['depth'])/max(min(h['width'],h['depth']),.1)>3.
                              for h in halls)
