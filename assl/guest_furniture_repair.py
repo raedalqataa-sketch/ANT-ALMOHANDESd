@@ -70,7 +70,7 @@ def attempt_guest_furniture_repair(model, revision, *,
             if not any(q.get('kind')=='sofa' for q in furnished):
                 continue
             remaining=access().get('unreachable',[])
-            if not any(r['id'] in remaining for r in councils):
+            if not remaining:
                 fixed=True
                 for i,q in enumerate(floor['furniture']):
                     q['id']=floor['id']+f'-F{i+1:03}'
