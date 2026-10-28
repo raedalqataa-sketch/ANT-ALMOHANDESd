@@ -99,7 +99,7 @@ def enrich_composition_quality(layout,wall_thickness,report):
     """Preserve hard room-size/facade tests; add measured quality + core checks."""
     floors=layout.get("floors",[])
     halls_by_floor=layout.get("halls_by_floor",[])
-    summaries=[];relations=[];stair_centers=[];new_issues=[]
+    summaries=[];relations=[];stair_centers=[];new_issues=[];entry_evidence=[]
     functional_cost=0.;run_cost=0.;union_total=0.
     for floor_num,cells in enumerate(floors):
         halls=halls_by_floor[floor_num] if floor_num<len(halls_by_floor) else []
@@ -118,6 +118,20 @@ def enrich_composition_quality(layout,wall_thickness,report):
             new_issues.append({"floor":floor_num,
                                "reason":"STAIR_CORE_WITHOUT_HALL_CONTACT_POTENTIAL"})
         guests=[r for r in cells if r.get("guest_distributor")]
+        if floor_num==0:
+            from .architectural_composer import facade_exposure
+            all_rects=list(cells)+list(halls)
+            family_run=max((facade_exposure(h,all_rects) for h in halls),default=0.)
+            guest_runs=[{"id":v.get("id"),
+                         "longest_continuous_exterior_run_m":round(facade_exposure(v,all_rects),3)}
+                        for v in guests]
+            entry_evidence.append({"family_hall_outer_exposure_m":round(family_run,3),
+                                   "guest_vestibules":guest_runs,
+                                   "doors_verified":False,"street_access_verified":False})
+            if halls and family_run<.9-EPS:
+                new_issues.append({"floor":floor_num,"reason":"NO_FAMILY_EXTERNAL_ENTRANCE_POTENTIAL"})
+            if any(v["longest_continuous_exterior_run_m"]<.9-EPS for v in guest_runs):
+                new_issues.append({"floor":floor_num,"reason":"NO_INDEPENDENT_GUEST_ENTRANCE_POTENTIAL"})
         for guest in guests:
             connections=[r for r in cells if r.get("guest_vestibule")==guest.get("id")]
             if connections and any(edge_contact(guest,r)<.90 for r in connections):
@@ -142,6 +156,7 @@ def enrich_composition_quality(layout,wall_thickness,report):
     output["long_straight_run_penalty"]=round(run_cost,4)
     output["functional_closeness_penalty"]=round(functional_cost,4)
     output["functional_relations"]=relations
+    output["entrance_facade_potential"]=entry_evidence
     output["architectural_bubble_graph_validated"]=False
     output["circulation_walk_paths_validated"]=False
     output["doors_generated"]=False
