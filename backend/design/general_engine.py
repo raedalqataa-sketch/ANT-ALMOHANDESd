@@ -191,23 +191,31 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 growth=bounded_growth(r,lane,t,base,growth,guest_area_factor)
             length=base+growth
             cell=box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else length,length if axis=='y' else lane['depth'],**copy.deepcopy(r),door_side=lane['door_side'])
-            if architecture_first and r.get('request_id'):
+            if architecture_first and (r.get('request_id') or r.get('guest_distributor')):
                 from assl.architectural_composer import architectural_profile
                 profile=architectural_profile(r,lane,t)
                 if profile is None:
                     return None
-                # Recess the room's outside edge, not its hallway-connected
-                # inside edge. This changes actual room geometry BEFORE walls.
                 reduced=profile['gross_cross']
+                # Family rooms need direct corridor contact, but a separate
+                # guest suite needs its entrance and shared vestibule along
+                # the EXTERNAL facade. All members of the guest bundle are
+                # anchored to the same outside edge, remaining contiguous.
+                independent_guest=(r.get('zone')=='guest' and
+                                   (r.get('guest_vestibule') or r.get('guest_distributor')))
                 if axis=='y':
-                    if lane['door_side']=='east':
+                    shift=(lane['door_side']=='west') if independent_guest else (lane['door_side']=='east')
+                    if shift:
                         cell['x']+=cell['width']-reduced
                     cell['width']=reduced
                 else:
-                    if lane['door_side']=='south':
+                    shift=(lane['door_side']=='north') if independent_guest else (lane['door_side']=='south')
+                    if shift:
                         cell['y']+=cell['depth']-reduced
                     cell['depth']=reduced
                 cell['architectural_width_profile']=profile['source']
+                if independent_guest:
+                    cell['guest_outer_facade_cluster']=True
             if policy=='reference_hub':
                 from .intelligence.references import preferred_shape
                 shape=preferred_shape(r,lane,t,guest_area_factor)
