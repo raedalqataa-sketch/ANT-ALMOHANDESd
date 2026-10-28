@@ -56,5 +56,8 @@ if __name__=='__main__':
     for row in result['results']:
         print(row['case'],'generated',row['number_generated'],'/',row['target'],
               'elapsed',row['elapsed_s'],'seconds')
+        if row['number_generated']<row['target']:
+            print('  family rejection diagnostics:',json.dumps(
+                  row['unavailable'],ensure_ascii=False))
     if any(x['number_generated']<3 for x in result['results']):
         raise SystemExit('ARCHITECTURE_COMPOSITION_SHORTFALL: fewer than three acceptable independent plans; see summary.json')
