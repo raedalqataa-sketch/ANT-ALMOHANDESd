@@ -896,6 +896,14 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
                         trial['guest_composition_diagnostics']['furnished_fit']=fit_check['evidence']
                         trial['checks']=[c for c in trial['checks'] if c['check_id']!=fit_check['check_id']]+[fit_check]
                 errors=[c for c in trial['checks'] if c['status']=='FAIL']
+            if assl_space_optimize:
+                # Recompute after possible V4 auto-repair; never reuse stale
+                # preflight/door geometry from the allocator.
+                from assl.guest_geometry_qa import generator_check
+                guest_quality_check=generator_check(trial)
+                trial['checks']=[c for c in trial['checks'] if c.get('check_id')!=guest_quality_check['check_id']]+[guest_quality_check]
+                trial['search']['assl_guest_audit_enabled']=True
+                errors=[c for c in trial['checks'] if c['status']=='FAIL']
             trial['search']['preflight']={
                 'enabled':candidate_validator is not None,
                 'candidates_validated':preflights,
@@ -906,7 +914,7 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
             # violations rather than treating every failed check as equally severe.
             # Only valid candidates may be exported; PENDING remains unresolved.
             def violation_cost(items):
-                critical={'guest-distributor-access':100,'guest-route':100,'entrance':100,
+                critical={'guest-distributor-access':100,'guest-route':100,'ASSL-guest-physical-route':100,'entrance':100,
                           'GF-doors':80,'GF-program':80,'GF-overlap':80,'GF-site':80}
                 return sum(critical.get(c['check_id'],20) for c in items)
             trial['search']['architectural_feedback']={
@@ -953,6 +961,14 @@ def export_general_model(model,brief,out):
             raise ValueError('تغيرت هندسة النموذج بعد الفحص؛ يلزم إصدار وفحص جديد قبل التصدير')
         model['checks']=validate_v4(model,brief)
         if any(c['status']=='FAIL' for c in model['checks']):
+            model['release'].update(status='BLOCKED',drawing_export_allowed=False)
+    if model.get('search',{}).get('assl_guest_audit_enabled'):
+        # V4 export revalidation replaces checks: the independent guest audit
+        # must also be rerun against FINAL emitted geometry before any DXF/PDF.
+        from assl.guest_geometry_qa import generator_check
+        guest_quality_check=generator_check(model)
+        model['checks']=[c for c in model['checks'] if c.get('check_id')!=guest_quality_check['check_id']]+[guest_quality_check]
+        if guest_quality_check['status']=='FAIL':
             model['release'].update(status='BLOCKED',drawing_export_allowed=False)
     if not model['release']['drawing_export_allowed']:
         raise ValueError('لا يجوز تصدير رسم أخفق في فحص هندسي')
