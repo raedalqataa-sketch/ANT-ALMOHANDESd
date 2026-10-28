@@ -223,7 +223,7 @@ def expanded_program(brief,floor):
     return rows
 
 
-def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear'):
+def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear',*,assl_space_optimize=False):
     # Reserve clearance outside the mass for a balcony on a non-street facade.
     margin={face:(brief.automatic_features.balcony_depth_m+.15 if brief.automatic_features.balcony and brief.boundary_widths.get(face,0)<10 else 0) for face in ('north','south','east','west')}
     aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness-margin['west']-margin['east']
@@ -338,14 +338,24 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
         pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated,sleeping_aspect_ratio=sleeping_aspect))
         if best is None or score<best['score']:best=pool[-1]
     if best:
-        if brief.proposed_room_area_factor is not None:
+        if assl_space_optimize:
+            from assl.space_optimizer import score_layout
+            from .design_selection import MAX_SLEEPING_ASPECT_RATIO
+            for row in pool:
+                row['assl_space']=score_layout(row,wall_thickness=brief.wall_thickness)
+            # Soft quality objective ranks actual searched geometries. Invalid
+            # doors/privacy/daylight are STILL rejected downstream by checks.
+            pool.sort(key=lambda r:(r['sleeping_aspect_ratio']>MAX_SLEEPING_ASPECT_RATIO,
+                                    r['assl_space']['unresolved_rooms']>0,
+                                    r['assl_space']['assl_rank_score'],r['score']))
+        elif brief.proposed_room_area_factor is not None:
             from .design_selection import MAX_SLEEPING_ASPECT_RATIO
             pool.sort(key=lambda r:(r['sleeping_aspect_ratio']>MAX_SLEEPING_ASPECT_RATIO,r['score']))
         else:pool.sort(key=lambda r:r['score'])
         best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
         if brief.massing_strategy=='coherent':
-            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position)
+            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position,assl_space_optimize=assl_space_optimize)
             if fallback:
                 backups=[{k:v for k,v in fallback.items() if k!='alternatives'}]+fallback.get('alternatives',[])
                 best['alternatives'].extend({**r,'massing_fallback':True} for r in backups)
@@ -784,7 +794,7 @@ def search_feasibility_evidence(brief:VillaBrief):
         'legal_buildability_certified':False}
 
 
-def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4,repair_layout=False):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4,repair_layout=False,assl_space_optimize=False):
     """Search physical layouts; an optional V4 validator participates in candidate choice.
 
     The budget bounds expensive room/furniture path checks. No unchecked alternative
@@ -792,6 +802,8 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
     """
     if candidate_validator is not None and validation_budget<1:
         raise ValueError('validation_budget must be positive')
+    if type(assl_space_optimize) is not bool:
+        raise ValueError('assl_space_optimize must be boolean')
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
@@ -807,9 +819,9 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         label=FAMILIES[family]
         guest_strategy=option.get('guest_strategy','linear')
         if guest_strategy not in ('linear','side_spine','compact_side'):raise ValueError('unsupported guest composition')
-        result=search(brief,family,policy,core_position,guest_strategy)
-        if not result and guest_strategy=='compact_side':result=search(brief,family,policy,core_position,'side_spine')
-        if not result and guest_strategy!='linear':result=search(brief,family,policy,core_position)
+        result=search(brief,family,policy,core_position,guest_strategy,assl_space_optimize=assl_space_optimize)
+        if not result and guest_strategy=='compact_side':result=search(brief,family,policy,core_position,'side_spine',assl_space_optimize=assl_space_optimize)
+        if not result and guest_strategy!='linear':result=search(brief,family,policy,core_position,assl_space_optimize=assl_space_optimize)
         if not result:
             evidence=search_feasibility_evidence(brief)
             impossibility=evidence['classification']=='PROVEN_ENVELOPE_SHORTFALL'
@@ -823,9 +835,9 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         reference_movement=None
         if guest_strategy!='linear':
             if guest_strategy=='compact_side':
-                side_fallback=search(brief,family,policy,core_position,'side_spine')
+                side_fallback=search(brief,family,policy,core_position,'side_spine',assl_space_optimize=assl_space_optimize)
                 if side_fallback:alternatives.extend({**r,'guest_strategy_fallback':True} for r in [side_fallback]+side_fallback.get('alternatives',[]))
-            fallback=search(brief,family,policy,core_position)
+            fallback=search(brief,family,policy,core_position,assl_space_optimize=assl_space_optimize)
             if fallback:
                 # Keep an original layout within the bounded preflight budget,
                 # even when new guest compositions repeatedly fail validation.
@@ -847,6 +859,8 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
             if guest_strategy!='linear' and candidate_validator is not None and preflights>=max(1,validation_budget-1) and not layout.get('guest_strategy_fallback'):
                 continue
             trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
+            if assl_space_optimize:
+                trial['search']['assl_space_optimizer']=layout.get('assl_space',{'status':'UNRANKED_FALLBACK'})
             actual_guest_strategy=next((c['guest_composition'] for f in trial['floors'] for c in f['cells'] if c.get('guest_composition')),None)
             if actual_guest_strategy:
                 from quality_review.unallocated_geometry import measure_model
