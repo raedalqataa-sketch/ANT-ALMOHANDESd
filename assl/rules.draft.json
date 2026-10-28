@@ -1,0 +1,71 @@
+{
+  "schema_version": "0.2.0",
+  "enforcement_enabled": false,
+  "rules": [
+    {
+      "id": "YE-L19-2002-A28-HABITABLE-MIN",
+      "country": "YE",
+      "layer": "national",
+      "metric": "space.net_floor_area",
+      "operator": ">=",
+      "value": 9,
+      "unit": "m2",
+      "applies_when": {
+        "space_type": "habitable_room"
+      },
+      "source_id": "YE-LAW-19-2002",
+      "article": "28",
+      "verification_status": "RESEARCH_REPORTED_PENDING_REVIEW",
+      "enforcement": "disabled"
+    },
+    {
+      "id": "SA-SBC1101-R304-HABITABLE-MIN",
+      "country": "SA",
+      "layer": "national",
+      "metric": "space.net_floor_area",
+      "operator": ">=",
+      "value": 6.5,
+      "unit": "m2",
+      "applies_when": {
+        "space_type": "habitable_room"
+      },
+      "source_id": "SA-SBC1101-2024",
+      "article": "304",
+      "verification_status": "NEEDS_2024_CLAUSE_CONFIRMATION",
+      "enforcement": "disabled"
+    },
+    {
+      "id": "YE-LOCAL-SETBACK",
+      "country": "YE",
+      "layer": "municipal",
+      "metric": "site.front_setback",
+      "operator": ">=",
+      "value": null,
+      "unit": "m",
+      "required_inputs": [
+        "governorate",
+        "city",
+        "planning_zone",
+        "plot_id"
+      ],
+      "verification_status": "LOCAL_DYNAMIC",
+      "on_missing": "UNRESOLVED"
+    },
+    {
+      "id": "SA-LOCAL-SETBACK",
+      "country": "SA",
+      "layer": "municipal",
+      "metric": "site.front_setback",
+      "operator": ">=",
+      "value": null,
+      "unit": "m",
+      "required_inputs": [
+        "city",
+        "planning_zone",
+        "plot_id"
+      ],
+      "verification_status": "LOCAL_DYNAMIC",
+      "on_missing": "UNRESOLVED"
+    }
+  ]
+}
