@@ -5,6 +5,7 @@ on:
       - feature/architecture-composition-first-004
     paths:
       - 'assl/architectural_composer.py'
+      - 'assl/concept_quality_v2.py'
       - 'assl/architecture_preview.py'
       - 'backend/design/general_engine.py'
       - 'scripts/assl_architecture_smoke.py'
