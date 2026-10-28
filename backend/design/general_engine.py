@@ -571,7 +571,7 @@ def make_guest_distributor(floor,brief,revision):
     return True
 
 
-def materialize(brief,family,result):
+def materialize(brief,family,result,*,assl_repair_guest_furniture=False):
     revision=uuid4().hex;t=brief.wall_thickness
     origin_x=result.get('origin_x',brief.setbacks.west);origin_y=result.get('origin_y',brief.setbacks.north)
     model=dict(schema_version='0.6.2-general',model_revision_id=revision,candidate_id=family,status='DRAFT_REVIEW',
@@ -615,6 +615,11 @@ def materialize(brief,family,result):
     build_features(model,brief,result)
     model['stairs']=make_stairs(model)
     repair_furniture_access(model,revision)
+    if assl_repair_guest_furniture:
+        # Opt-in bounded repair runs BEFORE geometry_sha256, never after
+        # final release verification. The full validation still decides.
+        from assl.guest_furniture_repair import attempt_guest_furniture_repair
+        model['search']['assl_guest_furniture_repair']=attempt_guest_furniture_repair(model,revision)
     for f in model['floors']:f['annotations']=annotate(f,model['stairs'])
     model['parking']=saudi_rules.parking(model,brief,requested_count=brief.design_parking_count if brief.country=='YE' else None)
     model['parking_basis']={'jurisdiction':brief.country,'status':'documented Saudi count; stall and access provisional' if brief.apply_saudi_rules else 'design assumption only; Yemeni legal count unknown'}
@@ -858,7 +863,7 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         for attempt,layout in enumerate(alternatives):
             if guest_strategy!='linear' and candidate_validator is not None and preflights>=max(1,validation_budget-1) and not layout.get('guest_strategy_fallback'):
                 continue
-            trial=materialize(brief,family,layout);trial['checks']=validate_general(trial,brief)
+            trial=materialize(brief,family,layout,assl_repair_guest_furniture=assl_space_optimize);trial['checks']=validate_general(trial,brief)
             if assl_space_optimize:
                 trial['search']['assl_space_optimizer']=layout.get('assl_space',{'status':'UNRANKED_FALLBACK'})
             actual_guest_strategy=next((c['guest_composition'] for f in trial['floors'] for c in f['cells'] if c.get('guest_composition')),None)
