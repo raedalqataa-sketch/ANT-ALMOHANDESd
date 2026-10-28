@@ -134,6 +134,38 @@ class CompositionTests(unittest.TestCase):
         report=assess_layout({"floors":[],"halls_by_floor":[]},.20)
         self.assertEqual(report["status"],"ARCHITECTURAL_REVIEW")
 
+    def test_guest_vestibule_short_in_wide_wing(self):
+        from assl.architectural_composer import architectural_profile
+        lane={"axis":"y","width":10.0,"depth":18.0}
+        distributor={"kind":"corridor","guest_distributor":True,
+                     "zone":"guest","min_side":1.6,"min_area":0}
+        result=architectural_profile(distributor,lane,.20)
+        self.assertLessEqual(result["gross_cross"],3.3+1e-6)
+        self.assertEqual(result["source"],"compact_outer_facade_guest_vestibule")
+
+    def test_guest_group_remains_adjacent_after_anchoring_to_outer_side(self):
+        from assl.architectural_composer import architectural_profile,assess_layout
+        lane={"axis":"y","x":0,"y":0,"width":10.0,"depth":16.0,"door_side":"east"}
+        reqs=[
+            {"id":"g","kind":"majlis","request_id":"g","zone":"guest",
+             "min_area":24,"min_side":3.2,"guest_vestibule":"v"},
+            {"id":"v","kind":"corridor","zone":"guest","min_area":0,
+             "min_side":1.6,"guest_distributor":True},
+            {"id":"b","kind":"bathroom","request_id":"b","zone":"guest",
+             "min_area":5,"min_side":1.6,"guest_vestibule":"v"},
+        ]
+        y=0.;cells=[]
+        for r in reqs:
+            p=architectural_profile(r,lane,.2)
+            cell={**r,"x":0.,"y":y,"width":p["gross_cross"],
+                  "depth":p["gross_length"]}
+            cells.append(cell);y+=cell["depth"]
+        hall={"x":10.0,"y":0.0,"width":1.6,"depth":y+1}
+        report=assess_layout({"floors":[cells],"halls_by_floor":[[hall]]},.2)
+        self.assertNotIn("GUEST_VESTIBULE_NOT_ADJACENT_TO_ASSOCIATED_ROOMS",
+                         [i["reason"] for i in report["hard_issues"]])
+        self.assertLess(cells[1]["width"],4.0)
+
     def test_existing_generator_is_default_unaffected(self):
         code=(Path(__file__).resolve().parents[1]/
               "backend/design/general_engine.py").read_text(encoding="utf8")
