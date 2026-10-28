@@ -191,6 +191,23 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 growth=bounded_growth(r,lane,t,base,growth,guest_area_factor)
             length=base+growth
             cell=box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else length,length if axis=='y' else lane['depth'],**copy.deepcopy(r),door_side=lane['door_side'])
+            if architecture_first and r.get('request_id'):
+                from assl.architectural_composer import architectural_profile
+                profile=architectural_profile(r,lane,t)
+                if profile is None:
+                    return None
+                # Recess the room's outside edge, not its hallway-connected
+                # inside edge. This changes actual room geometry BEFORE walls.
+                reduced=profile['gross_cross']
+                if axis=='y':
+                    if lane['door_side']=='east':
+                        cell['x']+=cell['width']-reduced
+                    cell['width']=reduced
+                else:
+                    if lane['door_side']=='south':
+                        cell['y']+=cell['depth']-reduced
+                    cell['depth']=reduced
+                cell['architectural_width_profile']=profile['source']
             if policy=='reference_hub':
                 from .intelligence.references import preferred_shape
                 shape=preferred_shape(r,lane,t,guest_area_factor)
