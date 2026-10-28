@@ -112,6 +112,11 @@ def inspect_guest_access(model, *, walkability_probe=None, max_majlis_aspect=2.2
     usable=[]; invalid=[]
     for door in floor.get('openings',[]):
         if door.get('kind')!='door':continue
+        # Only doors relevant to the guest route or the independent family
+        # entrance belong to this audit. Other rooms have separate checks.
+        if not (door.get('guest_entry') or door.get('main_entry') or
+                set(door.get('connects',[])) & set(guests)):
+            continue
         valid,why = _real_door(door,walls,cells,rooms)
         if not valid:
             invalid.append({'door':door.get('id'), 'reason':why})
