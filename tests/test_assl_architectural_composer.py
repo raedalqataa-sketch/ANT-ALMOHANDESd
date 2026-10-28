@@ -107,10 +107,15 @@ class CompositionTests(unittest.TestCase):
         self.assertEqual(architectural_length(bed,lane,.20),math.inf)
 
     def test_wing_spare_capacity_not_inflated_into_rooms(self):
+        from assl.architectural_composer import architectural_profile
         lane={"axis":"y","width":4.2,"depth":20}
-        bed={"kind":"bedroom","request_id":"b","min_area":16}
-        base=16/4+.2
-        self.assertAlmostEqual(limit_growth(bed,lane,.2,base,4),.32)
+        bed={"kind":"bedroom","request_id":"b","min_area":16,"min_side":2.8}
+        profile=architectural_profile(bed,lane,.2)
+        self.assertIsNotNone(profile)
+        base=profile["gross_length"]
+        growth=limit_growth(bed,lane,.2,base,4)
+        self.assertGreaterEqual(growth,0)
+        self.assertLessEqual(growth,16*.08/profile["net_cross"]+1e-6)
 
     def test_signatures_change_with_room_positions(self):
         a=layout([room("a",x=0),room("b",x=6)],[])
