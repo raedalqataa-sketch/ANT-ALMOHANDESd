@@ -201,7 +201,7 @@ def assess_layout(layout,t,*,facade_clear_m=.90):
     # No assumption that hallway rectangles equal union-of-physical-walkways.
     score=(total_gross+2.*excessive_penalty+35.*ratio_penalty+
            1.3*total_halls+9.*elongated_halls+1000.*len(issues))
-    return {'status':'ARCHITECTURAL_REVIEW' if issues else 'PRELIMINARY_GEOMETRY_ELIGIBLE',
+    report={'status':'ARCHITECTURAL_REVIEW' if issues else 'PRELIMINARY_GEOMETRY_ELIGIBLE',
             'hard_issues':issues,'rooms':rooms_evidence,
             'gross_rectangles_m2':round(total_gross,3),
             'hall_rectangle_area_m2':round(total_halls,3),
@@ -213,6 +213,8 @@ def assess_layout(layout,t,*,facade_clear_m=.90):
             'furniture_used':False,'windows_verified':False,
             'external_facade_only_potential':True,
             'legal_compliance_certified':False}
+    from .concept_quality_v2 import enrich_composition_quality
+    return enrich_composition_quality(layout,t,report)
 
 
 def spatial_signature(layout):
