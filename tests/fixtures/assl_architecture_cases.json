@@ -1,0 +1,342 @@
+{
+  "description": "Synthetic briefs derived from earlier comparative geometry tests; no client records",
+  "cases": [
+    {
+      "id": "sa-corner",
+      "brief": {
+        "project_name": "ASSL architecture smoke sa-corner",
+        "floors": 2,
+        "wall_thickness": 0.2,
+        "corridor_width": 1.5,
+        "compact_core": true,
+        "proposed_room_area_factor": 1.2,
+        "massing_strategy": "coherent",
+        "adaptive_search": true,
+        "site_placement": "legacy",
+        "separate_guest_entry": true,
+        "apply_saudi_rules": true,
+        "flexible_space_policy": "remove",
+        "country": "SA",
+        "plot_width": 20,
+        "plot_depth": 25,
+        "setbacks": {
+          "north": 1.5,
+          "south": 3,
+          "east": 1.5,
+          "west": 3
+        },
+        "entrance_face": "south",
+        "rooms": [
+          {
+            "id": "auto-master",
+            "name": "غرفة النوم الرئيسية",
+            "kind": "master",
+            "floor": 0,
+            "count": 1,
+            "min_area": 20,
+            "min_side": 3.5,
+            "capacity": 2
+          },
+          {
+            "id": "auto-children",
+            "name": "غرف نوم الأسرة",
+            "kind": "bedroom",
+            "floor": 1,
+            "count": 2,
+            "min_area": 16,
+            "min_side": 3.2,
+            "capacity": 2
+          },
+          {
+            "id": "auto-living",
+            "name": "المعيشة العائلية",
+            "kind": "living",
+            "floor": 0,
+            "count": 1,
+            "min_area": 24,
+            "min_side": 3.5,
+            "capacity": 0
+          },
+          {
+            "id": "auto-dining",
+            "name": "غرفة الطعام",
+            "kind": "dining",
+            "floor": 0,
+            "count": 1,
+            "min_area": 16,
+            "min_side": 3,
+            "capacity": 0
+          },
+          {
+            "id": "auto-kitchen",
+            "name": "المطبخ",
+            "kind": "kitchen",
+            "floor": 0,
+            "count": 1,
+            "min_area": 16,
+            "min_side": 3,
+            "capacity": 0
+          },
+          {
+            "id": "auto-majlis",
+            "name": "مجلس الضيوف",
+            "kind": "majlis",
+            "floor": 0,
+            "count": 1,
+            "min_area": 24,
+            "min_side": 3.5,
+            "capacity": 0
+          },
+          {
+            "id": "auto-guest-wc",
+            "name": "حمام الضيوف",
+            "kind": "bathroom",
+            "floor": 0,
+            "count": 1,
+            "min_area": 4,
+            "min_side": 1.6,
+            "capacity": 0
+          },
+          {
+            "id": "auto-family-bath",
+            "name": "حمام الأسرة",
+            "kind": "bathroom",
+            "floor": 1,
+            "count": 1,
+            "min_area": 5,
+            "min_side": 1.6,
+            "capacity": 0
+          },
+          {
+            "id": "auto-ground-bath",
+            "name": "حمام الدور الأرضي",
+            "kind": "bathroom",
+            "floor": 0,
+            "count": 1,
+            "min_area": 5,
+            "min_side": 1.6,
+            "capacity": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "sa-large",
+      "brief": {
+        "project_name": "ASSL architecture smoke sa-large",
+        "floors": 2,
+        "wall_thickness": 0.2,
+        "corridor_width": 1.65,
+        "compact_core": true,
+        "proposed_room_area_factor": 1.2,
+        "massing_strategy": "coherent",
+        "adaptive_search": true,
+        "site_placement": "legacy",
+        "separate_guest_entry": true,
+        "apply_saudi_rules": true,
+        "flexible_space_policy": "remove",
+        "country": "SA",
+        "plot_width": 40,
+        "plot_depth": 32,
+        "setbacks": {
+          "north": 1.5,
+          "south": 3,
+          "east": 6,
+          "west": 1.5
+        },
+        "entrance_face": "east",
+        "rooms": [
+          {
+            "id": "auto-master",
+            "name": "غرفة النوم الرئيسية",
+            "kind": "master",
+            "floor": 1,
+            "count": 1,
+            "min_area": 22.4,
+            "min_side": 3.5,
+            "capacity": 2
+          },
+          {
+            "id": "auto-children",
+            "name": "غرف نوم الأسرة",
+            "kind": "bedroom",
+            "floor": 1,
+            "count": 4,
+            "min_area": 17.92,
+            "min_side": 3.2,
+            "capacity": 2
+          },
+          {
+            "id": "auto-living",
+            "name": "المعيشة العائلية",
+            "kind": "living",
+            "floor": 0,
+            "count": 1,
+            "min_area": 44.8,
+            "min_side": 3.5,
+            "capacity": 0
+          },
+          {
+            "id": "auto-dining",
+            "name": "غرفة الطعام",
+            "kind": "dining",
+            "floor": 0,
+            "count": 1,
+            "min_area": 22.4,
+            "min_side": 3,
+            "capacity": 0
+          },
+          {
+            "id": "auto-kitchen",
+            "name": "المطبخ",
+            "kind": "kitchen",
+            "floor": 0,
+            "count": 1,
+            "min_area": 17.92,
+            "min_side": 3,
+            "capacity": 0
+          },
+          {
+            "id": "auto-majlis",
+            "name": "مجلس الضيوف",
+            "kind": "majlis",
+            "floor": 0,
+            "count": 1,
+            "min_area": 26.88,
+            "min_side": 3.5,
+            "capacity": 0
+          },
+          {
+            "id": "auto-guest-wc",
+            "name": "حمام الضيوف",
+            "kind": "bathroom",
+            "floor": 0,
+            "count": 1,
+            "min_area": 4.48,
+            "min_side": 1.6,
+            "capacity": 0
+          },
+          {
+            "id": "auto-family-bath",
+            "name": "حمام الأسرة",
+            "kind": "bathroom",
+            "floor": 1,
+            "count": 2,
+            "min_area": 5.6,
+            "min_side": 1.6,
+            "capacity": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "ye-medium",
+      "brief": {
+        "project_name": "ASSL architecture smoke ye-medium",
+        "floors": 2,
+        "wall_thickness": 0.2,
+        "corridor_width": 1.5,
+        "compact_core": true,
+        "proposed_room_area_factor": 1.2,
+        "massing_strategy": "coherent",
+        "adaptive_search": true,
+        "site_placement": "legacy",
+        "separate_guest_entry": true,
+        "apply_saudi_rules": false,
+        "flexible_space_policy": "remove",
+        "country": "YE",
+        "plot_width": 24,
+        "plot_depth": 32,
+        "setbacks": {
+          "north": 2,
+          "south": 4,
+          "east": 2,
+          "west": 2
+        },
+        "entrance_face": "south",
+        "rooms": [
+          {
+            "id": "auto-master",
+            "name": "غرفة النوم الرئيسية",
+            "kind": "master",
+            "floor": 1,
+            "count": 1,
+            "min_area": 20,
+            "min_side": 3.5,
+            "capacity": 2
+          },
+          {
+            "id": "auto-children",
+            "name": "غرف نوم الأسرة",
+            "kind": "bedroom",
+            "floor": 1,
+            "count": 2,
+            "min_area": 16,
+            "min_side": 3.2,
+            "capacity": 2
+          },
+          {
+            "id": "auto-living",
+            "name": "المعيشة العائلية",
+            "kind": "living",
+            "floor": 0,
+            "count": 1,
+            "min_area": 24,
+            "min_side": 3.5,
+            "capacity": 0
+          },
+          {
+            "id": "auto-dining",
+            "name": "غرفة الطعام",
+            "kind": "dining",
+            "floor": 0,
+            "count": 1,
+            "min_area": 16,
+            "min_side": 3,
+            "capacity": 0
+          },
+          {
+            "id": "auto-kitchen",
+            "name": "المطبخ",
+            "kind": "kitchen",
+            "floor": 0,
+            "count": 1,
+            "min_area": 16,
+            "min_side": 3,
+            "capacity": 0
+          },
+          {
+            "id": "auto-majlis",
+            "name": "مجلس الضيوف",
+            "kind": "majlis",
+            "floor": 0,
+            "count": 1,
+            "min_area": 24,
+            "min_side": 3.5,
+            "capacity": 0
+          },
+          {
+            "id": "auto-guest-wc",
+            "name": "حمام الضيوف",
+            "kind": "bathroom",
+            "floor": 0,
+            "count": 1,
+            "min_area": 4,
+            "min_side": 1.6,
+            "capacity": 0
+          },
+          {
+            "id": "auto-family-bath",
+            "name": "حمام الأسرة",
+            "kind": "bathroom",
+            "floor": 1,
+            "count": 1,
+            "min_area": 5,
+            "min_side": 1.6,
+            "capacity": 0
+          }
+        ]
+      }
+    }
+  ]
+}
