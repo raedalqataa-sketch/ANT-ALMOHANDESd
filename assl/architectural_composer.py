@@ -94,8 +94,13 @@ def architectural_profile(room,lane,t):
     minimum=room.get('min_side',0)
     if available+EPS<minimum or available<=EPS:return None
     if room.get('guest_distributor'):
-        return {'gross_cross':available+t,'gross_length':minimum+t,
-                'source':'full_width_guest_distributor'}
+        # A guest vestibule is NOT obliged to cross the entire family wing.
+        # Cluster the guest suite on the OUTER facade so the vestibule
+        # connects majlis+bathroom locally, independently of the family hall.
+        net_width=min(available,max(minimum,3.1))
+        return {'gross_cross':net_width+t,'gross_length':minimum+t,
+                'net_cross':net_width,'net_length':minimum,
+                'source':'compact_outer_facade_guest_vestibule'}
     requested=room.get('min_area')
     if not _num(requested) or requested<=0 or minimum<=0:return None
     soft,hard=ASPECTS.get(room.get('kind'),(2.,2.7))
