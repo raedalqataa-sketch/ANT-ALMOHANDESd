@@ -1,0 +1,42 @@
+{
+  "schema_version": "0.2.0",
+  "research_basis": "User-provided detailed research report (not independently reverified)",
+  "sources": [
+    {
+      "id": "SA-SBC1101-2024",
+      "country": "SA",
+      "title": "Saudi Residential Building Code SBC 1101–1102",
+      "url": "https://www.sbc.gov.sa/ar/BC/Pages/BuildingCode/BCDetails.aspx?codeId=1101&year=2024",
+      "verification_status": "CLAUSE_CONFIRMATION_REQUIRED"
+    },
+    {
+      "id": "SA-RESIDENTIAL-REQUIREMENTS",
+      "country": "SA",
+      "title": "اشتراطات إنشاء المباني السكنية",
+      "url": "https://sbc.gov.sa/ar/BC/Documents/TechnicalGuides/Files/اشتراطات إنشاء المباني السكنية.pdf",
+      "verification_status": "SOURCE_REVIEW_REQUIRED"
+    },
+    {
+      "id": "YE-LAW-19-2002",
+      "country": "YE",
+      "title": "قانون البناء اليمني رقم 19 لسنة 2002",
+      "url": "https://agoyemen.net/lib_details.php?id=42",
+      "verification_status": "PRIMARY_TEXT_REPORTED_REQUIRES_INDEPENDENT_REVIEW"
+    },
+    {
+      "id": "YE-URBAN-PLANNING",
+      "country": "YE",
+      "title": "اللائحة التنفيذية لقانون التخطيط الحضري",
+      "url": "https://agoyemen.net/lib_details.php?id=120",
+      "verification_status": "SOURCE_REVIEW_REQUIRED"
+    },
+    {
+      "id": "YE-BUILDING-EXEC-REG",
+      "country": "YE",
+      "title": "اللائحة التنفيذية لقانون البناء",
+      "url": null,
+      "verification_status": "AUTHENTICATION_REQUIRED",
+      "allow_rules_into_production": false
+    }
+  ]
+}
