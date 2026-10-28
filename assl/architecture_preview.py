@@ -6,7 +6,8 @@ from __future__ import annotations
 from xml.etree.ElementTree import Element,SubElement,tostring
 
 FILL={'guest':'#dcebf4','family':'#e3eddd','private':'#e9dff0',
-      'service':'#ede8d7','corridor':'#f0f1f3'}
+      'service':'#ede8d7','corridor':'#f0f1f3',
+      'stair':'#f0dcba','guest_distributor':'#b9dce8'}
 INK='#354052'
 
 
@@ -23,7 +24,7 @@ def render_concept_svg(option,*,title='ANT — Preliminary Architecture'):
                style='font-family:Tahoma,Arial,sans-serif;font-size:26px;text-anchor:middle').text=title
     SubElement(root,'text',x='700',y='77',fill='#aa642f',
                style='font-family:Tahoma,Arial,sans-serif;font-size:14px;text-anchor:middle').text=(
-                'CONCEPT ONLY · NO FURNITURE · DOORS/WINDOWS NOT CERTIFIED')
+                'CONCEPT ONLY · STAIR AND GUEST VESTIBULE SHOWN · DOORS/WINDOWS NOT CERTIFIED')
     panels=min(len(floors),2)
     for fi in range(panels):
         rooms=floors[fi]
@@ -47,13 +48,17 @@ def render_concept_svg(option,*,title='ANT — Preliminary Architecture'):
                        width=str(r['width']*s),height=str(r['depth']*s),
                        fill=FILL['corridor'],stroke='#9b9b9b',**{'stroke-width':'2'})
         for r in rooms:
-            fill=FILL.get(r.get('zone'),'#e9e9e9')
+            fill=(FILL['stair'] if r.get('kind')=='stair' else
+                  FILL['guest_distributor'] if r.get('guest_distributor') else
+                  FILL.get(r.get('zone'),'#e9e9e9'))
             SubElement(root,'rect',x=str(sx(r['x'])),y=str(sy(r['y'])),
                        width=str(r['width']*s),height=str(r['depth']*s),
                        fill=fill,stroke=INK,**{'stroke-width':'2.3'})
             cx=sx(r['x']+r['width']/2)
             cy=sy(r['y']+r['depth']/2)
-            name=r.get('name') or r.get('kind','Space')
+            name=('STAIR / RESERVED CORE' if r.get('kind')=='stair' else
+                  'GUEST VESTIBULE' if r.get('guest_distributor') else
+                  r.get('name') or r.get('kind','Space'))
             SubElement(root,'text',x=str(cx),y=str(cy-4),fill=INK,
                        style='font-family:Tahoma,Arial,sans-serif;font-size:13px;text-anchor:middle').text=str(name)[:37]
             SubElement(root,'text',x=str(cx),y=str(cy+15),fill='#586b74',
