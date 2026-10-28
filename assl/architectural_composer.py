@@ -157,7 +157,9 @@ def assess_layout(layout,t,*,facade_clear_m=.90):
         elongated_halls+=sum(max(h['width'],h['depth'])>6.0 and
                              max(h['width'],h['depth'])/max(min(h['width'],h['depth']),.1)>3.
                              for h in halls)
-        corridors=[r for r in all_rects if r.get('kind')=='corridor']
+        # Search topology hallway rectangles have no 'kind' field until
+        # materialization. Treat halls_by_floor as corridor geometry directly.
+        corridors=list(halls)+[r for r in cells if r.get('kind')=='corridor']
         for room in cells:
             if not room.get('request_id'):continue
             width,depth=room['width']-t,room['depth']-t
