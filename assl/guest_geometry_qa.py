@@ -184,7 +184,16 @@ def generator_check(model):
     """
     from backend.design.walkability import floor_access
     def probe(model_, floor, ids):
-        return floor_access(model_,floor,step=.20,body_width=.60,allowed_room_ids=ids)
+        # Seed from the *guest distributor*, not every exterior door. An
+        # unrelated exterior door must never mask a blocked council route.
+        roots=[r['id'] for r in floor['rooms'] if r.get('guest_distributor')
+               and r['id'] in ids and
+               any(o.get('guest_entry') and r['id'] in o.get('connects',[])
+                   for o in floor['openings'])]
+        if not roots:
+            return {'unreachable':sorted(ids)}
+        return floor_access(model_,floor,step=.20,body_width=.60,
+                            start_room_id=roots[0],allowed_room_ids=ids)
     try:
         evidence=inspect_guest_access(model,walkability_probe=probe)
     except (ValueError, KeyError, TypeError, IndexError) as exc:
