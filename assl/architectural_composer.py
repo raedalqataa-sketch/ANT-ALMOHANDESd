@@ -144,6 +144,37 @@ def limit_growth(room,lane,t,base,proposed_growth,*,area_factor=1.08):
     return min(max(0.,proposed_growth),allowed)
 
 
+def recenter_front_cluster_rooms(cells,lanes,halls):
+    """Pull front cluster room groups toward the central junction.
+
+    Original room areas and relative adjacencies stay unchanged. Only groups
+    fitting into unused lane depth are translated along that lane. Reserved
+    staircase clearance has ALREADY been removed from lane depth upstream.
+    This is a geometry operation, not a score-only re-ranking.
+    """
+    if len(halls)<3:return [dict(r) for r in cells]
+    junction=min((h["y"] for h in halls if h["width"]>h["depth"]),
+                 default=None)
+    if junction is None:return [dict(r) for r in cells]
+    updated=[dict(r) for r in cells]
+    for lane in lanes:
+        if lane.get("axis")!="y":continue
+        lo=lane["y"];hi=lo+lane["depth"]
+        if hi>junction+EPS or lo>=junction-EPS:continue
+        members=[r for r in updated
+                 if r.get("kind")!="reserve" and
+                 r["x"]>=lane["x"]-EPS and
+                 r["x"]+r["width"]<=lane["x"]+lane["width"]+EPS and
+                 r["y"]>=lo-EPS and r["y"]+r["depth"]<=hi+EPS]
+        if not members:continue
+        extra=hi-max(r["y"]+r["depth"] for r in members)
+        if extra<=.15:continue
+        for room in members:
+            room["y"]+=extra
+            room["architecture_cluster_recenter_m"]=round(extra,4)
+    return updated
+
+
 def assess_layout(layout,t,*,facade_clear_m=.90):
     """Architectural assessment only: hard program/facade/adjacency warnings.
 
