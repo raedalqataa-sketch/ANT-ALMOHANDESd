@@ -43,3 +43,51 @@ fresh-generator performance. Source files and published drawings are unchanged.
 - An existing-alternative re-ranker is NOT an automated geometric repairer.
 - This branch is on ANT-ALMOHANDESd (secondary repo); production primary
   ANT-ALMOHANDES remains untouched.
+
+
+## Follow-up: independent geometric guest-access gate (QA 003)
+
+Separate experimental branch: \`feature/assl-geometry-qa-003\`, based on
+\`feature/assl-regulatory-core-v02\`. This branch intentionally does not
+override or assume the unpushed Codex spatial optimizer modifications.
+
+### Changes actually implemented
+- \`assl/guest_geometry_qa.py\` inspects physical door hosts, room boundaries,
+  door spans, guest entry, guest-to-majlis and guest-to-bathroom portals,
+  family-only boundaries and internal graph reachability.
+- Independently rechecks 0.60m furniture-aware guest-zone movement using
+  the existing \`floor_access\` implementation, explicitly starting from the
+  guest distributor and excluding all family/private rooms from the grid.
+- Opt-in design upper bound for council aspect ratio is 2.2, NOT a law. A
+  user-requested design exception would require a separately reviewed policy.
+- When \`assl_space_optimize=True\`, the independent check is run after
+  V4 repairs, considered in candidate selection, and run again **after**
+  final V4 export revalidation. Any FAIL/UNRESOLVED critical route blocks
+  DXF/PDF drawing release; OFF/default path is untouched.
+- Branch CI now includes the QA branch. Local tests: 13 synthetic contract
+  cases + 4 historical archive regressions passed. GitHub CI and a fresh full
+  generator test MUST be verified independently, not assumed successful.
+
+### Verified archived results, NOT new-generation results
+Archived V4 artifact \`github-actions-artifact-12700763630.zip\` contains
+three candidates for each of SA-corner, SA-large and YE-medium.
+Legacy \`guest-route\`, \`guest-distributor-access\` and \`GF-walkability\`
+were PASS in all nine, but restricted guest-only 0.60m raster recheck
+reported:
+- SA corner alternative 1: majlis NOT reachable from guest distributor.
+- SA large alternative 1: majlis NOT reachable from guest distributor.
+- YE medium alternative 2: guest council aspect ratio 2.2804 > 2.2.
+Six passed the new stricter gate. Rechecked SA failures at 0.20, 0.15
+and 0.10m grid steps; the guest-only obstruction persisted.
+This report is a geometric QA finding, not a code/legal certification.
+
+### Still necessary
+1. Upload Codex local \`assl/spatial.py\`, measurement and integration
+   changes to its own experimental branch; currently those files are not
+   present in this remote branch.
+2. Run full fresh-generator OFF/ON benchmark with actual runtime
+   dependencies, including guest-specific movement proof after repairs.
+3. Improve guest door/furniture placement with bounded search when
+   \`ASSL-guest-physical-route\` fails, then rerun complete V4 validators.
+4. Seek architect review of council proportions, visual privacy and local code.
+5. Never merge to \`main\` or deploy without owner approval.
