@@ -1,0 +1,22 @@
+name: ASSL experimental checks
+on:
+  push:
+    branches:
+      - feature/assl-regulatory-core-v02
+    paths:
+      - 'assl/**'
+      - 'tests/test_assl_*.py'
+      - '.github/workflows/assl-experimental.yml'
+  workflow_dispatch:
+jobs:
+  assl-unit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run isolated ASSL unit and adapter tests
+        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
