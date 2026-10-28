@@ -166,6 +166,36 @@ class CompositionTests(unittest.TestCase):
                          [i["reason"] for i in report["hard_issues"]])
         self.assertLess(cells[1]["width"],4.0)
 
+    def test_cluster_recenter_moves_rooms_toward_central_junction(self):
+        from assl.architectural_composer import recenter_front_cluster_rooms
+        halls=[{"x":4,"y":0,"width":1.6,"depth":8},
+               {"x":4,"y":8,"width":4,"depth":1.6},
+               {"x":6.4,"y":9.6,"width":1.6,"depth":8}]
+        lanes=[{"x":5.6,"y":0,"width":5,"depth":8,"axis":"y"},
+               {"x":0,"y":9.6,"width":6.4,"depth":8,"axis":"y"}]
+        rooms=[{"id":"kitchen","kind":"kitchen","x":5.6,"y":0,"width":4,"depth":2},
+               {"id":"dining","kind":"dining","x":5.6,"y":2,"width":4,"depth":2},
+               {"id":"living","kind":"living","x":0,"y":9.6,"width":4,"depth":4}]
+        before=[dict(r) for r in rooms]
+        after=recenter_front_cluster_rooms(rooms,lanes,halls)
+        self.assertEqual(before,rooms)
+        self.assertAlmostEqual(after[0]["y"],4)
+        self.assertAlmostEqual(after[1]["y"],6)
+        self.assertAlmostEqual(after[2]["y"],9.6)
+        self.assertAlmostEqual(after[0]["width"]*after[0]["depth"],8)
+
+    def test_cluster_recenter_does_not_enter_reserved_stair_depth(self):
+        from assl.architectural_composer import recenter_front_cluster_rooms
+        halls=[{"x":4,"y":0,"width":1.6,"depth":8},
+               {"x":4,"y":8,"width":4,"depth":1.6},
+               {"x":6.4,"y":9.6,"width":1.6,"depth":8}]
+        # Stair was carved from 8m front lane down to 3.4m usable depth.
+        lanes=[{"x":5.6,"y":0,"width":5,"depth":3.4,"axis":"y"}]
+        rooms=[{"kind":"kitchen","x":5.6,"y":0,"width":4,"depth":3.4}]
+        after=recenter_front_cluster_rooms(rooms,lanes,halls)
+        self.assertAlmostEqual(after[0]["y"],0)
+        self.assertLessEqual(after[0]["y"]+after[0]["depth"],3.4)
+
     def test_existing_generator_is_default_unaffected(self):
         code=(Path(__file__).resolve().parents[1]/
               "backend/design/general_engine.py").read_text(encoding="utf8")
