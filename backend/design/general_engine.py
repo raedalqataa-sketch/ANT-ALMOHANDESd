@@ -78,7 +78,7 @@ def length_for(room,lane,t):
     return length+t
 
 
-def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south',guest_strategy='linear',guest_area_factor=None):
+def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south',guest_strategy='linear',guest_area_factor=None,*,architecture_first=False):
     """Bounded beam search, rejecting area/width violations before placement."""
     if guest_strategy=='compact_side':
         from .guest_composition import allocate_compact_side
@@ -89,6 +89,9 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         composed=allocate_side_spine(requests,lanes,t,guest_clear_width,coherent,policy,entry_face,guest_area_factor)
         if composed is not None:return composed
     def planned_length(room,lane,thickness):
+        if architecture_first:
+            from assl.architectural_composer import architectural_length
+            return architectural_length(room,lane,thickness)
         if policy=='reference_hub':
             from .intelligence.references import preferred_shape
             shape=preferred_shape(room,lane,thickness,guest_area_factor)
@@ -179,7 +182,11 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
             if coherent:
                 cross=lane['width' if axis=='y' else 'depth']-t
                 growth=min(growth,max(0,2.8*cross+t-base))
-            if policy in ('functional_hub','reference_hub'):
+            if architecture_first:
+                from assl.architectural_composer import limit_growth
+                growth=limit_growth(r,lane,t,base,growth,
+                                    area_factor=max(1.08,guest_area_factor or 1.))
+            elif policy in ('functional_hub','reference_hub'):
                 from .intelligence.allocation import bounded_growth
                 growth=bounded_growth(r,lane,t,base,growth,guest_area_factor)
             length=base+growth
@@ -223,7 +230,7 @@ def expanded_program(brief,floor):
     return rows
 
 
-def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear',*,assl_space_optimize=False):
+def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear',*,assl_space_optimize=False,architecture_first=False):
     # Reserve clearance outside the mass for a balcony on a non-street facade.
     margin={face:(brief.automatic_features.balcony_depth_m+.15 if brief.automatic_features.balcony and brief.boundary_widths.get(face,0)<10 else 0) for face in ('north','south','east','west')}
     aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness-margin['west']-margin['east']
@@ -296,10 +303,10 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
         lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
-            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face,guest_strategy if f==0 else 'linear',brief.proposed_room_area_factor)
+            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face,guest_strategy if f==0 else 'linear',brief.proposed_room_area_factor,architecture_first=architecture_first)
             if cells is None:failed=True;break
             if f==0 and guest_strategy!='linear' and not any(r.get('guest_composition')==guest_strategy for r in cells):failed=True;break
-            if brief.proposed_room_area_factor is not None or (family in ('freeform','adaptive') and policy!='legacy'):
+            if not architecture_first and (brief.proposed_room_area_factor is not None or (family in ('freeform','adaptive') and policy!='legacy')):
                 from .adaptive_geometry import moderate_room_expansion
                 cells=moderate_room_expansion(cells,brief.wall_thickness,brief.proposed_room_area_factor)
             if brief.automatic_features.roof_annex:
@@ -335,10 +342,21 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
                              min(r['width']-brief.wall_thickness,r['depth']-brief.wall_thickness)
                              for cells in floors for r in cells
                              if r.get('request_id') and r['kind'] in ('master','bedroom')),default=1.)
-        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated,sleeping_aspect_ratio=sleeping_aspect))
+        architecture_report=None
+        if architecture_first:
+            from assl.architectural_composer import assess_layout
+            architecture_report=assess_layout(dict(floors=floors,halls_by_floor=halls_by_floor),
+                                              brief.wall_thickness)
+            if architecture_report['hard_issues']:
+                continue
+            score=architecture_report['architecture_score']
+        pool.append(dict(W=W,D=D,halls=halls,halls_by_floor=halls_by_floor,floors=floors,score=score,gross=gross,top_fraction=top,wells=wells,origin_x=origin_x,origin_y=origin_y,massing_quality=massing,topology_rotated=rotated,sleeping_aspect_ratio=sleeping_aspect,architectural_quality=architecture_report))
         if best is None or score<best['score']:best=pool[-1]
     if best:
-        if assl_space_optimize:
+        if architecture_first:
+            pool.sort(key=lambda r:(r['architectural_quality']['architecture_score'],
+                                    r['gross']))
+        elif assl_space_optimize:
             from assl.space_optimizer import score_layout
             from .design_selection import MAX_SLEEPING_ASPECT_RATIO
             for row in pool:
@@ -355,7 +373,7 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
         best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
         if brief.massing_strategy=='coherent':
-            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position,assl_space_optimize=assl_space_optimize)
+            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position,assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
             if fallback:
                 backups=[{k:v for k,v in fallback.items() if k!='alternatives'}]+fallback.get('alternatives',[])
                 best['alternatives'].extend({**r,'massing_fallback':True} for r in backups)
