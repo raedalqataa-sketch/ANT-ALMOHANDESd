@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/assl-regulatory-core-v02
+      - feature/architecture-composition-first-004
     paths:
       - 'assl/**'
       - 'tests/test_assl_*.py'
