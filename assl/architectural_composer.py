@@ -249,7 +249,19 @@ def compose_architecture(brief,*,families=("adaptive","freeform","cluster","cros
             failed.append({'family':family,'reason':type(exc).__name__})
             continue
         if not layout:
-            failed.append({'family':family,'reason':'NO_FEASIBLE_TOPOLOGY'})
+            # Diagnostic-only legacy search: reveal WHY the stricter
+            # architectural composition was rejected, without accepting it.
+            baseline=search(brief,family,policy='relationship_aware',
+                            architecture_first=False)
+            if baseline:
+                quality=assess_layout(baseline,brief.wall_thickness)
+                reasons=sorted({item['reason'] for item in quality['hard_issues']})
+                failed.append({'family':family,'reason':'NO_FEASIBLE_TOPOLOGY',
+                               'legacy_candidate_rejected_for':reasons,
+                               'legacy_issues_count':len(quality['hard_issues'])})
+            else:
+                failed.append({'family':family,'reason':'NO_FEASIBLE_TOPOLOGY',
+                               'legacy_candidate_available':False})
             continue
         candidates=[layout]+layout.get('alternatives',[])
         for row in candidates:
