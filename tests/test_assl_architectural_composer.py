@@ -54,7 +54,8 @@ class CompositionTests(unittest.TestCase):
 
     def test_good_room_passes_preliminary_geometry(self):
         a=room("bed",x=0,y=0,w=3,d=4,requested=10)
-        hall={"kind":"corridor","x":3,"y":0,"width":1.5,"depth":4}
+        # The actual search topology uses untyped hall rectangles.
+        hall={"x":3,"y":0,"width":1.5,"depth":4}
         report=assess_layout(layout([a],[hall]),.20)
         self.assertEqual(report["status"],"PRELIMINARY_GEOMETRY_ELIGIBLE")
         self.assertFalse(report["furniture_used"])
