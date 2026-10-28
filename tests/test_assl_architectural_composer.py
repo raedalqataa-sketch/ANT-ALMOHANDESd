@@ -91,10 +91,15 @@ class CompositionTests(unittest.TestCase):
         self.assertTrue(math.isfinite(value))
         self.assertGreaterEqual(value,12/(3.2-.2)+.2)
 
-    def test_plan_rejects_overinflated_small_room_on_wide_strip(self):
+    def test_wide_wing_uses_normal_bedroom_width_instead_of_inflation(self):
+        from assl.architectural_composer import architectural_profile
         lane={"axis":"y","width":8.2,"depth":12}
         bed={"kind":"bedroom","request_id":"b","min_area":12,"min_side":2.8}
-        self.assertEqual(architectural_length(bed,lane,.20),math.inf)
+        result=architectural_profile(bed,lane,.20)
+        self.assertIsNotNone(result)
+        self.assertLess(result["gross_cross"],5.0)
+        self.assertGreaterEqual(result["net_cross"]*result["net_length"],12.0)
+        self.assertLessEqual(result["net_cross"]*result["net_length"],16.8)
 
     def test_plan_rejects_narrow_long_room(self):
         lane={"axis":"y","width":2.9,"depth":16}
