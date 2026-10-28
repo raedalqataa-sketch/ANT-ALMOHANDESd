@@ -1,0 +1,49 @@
+{
+  "schema_version": "0.2.0",
+  "classification": "INTERNAL_NON_LEGAL_GUIDELINES",
+  "enforcement_enabled": false,
+  "profiles": {
+    "ordinary_bedroom": {
+      "design_min_m2": 12,
+      "target_m2": [
+        13,
+        17
+      ],
+      "advisory_max_m2": 22,
+      "preferred_aspect_ratio_max": 1.6,
+      "warning_aspect_ratio_above": 2
+    },
+    "master_bedroom": {
+      "design_min_m2": 18,
+      "target_m2": [
+        20,
+        26
+      ],
+      "advisory_max_m2": 32
+    },
+    "men_guest_council": {
+      "design_min_m2": 20,
+      "target_m2": [
+        24,
+        32
+      ],
+      "advisory_max_m2": 40
+    },
+    "family_living": {
+      "design_min_m2": 18,
+      "target_m2": [
+        22,
+        30
+      ],
+      "advisory_max_m2": 38
+    },
+    "kitchen": {
+      "design_min_m2": 10,
+      "target_m2": [
+        12,
+        16
+      ],
+      "advisory_max_m2": 22
+    }
+  }
+}
