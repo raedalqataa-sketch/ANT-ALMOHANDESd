@@ -282,8 +282,13 @@ def compose_architecture(brief,*,families=("adaptive","freeform","cluster","cros
         if family in used_families:continue
         used_families.add(family)
         proposals.append({'family':family,'quality':quality,
-                          'rooms_by_floor':[[dict(r) for r in rooms if r.get('request_id')]
-                                            for rooms in row['floors']],
+                          # Display the reserved stair and guest distributor.
+                          # Omitting them gave a misleading impression of
+                          # disconnected rooms in previously generated SVGs.
+                          'rooms_by_floor':[[dict(r) for r in rooms if
+                              r.get('request_id') or r.get('guest_distributor')
+                              or r.get('kind')=='stair']
+                              for rooms in row['floors']],
                           'halls_by_floor':row['halls_by_floor'],
                           'structural_signature':str(spatial_signature(row))})
         if len(proposals)>=max_options:break
