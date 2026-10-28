@@ -54,7 +54,15 @@ def _uncovered_length(lo,hi,covered):
             merged[-1]=(merged[-1][0],max(b,merged[-1][1]))
         else:
             merged.append((a,b))
-    return max(0.,hi-lo-sum(b-a for a,b in merged))
+    # A usable facade opening needs one continuous clear run, not the
+    # sum of several narrow unrelated gaps between neighboring rooms.
+    free=[]
+    cursor=lo
+    for a,b in merged:
+        if a>cursor+EPS:free.append(a-cursor)
+        cursor=max(cursor,b)
+    if hi>cursor+EPS:free.append(hi-cursor)
+    return max(free,default=0.)
 
 
 def facade_exposure(room,others):
