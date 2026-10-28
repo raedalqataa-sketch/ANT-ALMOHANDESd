@@ -346,6 +346,9 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
                         previous['depth']=stair['y']-previous['y']
                     else:r.update(y=start,depth=depth,kind='corridor',name='بهو وصول الملحق')
             if brief.flexible_space_policy=='remove':cells=[r for r in cells if r['kind']!='reserve']
+            if architecture_first and family=='cluster' and brief.flexible_space_policy=='remove':
+                from assl.architectural_composer import recenter_front_cluster_rooms
+                cells=recenter_front_cluster_rooms(cells,lanes,halls)
             floors.append(cells+([copy.deepcopy(stair)] if stair else []))
         if failed:continue
         if wells and any(not any(r.get('request_id') and (abs(r['y']+r['depth']-(w['y']-brief.wall_thickness/2))<EPS or abs(r['y']-(w['y']+w['depth']+brief.wall_thickness/2))<EPS) and min(r['x']+r['width'],w['x']+w['width'])-max(r['x'],w['x'])>.7 for r in cells for w in wells) for cells in floors):continue
