@@ -174,3 +174,26 @@ def inspect_guest_access(model, *, walkability_probe=None, max_majlis_aspect=2.2
             'majlis_shapes':shape,'walkability_status':walk,
             'legal_compliance_certified':False,
             'scope':'Hosted real doors + restricted guest graph; optional 0.60m furniture-aware raster; not full visual privacy, code or construction approval'}
+
+
+def generator_check(model):
+    """Native generator check; critical guest path is fail-closed when opt-in.
+
+    This is invoked after any V4 repairs and again immediately before export.
+    Existing default/off-path behavior is entirely unaffected.
+    """
+    from backend.design.walkability import floor_access
+    def probe(model_, floor, ids):
+        return floor_access(model_,floor,step=.20,body_width=.60,allowed_room_ids=ids)
+    try:
+        evidence=inspect_guest_access(model,walkability_probe=probe)
+    except (ValueError, KeyError, TypeError, IndexError) as exc:
+        evidence={'check_id':'ASSL-guest-physical-route','status':'UNRESOLVED',
+                  'issues':['GEOMETRY_AUDIT_UNAVAILABLE'],
+                  'error_type':type(exc).__name__,
+                  'legal_compliance_certified':False}
+    status=evidence['status']
+    return {'check_id':'ASSL-guest-physical-route',
+            'status':status if status in ('PASS','NOT_APPLICABLE') else 'FAIL',
+            'label':'فحص مستقل للأبواب الحقيقية ومسار الضيوف وخلوص الحركة ونسب المجلس (اشتراط تصميمي تجريبي)',
+            'evidence':evidence}
