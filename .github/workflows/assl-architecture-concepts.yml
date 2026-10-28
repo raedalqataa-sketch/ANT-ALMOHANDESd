@@ -1,0 +1,35 @@
+name: ASSL architecture-first concepts (experimental)
+on:
+  push:
+    branches:
+      - feature/architecture-composition-first-004
+    paths:
+      - 'assl/architectural_composer.py'
+      - 'assl/architecture_preview.py'
+      - 'backend/design/general_engine.py'
+      - 'scripts/assl_architecture_smoke.py'
+      - 'tests/fixtures/assl_architecture_cases.json'
+      - '.github/workflows/assl-architecture-concepts.yml'
+  workflow_dispatch:
+jobs:
+  concept-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install geometric engine runtime
+        run: pip install -r requirements.txt
+      - name: Run 3 villa architecture concept benchmarks
+        run: python scripts/assl_architecture_smoke.py tests/fixtures/assl_architecture_cases.json architecture-smoke
+      - name: Save evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assl-architecture-concepts
+          path: architecture-smoke/
+          if-no-files-found: warn
