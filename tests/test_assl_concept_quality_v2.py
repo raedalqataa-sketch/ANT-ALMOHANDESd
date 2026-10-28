@@ -83,6 +83,29 @@ class ConceptQualityTests(unittest.TestCase):
         self.assertIn("GUEST_VESTIBULE_NOT_ADJACENT_TO_ASSOCIATED_ROOMS",
                       [x["reason"] for x in q["hard_issues"]])
 
+    def test_guest_independent_entrance_needs_contiguous_outer_edge(self):
+        guest=rect(1,1,3,2,kind="corridor",guest_distributor=True,id="vestibule")
+        closed=[rect(0,1,1,2),rect(4,1,1,2),
+                rect(1,0,3,1),rect(1,3,3,1)]
+        hall=rect(6,0,1.5,8)
+        report=enrich_composition_quality(
+            {"floors":[[guest]+closed],"halls_by_floor":[[hall]]},.2,
+            {"hard_issues":[],"architecture_score":100})
+        self.assertIn("NO_INDEPENDENT_GUEST_ENTRANCE_POTENTIAL",
+                      [x["reason"] for x in report["hard_issues"]])
+        self.assertFalse(report["entrance_facade_potential"][0]["doors_verified"])
+
+    def test_family_entry_potential_remains_unresolved_without_door(self):
+        hall=rect(1,1,1.5,3)
+        closed=[rect(0,1,1,3),rect(2.5,1,1,3),
+                rect(1,0,1.5,1),rect(1,4,1.5,1)]
+        report=enrich_composition_quality(
+            {"floors":[closed],"halls_by_floor":[[hall]]},.2,
+            {"hard_issues":[],"architecture_score":100})
+        self.assertIn("NO_FAMILY_EXTERNAL_ENTRANCE_POTENTIAL",
+                      [x["reason"] for x in report["hard_issues"]])
+        self.assertFalse(report["entrance_facade_potential"][0]["street_access_verified"])
+
     def test_architectural_scope_never_proves_walkability(self):
         layout={"floors":[[]],"halls_by_floor":[[rect(0,0,1.5,3)]]}
         q=enrich_composition_quality(layout,.2,{"hard_issues":[],"architecture_score":100})
