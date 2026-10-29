@@ -22,6 +22,7 @@ from assl.architecture_preview import render_concept_svg
 from assl.free_layout_audit import audit_preliminary_concept
 from assl.free_layout_solver import solve_free_concepts
 from assl.topology_options import compare_structural_evidence
+from assl.room_arrangement_diversity import compare_room_arrangements,difference_passes
 
 
 STYLES=('axial','elbow','split_hub')
@@ -72,7 +73,8 @@ def run(fixture,destination):
         brief=VillaBrief.model_validate(item['brief'])
         start=time.monotonic()
         data=solve_free_concepts(brief,seeds=SEEDS,max_results=3,
-             topologies=STYLES,orient_to_frontage=True)
+             topologies=STYLES,orient_to_frontage=True,
+             require_room_diversity=True)
         case_dir=out/item['id']
         case_dir.mkdir(exist_ok=True)
         accepted=[];rejected=[]
@@ -94,6 +96,9 @@ def run(fixture,destination):
             (case_dir/f'concept_{idx}.json').write_text(
                 json.dumps(option,ensure_ascii=False,indent=2),encoding='utf-8')
         styles=[r['summary']['style'] for r in accepted]
+        room_pairwise=data.get('room_diversity_selection',{}).get('comparisons',[])
+        room_diverse=(len(room_pairwise)==3 and
+                      all(difference_passes(x) for x in room_pairwise))
         pairwise=[]
         for i,a in enumerate(accepted):
             for b in accepted[i+1:]:
@@ -105,7 +110,8 @@ def run(fixture,destination):
         meaningful=(len(accepted)==3 and len(set(styles))==3
                     and len(pairwise)==3
                     and all(r['different_measured_geometry']
-                            for r in pairwise))
+                            for r in pairwise)
+                    and room_diverse)
         baseline=search(brief,'cluster',policy='relationship_aware',
                         architecture_first=True)
         baseline_hall=baseline['architectural_quality']['hall_union_area_m2'] if baseline else None
@@ -115,6 +121,9 @@ def run(fixture,destination):
               'styles_with_candidates':data['topology_availability'],
               'measured_structural_diversity':meaningful,
               'pairwise_graph_differences':pairwise,
+              'pairwise_room_rearrangement':room_pairwise,
+              'strong_room_arrangement_difference':room_diverse,
+              'diversity_selection_diagnostics':data.get('room_diversity_selection',{}),
               'accepted':accepted,'rejected':rejected,
               'baseline_cluster_hall_union_m2':baseline_hall,
               'candidate_failure_reasons':data['rejected_seeds'],
