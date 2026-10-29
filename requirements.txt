@@ -12,6 +12,7 @@ google-genai>=1.0,<2
 
 # Computational geometry, adjacency graphs and constraint optimization
 ortools>=9.11,<10
+scipy>=1.12,<2  # alternative mixed-integer solver for isolated 012 experiment
 shapely>=2.0,<3
 networkx>=3.4,<3.7
 
