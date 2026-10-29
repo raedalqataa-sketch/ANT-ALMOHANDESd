@@ -100,7 +100,7 @@ def layouts():
                     hub=rect(hx,hy,2.5,3.,kind='corridor',id='family-hub')
                     # Entry spur placed on real south street frontage; a
                     # pedestrian door is reserved on its first boundary.
-                    entry=rect(hx+.5,0.,1.5,hy,kind='corridor',id='family-entry-spur')
+                    entry=rect(hx+.25,0.,1.75,hy,kind='corridor',id='family-entry-spur')
                     rear=rect(hx+.5,hy+3.,1.5,3.0,kind='corridor',id='family-growth-node')
                     stair=rect(hx+2.5,hy-.5,3.0,4.6,id='shared-stair',kind='stair',name='درج ثابت بين الدورين')
                     walk=[hub,entry,rear]
@@ -258,6 +258,11 @@ def audit(floors,halls_by_floor,guests,stair):
     for fi,(rooms,halls) in enumerate(zip(floors,halls_by_floor)):
         all_fixed=(guests if fi==0 else [])+[stair]
         shapes=rooms+halls+all_fixed
+        # A guest wing can be isolated even when all individual rooms have
+        # hosted doors. 009 explicitly requires one connected building mass.
+        footprint=unary_union([geo(r) for r in shapes])
+        if footprint.geom_type != 'Polygon':
+            problems.append(f'FLOOR_{fi}_DISCONNECTED_BUILDING_FOOTPRINT')
         if any(not inside(r) for r in shapes):problems.append(f'FLOOR_{fi}_OUTSIDE_PLOT')
         for a,b in itertools.combinations(rooms+all_fixed,2):
             if overlap(a,b)>EPS:problems.append(f'FLOOR_{fi}_ROOM_COLLISION:{a["id"]},{b["id"]}')
