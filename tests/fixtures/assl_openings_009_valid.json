@@ -1,0 +1,1506 @@
+{
+  "seed": 3,
+  "topology_style": "axial",
+  "family": "free_constraints",
+  "quality": {
+    "status": "PRELIMINARY_GEOMETRY_ELIGIBLE",
+    "hard_issues": [],
+    "rooms": [
+      {
+        "floor": 0,
+        "room_id": "auto-majlis-1",
+        "kind": "majlis",
+        "net_area_m2": 25.502,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 5.25,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-guest-wc-1",
+        "kind": "bathroom",
+        "net_area_m2": 4.202,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 2.25,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-living-1",
+        "kind": "living",
+        "net_area_m2": 25.252,
+        "aspect_ratio": 1.22,
+        "exposed_facade_potential_m": 5.75,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-dining-1",
+        "kind": "dining",
+        "net_area_m2": 16.402,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 4.25,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-kitchen-1",
+        "kind": "kitchen",
+        "net_area_m2": 16.402,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 4.25,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-master-1",
+        "kind": "master",
+        "net_area_m2": 20.59,
+        "aspect_ratio": 1.634,
+        "exposed_facade_potential_m": 6.0,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-ground-bath-1",
+        "kind": "bathroom",
+        "net_area_m2": 5.29,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 2.5,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 1,
+        "room_id": "auto-children-1",
+        "kind": "bedroom",
+        "net_area_m2": 16.402,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 4.25,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 1,
+        "room_id": "auto-children-2",
+        "kind": "bedroom",
+        "net_area_m2": 16.402,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 4.25,
+        "corridor_contact_potential": true
+      },
+      {
+        "floor": 1,
+        "room_id": "auto-family-bath-1",
+        "kind": "bathroom",
+        "net_area_m2": 5.29,
+        "aspect_ratio": 1.0,
+        "exposed_facade_potential_m": 2.5,
+        "corridor_contact_potential": true
+      }
+    ],
+    "gross_rectangles_m2": 241.038,
+    "hall_rectangle_area_m2": 46.25,
+    "hall_rectangle_fraction": 0.1919,
+    "hall_rectangles_long_count": 0,
+    "space_excess_m2": 0.0,
+    "proportion_penalty": 0.0,
+    "architecture_score": 303.1625,
+    "furniture_used": false,
+    "windows_verified": false,
+    "external_facade_only_potential": true,
+    "legal_compliance_certified": false,
+    "corridor_topology": [
+      {
+        "floor": 0,
+        "components": 1,
+        "segments": 5,
+        "union_area_m2": 24.625,
+        "max_straight_run_m": 4.25,
+        "long_run_excess_sq_m2": 0.0,
+        "pattern": "CONNECTED_BENDS_OR_JUNCTIONS",
+        "reserved_stair_count": 1,
+        "guest_distributor_count": 1
+      },
+      {
+        "floor": 1,
+        "components": 1,
+        "segments": 3,
+        "union_area_m2": 17.125,
+        "max_straight_run_m": 4.25,
+        "long_run_excess_sq_m2": 0.0,
+        "pattern": "CONNECTED_BENDS_OR_JUNCTIONS",
+        "reserved_stair_count": 1,
+        "guest_distributor_count": 0
+      }
+    ],
+    "hall_union_area_m2": 41.75,
+    "long_straight_run_penalty": 0.0,
+    "functional_closeness_penalty": 2.0,
+    "functional_relations": [
+      {
+        "floor": 0,
+        "relations": [
+          {
+            "relation": "kitchen:dining",
+            "nearest_boundary_gap_m": 0.5,
+            "penalty": 0.0
+          },
+          {
+            "relation": "living:dining",
+            "nearest_boundary_gap_m": 1.5,
+            "penalty": 0.0
+          },
+          {
+            "relation": "master:bathroom",
+            "nearest_boundary_gap_m": 5.0,
+            "penalty": 2.0
+          }
+        ]
+      },
+      {
+        "floor": 1,
+        "relations": [
+          {
+            "relation": "bedroom:bathroom",
+            "nearest_boundary_gap_m": 0.0,
+            "penalty": 0.0
+          }
+        ]
+      }
+    ],
+    "entrance_facade_potential": [
+      {
+        "family_hall_outer_exposure_m": 4.25,
+        "guest_vestibules": [
+          {
+            "id": "men-vestibule",
+            "longest_continuous_exterior_run_m": 2.0
+          }
+        ],
+        "doors_verified": false,
+        "street_access_verified": false
+      }
+    ],
+    "architectural_bubble_graph_validated": false,
+    "circulation_walk_paths_validated": false,
+    "doors_generated": false,
+    "stair_cores_reserved_by_floor": [
+      1,
+      1
+    ]
+  },
+  "rooms_by_floor": [
+    [
+      {
+        "x": 9.5,
+        "y": 3.25,
+        "width": 3.0,
+        "depth": 4.6,
+        "kind": "stair",
+        "id": "shared-stair",
+        "name": "درج ثابت بين الدورين"
+      },
+      {
+        "x": 1.75,
+        "y": 0.0,
+        "width": 5.25,
+        "depth": 5.25,
+        "id": "auto-majlis-1",
+        "request_id": "auto-majlis",
+        "name": "مجلس الضيوف",
+        "kind": "majlis",
+        "min_area": 24.0,
+        "min_side": 3.5,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "guest",
+        "separate_guest_entry": true,
+        "include_shower": false,
+        "guest_vestibule": "men-vestibule"
+      },
+      {
+        "x": 1.75,
+        "y": 5.25,
+        "width": 2.25,
+        "depth": 2.0,
+        "id": "men-vestibule",
+        "zone": "guest",
+        "kind": "corridor",
+        "name": "موزع ضيوف مستقل",
+        "guest_distributor": true,
+        "guest_entrance_potential": true
+      },
+      {
+        "x": 1.75,
+        "y": 7.25,
+        "width": 2.25,
+        "depth": 2.25,
+        "id": "auto-guest-wc-1",
+        "request_id": "auto-guest-wc",
+        "name": "حمام الضيوف",
+        "kind": "bathroom",
+        "min_area": 4.0,
+        "min_side": 1.6,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "guest",
+        "separate_guest_entry": true,
+        "include_shower": false,
+        "guest_parent": "auto-majlis-1",
+        "guest_vestibule": "men-vestibule"
+      },
+      {
+        "x": 1.75,
+        "y": 9.75,
+        "width": 5.75,
+        "depth": 4.75,
+        "id": "auto-living-1",
+        "request_id": "auto-living",
+        "name": "المعيشة العائلية",
+        "kind": "living",
+        "min_area": 24.0,
+        "min_side": 3.5,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 9.0,
+        "y": 9.0,
+        "width": 4.25,
+        "depth": 4.25,
+        "id": "auto-dining-1",
+        "request_id": "auto-dining",
+        "name": "غرفة الطعام",
+        "kind": "dining",
+        "min_area": 16.0,
+        "min_side": 3.0,
+        "capacity": 0,
+        "dining_seats": 6,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 9.0,
+        "y": 13.5,
+        "width": 4.25,
+        "depth": 4.25,
+        "id": "auto-kitchen-1",
+        "request_id": "auto-kitchen",
+        "name": "المطبخ",
+        "kind": "kitchen",
+        "min_area": 16.0,
+        "min_side": 3.0,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 2.75,
+        "y": 14.75,
+        "width": 6.0,
+        "depth": 3.75,
+        "id": "auto-master-1",
+        "request_id": "auto-master",
+        "name": "غرفة النوم الرئيسية",
+        "kind": "master",
+        "min_area": 20.0,
+        "min_side": 3.5,
+        "capacity": 2,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 5.0,
+        "y": 7.25,
+        "width": 2.5,
+        "depth": 2.5,
+        "id": "auto-ground-bath-1",
+        "request_id": "auto-ground-bath",
+        "name": "حمام الدور الأرضي",
+        "kind": "bathroom",
+        "min_area": 5.0,
+        "min_side": 1.6,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": true
+      }
+    ],
+    [
+      {
+        "x": 9.5,
+        "y": 3.25,
+        "width": 3.0,
+        "depth": 4.6,
+        "kind": "stair",
+        "id": "shared-stair",
+        "name": "درج ثابت بين الدورين"
+      },
+      {
+        "x": 3.25,
+        "y": 0.0,
+        "width": 4.25,
+        "depth": 4.25,
+        "id": "auto-children-1",
+        "request_id": "auto-children",
+        "name": "غرف نوم الأسرة 1",
+        "kind": "bedroom",
+        "min_area": 16.0,
+        "min_side": 3.2,
+        "capacity": 2,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 3.25,
+        "y": 6.75,
+        "width": 4.25,
+        "depth": 4.25,
+        "id": "auto-children-2",
+        "request_id": "auto-children",
+        "name": "غرف نوم الأسرة 2",
+        "kind": "bedroom",
+        "min_area": 16.0,
+        "min_side": 3.2,
+        "capacity": 2,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 4.5,
+        "y": 4.25,
+        "width": 2.5,
+        "depth": 2.5,
+        "id": "auto-family-bath-1",
+        "request_id": "auto-family-bath",
+        "name": "حمام الأسرة",
+        "kind": "bathroom",
+        "min_area": 5.0,
+        "min_side": 1.6,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": true
+      }
+    ]
+  ],
+  "halls_by_floor": [
+    [
+      {
+        "x": 7.0,
+        "y": 4.25,
+        "width": 2.5,
+        "depth": 2.5,
+        "kind": "corridor",
+        "id": "family-hub"
+      },
+      {
+        "x": 7.5,
+        "y": 0.0,
+        "width": 1.5,
+        "depth": 4.25,
+        "kind": "corridor",
+        "id": "family-entry-spur"
+      },
+      {
+        "x": 7.5,
+        "y": 6.75,
+        "width": 1.5,
+        "depth": 3.0,
+        "kind": "corridor",
+        "id": "family-growth-node"
+      },
+      {
+        "x": 7.5,
+        "y": 9.75,
+        "width": 1.5,
+        "depth": 2.5,
+        "kind": "corridor"
+      },
+      {
+        "x": 7.5,
+        "y": 12.25,
+        "width": 1.5,
+        "depth": 2.5,
+        "kind": "corridor"
+      }
+    ],
+    [
+      {
+        "x": 7.0,
+        "y": 4.25,
+        "width": 2.5,
+        "depth": 2.5,
+        "kind": "corridor",
+        "id": "family-hub"
+      },
+      {
+        "x": 7.5,
+        "y": 0.0,
+        "width": 1.5,
+        "depth": 4.25,
+        "kind": "corridor",
+        "id": "family-entry-spur"
+      },
+      {
+        "x": 7.5,
+        "y": 6.75,
+        "width": 1.5,
+        "depth": 3.0,
+        "kind": "corridor",
+        "id": "family-growth-node"
+      }
+    ]
+  ],
+  "topology_evidence": {
+    "topology_style": "axial",
+    "entrance_face": "south",
+    "by_floor": [
+      {
+        "corridor_segments": 5,
+        "pattern": "CONNECTED_BENDS_OR_JUNCTIONS",
+        "max_straight_run_m": 4.25,
+        "hall_union_area_m2": 24.625,
+        "connected_components": 1
+      },
+      {
+        "corridor_segments": 3,
+        "pattern": "CONNECTED_BENDS_OR_JUNCTIONS",
+        "max_straight_run_m": 4.25,
+        "hall_union_area_m2": 17.125,
+        "connected_components": 1
+      }
+    ],
+    "room_hall_incidence": [
+      [
+        0,
+        0,
+        1,
+        2,
+        4
+      ],
+      [
+        1,
+        1,
+        1
+      ]
+    ],
+    "special_core_access_by_floor": [
+      [],
+      []
+    ],
+    "distinctive_nodes_actually_serve_rooms": true,
+    "room_service_from_special_core": {
+      "cross-link": false,
+      "satellite": false
+    },
+    "critical_transit_connector_to_served_satellite": false,
+    "geometric_graph_signature": "((5, 'CONNECTED_BENDS_OR_JUNCTIONS', (0, 0, 1, 2, 4)), (3, 'CONNECTED_BENDS_OR_JUNCTIONS', (1, 1, 1)))",
+    "actual_doors_checked": false,
+    "architectural_distinctness_certified": false
+  },
+  "placement_trace": [
+    [
+      [
+        "auto-living-1",
+        true
+      ],
+      [
+        "auto-dining-1",
+        true
+      ],
+      [
+        "auto-kitchen-1",
+        false
+      ],
+      [
+        "auto-master-1",
+        false
+      ],
+      [
+        "auto-ground-bath-1",
+        false
+      ]
+    ],
+    [
+      [
+        "auto-children-1",
+        false
+      ],
+      [
+        "auto-children-2",
+        false
+      ],
+      [
+        "auto-family-bath-1",
+        false
+      ]
+    ]
+  ],
+  "building_envelope_m": [
+    15.3,
+    20.3
+  ],
+  "structural_signature": "((0, 'bathroom', 'auto-ground-bath', 1, 1), (0, 'bathroom', 'auto-guest-wc', 0, 1), (0, 'dining', 'auto-dining', 3, 2), (0, 'kitchen', 'auto-kitchen', 3, 3), (0, 'living', 'auto-living', 1, 2), (0, 'majlis', 'auto-majlis', 0, 0), (0, 'master', 'auto-master', 1, 3), (1, 'bathroom', 'auto-family-bath', 2, 2), (1, 'bedroom', 'auto-children', 2, 0), (1, 'bedroom', 'auto-children', 2, 3))",
+  "opening_model_009": [
+    {
+      "index": 0,
+      "rooms": [
+        {
+          "x": 9.5,
+          "y": 3.25,
+          "width": 3.0,
+          "depth": 4.6,
+          "kind": "stair",
+          "id": "shared-stair",
+          "name": "درج ثابت بين الدورين"
+        },
+        {
+          "x": 1.75,
+          "y": 0.0,
+          "width": 5.25,
+          "depth": 5.25,
+          "id": "auto-majlis-1",
+          "request_id": "auto-majlis",
+          "name": "مجلس الضيوف",
+          "kind": "majlis",
+          "min_area": 24.0,
+          "min_side": 3.5,
+          "capacity": 0,
+          "dining_seats": 0,
+          "zone": "guest",
+          "separate_guest_entry": true,
+          "include_shower": false,
+          "guest_vestibule": "men-vestibule"
+        },
+        {
+          "x": 1.75,
+          "y": 5.25,
+          "width": 2.25,
+          "depth": 2.0,
+          "id": "men-vestibule",
+          "zone": "guest",
+          "kind": "corridor",
+          "name": "موزع ضيوف مستقل",
+          "guest_distributor": true,
+          "guest_entrance_potential": true
+        },
+        {
+          "x": 1.75,
+          "y": 7.25,
+          "width": 2.25,
+          "depth": 2.25,
+          "id": "auto-guest-wc-1",
+          "request_id": "auto-guest-wc",
+          "name": "حمام الضيوف",
+          "kind": "bathroom",
+          "min_area": 4.0,
+          "min_side": 1.6,
+          "capacity": 0,
+          "dining_seats": 0,
+          "zone": "guest",
+          "separate_guest_entry": true,
+          "include_shower": false,
+          "guest_parent": "auto-majlis-1",
+          "guest_vestibule": "men-vestibule"
+        },
+        {
+          "x": 1.75,
+          "y": 9.75,
+          "width": 5.75,
+          "depth": 4.75,
+          "id": "auto-living-1",
+          "request_id": "auto-living",
+          "name": "المعيشة العائلية",
+          "kind": "living",
+          "min_area": 24.0,
+          "min_side": 3.5,
+          "capacity": 0,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": false
+        },
+        {
+          "x": 9.0,
+          "y": 9.0,
+          "width": 4.25,
+          "depth": 4.25,
+          "id": "auto-dining-1",
+          "request_id": "auto-dining",
+          "name": "غرفة الطعام",
+          "kind": "dining",
+          "min_area": 16.0,
+          "min_side": 3.0,
+          "capacity": 0,
+          "dining_seats": 6,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": false
+        },
+        {
+          "x": 9.0,
+          "y": 13.5,
+          "width": 4.25,
+          "depth": 4.25,
+          "id": "auto-kitchen-1",
+          "request_id": "auto-kitchen",
+          "name": "المطبخ",
+          "kind": "kitchen",
+          "min_area": 16.0,
+          "min_side": 3.0,
+          "capacity": 0,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": false
+        },
+        {
+          "x": 2.75,
+          "y": 14.75,
+          "width": 6.0,
+          "depth": 3.75,
+          "id": "auto-master-1",
+          "request_id": "auto-master",
+          "name": "غرفة النوم الرئيسية",
+          "kind": "master",
+          "min_area": 20.0,
+          "min_side": 3.5,
+          "capacity": 2,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": false
+        },
+        {
+          "x": 5.0,
+          "y": 7.25,
+          "width": 2.5,
+          "depth": 2.5,
+          "id": "auto-ground-bath-1",
+          "request_id": "auto-ground-bath",
+          "name": "حمام الدور الأرضي",
+          "kind": "bathroom",
+          "min_area": 5.0,
+          "min_side": 1.6,
+          "capacity": 0,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": true
+        }
+      ],
+      "halls": [
+        {
+          "x": 7.0,
+          "y": 4.25,
+          "width": 2.5,
+          "depth": 2.5,
+          "kind": "corridor",
+          "id": "hall-0-0"
+        },
+        {
+          "x": 7.5,
+          "y": 0.0,
+          "width": 1.5,
+          "depth": 4.25,
+          "kind": "corridor",
+          "id": "hall-0-1"
+        },
+        {
+          "x": 7.5,
+          "y": 6.75,
+          "width": 1.5,
+          "depth": 3.0,
+          "kind": "corridor",
+          "id": "hall-0-2"
+        },
+        {
+          "x": 7.5,
+          "y": 9.75,
+          "width": 1.5,
+          "depth": 2.5,
+          "kind": "corridor",
+          "id": "hall-0-3"
+        },
+        {
+          "x": 7.5,
+          "y": 12.25,
+          "width": 1.5,
+          "depth": 2.5,
+          "kind": "corridor",
+          "id": "hall-0-4"
+        }
+      ],
+      "doors": [
+        {
+          "id": "door-0-0",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            9.5,
+            5.500000000000001
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-0-0",
+            "shared-stair"
+          ],
+          "receiving_room": "shared-stair"
+        },
+        {
+          "id": "door-0-1",
+          "kind": "door",
+          "axis": "x",
+          "center": [
+            2.875,
+            5.25
+          ],
+          "width": 0.9,
+          "connects": [
+            "men-vestibule",
+            "auto-majlis-1"
+          ],
+          "receiving_room": "auto-majlis-1"
+        },
+        {
+          "id": "door-0-2",
+          "kind": "door",
+          "axis": "x",
+          "center": [
+            2.875,
+            7.25
+          ],
+          "width": 0.9,
+          "connects": [
+            "men-vestibule",
+            "auto-guest-wc-1"
+          ],
+          "receiving_room": "auto-guest-wc-1"
+        },
+        {
+          "id": "door-0-3",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            7.5,
+            11.0
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-0-3",
+            "auto-living-1"
+          ],
+          "receiving_room": "auto-living-1"
+        },
+        {
+          "id": "door-0-4",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            9.0,
+            11.0
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-0-3",
+            "auto-dining-1"
+          ],
+          "receiving_room": "auto-dining-1"
+        },
+        {
+          "id": "door-0-5",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            9.0,
+            14.125
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-0-4",
+            "auto-kitchen-1"
+          ],
+          "receiving_room": "auto-kitchen-1"
+        },
+        {
+          "id": "door-0-6",
+          "kind": "door",
+          "axis": "x",
+          "center": [
+            8.125,
+            14.75
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-0-4",
+            "auto-master-1"
+          ],
+          "receiving_room": "auto-master-1"
+        },
+        {
+          "id": "door-0-7",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            7.5,
+            8.5
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-0-2",
+            "auto-ground-bath-1"
+          ],
+          "receiving_room": "auto-ground-bath-1"
+        },
+        {
+          "id": "family-entry",
+          "kind": "door",
+          "axis": "x",
+          "center": [
+            8.25,
+            0.0
+          ],
+          "width": 1.0,
+          "connects": [
+            "OUTSIDE",
+            "hall-0-1"
+          ],
+          "receiving_room": "hall-0-1"
+        },
+        {
+          "id": "guest-entry",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            1.75,
+            6.25
+          ],
+          "width": 1.0,
+          "connects": [
+            "OUTSIDE",
+            "men-vestibule"
+          ],
+          "receiving_room": "men-vestibule"
+        }
+      ],
+      "windows": [
+        {
+          "id": "window-0-0",
+          "kind": "window",
+          "axis": "y",
+          "center": [
+            1.75,
+            8.375
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-guest-wc-1"
+        },
+        {
+          "id": "window-0-1",
+          "kind": "window",
+          "axis": "x",
+          "center": [
+            11.125,
+            17.75
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-kitchen-1"
+        },
+        {
+          "id": "window-0-2",
+          "kind": "window",
+          "axis": "x",
+          "center": [
+            5.75,
+            18.5
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-master-1"
+        },
+        {
+          "id": "window-0-3",
+          "kind": "window",
+          "axis": "x",
+          "center": [
+            6.250000000000001,
+            7.25
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-ground-bath-1"
+        }
+      ],
+      "construction_errors": []
+    },
+    {
+      "index": 1,
+      "rooms": [
+        {
+          "x": 9.5,
+          "y": 3.25,
+          "width": 3.0,
+          "depth": 4.6,
+          "kind": "stair",
+          "id": "shared-stair",
+          "name": "درج ثابت بين الدورين"
+        },
+        {
+          "x": 3.25,
+          "y": 0.0,
+          "width": 4.25,
+          "depth": 4.25,
+          "id": "auto-children-1",
+          "request_id": "auto-children",
+          "name": "غرف نوم الأسرة 1",
+          "kind": "bedroom",
+          "min_area": 16.0,
+          "min_side": 3.2,
+          "capacity": 2,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": false
+        },
+        {
+          "x": 3.25,
+          "y": 6.75,
+          "width": 4.25,
+          "depth": 4.25,
+          "id": "auto-children-2",
+          "request_id": "auto-children",
+          "name": "غرف نوم الأسرة 2",
+          "kind": "bedroom",
+          "min_area": 16.0,
+          "min_side": 3.2,
+          "capacity": 2,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": false
+        },
+        {
+          "x": 4.5,
+          "y": 4.25,
+          "width": 2.5,
+          "depth": 2.5,
+          "id": "auto-family-bath-1",
+          "request_id": "auto-family-bath",
+          "name": "حمام الأسرة",
+          "kind": "bathroom",
+          "min_area": 5.0,
+          "min_side": 1.6,
+          "capacity": 0,
+          "dining_seats": 0,
+          "zone": "family",
+          "separate_guest_entry": true,
+          "include_shower": true
+        }
+      ],
+      "halls": [
+        {
+          "x": 7.0,
+          "y": 4.25,
+          "width": 2.5,
+          "depth": 2.5,
+          "kind": "corridor",
+          "id": "hall-1-0"
+        },
+        {
+          "x": 7.5,
+          "y": 0.0,
+          "width": 1.5,
+          "depth": 4.25,
+          "kind": "corridor",
+          "id": "hall-1-1"
+        },
+        {
+          "x": 7.5,
+          "y": 6.75,
+          "width": 1.5,
+          "depth": 3.0,
+          "kind": "corridor",
+          "id": "hall-1-2"
+        }
+      ],
+      "doors": [
+        {
+          "id": "door-1-0",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            9.5,
+            5.500000000000001
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-1-0",
+            "shared-stair"
+          ],
+          "receiving_room": "shared-stair"
+        },
+        {
+          "id": "door-1-1",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            7.5,
+            2.125
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-1-1",
+            "auto-children-1"
+          ],
+          "receiving_room": "auto-children-1"
+        },
+        {
+          "id": "door-1-2",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            7.5,
+            8.25
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-1-2",
+            "auto-children-2"
+          ],
+          "receiving_room": "auto-children-2"
+        },
+        {
+          "id": "door-1-3",
+          "kind": "door",
+          "axis": "y",
+          "center": [
+            7.0,
+            5.500000000000001
+          ],
+          "width": 0.9,
+          "connects": [
+            "hall-1-0",
+            "auto-family-bath-1"
+          ],
+          "receiving_room": "auto-family-bath-1"
+        }
+      ],
+      "windows": [
+        {
+          "id": "window-1-0",
+          "kind": "window",
+          "axis": "x",
+          "center": [
+            5.375,
+            0.0
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-children-1"
+        },
+        {
+          "id": "window-1-1",
+          "kind": "window",
+          "axis": "x",
+          "center": [
+            5.375,
+            11.0
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-children-2"
+        },
+        {
+          "id": "window-1-2",
+          "kind": "window",
+          "axis": "y",
+          "center": [
+            4.5,
+            5.500000000000001
+          ],
+          "width": 0.8,
+          "height": 1.2,
+          "operable_fraction": 0.5,
+          "room_id": "auto-family-bath-1"
+        }
+      ],
+      "construction_errors": []
+    }
+  ],
+  "validation_009": {
+    "status": "PASS",
+    "issues": [],
+    "floors": [
+      {
+        "floor": 0,
+        "valid_doors": 10,
+        "routes": [
+          {
+            "room_id": "shared-stair",
+            "guest": false,
+            "points": [
+              [
+                8.25,
+                0.6
+              ],
+              [
+                8.6,
+                4.6499999999999995
+              ],
+              [
+                9.1,
+                5.3500000000000005
+              ],
+              [
+                10.15,
+                5.500000000000001
+              ]
+            ],
+            "length_m": 5.986,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-majlis-1",
+            "guest": true,
+            "points": [
+              [
+                2.35,
+                6.25
+              ],
+              [
+                2.7249999999999996,
+                5.6499999999999995
+              ],
+              [
+                2.875,
+                4.6
+              ]
+            ],
+            "length_m": 1.7682,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-guest-wc-1",
+            "guest": true,
+            "points": [
+              [
+                2.35,
+                6.25
+              ],
+              [
+                2.7249999999999996,
+                6.8500000000000005
+              ],
+              [
+                2.875,
+                7.9
+              ]
+            ],
+            "length_m": 1.7682,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-living-1",
+            "guest": false,
+            "points": [
+              [
+                8.25,
+                0.6
+              ],
+              [
+                7.8999999999999995,
+                10.850000000000001
+              ],
+              [
+                6.85,
+                11.0
+              ]
+            ],
+            "length_m": 11.3166,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-dining-1",
+            "guest": false,
+            "points": [
+              [
+                8.25,
+                0.6
+              ],
+              [
+                8.6,
+                10.850000000000001
+              ],
+              [
+                9.65,
+                11.0
+              ]
+            ],
+            "length_m": 11.3166,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-kitchen-1",
+            "guest": false,
+            "points": [
+              [
+                8.25,
+                0.6
+              ],
+              [
+                8.6,
+                13.975000000000001
+              ],
+              [
+                9.65,
+                14.125
+              ]
+            ],
+            "length_m": 14.4402,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-master-1",
+            "guest": false,
+            "points": [
+              [
+                8.25,
+                0.6
+              ],
+              [
+                8.125,
+                15.4
+              ]
+            ],
+            "length_m": 14.8005,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-ground-bath-1",
+            "guest": false,
+            "points": [
+              [
+                8.25,
+                0.6
+              ],
+              [
+                7.8999999999999995,
+                8.350000000000001
+              ],
+              [
+                6.85,
+                8.5
+              ]
+            ],
+            "length_m": 8.8186,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "GUEST_EXTERIOR",
+            "guest": true,
+            "points": [
+              [
+                1.1,
+                -2.7
+              ],
+              [
+                1.1,
+                6.25
+              ]
+            ],
+            "length_m": 8.95,
+            "body_width_m": 0.6
+          }
+        ],
+        "windows": [
+          {
+            "room_id": "auto-guest-wc-1",
+            "status": "PASS",
+            "windows": [
+              "window-0-0"
+            ]
+          },
+          {
+            "room_id": "auto-kitchen-1",
+            "status": "PASS",
+            "windows": [
+              "window-0-1"
+            ]
+          },
+          {
+            "room_id": "auto-master-1",
+            "status": "PASS",
+            "windows": [
+              "window-0-2"
+            ]
+          },
+          {
+            "room_id": "auto-ground-bath-1",
+            "status": "PASS",
+            "windows": [
+              "window-0-3"
+            ]
+          }
+        ]
+      },
+      {
+        "floor": 1,
+        "valid_doors": 4,
+        "routes": [
+          {
+            "room_id": "shared-stair",
+            "guest": false,
+            "points": [
+              [
+                8.9,
+                5.500000000000001
+              ],
+              [
+                10.15,
+                5.500000000000001
+              ]
+            ],
+            "length_m": 1.25,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-children-1",
+            "guest": false,
+            "points": [
+              [
+                8.9,
+                5.500000000000001
+              ],
+              [
+                8.6,
+                4.6499999999999995
+              ],
+              [
+                7.8999999999999995,
+                2.2750000000000004
+              ],
+              [
+                6.85,
+                2.125
+              ]
+            ],
+            "length_m": 4.4381,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-children-2",
+            "guest": false,
+            "points": [
+              [
+                8.9,
+                5.500000000000001
+              ],
+              [
+                7.8999999999999995,
+                8.1
+              ],
+              [
+                6.85,
+                8.25
+              ]
+            ],
+            "length_m": 3.8463,
+            "body_width_m": 0.6
+          },
+          {
+            "room_id": "auto-family-bath-1",
+            "guest": false,
+            "points": [
+              [
+                8.9,
+                5.500000000000001
+              ],
+              [
+                6.35,
+                5.500000000000001
+              ]
+            ],
+            "length_m": 2.55,
+            "body_width_m": 0.6
+          }
+        ],
+        "windows": [
+          {
+            "room_id": "auto-children-1",
+            "status": "PASS",
+            "windows": [
+              "window-1-0"
+            ]
+          },
+          {
+            "room_id": "auto-children-2",
+            "status": "PASS",
+            "windows": [
+              "window-1-1"
+            ]
+          },
+          {
+            "room_id": "auto-family-bath-1",
+            "status": "PASS",
+            "windows": [
+              "window-1-2"
+            ]
+          }
+        ]
+      }
+    ],
+    "legal": "UNRESOLVED",
+    "daylight_airflow": "UNRESOLVED",
+    "visual_privacy": "UNRESOLVED",
+    "furniture_used": false,
+    "body_width_m": 0.6,
+    "door_width_design_m": 0.9
+  },
+  "repair_history_009": [
+    {
+      "fraction": 0.5,
+      "status": "PASS",
+      "issues": []
+    }
+  ],
+  "relocations_009": [
+    {
+      "round": 0,
+      "room": "auto-kitchen-1",
+      "axis": "y",
+      "delta_m": -0.25,
+      "before": 2,
+      "after": 1
+    },
+    {
+      "round": 1,
+      "room": "auto-master-1",
+      "axis": "x",
+      "delta_m": 0.25,
+      "before": 1,
+      "after": 0
+    }
+  ]
+}
