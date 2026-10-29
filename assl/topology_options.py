@@ -82,7 +82,7 @@ def overlap_area_rect(a,b):
 
 def structural_evidence(rooms_by_floor,halls_by_floor,style,face):
     """Only observable geometric attributes count as diversity evidence."""
-    profiles=[];neighbor_patterns=[]
+    profiles=[];neighbor_patterns=[];active_nodes=[]
     for rooms,halls in zip(rooms_by_floor,halls_by_floor):
         info=hall_shape(halls)
         profiles.append({"corridor_segments":info["segments"],
@@ -96,12 +96,28 @@ def structural_evidence(rooms_by_floor,halls_by_floor,style,face):
                           if room.get("request_id") and room.get("zone")!="guest")
                       for h in halls)
         neighbor_patterns.append(tuple(counts))
+        roles=[]
+        for hall in halls:
+            role=hall.get("core_role")
+            if not role:continue
+            attached=[r.get("id") for r in rooms
+                      if r.get("request_id") and r.get("zone")!="guest"
+                      and edge_contact(r,hall)>=.9-EPS]
+            roles.append({"core_role":role,"family_rooms_served":attached,
+                          "serves_requested_room":bool(attached)})
+        active_nodes.append(roles)
     # A reported core style alone is never evidence of genuine novelty.
     geometric_signature=tuple((p["corridor_segments"],p["pattern"],j)
                               for p,j in zip(profiles,neighbor_patterns))
     return {"topology_style":style,"entrance_face":face,
             "by_floor":profiles,
             "room_hall_incidence":neighbor_patterns,
+            "special_core_access_by_floor":active_nodes,
+            "distinctive_nodes_actually_serve_rooms":all(
+                any(node["serves_requested_room"] for roles in active_nodes
+                    for node in roles if node["core_role"]==target)
+                for target in (("cross-link",) if style=="elbow" else
+                               ("cross-link","satellite") if style=="split_hub" else ())),
             "geometric_graph_signature":str(geometric_signature),
             "actual_doors_checked":False,
             "architectural_distinctness_certified":False}
