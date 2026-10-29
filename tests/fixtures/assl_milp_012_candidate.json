@@ -1,0 +1,456 @@
+{
+  "label": "relationship_first_scipy_milp_012",
+  "topology": [
+    "compact",
+    7.25,
+    5.5,
+    "none"
+  ],
+  "rooms_by_floor": [
+    [
+      {
+        "x": 9.75,
+        "y": 5.0,
+        "width": 3.0,
+        "depth": 4.6,
+        "id": "shared-stair",
+        "kind": "stair",
+        "name": "درج ثابت بين الدورين"
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 5.25,
+        "depth": 5.25,
+        "id": "auto-majlis-1",
+        "request_id": "auto-majlis",
+        "name": "مجلس الضيوف",
+        "kind": "majlis",
+        "min_area": 24.0,
+        "min_side": 3.5,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "guest",
+        "separate_guest_entry": true,
+        "include_shower": false,
+        "guest_vestibule": "men-vestibule"
+      },
+      {
+        "x": 5.25,
+        "y": 0.0,
+        "width": 2.25,
+        "depth": 2.0,
+        "kind": "corridor",
+        "zone": "guest",
+        "id": "men-vestibule",
+        "name": "موزع ضيوف مستقل",
+        "guest_distributor": true
+      },
+      {
+        "x": 5.25,
+        "y": 2.0,
+        "width": 2.25,
+        "depth": 2.25,
+        "id": "auto-guest-wc-1",
+        "request_id": "auto-guest-wc",
+        "name": "حمام الضيوف",
+        "kind": "bathroom",
+        "min_area": 4.0,
+        "min_side": 1.6,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "guest",
+        "separate_guest_entry": true,
+        "include_shower": false,
+        "guest_parent": "auto-majlis-1",
+        "guest_vestibule": "men-vestibule"
+      },
+      {
+        "x": 5.3,
+        "y": 9.0,
+        "width": 2.45,
+        "depth": 2.45,
+        "id": "auto-ground-bath-1",
+        "request_id": "auto-ground-bath",
+        "name": "حمام الدور الأرضي",
+        "kind": "bathroom",
+        "min_area": 5.0,
+        "min_side": 1.6,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": true
+      },
+      {
+        "x": 2.05,
+        "y": 5.55,
+        "width": 5.2,
+        "depth": 3.45,
+        "id": "auto-dining-1",
+        "request_id": "auto-dining",
+        "name": "غرفة الطعام",
+        "kind": "dining",
+        "min_area": 16.0,
+        "min_side": 3.0,
+        "capacity": 0,
+        "dining_seats": 6,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 9.25,
+        "y": 0.8,
+        "width": 4.2,
+        "depth": 4.2,
+        "id": "auto-kitchen-1",
+        "request_id": "auto-kitchen",
+        "name": "المطبخ",
+        "kind": "kitchen",
+        "min_area": 16.0,
+        "min_side": 3.0,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 3.55,
+        "y": 11.5,
+        "width": 5.7,
+        "depth": 4.7,
+        "id": "auto-living-1",
+        "request_id": "auto-living",
+        "name": "المعيشة العائلية",
+        "kind": "living",
+        "min_area": 24.0,
+        "min_side": 3.5,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 9.25,
+        "y": 10.0,
+        "width": 4.2,
+        "depth": 5.2,
+        "id": "auto-master-1",
+        "request_id": "auto-master",
+        "name": "غرفة النوم الرئيسية",
+        "kind": "master",
+        "min_area": 20.0,
+        "min_side": 3.5,
+        "capacity": 2,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      }
+    ],
+    [
+      {
+        "x": 9.75,
+        "y": 5.0,
+        "width": 3.0,
+        "depth": 4.6,
+        "id": "shared-stair",
+        "kind": "stair",
+        "name": "درج ثابت بين الدورين"
+      },
+      {
+        "x": 4.55,
+        "y": 7.0,
+        "width": 2.7,
+        "depth": 2.2,
+        "id": "auto-family-bath-1",
+        "request_id": "auto-family-bath",
+        "name": "حمام الأسرة",
+        "kind": "bathroom",
+        "min_area": 5.0,
+        "min_side": 1.6,
+        "capacity": 0,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": true
+      },
+      {
+        "x": 3.05,
+        "y": 2.8,
+        "width": 4.2,
+        "depth": 4.2,
+        "id": "auto-children-1",
+        "request_id": "auto-children",
+        "name": "غرف نوم الأسرة 1",
+        "kind": "bedroom",
+        "min_area": 16.0,
+        "min_side": 3.2,
+        "capacity": 2,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      },
+      {
+        "x": 3.55,
+        "y": 9.3,
+        "width": 4.2,
+        "depth": 4.2,
+        "id": "auto-children-2",
+        "request_id": "auto-children",
+        "name": "غرف نوم الأسرة 2",
+        "kind": "bedroom",
+        "min_area": 16.0,
+        "min_side": 3.2,
+        "capacity": 2,
+        "dining_seats": 0,
+        "zone": "family",
+        "separate_guest_entry": true,
+        "include_shower": false
+      }
+    ]
+  ],
+  "halls_by_floor": [
+    [
+      {
+        "x": 7.25,
+        "y": 5.5,
+        "width": 2.5,
+        "depth": 3.0,
+        "kind": "corridor",
+        "id": "family-hub"
+      },
+      {
+        "x": 7.75,
+        "y": 0.0,
+        "width": 1.5,
+        "depth": 5.5,
+        "kind": "corridor",
+        "id": "family-entry-spur"
+      },
+      {
+        "x": 7.75,
+        "y": 8.5,
+        "width": 1.5,
+        "depth": 3.0,
+        "kind": "corridor",
+        "id": "family-growth-node"
+      }
+    ],
+    [
+      {
+        "x": 7.25,
+        "y": 5.5,
+        "width": 2.5,
+        "depth": 3.0,
+        "kind": "corridor",
+        "id": "family-hub"
+      },
+      {
+        "x": 7.75,
+        "y": 8.5,
+        "width": 1.5,
+        "depth": 3.0,
+        "kind": "corridor",
+        "id": "family-growth-node"
+      }
+    ]
+  ],
+  "doors_potential": [
+    {
+      "floor": 0,
+      "room_id": "auto-ground-bath-1",
+      "host": "family-growth-node",
+      "shared_wall_m": 2.45,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 0,
+      "room_id": "auto-dining-1",
+      "host": "family-hub",
+      "shared_wall_m": 2.95,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 0,
+      "room_id": "auto-kitchen-1",
+      "host": "family-entry-spur",
+      "shared_wall_m": 4.2,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 0,
+      "room_id": "auto-living-1",
+      "host": "family-growth-node",
+      "shared_wall_m": 1.5,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 0,
+      "room_id": "auto-master-1",
+      "host": "family-growth-node",
+      "shared_wall_m": 1.5,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 1,
+      "room_id": "auto-family-bath-1",
+      "host": "family-hub",
+      "shared_wall_m": 1.5,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 1,
+      "room_id": "auto-children-1",
+      "host": "family-hub",
+      "shared_wall_m": 1.5,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    },
+    {
+      "floor": 1,
+      "room_id": "auto-children-2",
+      "host": "family-growth-node",
+      "shared_wall_m": 2.2,
+      "door_width_m": 0.9,
+      "actual_door_009_verified": false
+    }
+  ],
+  "independent_audit": {
+    "passed_independent_geometry": true,
+    "issues": [],
+    "floors": [
+      {
+        "floor": 0,
+        "corridor_union_m2": 20.25,
+        "max_straight_run_m": 11.5,
+        "hall_nodes": 3,
+        "requested_room_count": 5
+      },
+      {
+        "floor": 1,
+        "corridor_union_m2": 12.0,
+        "max_straight_run_m": 6.0,
+        "hall_nodes": 2,
+        "requested_room_count": 3
+      }
+    ],
+    "door_host_evidence": [
+      {
+        "floor": 0,
+        "room_id": "auto-ground-bath-1",
+        "host": "family-growth-node",
+        "shared_wall_m": 2.45,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-dining-1",
+        "host": "family-hub",
+        "shared_wall_m": 2.95,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-kitchen-1",
+        "host": "family-entry-spur",
+        "shared_wall_m": 4.2,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-living-1",
+        "host": "family-growth-node",
+        "shared_wall_m": 1.5,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 0,
+        "room_id": "auto-master-1",
+        "host": "family-growth-node",
+        "shared_wall_m": 1.5,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 1,
+        "room_id": "auto-family-bath-1",
+        "host": "family-hub",
+        "shared_wall_m": 1.5,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 1,
+        "room_id": "auto-children-1",
+        "host": "family-hub",
+        "shared_wall_m": 1.5,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      },
+      {
+        "floor": 1,
+        "room_id": "auto-children-2",
+        "host": "family-growth-node",
+        "shared_wall_m": 2.2,
+        "door_width_m": 0.9,
+        "actual_door_009_verified": false
+      }
+    ],
+    "stage009_actual_door_swing_verified": false,
+    "privacy_visual_verified": false,
+    "light_airflow_adequacy_verified": false,
+    "legal_approval": false
+  },
+  "solver": [
+    {
+      "options": [
+        105,
+        105,
+        105,
+        105,
+        105
+      ],
+      "binary_variables": 525,
+      "clashes": 54437,
+      "linear_rows": 54454,
+      "time_sec": 0.44,
+      "solver_status": 0,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+      "objective": 27.596
+    },
+    {
+      "options": [
+        105,
+        105,
+        105
+      ],
+      "binary_variables": 315,
+      "clashes": 14461,
+      "linear_rows": 14472,
+      "time_sec": 0.61,
+      "solver_status": 1,
+      "message": "Time limit reached. (HiGHS Status 13: Time limit reached)",
+      "objective": 3.4107499999999935
+    }
+  ],
+  "building_envelope_m": [
+    15.3,
+    20.3
+  ],
+  "claim_009_verified": false
+}
