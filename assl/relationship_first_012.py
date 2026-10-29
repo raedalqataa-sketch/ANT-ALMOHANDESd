@@ -29,7 +29,7 @@ T = 0.20
 PLOT_W, PLOT_D = 15.30, 20.30
 EPS = 1e-6
 DATA = Path(__file__).parent
-SOURCE_009 = (SOURCE_009 if (SOURCE_009).exists() else DATA.parent/'tests'/'fixtures'/'assl_openings_009_valid.json')
+SOURCE_009 = (DATA/'baseline_009_corner.json' if (DATA/'baseline_009_corner.json').exists() else DATA.parent/'tests'/'fixtures'/'assl_openings_009_valid.json')
 
 
 def rect(x, y, w, h, **kw):
