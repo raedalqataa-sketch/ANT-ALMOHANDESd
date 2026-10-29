@@ -52,13 +52,19 @@ def attach_core_nodes(rect_factory,core_halls,stair,width,depth,style):
     hx,hy=hub["x"],hub["y"]
     # Exit via the rear stem well beyond the staircase's 4.6m depth,
     # not through the guest suite and not through the shared stair.
-    arm=rect_factory(hx+2.,hy+4.,3.,1.5,
+    # Shorter offset gallery on compact lots. It must share at least 1.2m
+    # with the rear stem and lie below the staircase's actual south edge.
+    arm_width=2.25 if width<20. else 3.
+    arm=rect_factory(hx+2.,hy+3.75,arm_width,1.5,
                      kind="corridor",id="side-gallery",core_role="cross-link")
     # arm touches rear corridor along its west wall, independently of
     # room positions. Separate family routing, not a guest access door.
     new=[dict(h) for h in core_halls]+[arm]
     if style=="split_hub":
-        satellite=rect_factory(hx+5.,hy+3.75,2.5,2.5,
+        satellite_width=2. if width<20. else 2.5
+        satellite_depth=2.25 if width<20. else 2.5
+        satellite=rect_factory(hx+2.+arm_width,hy+3.75,
+                               satellite_width,satellite_depth,
                                kind="corridor",id="secondary-family-hub",
                                core_role="satellite")
         new.append(satellite)
