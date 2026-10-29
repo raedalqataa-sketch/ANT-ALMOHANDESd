@@ -68,6 +68,29 @@ class RelationshipFirstTests(unittest.TestCase):
         after_hall=sum(unary_union([m.geo(h) for h in halls+[r for r in rooms if r.get('guest_distributor')]]).area for halls,rooms in zip(p['halls_by_floor'],p['rooms_by_floor']))
         self.assertGreater(before_hall,after_hall)
 
+    def test_physically_connected_massing_for_both_floors(self):
+        for fi in (0, 1):
+            shapes = self.after['rooms_by_floor'][fi] + self.after['halls_by_floor'][fi]
+            mass = unary_union([m.geo(r) for r in shapes])
+            self.assertEqual(mass.geom_type, 'Polygon', f'Floor {fi} split into annexes')
+
+    def test_guest_to_family_touch_is_wall_only_not_portal(self):
+        guests = [r for r in self.after['rooms_by_floor'][0] if r.get('zone') == 'guest']
+        family_halls = self.after['halls_by_floor'][0]
+        self.assertTrue(any(m.contact(g,h) >= .9 for g in guests for h in family_halls))
+        self.assertFalse(self.after.get('claim_009_verified'))
+
+    def test_disconnected_guest_annex_is_rejected(self):
+        p=copy.deepcopy(self.after)
+        for r in p['rooms_by_floor'][0]:
+            if r.get('zone')=='guest':r['x']-=.25
+        guests=[r for r in p['rooms_by_floor'][0] if r.get('zone')=='guest']
+        stair=next(r for r in p['rooms_by_floor'][0] if r['kind']=='stair')
+        floors=[[r for r in floor if r.get('request_id') and r.get('zone')!='guest'] for floor in p['rooms_by_floor']]
+        evidence=m.audit(floors,p['halls_by_floor'],guests,stair)
+        self.assertFalse(evidence['passed_independent_geometry'])
+        self.assertIn('FLOOR_0_DISCONNECTED_BUILDING_MASS',evidence['issues'])
+
     def test_impossible_room_is_rejected(self):
         r={'id':'oversize','request_id':'oversize','kind':'living','zone':'family','min_area':400.,'min_side':20.}
         hall=m.rect(7,7,2,2,kind='corridor')
