@@ -74,7 +74,7 @@ def room_shapes(request,t):
             sorted(shapes.items(),key=lambda x:x[1])[:10]]
 
 
-def initial_core(W,D,seed,t):
+def initial_core(W,D,seed,t,*,style='axial'):
     """Core location is a searched variable, not a mandatory housing template."""
     # 3x4.6m stair is reserved before distributing any room, on all floors.
     hx=snap(W*(.50+.045*(seed%3-1)))
@@ -91,7 +91,11 @@ def initial_core(W,D,seed,t):
     rear=rect(hx+.50,hy+2.5,1.5,3.0,kind="corridor",id="family-growth-node")
     if not all(inside(r,W,D) for r in (hub,stair,entry,rear)):
         return None
-    return [hub,entry,rear],stair
+
+    from .topology_options import attach_core_nodes
+    halls=attach_core_nodes(rect,[hub,entry,rear],stair,W,D,style)
+    if halls is None:return None
+    return halls,stair
 
 
 def guest_suite(requests,hub,W,D,t):
@@ -325,7 +329,8 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
     return min(candidates,key=lambda s:s.score),None
 
 
-def solve_free_concepts(brief,*,seeds=range(8),max_results=3):
+def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
+                        topologies=('axial',),orient_to_frontage=False):
     """Return real geometric proposals or explicit named failures.
 
     The candidate generator is independent of the existing fixed-lane search.
@@ -334,54 +339,85 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3):
     """
     from backend.design.general_engine import expanded_program
     t=brief.wall_thickness
-    W=brief.plot_width-brief.setbacks.east-brief.setbacks.west-t
-    D=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-t
+    from .topology_options import (local_envelope,transform_candidate,
+                                    structural_evidence)
+    real_W=brief.plot_width-brief.setbacks.east-brief.setbacks.west-t
+    real_D=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-t
+    face=brief.entrance_face if orient_to_frontage else 'south'
+    W,D=local_envelope(real_W,real_D,face)
     requested=[expanded_program(brief,f) for f in range(brief.floors)]
     failures=[];solutions=[];signatures=set()
-    for seed in seeds:
-        core=initial_core(W,D,seed,t)
-        if core is None:
-            failures.append({"seed":seed,"reason":"CORE_OUTSIDE_BUILDABLE_AREA"})
-            continue
-        guest,error=guest_suite(requested[0],core[0][0],W,D,t)
-        if error:
-            failures.append({"seed":seed,"reason":error});continue
-        floors=[];halls_by_floor=[]
-        problem=None;traces=[]
-        for floor_idx,program in enumerate(requested):
-            stair=core[1]
-            guest_on_floor=guest if floor_idx==0 else []
-            state,reason=pack_floor(program,W,D,t,seed,core,guest_on_floor)
-            if not state:
-                problem={"floor":floor_idx,"reason":reason};break
-            floors.append(state.rooms)
-            halls_by_floor.append(state.halls)
-            traces.append(state.trace)
-        if problem:
-            failures.append({"seed":seed,**problem});continue
-        candidate={"floors":floors,"halls_by_floor":halls_by_floor}
-        quality=assess_layout(candidate,t)
-        expected=[[r["id"] for r in req] for req in requested]
-        actual=[[r["id"] for r in floor if r.get("request_id")]
-                for floor in floors]
-        if any(sorted(a)!=sorted(b) for a,b in zip(expected,actual)):
-            failures.append({"seed":seed,"reason":"PROGRAM_LOST_OR_DUPLICATED"})
-            continue
-        if quality["hard_issues"]:
-            failures.append({"seed":seed,"reason":"QUALITY_GATE",
-                             "issues":quality["hard_issues"][:9]})
-            continue
-        signature=spatial_signature(candidate)
-        if signature in signatures:continue
-        signatures.add(signature)
-        solutions.append({"seed":seed,
-            "family":"free_constraints","quality":quality,
-            "rooms_by_floor":floors,"halls_by_floor":halls_by_floor,
-            "placement_trace":traces,"building_envelope_m":[W,D],
-            "structural_signature":str(signature)})
+    by_topology={style:[] for style in topologies}
+    for style in topologies:
+        for seed in seeds:
+            core=initial_core(W,D,seed,t,style=style)
+            if core is None:
+                failures.append({"seed":seed,"style":style,"reason":"CORE_OUTSIDE_BUILDABLE_AREA"})
+                continue
+            guest,error=guest_suite(requested[0],core[0][0],W,D,t)
+            if error:
+                failures.append({"seed":seed,"style":style,"reason":error});continue
+            floors=[];halls_by_floor=[]
+            problem=None;traces=[]
+            for floor_idx,program in enumerate(requested):
+                stair=core[1]
+                guest_on_floor=guest if floor_idx==0 else []
+                state,reason=pack_floor(program,W,D,t,seed,core,guest_on_floor)
+                if not state:
+                    problem={"floor":floor_idx,"reason":reason};break
+                floors.append(state.rooms)
+                halls_by_floor.append(state.halls)
+                traces.append(state.trace)
+            if problem:
+                failures.append({"seed":seed,"style":style,**problem});continue
+            candidate={"floors":floors,"halls_by_floor":halls_by_floor}
+            candidate=transform_candidate(candidate,W,D,face)
+            floors=candidate['floors']
+            halls_by_floor=candidate['halls_by_floor']
+            quality=assess_layout(candidate,t)
+            expected=[[r["id"] for r in req] for req in requested]
+            actual=[[r["id"] for r in floor if r.get("request_id")]
+                    for floor in floors]
+            if any(sorted(a)!=sorted(b) for a,b in zip(expected,actual)):
+                failures.append({"seed":seed,"style":style,"reason":"PROGRAM_LOST_OR_DUPLICATED"})
+                continue
+            if quality["hard_issues"]:
+                failures.append({"seed":seed,"style":style,"reason":"QUALITY_GATE",
+                                 "issues":quality["hard_issues"][:9]})
+                continue
+            signature=spatial_signature(candidate)
+            if signature in signatures:continue
+            signatures.add(signature)
+            evidence=structural_evidence(floors,halls_by_floor,style,face)
+            option={"seed":seed,"topology_style":style,
+                "family":"free_constraints","quality":quality,
+                "rooms_by_floor":floors,"halls_by_floor":halls_by_floor,
+                "topology_evidence":evidence,
+                "placement_trace":traces,"building_envelope_m":[real_W,real_D],
+                "structural_signature":str(signature)}
+            solutions.append(option)
+            by_topology[style].append(option)
     solutions.sort(key=lambda s:s["quality"]["architecture_score"])
-    return {"status":"PRELIMINARY_CONCEPT_ONLY","proposals":solutions[:max_results],
+    # One representative per actually feasible core graph, with independent
+    # geometric descriptors, not three neighboring seeds from one spine.
+    selected=[]
+    if len(topologies)>1:
+        for style in topologies:
+            ranked=sorted(by_topology[style],
+                          key=lambda s:s["quality"]["architecture_score"])
+            if ranked and len(selected)<max_results:
+                selected.append(ranked[0])
+        if len(selected)<max_results:
+            chosen={id(x) for x in selected}
+            selected.extend(x for x in solutions if id(x) not in chosen)
+    else:
+        selected=solutions
+    selected=selected[:max_results]
+    return {"status":"PRELIMINARY_CONCEPT_ONLY","proposals":selected,
             "valid_found":len(solutions),"requested_count":max_results,
+            "topology_availability":{style:len(options)
+                                     for style,options in by_topology.items()},
+            "selected_styles":[o["topology_style"] for o in selected],
             "rejected_seeds":failures,"program_integrity_gate":True,
             "stair_consistency_gate":True,"furniture_used":False,
             "door_and_window_geometry_verified":False,
