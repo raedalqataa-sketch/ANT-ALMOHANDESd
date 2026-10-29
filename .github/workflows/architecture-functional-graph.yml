@@ -1,0 +1,36 @@
+name: Architecture functional graph experiment
+on:
+  push:
+    branches:
+      - feature/architecture-functional-graph-006
+    paths:
+      - 'assl/**'
+      - 'backend/design/general_engine.py'
+      - 'scripts/assl_functional_graph_benchmark.py'
+      - 'tests/test_assl_*.py'
+      - '.github/workflows/architecture-functional-graph.yml'
+  workflow_dispatch:
+jobs:
+  architectural-grouping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install geometric engine
+        run: pip install -r requirements.txt
+      - name: Architecture and regression tests
+        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
+      - name: Re-generate three villa concepts with functional grouping off and on
+        run: python scripts/assl_functional_graph_benchmark.py tests/fixtures/assl_architecture_cases.json function-graph-benchmark
+      - name: Publish reproducible geometry and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-graph-comparison
+          path: function-graph-benchmark/
+          if-no-files-found: warn
