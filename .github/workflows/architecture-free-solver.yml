@@ -1,0 +1,36 @@
+name: Free constraint architectural solver (experimental)
+on:
+  push:
+    branches:
+      - feature/architecture-constraint-packing-007
+    paths:
+      - 'assl/**'
+      - 'backend/design/**'
+      - 'tests/test_assl_*.py'
+      - 'scripts/assl_free_packing_benchmark.py'
+      - '.github/workflows/architecture-free-solver.yml'
+  workflow_dispatch:
+jobs:
+  free-solver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install runtime
+        run: pip install -r requirements.txt
+      - name: Unit tests
+        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
+      - name: Independently generate and measure three villas
+        run: python scripts/assl_free_packing_benchmark.py tests/fixtures/assl_architecture_cases.json free-packing-evidence
+      - name: Preserve complete evidence even if new solver fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: free-layout-solver-evidence
+          path: free-packing-evidence/
+          if-no-files-found: warn
