@@ -1,38 +1,43 @@
-name: Architectural diversity — geometry only (experimental)
+name: Experimental architectural proof 009 and 010
 on:
-  push:
-    branches:
-      - feature/architecture-diverse-topology-008
-    paths:
-      - 'assl/free_layout_solver.py'
-      - 'assl/free_layout_audit.py'
-      - 'assl/topology_options.py'
-      - 'backend/design/**'
-      - 'tests/test_assl_*.py'
-      - 'scripts/assl_diverse_topology_benchmark.py'
-      - '.github/workflows/architecture-diverse-topology.yml'
   workflow_dispatch:
+    inputs:
+      proof_ref:
+        description: Exact experimental commit or branch to verify
+        required: true
+        default: feature/architecture-door-circulation-validation-009
+      stage:
+        description: '009 or 010'
+        required: true
+        default: '009'
+permissions:
+  contents: read
 jobs:
-  topology-diversity:
+  proof:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.proof_ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install geometric engine
-        run: pip install -r requirements.txt
-      - name: Run concept geometry unit and regression tests
-        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
-      - name: Regenerate and independently audit three circulation nuclei
-        run: python scripts/assl_diverse_topology_benchmark.py tests/fixtures/assl_architecture_cases.json diverse-topology-evidence
-      - name: Preserve source geometry and diagnostics regardless of result
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+      - name: Actual geometry proof
+        env:
+          STAGE: ${{ inputs.stage }}
+        run: |
+          if [ "$STAGE" = "009" ]; then
+            python scripts/assl_openings_benchmark.py evidence
+          elif [ "$STAGE" = "010" ]; then
+            python scripts/assl_replan_benchmark.py evidence
+          else
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: architecture-diversity-geometry
-          path: diverse-topology-evidence/
-          if-no-files-found: warn
+          name: experimental-architecture-proof
+          path: evidence/
