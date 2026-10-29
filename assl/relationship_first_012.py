@@ -315,7 +315,11 @@ def search(time_limit=5,limit=60):
     baseline=json.loads((SOURCE_009).read_text(encoding='utf-8'))
     reqs=[[r for r in floor if r.get('request_id') and r.get('zone')!='guest']
           for floor in baseline['rooms_by_floor']]
-    attempts=[];found=[]
+    attempts=[];found=[];geometric_passes=0
+    from backend.design.general_models import VillaBrief
+    from .stage012_009_gate import verify_stage012
+    cases=json.loads((DATA.parent/'tests'/'fixtures'/'assl_architecture_cases.json').read_text(encoding='utf-8'))['cases']
+    brief=VillaBrief.model_validate(next(c['brief'] for c in cases if c['id']=='sa-corner'))
     for idx,(tag,halls,stair,guests) in enumerate(layouts()):
         if idx>=limit:break
         group=[];reports=[]
@@ -331,6 +335,7 @@ def search(time_limit=5,limit=60):
         out=audit(group,per_floor_halls,guests,stair)
         attempts.append({'tag':tag,'status':'GEOMETRY_PASS' if out['passed_independent_geometry'] else 'AUDIT_FAIL','audit':out,'solver':reports})
         if out['passed_independent_geometry']:
+            geometric_passes+=1
             candidate={'label':'relationship_first_scipy_milp_012',
                        'topology':tag,'rooms_by_floor':[[stair]+guests+group[0],[stair]+group[1]],
                        'halls_by_floor':per_floor_halls,
@@ -338,16 +343,29 @@ def search(time_limit=5,limit=60):
                        'independent_audit':out,'solver':reports,
                        'building_envelope_m':[PLOT_W,PLOT_D],
                        'claim_009_verified':False}
-            found.append(candidate)
-            print('GEOMETRY_PASS',tag,out['floors'],flush=True)
+            evidence, inspected=verify_stage012(brief,candidate,baseline_009=baseline)
+            attempts[-1]['stage009_gate']=evidence
+            if evidence['status']=='READY_FOR_ARCHITECTURAL_REVIEW':
+                found.append(inspected)
+                attempts[-1]['status']='READY_FOR_ARCHITECTURAL_REVIEW'
+                print('009_VALIDATED',tag,out['floors'],flush=True)
+            else:
+                attempts[-1]['status']='REJECT_AND_REPLAN_UNRESOLVED'
+                print('009_NOT_PASSED',tag,evidence['preliminary_issues'][:2],
+                      evidence['009_issues'][:2],flush=True)
             if len(found)>=max(5,limit):break
         elif idx%10==0:print('AUDIT_FAIL',tag,out['issues'][:5],flush=True)
         elif idx%10==0:print('NO_FEASIBLE',tag,flush=True)
     found.sort(key=lambda c: sum(v['corridor_union_m2'] for v in c['independent_audit']['floors']) + 1.5*c['independent_audit']['floors'][0]['max_straight_run_m'] + .65*c['independent_audit']['floors'][1]['max_straight_run_m'])
-    report={'status':'EXPERIMENTAL_GEOMETRY_ONLY','attempts':len(attempts),'passing':len(found),
+    report={'status':'READY_FOR_ARCHITECTURAL_REVIEW' if found else 'REJECT_AND_REPLAN_UNRESOLVED',
+            'attempts':len(attempts),'geometric_passes':geometric_passes,
+            '009_review_candidates':len(found),'passing':len(found),
             'per_attempt':attempts,'ranking_criterion':'family hall union two floors + 1.5 ground max run + 0.65 upper max run',
             'best_tag':found[0]['topology'] if found else None,
-            'stage_009_full_validation_passed':False,
+            'stage_009_full_validation_passed':bool(found),
+            'architecturally_approved':False,
+            'daylight_airflow_adequacy':'UNRESOLVED','visual_privacy':'UNRESOLVED',
+            'legal_and_structural':'UNRESOLVED',
             'no_furniture':True,'no_deployment':True}
     (DATA/'stage012_search_report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     if found:
