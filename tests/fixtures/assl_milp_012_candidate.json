@@ -18,7 +18,7 @@
         "name": "درج ثابت بين الدورين"
       },
       {
-        "x": 0.0,
+        "x": 0.25,
         "y": 0.0,
         "width": 5.25,
         "depth": 5.25,
@@ -36,7 +36,7 @@
         "guest_vestibule": "men-vestibule"
       },
       {
-        "x": 5.25,
+        "x": 5.5,
         "y": 0.0,
         "width": 2.25,
         "depth": 2.0,
@@ -47,7 +47,7 @@
         "guest_distributor": true
       },
       {
-        "x": 5.25,
+        "x": 5.5,
         "y": 2.0,
         "width": 2.25,
         "depth": 2.25,
@@ -428,7 +428,7 @@
       "binary_variables": 525,
       "clashes": 54437,
       "linear_rows": 54454,
-      "time_sec": 0.44,
+      "time_sec": 0.48,
       "solver_status": 0,
       "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
       "objective": 27.596
@@ -442,7 +442,7 @@
       "binary_variables": 315,
       "clashes": 14461,
       "linear_rows": 14472,
-      "time_sec": 0.61,
+      "time_sec": 0.47,
       "solver_status": 1,
       "message": "Time limit reached. (HiGHS Status 13: Time limit reached)",
       "objective": 3.4107499999999935
