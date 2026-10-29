@@ -1,0 +1,38 @@
+name: Architectural diversity — geometry only (experimental)
+on:
+  push:
+    branches:
+      - feature/architecture-diverse-topology-008
+    paths:
+      - 'assl/free_layout_solver.py'
+      - 'assl/free_layout_audit.py'
+      - 'assl/topology_options.py'
+      - 'backend/design/**'
+      - 'tests/test_assl_*.py'
+      - 'scripts/assl_diverse_topology_benchmark.py'
+      - '.github/workflows/architecture-diverse-topology.yml'
+  workflow_dispatch:
+jobs:
+  topology-diversity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install geometric engine
+        run: pip install -r requirements.txt
+      - name: Run concept geometry unit and regression tests
+        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
+      - name: Regenerate and independently audit three circulation nuclei
+        run: python scripts/assl_diverse_topology_benchmark.py tests/fixtures/assl_architecture_cases.json diverse-topology-evidence
+      - name: Preserve source geometry and diagnostics regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-diversity-geometry
+          path: diverse-topology-evidence/
+          if-no-files-found: warn
