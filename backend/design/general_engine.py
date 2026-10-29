@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة','meander':'ثلاثة تجمعات مترابطة بممر متعرج'}
+FAMILIES={'hub_fork':'عقدتا توزيع متصلتان بجسر قصير','cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة','meander':'ثلاثة تجمعات مترابطة بممر متعرج'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -28,6 +28,9 @@ def area(r):return r['width']*r['depth']
 def topology(family,W,D,c,ratio,top):
     """Disjoint cells tile a nonrectangular mass; lanes abut connected halls."""
     a=W*ratio;b=D*top
+    if family=='hub_fork':
+        from .hub_geometry import compact_fork_topology
+        return compact_fork_topology(W,D,c,ratio,top)
     if family=='cluster':
         from .adaptive_geometry import clustered_topology
         return clustered_topology(W,D,c,ratio,top)
@@ -274,6 +277,7 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
                     for d in (.70,.82,.92,1.)
                     for r in (.38,.46,.54,.62)
                     for b in (.36,.45,.55,.64)]
+    if family=='hub_fork':variations=[(s,d,r,b) for s in (.78,.90,1.) for d in (.82,.94,1.) for r in (.35,.45,.55) for b in (.38,.48,.58)]
     if family=='cluster':variations=[(s,d,r,b) for s in (.74,.88,1.) for d in (.78,.9,1.) for r in (.35,.42,.58,.65) for b in (.36,.5,.64)]
     if family=='meander':variations=[(s,d,r,b) for s in (.80,.92,1.) for d in (.84,1.) for r in (.38,.44,.55,.61) for b in (.30,.36,.42)]
     if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
