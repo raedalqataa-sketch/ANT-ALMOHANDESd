@@ -1,0 +1,37 @@
+name: Architecture compact hub fork (experimental)
+on:
+  push:
+    branches:
+      - feature/architecture-compact-hub-005
+    paths:
+      - 'backend/design/hub_geometry.py'
+      - 'backend/design/general_engine.py'
+      - 'assl/**'
+      - 'tests/test_assl_*.py'
+      - 'scripts/assl_hub_fork_benchmark.py'
+      - '.github/workflows/architecture-compact-hub.yml'
+  workflow_dispatch:
+jobs:
+  hub-composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install engine dependencies
+        run: pip install -r requirements.txt
+      - name: Unit and source regression gates
+        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
+      - name: Measure genuine compact hub candidates across three sites
+        run: python scripts/assl_hub_fork_benchmark.py tests/fixtures/assl_architecture_cases.json hub-experiment
+      - name: Always publish baseline, geometry and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-hub-experiment
+          path: hub-experiment/
+          if-no-files-found: warn
