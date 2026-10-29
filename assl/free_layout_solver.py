@@ -88,7 +88,9 @@ def initial_core(W,D,seed,t,*,style='axial'):
     # A short protected growth node prevents the first living room from
     # sealing every corridor outlet. The continuation is then free to bend
     # left, right or continue only when actual program needs more space.
-    rear=rect(hx+.50,hy+2.5,1.5,3.0,kind="corridor",id="family-growth-node")
+    rear_depth=3.0 if style=="axial" else 2.5
+    rear=rect(hx+.50,hy+2.5,1.5,rear_depth,
+              kind="corridor",id="family-growth-node")
     if not all(inside(r,W,D) for r in (hub,stair,entry,rear)):
         return None
 
