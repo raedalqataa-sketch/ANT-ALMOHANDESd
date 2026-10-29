@@ -1,0 +1,35 @@
+name: Room-level architectural diversity QA (experimental)
+on:
+  push:
+    branches:
+      - feature/architecture-diversity-qa-009
+    paths:
+      - 'assl/**'
+      - 'tests/test_assl_*.py'
+      - 'scripts/assl_diverse_topology_benchmark.py'
+      - '.github/workflows/architecture-room-diversity-qa.yml'
+  workflow_dispatch:
+jobs:
+  true-room-diversity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install architectural solver runtime
+        run: pip install -r requirements.txt
+      - name: Test structural variety and room-placement criteria
+        run: python -m unittest discover -s tests -p 'test_assl_*.py' -v
+      - name: Generate and independently audit three diverse villa concepts
+        run: python scripts/assl_diverse_topology_benchmark.py tests/fixtures/assl_architecture_cases.json room-diversity-evidence
+      - name: Preserve all source coordinates and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: room-diversity-geometry-qa
+          path: room-diversity-evidence/
+          if-no-files-found: warn
