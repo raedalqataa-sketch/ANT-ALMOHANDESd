@@ -386,9 +386,12 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
                                  "issues":quality["hard_issues"][:9]})
                 continue
             signature=spatial_signature(candidate)
-            if signature in signatures:continue
-            signatures.add(signature)
             evidence=structural_evidence(floors,halls_by_floor,style,face)
+            # Actual hall graph matters independently of normalized room
+            # centroids. One topology name alone never makes a distinct plan.
+            distinct_key=(signature,evidence["geometric_graph_signature"])
+            if distinct_key in signatures:continue
+            signatures.add(distinct_key)
             option={"seed":seed,"topology_style":style,
                 "family":"free_constraints","quality":quality,
                 "rooms_by_floor":floors,"halls_by_floor":halls_by_floor,
