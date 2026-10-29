@@ -86,6 +86,24 @@ def overlap_area_rect(a,b):
     return max(0,min(a["x"]+a["width"],b["x"]+b["width"])-max(a["x"],b["x"])) * max(
         0,min(a["y"]+a["depth"],b["y"]+b["depth"])-max(a["y"],b["y"]))
 
+def _essential_transit_connector(rooms,halls):
+    """A branch can be useful as a real transfer to a room-serving satellite.
+
+    Unlike an empty dead-end hallway, this bridge is essential if removing
+    it disconnects the secondary hub from the entry side, and that secondary
+    hub actually contacts at least one requested family room.
+    """
+    satellites=[h for h in halls if h.get("core_role")=="satellite"]
+    if not satellites:return False
+    served=any(any(r.get("request_id") and r.get("zone")!="guest" and
+                   edge_contact(r,sat)>=.9-EPS for r in rooms)
+               for sat in satellites)
+    if not served:return False
+    reduced=[h for h in halls if h.get("core_role")!="cross-link"]
+    if len(reduced)==len(halls):return False
+    return hall_shape(reduced)["components"]>hall_shape(halls)["components"]
+
+
 def structural_evidence(rooms_by_floor,halls_by_floor,style,face):
     """Only observable geometric attributes count as diversity evidence."""
     profiles=[];neighbor_patterns=[];active_nodes=[]
@@ -112,6 +130,19 @@ def structural_evidence(rooms_by_floor,halls_by_floor,style,face):
             roles.append({"core_role":role,"family_rooms_served":attached,
                           "serves_requested_room":bool(attached)})
         active_nodes.append(roles)
+    # A cross-link with no direct room door may still be critical to reaching
+    # an occupied satellite hub. Verify connectivity changes on removal.
+    essential_transit=any(_essential_transit_connector(rooms,halls)
+                          for rooms,halls in zip(rooms_by_floor,halls_by_floor))
+    served_by_role={
+        role:any(node["serves_requested_room"] for roles in active_nodes
+                 for node in roles if node["core_role"]==role)
+        for role in ("cross-link","satellite")
+    }
+    effective_use=(True if style=="axial" else
+                   served_by_role["cross-link"] if style=="elbow" else
+                   served_by_role["satellite"] and (
+                       served_by_role["cross-link"] or essential_transit))
     # A reported core style alone is never evidence of genuine novelty.
     geometric_signature=tuple((p["corridor_segments"],p["pattern"],j)
                               for p,j in zip(profiles,neighbor_patterns))
@@ -119,11 +150,9 @@ def structural_evidence(rooms_by_floor,halls_by_floor,style,face):
             "by_floor":profiles,
             "room_hall_incidence":neighbor_patterns,
             "special_core_access_by_floor":active_nodes,
-            "distinctive_nodes_actually_serve_rooms":all(
-                any(node["serves_requested_room"] for roles in active_nodes
-                    for node in roles if node["core_role"]==target)
-                for target in (("cross-link",) if style=="elbow" else
-                               ("cross-link","satellite") if style=="split_hub" else ())),
+            "distinctive_nodes_actually_serve_rooms":bool(effective_use),
+            "room_service_from_special_core":served_by_role,
+            "critical_transit_connector_to_served_satellite":essential_transit,
             "geometric_graph_signature":str(geometric_signature),
             "actual_doors_checked":False,
             "architectural_distinctness_certified":False}
