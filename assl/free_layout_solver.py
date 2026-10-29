@@ -339,7 +339,8 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
 
 
 def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
-                        topologies=('axial',),orient_to_frontage=False):
+                        topologies=('axial',),orient_to_frontage=False,
+                        require_room_diversity=False):
     """Return real geometric proposals or explicit named failures.
 
     The candidate generator is independent of the existing fixed-lane search.
@@ -432,7 +433,15 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
     else:
         selected=solutions
     selected=selected[:max_results]
+    group_report={'reason':'NOT_REQUESTED'}
+    if require_room_diversity:
+        # Fail closed when only the corridors differ: genuine requested room
+        # arrangements must differ materially as a whole set.
+        from .room_arrangement_diversity import select_distinct_proposals
+        group_report=select_distinct_proposals(by_topology,topologies,max_results)
+        selected=group_report['selected']
     return {"status":"PRELIMINARY_CONCEPT_ONLY","proposals":selected,
+            "room_diversity_selection":group_report,
             "valid_found":len(solutions),"requested_count":max_results,
             "topology_availability":{style:len(options)
                                      for style,options in by_topology.items()},
