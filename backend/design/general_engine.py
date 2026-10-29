@@ -78,7 +78,7 @@ def length_for(room,lane,t):
     return length+t
 
 
-def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south',guest_strategy='linear',guest_area_factor=None,*,architecture_first=False):
+def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legacy',entry_face='south',guest_strategy='linear',guest_area_factor=None,*,architecture_first=False,relationship_pack=False):
     """Bounded beam search, rejecting area/width violations before placement."""
     if guest_strategy=='compact_side':
         from .guest_composition import allocate_compact_side
@@ -117,6 +117,9 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         rank={'majlis':0,'living':1,'dining':2,'kitchen':3,'office':4,'master':5,'bedroom':6,'bathroom':7,'laundry':8,'storage':9}
         return (min(rank.get(r['kind'],10) for r in rs),*size)
     ordered=sorted(bundles.values(),key=bundle_order)
+    if architecture_first and relationship_pack:
+        from assl.functional_graph import pair_functional_bundles
+        ordered=pair_functional_bundles(ordered)['bundles']
     def relationship_cost(groups):
         if policy not in ('relationship_aware','functional_hub','reference_hub'):return 0.
         kinds=[{r['kind'] for r in group if not r.get('guest_distributor')} for group in groups]
@@ -147,7 +150,15 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         if not expanded:
             from .allocation_repair import reassign_bundles
             fallback_allocation=reassign_bundles(ordered,lanes,t,planned_length)
-            if fallback_allocation is None:return None
+            if fallback_allocation is None:
+                if architecture_first and relationship_pack:
+                    # Never sacrifice a requested room because its preferred
+                    # neighbor cannot fit in the same architectural wing.
+                    return allocate(requests,lanes,t,guest_clear_width,coherent,
+                                    policy,entry_face,guest_strategy,
+                                    guest_area_factor,architecture_first=True,
+                                    relationship_pack=False)
+                return None
             break
         expanded.sort(key=lambda state:state[0]);states=[(u,g) for _,u,g in expanded[:20]]
     used,groups=fallback_allocation if fallback_allocation is not None else min(states,key=lambda state:(
@@ -255,7 +266,7 @@ def expanded_program(brief,floor):
     return rows
 
 
-def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear',*,assl_space_optimize=False,architecture_first=False):
+def search(brief,family,policy='legacy',core_position='rear',guest_strategy='linear',*,assl_space_optimize=False,architecture_first=False,relationship_pack=False):
     # Reserve clearance outside the mass for a balcony on a non-street facade.
     margin={face:(brief.automatic_features.balcony_depth_m+.15 if brief.automatic_features.balcony and brief.boundary_widths.get(face,0)<10 else 0) for face in ('north','south','east','west')}
     aw=brief.plot_width-brief.setbacks.west-brief.setbacks.east-brief.wall_thickness-margin['west']-margin['east']
@@ -328,7 +339,7 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
         lanes,wells=reserved
         floors=[];failed=False
         for f in range(brief.floors):
-            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face,guest_strategy if f==0 else 'linear',brief.proposed_room_area_factor,architecture_first=architecture_first)
+            cells=allocate(expanded_program(brief,f),lanes,brief.wall_thickness,brief.corridor_width,brief.massing_strategy=='coherent',policy,brief.entrance_face,guest_strategy if f==0 else 'linear',brief.proposed_room_area_factor,architecture_first=architecture_first,relationship_pack=relationship_pack)
             if cells is None:failed=True;break
             if f==0 and guest_strategy!='linear' and not any(r.get('guest_composition')==guest_strategy for r in cells):failed=True;break
             if not architecture_first and (brief.proposed_room_area_factor is not None or (family in ('freeform','adaptive') and policy!='legacy')):
@@ -401,7 +412,7 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
         best=pool[0];best['attempts']=attempts
         best['alternatives']=[{**r,'attempts':attempts} for r in pool[1:12]]
         if brief.massing_strategy=='coherent':
-            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position,assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
+            fallback=search(brief.model_copy(update={'massing_strategy':'legacy','site_placement':'legacy'}),family,policy,core_position,assl_space_optimize=assl_space_optimize,architecture_first=architecture_first,relationship_pack=relationship_pack)
             if fallback:
                 backups=[{k:v for k,v in fallback.items() if k!='alternatives'}]+fallback.get('alternatives',[])
                 best['alternatives'].extend({**r,'massing_fallback':True} for r in backups)
