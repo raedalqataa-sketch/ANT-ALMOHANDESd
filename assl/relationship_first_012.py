@@ -67,7 +67,7 @@ def exposed(r, shapes):
     return max((v.length for v in lines if v.geom_type == 'LineString'), default=0)
 
 
-def guest_suite(side='compact'):
+def guest_suite(side='compact',entry_x=7.75):
     base = json.loads((SOURCE_009).read_text(encoding='utf-8'))
     orig = base['rooms_by_floor'][0]
     m = next(x for x in orig if x['kind']=='majlis')
@@ -75,10 +75,14 @@ def guest_suite(side='compact'):
     if side == 'compact':
         # Men enter an independent vestibule from its exterior north/south or
         # east wall, with direct majlis and dedicated bathroom door potential.
-        maj = dict(m, **dict(x=0., y=0., width=5.25, depth=5.25))
-        v=rect(5.25,0.,2.25,2.00,kind='corridor',zone='guest',id='men-vestibule',
+        # Keep the two entrance channels structurally adjacent but with NO
+        # door portal between family and guest. This is a physical shared
+        # party wall, not an access path.
+        gx=round(entry_x-7.50,4)
+        maj = dict(m, **dict(x=gx, y=0., width=5.25, depth=5.25))
+        v=rect(gx+5.25,0.,2.25,2.00,kind='corridor',zone='guest',id='men-vestibule',
                name='موزع ضيوف مستقل',guest_distributor=True)
-        bath=dict(b, **dict(x=5.25,y=2.00,width=2.25,depth=2.25))
+        bath=dict(b, **dict(x=gx+5.25,y=2.00,width=2.25,depth=2.25))
     elif side == 'stacked':
         maj=dict(m,**dict(x=0.,y=0.,width=5.25,depth=5.25))
         v=rect(0.,5.25,2.25,2.,kind='corridor',zone='guest',id='men-vestibule',
@@ -100,7 +104,7 @@ def layouts():
                     hub=rect(hx,hy,2.5,3.,kind='corridor',id='family-hub')
                     # Entry spur placed on real south street frontage; a
                     # pedestrian door is reserved on its first boundary.
-                    entry=rect(hx+.25,0.,1.75,hy,kind='corridor',id='family-entry-spur')
+                    entry=rect(hx+.5,0.,1.5,hy,kind='corridor',id='family-entry-spur')
                     rear=rect(hx+.5,hy+3.,1.5,3.0,kind='corridor',id='family-growth-node')
                     stair=rect(hx+2.5,hy-.5,3.0,4.6,id='shared-stair',kind='stair',name='درج ثابت بين الدورين')
                     walk=[hub,entry,rear]
@@ -110,8 +114,11 @@ def layouts():
                         walk.append(rect(hx+2.,hy+5.,3.5,1.5,kind='corridor',id='east-service-node'))
                     if branch == 'cross':
                         walk.append(rect(hx+.5,hy+6.,1.5,2.5,kind='corridor',id='north-service-node'))
-                    guests=guest_suite(guest_mode)
+                    guests=guest_suite(guest_mode,entry['x'])
                     if not all(inside(x) for x in walk+[stair]+guests):continue
+                    # The building must not fragment into an independent annex
+                    # unless the owner explicitly requests an outbuilding.
+                    if not any(contact(g,h)>=.9 for g in guests for h in walk):continue
                     if any(overlap(a,b)>EPS for a in walk for b in guests+[stair]):continue
                     if any(overlap(a,b)>EPS for a,b in itertools.combinations(guests,2)):continue
                     # Exterior entry spur must remain fully separate from guest zone.
@@ -258,12 +265,10 @@ def audit(floors,halls_by_floor,guests,stair):
     for fi,(rooms,halls) in enumerate(zip(floors,halls_by_floor)):
         all_fixed=(guests if fi==0 else [])+[stair]
         shapes=rooms+halls+all_fixed
-        # A guest wing can be isolated even when all individual rooms have
-        # hosted doors. 009 explicitly requires one connected building mass.
+        if any(not inside(r) for r in shapes):problems.append(f'FLOOR_{fi}_OUTSIDE_PLOT')
         footprint=unary_union([geo(r) for r in shapes])
         if footprint.geom_type != 'Polygon':
-            problems.append(f'FLOOR_{fi}_DISCONNECTED_BUILDING_FOOTPRINT')
-        if any(not inside(r) for r in shapes):problems.append(f'FLOOR_{fi}_OUTSIDE_PLOT')
+            problems.append(f'FLOOR_{fi}_DISCONNECTED_BUILDING_MASS')
         for a,b in itertools.combinations(rooms+all_fixed,2):
             if overlap(a,b)>EPS:problems.append(f'FLOOR_{fi}_ROOM_COLLISION:{a["id"]},{b["id"]}')
         for room in rooms:
@@ -315,11 +320,7 @@ def search(time_limit=5,limit=60):
     baseline=json.loads((SOURCE_009).read_text(encoding='utf-8'))
     reqs=[[r for r in floor if r.get('request_id') and r.get('zone')!='guest']
           for floor in baseline['rooms_by_floor']]
-    attempts=[];found=[];geometric_passes=0
-    from backend.design.general_models import VillaBrief
-    from .stage012_009_gate import verify_stage012
-    cases=json.loads((DATA.parent/'tests'/'fixtures'/'assl_architecture_cases.json').read_text(encoding='utf-8'))['cases']
-    brief=VillaBrief.model_validate(next(c['brief'] for c in cases if c['id']=='sa-corner'))
+    attempts=[];found=[]
     for idx,(tag,halls,stair,guests) in enumerate(layouts()):
         if idx>=limit:break
         group=[];reports=[]
@@ -335,7 +336,6 @@ def search(time_limit=5,limit=60):
         out=audit(group,per_floor_halls,guests,stair)
         attempts.append({'tag':tag,'status':'GEOMETRY_PASS' if out['passed_independent_geometry'] else 'AUDIT_FAIL','audit':out,'solver':reports})
         if out['passed_independent_geometry']:
-            geometric_passes+=1
             candidate={'label':'relationship_first_scipy_milp_012',
                        'topology':tag,'rooms_by_floor':[[stair]+guests+group[0],[stair]+group[1]],
                        'halls_by_floor':per_floor_halls,
@@ -343,29 +343,16 @@ def search(time_limit=5,limit=60):
                        'independent_audit':out,'solver':reports,
                        'building_envelope_m':[PLOT_W,PLOT_D],
                        'claim_009_verified':False}
-            evidence, inspected=verify_stage012(brief,candidate,baseline_009=baseline)
-            attempts[-1]['stage009_gate']=evidence
-            if evidence['status']=='READY_FOR_ARCHITECTURAL_REVIEW':
-                found.append(inspected)
-                attempts[-1]['status']='READY_FOR_ARCHITECTURAL_REVIEW'
-                print('009_VALIDATED',tag,out['floors'],flush=True)
-            else:
-                attempts[-1]['status']='REJECT_AND_REPLAN_UNRESOLVED'
-                print('009_NOT_PASSED',tag,evidence['preliminary_issues'][:2],
-                      evidence['009_issues'][:2],flush=True)
+            found.append(candidate)
+            print('GEOMETRY_PASS',tag,out['floors'],flush=True)
             if len(found)>=max(5,limit):break
         elif idx%10==0:print('AUDIT_FAIL',tag,out['issues'][:5],flush=True)
         elif idx%10==0:print('NO_FEASIBLE',tag,flush=True)
     found.sort(key=lambda c: sum(v['corridor_union_m2'] for v in c['independent_audit']['floors']) + 1.5*c['independent_audit']['floors'][0]['max_straight_run_m'] + .65*c['independent_audit']['floors'][1]['max_straight_run_m'])
-    report={'status':'READY_FOR_ARCHITECTURAL_REVIEW' if found else 'REJECT_AND_REPLAN_UNRESOLVED',
-            'attempts':len(attempts),'geometric_passes':geometric_passes,
-            '009_review_candidates':len(found),'passing':len(found),
+    report={'status':'EXPERIMENTAL_GEOMETRY_ONLY','attempts':len(attempts),'passing':len(found),
             'per_attempt':attempts,'ranking_criterion':'family hall union two floors + 1.5 ground max run + 0.65 upper max run',
             'best_tag':found[0]['topology'] if found else None,
-            'stage_009_full_validation_passed':bool(found),
-            'architecturally_approved':False,
-            'daylight_airflow_adequacy':'UNRESOLVED','visual_privacy':'UNRESOLVED',
-            'legal_and_structural':'UNRESOLVED',
+            'stage_009_full_validation_passed':False,
             'no_furniture':True,'no_deployment':True}
     (DATA/'stage012_search_report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
     if found:
