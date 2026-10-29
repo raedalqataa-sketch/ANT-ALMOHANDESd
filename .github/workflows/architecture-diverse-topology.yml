@@ -1,4 +1,4 @@
-name: Experimental architectural proof 009 and 010
+name: Experimental architectural proof 009, 010 and 011
 on:
   workflow_dispatch:
     inputs:
@@ -7,7 +7,7 @@ on:
         required: true
         default: feature/architecture-door-circulation-validation-009
       stage:
-        description: '009 or 010'
+        description: '009, 010 or 011'
         required: true
         default: '009'
 permissions:
@@ -33,6 +33,8 @@ jobs:
             python scripts/assl_openings_benchmark.py evidence
           elif [ "$STAGE" = "010" ]; then
             python scripts/assl_replan_benchmark.py evidence
+          elif [ "$STAGE" = "011" ]; then
+            python scripts/assl_structural_benchmark_011.py evidence
           else
             exit 1
           fi

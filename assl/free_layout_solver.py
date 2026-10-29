@@ -216,7 +216,7 @@ def state_cost(rooms,halls):
 
 
 def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
-               max_branches=4,protect_large_rooms=False):
+               max_branches=4,protect_large_rooms=False,priority_order=None):
     base_halls,stair=core
     occupied=[stair]+guest_ground
     if any(overlap_area(stair,g)>EPS for g in guest_ground):
@@ -237,6 +237,8 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
         priority={"master":0,"living":1,"bedroom":2,"kitchen":3,
                   "dining":4,"bathroom":5,"office":6,"laundry":7,
                   "storage":8}
+    if priority_order is not None:
+        priority={**priority,**{kind:i for i,kind in enumerate(priority_order)}}
     family=sorted(family,key=lambda r:(priority.get(r["kind"],10)+
                  (seed%3-1)*({"kitchen":1,"master":-1,"bathroom":-1}.get(r["kind"],0)),
                  -r["min_area"],r["id"]))
