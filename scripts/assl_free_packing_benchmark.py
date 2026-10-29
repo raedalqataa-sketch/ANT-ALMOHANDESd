@@ -17,6 +17,7 @@ sys.path.insert(0,str(ROOT))
 from backend.design.general_models import VillaBrief
 from backend.design.general_engine import search
 from assl.free_layout_solver import solve_free_concepts
+from assl.free_layout_audit import audit_preliminary_concept
 from assl.architecture_preview import render_concept_svg
 
 
@@ -50,18 +51,29 @@ def run(fixtures,destination):
         elapsed=round(time.monotonic()-begin,2)
         baseline=baseline_report(brief)
         case_out=out/name;case_out.mkdir(exist_ok=True)
+        qualified=[]
         for n,option in enumerate(results['proposals'],1):
+            independent_audit=audit_preliminary_concept(brief,option)
+            option['independent_qa']=independent_audit
+            if independent_audit['status']=='PRELIMINARY_CONSISTENT':
+                qualified.append(option)
             (case_out/f'free_concept_{n}.svg').write_text(
                 render_concept_svg(option,title=f'{name} — free constraints #{n}'),
                 encoding='utf8')
+            # Full source coordinates are necessary to inspect geometric
+            # connectivity; SVG alone is not independent engineering evidence.
+            (case_out/f'free_concept_{n}.json').write_text(
+                json.dumps(option,ensure_ascii=False,indent=2),encoding='utf8')
         row={
             'case':name,'engine':'independent_free_constraint_packing',
             'runtime_seconds':elapsed,
             'baseline_cluster':summarize(baseline),
-            'free_candidate_count':len(results['proposals']),
-            'valid_found':results['valid_found'],
+            'free_candidate_count':len(qualified),
+            'raw_geometric_candidates_found':results['valid_found'],
+            'independent_audits':[o['independent_qa']
+                                   for o in results['proposals']],
             'free_candidates':[summarize(o['quality'])
-                               for o in results['proposals']],
+                               for o in qualified],
             'failure_reasons':results['rejected_seeds'],
             'same_customer_program':results['program_integrity_gate'],
             'stair_position_consistency':results['stair_consistency_gate'],
@@ -69,12 +81,12 @@ def run(fixtures,destination):
             'not_construction_ready':True,
             'doors_windows_actual_access_verified':False,
         }
-        if baseline and results['proposals']:
+        if baseline and qualified:
             old=baseline.get('hall_union_area_m2',0)
-            new=results['proposals'][0]['quality'].get('hall_union_area_m2',0)
+            new=qualified[0]['quality'].get('hall_union_area_m2',0)
             row['hall_union_saved_vs_cluster_m2']=round(old-new,4)
             row['architectural_score_change']=round(
-                results['proposals'][0]['quality']['architecture_score']-
+                qualified[0]['quality']['architecture_score']-
                 baseline['architecture_score'],4)
         (case_out/'comparison.json').write_text(
             json.dumps(row,ensure_ascii=False,indent=2),encoding='utf8')
