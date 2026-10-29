@@ -216,7 +216,7 @@ def state_cost(rooms,halls):
 
 
 def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
-               max_branches=4):
+               max_branches=4,protect_large_rooms=False):
     base_halls,stair=core
     occupied=[stair]+guest_ground
     if any(overlap_area(stair,g)>EPS for g in guest_ground):
@@ -230,6 +230,13 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
     # order. Seed changes which relationship cluster wins first.
     priority={"living":0,"dining":1,"kitchen":2,"master":3,
               "bedroom":4,"bathroom":5,"office":6,"laundry":7,"storage":8}
+    if protect_large_rooms:
+        # A narrow corner site can lose the only 5m-wide bedroom location
+        # when kitchen/dining claim it first. Reserve large room footprints
+        # earlier without changing *any* requested dimension or room count.
+        priority={"master":0,"living":1,"bedroom":2,"kitchen":3,
+                  "dining":4,"bathroom":5,"office":6,"laundry":7,
+                  "storage":8}
     family=sorted(family,key=lambda r:(priority.get(r["kind"],10)+
                  (seed%3-1)*({"kitchen":1,"master":-1,"bathroom":-1}.get(r["kind"],0)),
                  -r["min_area"],r["id"]))
@@ -364,7 +371,11 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
             for floor_idx,program in enumerate(requested):
                 stair=core[1]
                 guest_on_floor=guest if floor_idx==0 else []
-                state,reason=pack_floor(program,W,D,t,seed,core,guest_on_floor)
+                state,reason=pack_floor(
+                program,W,D,t,seed,core,guest_on_floor,
+                beam_width=24 if style!='axial' and W<20. else 12,
+                max_branches=5 if style!='axial' and W<20. else 4,
+                protect_large_rooms=style!='axial' and W<20.)
                 if not state:
                     problem={"floor":floor_idx,"reason":reason};break
                 floors.append(state.rooms)
@@ -408,8 +419,11 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
     selected=[]
     if len(topologies)>1:
         for style in topologies:
-            ranked=sorted(by_topology[style],
-                          key=lambda s:s["quality"]["architecture_score"])
+            ranked=sorted(
+                by_topology[style],
+                key=lambda s:(
+                    not s["topology_evidence"]["distinctive_nodes_actually_serve_rooms"],
+                    s["quality"]["architecture_score"]))
             if ranked and len(selected)<max_results:
                 selected.append(ranked[0])
         if len(selected)<max_results:
