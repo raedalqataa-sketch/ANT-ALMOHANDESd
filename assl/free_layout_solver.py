@@ -244,7 +244,7 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
                         r={**candidate,**copy.deepcopy(room)}
                         proposed.append((r,None,shape_penalty))
                 # On-demand additional hallway branches; not prescribed wings.
-                if len(state.halls)<2+max_branches and idx>0:
+                if len(state.halls)<2+max_branches:
                     for branch in hall_extensions(state.halls,old,W,D,seed):
                         for candidate in anchors(branch,w,d,seed):
                             if not clear(candidate,old+[branch],W,D):
@@ -258,7 +258,13 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
                 (area(item[1])*3 if item[1] else 0)+item[2]*2+
                 .03*(item[0]["x"]+item[0]["y"])))
             seen=set()
-            for new_room,new_hall,shape_cost in proposed[:80]:
+            # A purely greedy cost ranking filled all beam slots with
+            # no-branch rooms and later trapped the remaining program.
+            # Preserve a bounded minority of corridor-growth hypotheses.
+            direct=[p for p in proposed if p[1] is None]
+            branched=[p for p in proposed if p[1] is not None]
+            considered=direct[:40]+branched[:45]
+            for new_room,new_hall,shape_cost in considered:
                 key=(new_room["x"],new_room["y"],new_room["width"],
                      new_room["depth"],new_hall["x"] if new_hall else -1,
                      new_hall["y"] if new_hall else -1)
@@ -273,15 +279,25 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
             failed="CANNOT_PLACE_ROOM:"+room["id"]
             break
         expansions.sort(key=lambda s:s.score)
-        next_states=[];seen=set()
+        next_states=[];seen=set();bucket_counts={}
+        # Keep several different circulation-growth depths alive rather
+        # than allowing the cheapest first bedroom to block the only exit.
         for item in expansions:
-            # Structural digest includes all room coordinates and corridor
-            # graph, preventing copies of the same candidate beam state.
+            group=len(item.halls)
+            if bucket_counts.get(group,0)>=max(2,beam_width//3):continue
             key=tuple(sorted((r.get("id"),r["x"],r["y"],r["width"],r["depth"])
                              for r in item.rooms))
             if key in seen:continue
             next_states.append(item);seen.add(key)
+            bucket_counts[group]=bucket_counts.get(group,0)+1
             if len(next_states)>=beam_width:break
+        if len(next_states)<beam_width:
+            for item in expansions:
+                key=tuple(sorted((r.get("id"),r["x"],r["y"],r["width"],r["depth"])
+                                 for r in item.rooms))
+                if key in seen:continue
+                next_states.append(item);seen.add(key)
+                if len(next_states)>=beam_width:break
         states=next_states
     if failed:return None,failed
     candidates=[]
