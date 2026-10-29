@@ -271,7 +271,7 @@ def spatial_signature(layout):
     return tuple(sorted(pts))
 
 
-def compose_architecture(brief,*,families=("hub_fork","adaptive","freeform","cluster","cross","spine","meander"),
+def compose_architecture(brief,*,families=("adaptive","freeform","cluster","cross","spine","meander"),
                          max_options=3):
     """Generate preliminary geometries without furniture, PDF, DXF, or V4.
 
