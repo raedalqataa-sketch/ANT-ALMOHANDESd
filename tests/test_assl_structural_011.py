@@ -75,3 +75,19 @@ def test_priority_override_keeps_existing_packer_default_behavior():
  z,ez=pack_floor(requests,16,20,.2,0,core,[],priority_order=None)
  assert ea==ez
  assert (a.rooms if a else None)==(z.rooms if z else None)
+
+def test_finer_geometry_reduces_rounding_excess_without_lowering_minimum():
+ from assl.free_layout_solver import room_shapes
+ request=dict(kind='kitchen',min_area=16,min_side=3)
+ old=room_shapes(request,.2);fine=room_shapes(request,.2,grid=.05)
+ areas=lambda shapes:[(w-.2)*(d-.2) for w,d,_ in shapes]
+ assert min(areas(fine))<min(areas(old))
+ assert all(a>=16-1e-6 for a in areas(fine))
+
+def test_structural_anchors_reserve_real_door_host_length():
+ from assl.free_layout_solver import anchors
+ from assl.openings_009 import shared_edge
+ hall=dict(x=4,y=4,width=2.5,depth=2.5)
+ candidates=list(anchors(hall,4.2,4.2,0,grid=.05,minimum_contact=1.2))
+ assert candidates
+ assert all(shared_edge(hall,r)['length']>=1.2-1e-6 for r in candidates)

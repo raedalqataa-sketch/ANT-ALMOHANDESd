@@ -51,20 +51,22 @@ def clear(r,objects,W,D):
     return inside(r,W,D) and all(overlap_area(r,v)<=EPS for v in objects)
 
 
-def room_shapes(request,t):
+def room_shapes(request,t,*,grid=None):
     """Multiple orthogonal proportions from min net area; never reduce it."""
+    unit=GRID if grid is None else grid
+    round_up=lambda value: round(math.ceil((value-EPS)/unit)*unit,6)
     requested=request["min_area"]
     side=request["min_side"]
     preferred,hard=ASPECTS.get(request["kind"],(2.,2.7))
     shapes={}
     for factor in (.76,.88,1.,1.10,1.23,1.40):
-        netw=up(max(side,math.sqrt(requested)*factor))
-        netd=up(max(side,requested/netw))
+        netw=round_up(max(side,math.sqrt(requested)*factor))
+        netd=round_up(max(side,requested/netw))
         ratio=max(netw,netd)/min(netw,netd)
         if ratio>hard+EPS or netw*netd>requested*1.4+EPS:
             continue
         for w,d in ((netw+t,netd+t),(netd+t,netw+t)):
-            w,d=up(w),up(d)
+            w,d=round_up(w),round_up(d)
             if (w-t)*(d-t)+EPS<requested:continue
             if (w-t)*(d-t)>requested*1.42+EPS:continue
             shapes[(w,d)]=min(shapes.get((w,d),math.inf),
@@ -133,8 +135,10 @@ def guest_suite(requests,hub,W,D,t):
     return [maj,v,bath],None
 
 
-def anchors(hall,w,d,seed):
+def anchors(hall,w,d,seed,*,grid=None,minimum_contact=.9):
     """Attach a free rectangle along a *real* hall wall (>=0.90m contact)."""
+    unit=GRID if grid is None else grid
+    rounded=lambda value:round(round(value/unit)*unit,6)
     hx,hy,hw,hd=(hall[k] for k in ("x","y","width","depth"))
     order=("south","west","north","east")
     for direction in (order[seed%4:]+order[:seed%4]):
@@ -143,16 +147,16 @@ def anchors(hall,w,d,seed):
                 hx+hw-1.,hx+1.-w)
             y=hy-d if direction=="north" else hy+hd
             for x in xs:
-                c=rect(snap(x),snap(y),w,d)
-                if edge_contact(hall,c)>=.9:
+                c=rect(rounded(x),rounded(y),w,d)
+                if edge_contact(hall,c)>=minimum_contact:
                     yield c
         else:
             ys=(hy+(hd-d)/2,hy,hy+hd-d,
                 hy+hd-1.,hy+1.-d)
             x=hx-w if direction=="west" else hx+hw
             for y in ys:
-                c=rect(snap(x),snap(y),w,d)
-                if edge_contact(hall,c)>=.9:
+                c=rect(rounded(x),rounded(y),w,d)
+                if edge_contact(hall,c)>=minimum_contact:
                     yield c
 
 
@@ -216,7 +220,7 @@ def state_cost(rooms,halls):
 
 
 def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
-               max_branches=4,protect_large_rooms=False,priority_order=None):
+               max_branches=4,protect_large_rooms=False,priority_order=None,shape_grid=None,portal_contact=.9):
     base_halls,stair=core
     occupied=[stair]+guest_ground
     if any(overlap_area(stair,g)>EPS for g in guest_ground):
@@ -246,7 +250,7 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
     failed=None
     for idx,room in enumerate(family):
         expansions=[]
-        shapes=room_shapes(room,t)
+        shapes=room_shapes(room,t,grid=shape_grid)
         if not shapes:
             return None,"ROOM_HAS_NO_VALID_DIMENSION:"+room["id"]
         for state in states:
@@ -254,14 +258,14 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
             proposed=[]
             for w,d,shape_penalty in shapes[:6]:
                 for hall in state.halls:
-                    for candidate in anchors(hall,w,d,seed):
+                    for candidate in anchors(hall,w,d,seed,grid=shape_grid,minimum_contact=portal_contact):
                         if not clear(candidate,old,W,D):continue
                         r={**candidate,**copy.deepcopy(room)}
                         proposed.append((r,None,shape_penalty))
                 # On-demand additional hallway branches; not prescribed wings.
                 if len(state.halls)<2+max_branches:
                     for branch in hall_extensions(state.halls,old,W,D,seed):
-                        for candidate in anchors(branch,w,d,seed):
+                        for candidate in anchors(branch,w,d,seed,grid=shape_grid,minimum_contact=portal_contact):
                             if not clear(candidate,old+[branch],W,D):
                                 continue
                             r={**candidate,**copy.deepcopy(room)}

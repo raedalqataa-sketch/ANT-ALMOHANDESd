@@ -86,7 +86,7 @@ def rebuild(brief,p,locked=False):
     requests=[{k:v for k,v in r.items() if k not in ('x','y','width','depth','guest_vestibule')} for r in old if r.get('request_id')]
     guests,reason=guest_suite(requests,core[0],w,d,t) if fi==0 else ([],None)
     if reason:break
-    state,reason=pack_floor(requests,w,d,t,int(hy*4+fraction*10),(core,stair),guests,beam_width=10,max_branches=4,protect_large_rooms=w<18,priority_order=('kitchen','dining','living','master','bedroom','bathroom'))
+    state,reason=pack_floor(requests,w,d,t,int(hy*4+fraction*10),(core,stair),guests,beam_width=10,max_branches=4,protect_large_rooms=w<18,priority_order=('kitchen','dining','living','master','bedroom','bathroom'),shape_grid=.05,portal_contact=1.2)
     if state is None:break
     floors.append(state.rooms);walk.append(state.halls)
    if len(floors)!=brief.floors:yield None,dict(hub=[hx,hy],failure=reason);continue
