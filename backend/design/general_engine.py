@@ -362,7 +362,15 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
         halls_by_floor=[halls for _ in floors]
         if brief.massing_strategy=='coherent':
             from .massing_quality import trim_corridor_tails
-            halls_by_floor=[trim_corridor_tails(halls,cells) for cells in floors]
+            if architecture_first and family=='hub_fork':
+                # A separately entered guest suite has its OWN distributor.
+                # Do not keep unnecessary family-hall tails merely because
+                # the guest rooms happen to border the hall geometry.
+                halls_by_floor=[trim_corridor_tails(halls,[
+                    r for r in cells if r.get('zone')!='guest'])
+                    for cells in floors]
+            else:
+                halls_by_floor=[trim_corridor_tails(halls,cells) for cells in floors]
         gross=max(sum(area(r) for r in cells)+sum(area(h) for h in floor_halls) for cells,floor_halls in zip(floors,halls_by_floor))
         spare=sum(area(r) for rooms in floors for r in rooms if r['kind']=='reserve')
         score=gross*brief.floors+spare*.8
