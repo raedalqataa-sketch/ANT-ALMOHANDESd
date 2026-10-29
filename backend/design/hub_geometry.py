@@ -9,8 +9,13 @@ decline a family that cannot fit the actual customer program.
 def compact_fork_topology(width,depth,corridor,side_fraction,split_fraction):
     if min(width,depth,corridor)<=0:return None
     # Off-axis hubs rather than a central uninterrupted spine.
-    left_x=width*(.255+.04*(side_fraction-.45))
-    right_x=width*(.635+.055*(side_fraction-.45))
+    # Keep the crossbar short even on very wide plots; exterior room
+    # recesses absorb excess land, not additional circulation floor area.
+    # The available inner lane must remain at least 2.8m net.
+    separation=min(6.2,max(corridor+3.0,width*.38))
+    center=width*(.5+.015*(side_fraction-.45))
+    left_x=center-(separation+corridor)/2
+    right_x=left_x+separation
     cross=right_x-left_x-corridor
     left_width=left_x
     right_width=width-right_x-corridor
