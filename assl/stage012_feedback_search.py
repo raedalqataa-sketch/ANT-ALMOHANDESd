@@ -128,12 +128,13 @@ def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5):
             else:
                 seen_floor[fi].add(floor_key)
                 exclusions[fi].append(copy.deepcopy(floors[fi]))
-            if len(accepted) >= 3:
+            if len({(p['topology'][0], p['topology'][3]) for p in accepted}) >= 3:
                 break
-        if len(accepted) >= 3:
+        if len({(p['topology'][0], p['topology'][3]) for p in accepted}) >= 3:
             break
     # Distinct floor coordinates alone do NOT count as structural diversity.
-    distinct_topologies = len({tuple(p['topology']) for p in accepted})
+    # hx/hy are mere translations: do not count them as structural variety.
+    distinct_topologies = len({(p['topology'][0], p['topology'][3]) for p in accepted})
     report = {'status': 'EXPERIMENTAL_ONLY', 'stage009_required': True,
               'attempted': len(attempts), 'accepted_candidates': len(accepted),
               'distinct_topology_count': distinct_topologies,
