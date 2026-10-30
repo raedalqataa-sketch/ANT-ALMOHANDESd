@@ -191,7 +191,7 @@ def anchors(room,halls,other_fixed,limit_per_room=105):
     return result
 
 
-def optimize_floor(rooms,halls,stair,guests,time_limit=7):
+def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     # Every family room is assigned simultaneously. No sequential blocker room.
     req=sorted(rooms,key=lambda r:(r['kind'],r['id']))
     fixed=[stair]+guests
@@ -220,6 +220,26 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7):
             if v:rows.append(row);cols.append(j);data.append(v)
         low.append(lb);up.append(ub)
     for indices in origins:add({j:1 for j in indices},1,1)
+    # 009 feedback as genuine MILP no-good constraints, not post-hoc ranking.
+    # A forbidden entry contains the whole rejected assignment of this floor.
+    # Keep every program item and all hard geometric restrictions unchanged.
+    no_good_cuts = 0
+    for rejected in (forbidden or []):
+        by_id = {r['id']: r for r in rejected}
+        selected = []
+        for ri, requested in enumerate(req):
+            target = by_id.get(requested['id'])
+            if target is None:
+                break
+            match = next((j for j in origins[ri]
+                          if all(abs(choices[j][1][key]-target[key]) < EPS
+                                 for key in ('x','y','width','depth'))), None)
+            if match is None:
+                break
+            selected.append(match)
+        if len(selected) == len(req) and selected:
+            add({j:1 for j in selected}, -np.inf, len(selected)-1)
+            no_good_cuts += 1
     # Use pairwise clash cuts (sparse) rather than coarse tile exclusions;
     # this is an exact continuous rectangle non-overlap condition for candidates.
     conflicts=0
@@ -247,7 +267,7 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7):
     result=milp(c=obj,integrality=integrality,bounds=Bounds(np.zeros(vnum),ub),
                 constraints=LinearConstraint(mat,np.array(low),np.array(up)),
                 options={'time_limit':time_limit,'mip_rel_gap':.08})
-    evidence=dict(options=[len(group) for group in groups],binary_variables=n,
+    evidence=dict(options=[len(group) for group in groups],no_good_cuts=no_good_cuts,binary_variables=n,
                   clashes=conflicts,linear_rows=len(low),time_sec=round(time.monotonic()-start,2),
                   solver_status=int(result.status),message=result.message,
                   objective=float(result.fun) if result.fun is not None else None)
