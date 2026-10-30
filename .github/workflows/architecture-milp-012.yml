@@ -6,7 +6,9 @@ on:
     paths:
       - 'assl/relationship_first_012.py'
       - 'assl/stage012_validation_gate.py'
+      - 'assl/stage012_feedback_search.py'
       - 'tests/test_assl_relationship_first_012.py'
+      - 'tests/test_assl_stage012_feedback.py'
       - 'tests/fixtures/assl_milp_012_candidate.json'
       - 'scripts/assl_stage012_render.py'
       - '.github/workflows/architecture-milp-012.yml'
@@ -26,7 +28,10 @@ jobs:
       - name: Install geometric dependencies
         run: pip install -r requirements.txt pillow
       - name: Run honest concept geometry regressions
-        run: python -m pytest -q tests/test_assl_relationship_first_012.py
+        run: |
+          mkdir -p stage012-experimental
+          python -m pytest -q tests/test_assl_relationship_first_012.py tests/test_assl_stage012_feedback.py \
+            --junitxml=stage012-experimental/pytest012.xml
       - name: Render actual stored solution without invented openings
         run: python scripts/assl_stage012_render.py
       - name: Exact stage 009 door, window and body-route validation
@@ -35,6 +40,13 @@ jobs:
             --candidate tests/fixtures/assl_milp_012_candidate.json \
             --fixture tests/fixtures/assl_architecture_cases.json \
             --out stage012-experimental/stage012_real_009_result.json
+      - name: Bounded 012 feedback search using real 009/010 outcomes
+        if: always()
+        run: |
+          python -m assl.stage012_feedback_search \
+            --fixture tests/fixtures/assl_architecture_cases.json \
+            --layouts 4 --repacks 2 --seconds 1.0 \
+            --out stage012-experimental/feedback_012.json
       - name: Archive evidence even if 009 rejects
         if: always()
         uses: actions/upload-artifact@v4
