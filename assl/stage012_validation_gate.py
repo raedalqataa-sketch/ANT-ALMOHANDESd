@@ -16,7 +16,16 @@ def evaluate(brief, proposal):
     from assl.free_layout_audit import audit_preliminary_concept
     from assl.openings_009 import _opening_revision, validate
     from assl.layout_critic_010 import critique
-    preliminary = audit_preliminary_concept(brief, proposal)
+    try:
+        preliminary = audit_preliminary_concept(brief, proposal)
+    except Exception as exc:
+        # A broken preliminary validator is not a failed geometry test and
+        # must not crash before the JSON rejection evidence is written.
+        return {'status': 'GATE_RUNTIME_ERROR', 'stage009_executed': False,
+                'doors_and_body_routes_009_passed': False,
+                'stage008_precheck': None, 'error_stage': '008_PRECHECK',
+                'error_type': type(exc).__name__, 'error_message': str(exc),
+                'legal_compliance_certified': False}
     # Stage 009 may reject disconnected mass, swing conflicts, exterior path,
     # privacy movement, absent windows, or missing real 0.6m body clearance.
     try:
