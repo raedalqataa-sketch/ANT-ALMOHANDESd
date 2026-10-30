@@ -67,6 +67,48 @@ def exposed(r, shapes):
     return max((v.length for v in lines if v.geom_type == 'LineString'), default=0)
 
 
+def window_strip_potential(room, solids, clear_m=.61, min_wall_m=1.10):
+    """Conservative exterior clearance screen, never a certified window.
+
+    Reject fake 'exposed' walls facing a 5 cm inaccessible inter-room slit.
+    Requires one continuous >=1.10 m interval with a 0.61 m outward free
+    strip against *all* placed solids. 009 remains authoritative for real
+    openings, operability, light and air movement.
+    """
+    if room.get('kind') not in ('bathroom', 'bedroom', 'master', 'kitchen'):
+        return True
+    x0, y0 = room['x'], room['y']
+    x1, y1 = x0 + room['width'], y0 + room['depth']
+    for face, normal, lo, hi in (
+            ('east', x1, y0, y1), ('west', x0, y0, y1),
+            ('north', y1, x0, x1), ('south', y0, x0, x1)):
+        blocked = []
+        for b in solids:
+            if b is room or b.get('id') == room.get('id'):
+                continue
+            bx0, by0 = b['x'], b['y']
+            bx1, by1 = bx0 + b['width'], by0 + b['depth']
+            if face == 'east':
+                near = normal - EPS <= bx0 < normal + clear_m and bx1 >= normal
+            elif face == 'west':
+                near = normal - clear_m < bx1 <= normal + EPS and bx0 <= normal
+            elif face == 'north':
+                near = normal - EPS <= by0 < normal + clear_m and by1 >= normal
+            else:
+                near = normal - clear_m < by1 <= normal + EPS and by0 <= normal
+            if near:
+                a, z = ((by0, by1) if face in ('east', 'west') else (bx0, bx1))
+                if min(hi, z) > max(lo, a):
+                    blocked.append((max(lo, a), min(hi, z)))
+        cursor, free = lo, 0.
+        for a, z in sorted(blocked):
+            free = max(free, a - cursor)
+            cursor = max(cursor, z)
+        if max(free, hi - cursor) >= min_wall_m - EPS:
+            return True
+    return False
+
+
 def guest_suite(side='compact',entry_x=7.75):
     base = json.loads((SOURCE_009).read_text(encoding='utf-8'))
     orig = base['rooms_by_floor'][0]
@@ -296,6 +338,8 @@ def audit(floors,halls_by_floor,guests,stair):
             if not available:problems.append(f'FLOOR_{fi}_NO_REAL_DOOR_HOST:{room["id"]}')
             if room['kind'] in ('bathroom','master','bedroom','kitchen') and exposed(room,shapes)<1.10:
                 problems.append(f'FLOOR_{fi}_NO_WINDOW_FACADE:{room["id"]}')
+            if not window_strip_potential(room, shapes):
+                problems.append(f'FLOOR_{fi}_WINDOW_CLEARANCE_BLOCKED:{room["id"]}')
             if (room['width']-T)*(room['depth']-T)+1e-6<room['min_area']:
                 problems.append(f'FLOOR_{fi}_BELOW_MIN_AREA:{room["id"]}')
             if min(room['width']-T,room['depth']-T)+1e-6<room['min_side']:
