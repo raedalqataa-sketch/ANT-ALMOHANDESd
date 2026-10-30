@@ -211,6 +211,9 @@ def anchors(room,halls,other_fixed,limit_per_room=105):
                 # touching the plot boundary, subject to final check.
                 if room['kind'] in ('bathroom','bedroom','master','kitchen'):
                     if exposed(c,other_fixed+halls+[c])<1.1:continue
+                    # Necessary check before MILP: no false facade facing a
+                    # narrow gap beside a fixed stair / guest suite.
+                    if not window_strip_potential(c, other_fixed+halls+[c]):continue
                 key=(c['x'],c['y'],c['width'],c['depth'])
                 if key in options:continue
                 cost=.015*(c['x']+c['y'])+.04*abs(w-d)
@@ -333,6 +336,13 @@ def audit(floors,halls_by_floor,guests,stair):
             problems.append(f'FLOOR_{fi}_DISCONNECTED_BUILDING_MASS')
         for a,b in itertools.combinations(rooms+all_fixed,2):
             if overlap(a,b)>EPS:problems.append(f'FLOOR_{fi}_ROOM_COLLISION:{a["id"]},{b["id"]}')
+        # Guest WC also needs direct exterior window potential; family-only
+        # room loop below does not inspect the fixed guest suite.
+        if fi == 0:
+            for guest in guests:
+                if guest.get('kind') in ('bathroom', 'bedroom', 'master', 'kitchen'):
+                    if not window_strip_potential(guest, shapes):
+                        problems.append(f'FLOOR_0_WINDOW_CLEARANCE_BLOCKED:{guest["id"]}')
         for room in rooms:
             available=[h for h in halls if contact(room,h)>=1.2]
             if not available:problems.append(f'FLOOR_{fi}_NO_REAL_DOOR_HOST:{room["id"]}')
