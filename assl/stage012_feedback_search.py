@@ -55,7 +55,7 @@ def candidate_of(topology, halls, stair, guests, floors, reports):
     }
 
 
-def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5):
+def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5, layout_sequence=None):
     """Apply 009/010 fail-closed feedback to bounded MILP no-good cuts.
 
     No-good cuts forbid exact *floor solutions*, not whole topologies or
@@ -67,7 +67,8 @@ def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5):
     attempts, accepted = [], []
     reason_tally = Counter()
     seen_full = set()
-    for layout_idx, (tag, halls, stair, guests) in enumerate(solver.layouts()):
+    allowed = solver.layouts() if layout_sequence is None else layout_sequence
+    for layout_idx, (tag, halls, stair, guests) in enumerate(allowed):
         if layout_idx >= max_layouts:
             break
         upper_halls = [h for h in halls if h.get('id') != 'family-entry-spur']
@@ -135,7 +136,9 @@ def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5):
     # Distinct floor coordinates alone do NOT count as structural diversity.
     # hx/hy are mere translations: do not count them as structural variety.
     distinct_topologies = len({(p['topology'][0], p['topology'][3]) for p in accepted})
-    report = {'status': 'EXPERIMENTAL_ONLY', 'stage009_required': True,
+    report = {'status': 'EXPERIMENTAL_ONLY',
+              'layout_source': 'ALL_SOLVER_LAYOUTS' if layout_sequence is None else 'EXPLICIT_SOLVER_LAYOUTS',
+              'stage009_required': True,
               'attempted': len(attempts), 'accepted_candidates': len(accepted),
               'distinct_topology_count': distinct_topologies,
               'three_structural_alternatives_verified': len(accepted) >= 3 and distinct_topologies >= 3,
