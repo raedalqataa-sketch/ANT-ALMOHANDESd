@@ -105,7 +105,9 @@ def minimal_context(brief):
 def verify_immutable_case(brief, baseline):
     """Do not send a model input or run MILP against a different program/site."""
     from collections import Counter
-    expected = Counter({(r.floor, r.kind): r.count for r in brief.rooms})
+    expected = Counter()
+    for room in brief.rooms:
+        expected[(room.floor, room.kind)] += room.count
     actual = Counter((fi, r['kind']) for fi, floor in
                      enumerate(baseline['rooms_by_floor'])
                      for r in floor if r.get('request_id'))
