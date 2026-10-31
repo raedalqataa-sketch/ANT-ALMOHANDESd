@@ -1,0 +1,22 @@
+{
+  "options": [
+    {
+      "guest_mode": "compact",
+      "corridor_branch": "none",
+      "hub_x": "center",
+      "hub_y": "middle"
+    },
+    {
+      "guest_mode": "compact",
+      "corridor_branch": "west",
+      "hub_x": "center",
+      "hub_y": "middle"
+    },
+    {
+      "guest_mode": "compact",
+      "corridor_branch": "east",
+      "hub_x": "center",
+      "hub_y": "middle"
+    }
+  ]
+}
