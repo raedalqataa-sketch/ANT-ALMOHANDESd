@@ -25,9 +25,9 @@ def placement_key(rooms):
 def reason_codes(result):
     """Never substitute a successful assertion for a missing 009 execution."""
     reasons = []
-    for item in result.get('stage008_precheck', {}).get('issues', []):
+    for item in (result.get('stage008_precheck') or {}).get('issues', []):
         reasons.append('008:' + str(item.get('reason', item) if isinstance(item, dict) else item))
-    for item in result.get('stage009_actual_validation', {}).get('issues', []):
+    for item in (result.get('stage009_actual_validation') or {}).get('issues', []):
         reasons.append('009:' + str(item))
     critic = result.get('stage010_critic') or {}
     for item in critic.get('defects', []):
