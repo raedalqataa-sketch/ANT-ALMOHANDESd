@@ -160,9 +160,17 @@ class Provider:
             result['status'] = 'INVALID_OUTPUT'
         return result
 
-    def propose(self, context):
+    def propose(self, context, *, response_schema=SearchPlan):
+        """Use a caller-owned strict Pydantic search-plan schema (default unchanged).
+
+        This changes only the *advice contract*: it cannot grant a model
+        authority to produce coordinates or bypass deterministic validation.
+        """
+        from pydantic import BaseModel
+        if not isinstance(response_schema, type) or not issubclass(response_schema, BaseModel):
+            raise ValueError('unsupported response schema')
         self._free_guard()
-        schema = SearchPlan.model_json_schema()
+        schema = response_schema.model_json_schema()
         system = ('You are an architectural search advisor. Return ONLY JSON matching this schema: ' + json.dumps(schema) +
                   '. Choose 3 to 6 different physical search configurations. Preserve every supplied space, law and privacy constraint. '
                   'Do not output coordinates, code, promises of compliance or change room targets. '
@@ -202,6 +210,6 @@ class Provider:
             except (KeyError, IndexError, TypeError, AttributeError):
                 raise ProviderError('INVALID_OUTPUT') from None
         try:
-            return SearchPlan.model_validate_json(text)
+            return response_schema.model_validate_json(text)
         except (ValidationError, ValueError, TypeError):
             raise ProviderError('INVALID_OUTPUT') from None
