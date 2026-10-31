@@ -26,8 +26,25 @@ def evaluate(brief, proposal):
                 'stage008_precheck': None, 'error_stage': '008_PRECHECK',
                 'error_type': type(exc).__name__, 'error_message': str(exc),
                 'legal_compliance_certified': False}
-    # Stage 009 may reject disconnected mass, swing conflicts, exterior path,
-    # privacy movement, absent windows, or missing real 0.6m body clearance.
+    # A failed/unknown 008 hard precheck must NEVER be rehabilitated by a
+    # later 009 or 010 indicator. Fail closed *before* attempting 009.
+    if not isinstance(preliminary, dict) or preliminary.get('status') != 'PRELIMINARY_CONSISTENT':
+        return {
+            'status': 'REJECT_AND_REPLAN_UNRESOLVED',
+            'stage008_precheck': preliminary,
+            'stage009_executed': False,
+            'doors_and_body_routes_009_passed': False,
+            'all_architectural_indicators_passed': False,
+            'rejection_stage': '008_PRECHECK',
+            'stage009_actual_validation': None,
+            'stage010_critic': None,
+            'legal_compliance_certified': False,
+            'visual_privacy_certified': False,
+            'natural_light_and_airflow_certified': False,
+            'furniture_used': False,
+        }
+    # Stage 009 may reject swing conflicts, exterior path, privacy movement,
+    # absent windows, or missing real 0.6m body clearance.
     try:
         revision = _opening_revision(brief, copy.deepcopy(proposal))
         full = validate(brief, revision)  # recompute; never trust cached PASS
