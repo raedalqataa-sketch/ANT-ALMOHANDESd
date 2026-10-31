@@ -1,0 +1,44 @@
+name: Stage 012 Gemini advice bridge - OFFLINE ONLY (manual, experimental)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-contract-and-feedback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      GEMINI_API_KEY: ''
+      GEMINI_FREE_TIER_CONFIRMED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install project dependencies
+        run: pip install -r requirements.txt
+      - name: Test strict offline advice and current provider defaults
+        run: |
+          mkdir -p stage012-experimental
+          python -m pytest -q tests/test_assl_stage012_gemini_bridge.py tests/test_assl_stage012_feedback.py tests/test_ai_lab_providers.py \
+            --junitxml=stage012-experimental/stage012_advice_pytest.xml
+      - name: Bounded offline candidate attempt (rejection is allowed, no fake success)
+        shell: bash
+        run: |
+          set +e
+          python -m assl.stage012_gemini_bridge \
+            --mode offline \
+            --plan-file tests/fixtures/stage012_gemini_advice_example.json \
+            --repacks 1 --seconds 1.0 \
+            --out stage012-experimental/offline_gemini_shape_search.json
+          code=$?
+          set -e
+          echo "The bounded screening exit code was $code (2 means NOT 3 verified alternatives)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Archive evidence including rejected candidates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage012-gemini-advice-offline-only
+          path: stage012-experimental/
+          if-no-files-found: warn
+          retention-days: 14
