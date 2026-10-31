@@ -9,6 +9,9 @@ on:
       - 'assl/stage012_feedback_search.py'
       - 'tests/test_assl_relationship_first_012.py'
       - 'tests/test_assl_stage012_feedback.py'
+      - 'tests/test_assl_stage012_gate_fail_closed.py'
+      - 'tests/test_assl_stage012_gemini_bridge.py'
+      - 'assl/stage012_gemini_bridge.py'
       - 'tests/test_assl_stage012_window_clearance.py'
       - 'tests/fixtures/assl_milp_012_candidate.json'
       - 'scripts/assl_stage012_render.py'
@@ -31,7 +34,7 @@ jobs:
       - name: Run honest concept geometry regressions
         run: |
           mkdir -p stage012-experimental
-          python -m pytest -q tests/test_assl_relationship_first_012.py tests/test_assl_stage012_feedback.py tests/test_assl_stage012_window_clearance.py \
+          python -m pytest -q tests/test_assl_relationship_first_012.py tests/test_assl_stage012_feedback.py tests/test_assl_stage012_window_clearance.py tests/test_assl_stage012_gate_fail_closed.py tests/test_assl_stage012_gemini_bridge.py \
             --junitxml=stage012-experimental/pytest012.xml
       - name: Render actual stored solution without invented openings
         run: python scripts/assl_stage012_render.py
