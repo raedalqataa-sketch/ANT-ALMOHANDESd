@@ -138,3 +138,21 @@ def test_null_precheck_is_fail_closed_and_preserves_diagnostic():
                       'stage009_executed':False})
     assert '009:NOT_EXECUTED' in r
     assert 'RUNTIME:RuntimeError' in r
+
+
+def test_exact_site_and_program_preflight_uses_stored_009_not_llm_claims():
+    from assl.relationship_first_012 import SOURCE_009
+    fixture = json.loads((ROOT / 'fixtures' / 'assl_architecture_cases.json').read_text(encoding='utf-8'))
+    brief = VillaBrief.model_validate(fixture['cases'][0]['brief'])
+    baseline = json.loads(SOURCE_009.read_text(encoding='utf-8'))
+    bridge.verify_immutable_case(brief, baseline)
+    altered = brief.model_copy(update={'setbacks':
+        brief.setbacks.model_copy(update={'east': brief.setbacks.east + 0.5})})
+    with pytest.raises(ValueError, match='STAGE012_BUILDABLE_ENVELOPE_MISMATCH'):
+        bridge.verify_immutable_case(altered, baseline)
+    fewer = json.loads(json.dumps(baseline))
+    fewer['rooms_by_floor'][0] = [
+        r for r in fewer['rooms_by_floor'][0] if r.get('id') != 'auto-ground-bath-1'
+    ]
+    with pytest.raises(ValueError, match='STAGE012_BASELINE_PROGRAM_MISMATCH'):
+        bridge.verify_immutable_case(brief, fewer)
