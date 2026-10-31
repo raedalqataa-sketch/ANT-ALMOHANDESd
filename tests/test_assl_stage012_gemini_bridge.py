@@ -156,3 +156,23 @@ def test_exact_site_and_program_preflight_uses_stored_009_not_llm_claims():
     ]
     with pytest.raises(ValueError, match='STAGE012_BASELINE_PROGRAM_MISMATCH'):
         bridge.verify_immutable_case(brief, fewer)
+
+
+def test_explicit_layout_sequence_is_not_overridden_by_default_enumerator(monkeypatch):
+    from assl import stage012_feedback_search as feedback
+    baseline = {'rooms_by_floor': [[{'id': 'room0', 'request_id': 'room0',
+                                    'zone': 'family'}],
+                                   [{'id': 'room1', 'request_id': 'room1',
+                                     'zone': 'family'}]]}
+    row = (('compact', 7.25, 5.5, 'none'), [], {'id': 'stair'}, [])
+    monkeypatch.setattr(feedback.solver, 'layouts',
+                        lambda: pytest.fail('unadvised default layout enumerator called'))
+    monkeypatch.setattr(feedback.solver, 'optimize_floor',
+                        lambda *args, **kwargs: (None, {'reason': 'NO_SOLUTION'}))
+    report, accepted = feedback.run_search(
+        object(), baseline, layout_sequence=[row], max_layouts=1,
+        repacks=1, seconds=0.1)
+    assert report['layout_source'] == 'EXPLICIT_SOLVER_LAYOUTS'
+    assert report['accepted_candidates'] == 0
+    assert report['attempts'][0]['status'] == 'MILP_INFEASIBLE_OR_TIMEOUT'
+    assert not accepted
