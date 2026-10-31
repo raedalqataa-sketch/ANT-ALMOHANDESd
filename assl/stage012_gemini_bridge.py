@@ -102,6 +102,25 @@ def minimal_context(brief):
     }
 
 
+def verify_immutable_case(brief, baseline):
+    """Do not send a model input or run MILP against a different program/site."""
+    from collections import Counter
+    expected = Counter({(r.floor, r.kind): r.count for r in brief.rooms})
+    actual = Counter((fi, r['kind']) for fi, floor in
+                     enumerate(baseline['rooms_by_floor'])
+                     for r in floor if r.get('request_id'))
+    if expected != actual:
+        raise ValueError('STAGE012_BASELINE_PROGRAM_MISMATCH')
+    if not brief.separate_guest_entry or not brief.apply_saudi_rules:
+        raise ValueError('STAGE012_REQUIRED_ENTRY_OR_RULES_MISSING')
+    buildable_w = (brief.plot_width - brief.setbacks.west -
+                   brief.setbacks.east - brief.wall_thickness)
+    buildable_d = (brief.plot_depth - brief.setbacks.north -
+                   brief.setbacks.south - brief.wall_thickness)
+    if abs(buildable_w - solver.PLOT_W) > .001 or abs(buildable_d - solver.PLOT_D) > .001:
+        raise ValueError('STAGE012_BUILDABLE_ENVELOPE_MISMATCH')
+
+
 def evaluate_plan(brief, baseline, plan, *, repacks=2, seconds=1.0):
     selected, mapping = select_existing_layouts(plan)
     if not selected:
@@ -169,6 +188,8 @@ def main(argv=None):
     source = 'OFFLINE_PLAN_NOT_GEMINI_LIVE'
     report = None
     try:
+        baseline = json.loads(solver.SOURCE_009.read_text(encoding='utf-8'))
+        verify_immutable_case(brief, baseline)
         if args.mode == 'live':
             from backend.design.ai_lab.providers import Provider, ProviderConfig
             with_provider = Provider(ProviderConfig.from_env('GEMINI', args.model))
@@ -182,7 +203,6 @@ def main(argv=None):
         else:
             plan = Stage012SearchPlan.model_validate_json(
                 args.plan_file.read_text(encoding='utf-8'))
-        baseline = json.loads(solver.SOURCE_009.read_text(encoding='utf-8'))
         report, accepted = evaluate_plan(
             brief, baseline, plan, repacks=args.repacks, seconds=args.seconds)
         report['proposal_origin'] = source
