@@ -176,3 +176,22 @@ def test_explicit_layout_sequence_is_not_overridden_by_default_enumerator(monkey
     assert report['accepted_candidates'] == 0
     assert report['attempts'][0]['status'] == 'MILP_INFEASIBLE_OR_TIMEOUT'
     assert not accepted
+
+
+def test_no_false_three_alternatives_from_unserviced_branches():
+    from assl.stage012_feedback_search import counted_distinct_topologies
+    def candidate(branch, extra_served=False):
+        return {'topology':('compact',7.25,5.5,branch),
+                'verified_009_evidence':{'opening_model_009':[
+                    {'halls':[{'id':'hall-0-0'}, {'id':'hall-0-1'}],
+                     'doors':[{'connects':['hall-0-0','room-a']},
+                              {'connects':['hall-0-1','room-b']}] if extra_served
+                             else [{'connects':['hall-0-0','room-a']}]},
+                    {'halls':[{'id':'hall-1-0'}],
+                     'doors':[{'connects':['hall-1-0','bed-1']}]}
+                ]}}
+    plain = candidate('none')
+    unused = candidate('west')
+    more_served = candidate('east', extra_served=True)
+    assert counted_distinct_topologies([plain, unused, more_served]) == 2
+    assert counted_distinct_topologies([plain, unused, {}]) == 1
