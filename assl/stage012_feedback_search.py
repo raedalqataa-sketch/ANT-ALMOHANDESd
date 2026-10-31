@@ -55,6 +55,46 @@ def candidate_of(topology, halls, stair, guests, floors, reports):
     }
 
 
+def serviced_opening_signature(proposal):
+    """Conservative structural difference from *actual 009 doors* only.
+
+    A nominal east/west branch does not count as another alternative if no
+    room opens to it. Unknown/missing 009 evidence cannot prove diversity.
+    """
+    evidence = proposal.get('verified_009_evidence') or {}
+    opened = evidence.get('opening_model_009')
+    if not isinstance(opened, list) or len(opened) != 2:
+        return None
+    signature = []
+    for floor in opened:
+        if not isinstance(floor, dict):
+            return None
+        halls = {h.get('id') for h in floor.get('halls', []) if h.get('id')}
+        if not halls:
+            return None
+        served = {hall: set() for hall in halls}
+        for door in floor.get('doors', []):
+            links = door.get('connects')
+            if not isinstance(links, list):
+                continue
+            room_ids = [k for k in links if k not in halls and k != 'OUTSIDE']
+            for hall in (k for k in links if k in halls):
+                served[hall].update(room_ids)
+        # Ignore branches with no door to a room. Empty/spare corridors
+        # are not substantive architectural diversity.
+        groups = sorted(set(tuple(sorted(room_ids)) for room_ids in served.values()
+                            if room_ids))
+        if not groups:
+            return None
+        signature.append(tuple(groups))
+    return (proposal['topology'][0], tuple(signature))
+
+
+def counted_distinct_topologies(accepted):
+    return len({key for p in accepted
+                if (key := serviced_opening_signature(p)) is not None})
+
+
 def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5, layout_sequence=None):
     """Apply 009/010 fail-closed feedback to bounded MILP no-good cuts.
 
@@ -129,13 +169,13 @@ def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5, layou
             else:
                 seen_floor[fi].add(floor_key)
                 exclusions[fi].append(copy.deepcopy(floors[fi]))
-            if len({(p['topology'][0], p['topology'][3]) for p in accepted}) >= 3:
+            if counted_distinct_topologies(accepted) >= 3:
                 break
-        if len({(p['topology'][0], p['topology'][3]) for p in accepted}) >= 3:
+        if counted_distinct_topologies(accepted) >= 3:
             break
-    # Distinct floor coordinates alone do NOT count as structural diversity.
-    # hx/hy are mere translations: do not count them as structural variety.
-    distinct_topologies = len({(p['topology'][0], p['topology'][3]) for p in accepted})
+    # Only actual 009 door-serviced hall patterns count as diversity.
+    # A nominal new branch with no serviced rooms never proves a new design.
+    distinct_topologies = counted_distinct_topologies(accepted)
     report = {'status': 'EXPERIMENTAL_ONLY',
               'layout_source': 'ALL_SOLVER_LAYOUTS' if layout_sequence is None else 'EXPLICIT_SOLVER_LAYOUTS',
               'stage009_required': True,
