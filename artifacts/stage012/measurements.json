@@ -1,0 +1,456 @@
+[
+  {
+    "case": "sa-corner",
+    "alternative": "concept_1",
+    "before": {
+      "movement_m2": 46.25,
+      "configuration_m2": 241.03749999999997,
+      "net_rooms_m2": 151.73749999999998,
+      "movement_ratio": 0.19187885702432197,
+      "longest_m": 14.75,
+      "mean_access_m": 6.851075000000001,
+      "kitchen_dining_m": 4.9463,
+      "room_excess_m2": 5.737499999999993,
+      "residual_m2": 5.4125,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 46.25,
+      "configuration_m2": 241.03749999999997,
+      "net_rooms_m2": 151.73749999999998,
+      "movement_ratio": 0.19187885702432197,
+      "longest_m": 14.75,
+      "mean_access_m": 6.851075000000001,
+      "kitchen_dining_m": 4.9463,
+      "room_excess_m2": 5.737499999999993,
+      "residual_m2": 5.4125,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 990,
+      "opening_variants_tested": 64,
+      "NO_GAIN_OR_REGRESSION": 10,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 38
+    },
+    "seconds": 85.42989904599995
+  },
+  {
+    "case": "sa-corner",
+    "alternative": "concept_2",
+    "before": {
+      "movement_m2": 48.875,
+      "configuration_m2": 243.30833333333334,
+      "net_rooms_m2": 151.41,
+      "movement_ratio": 0.20087680241120662,
+      "longest_m": 15.25,
+      "mean_access_m": 7.201241666666667,
+      "kitchen_dining_m": 2.4549,
+      "room_excess_m2": 5.409999999999992,
+      "residual_m2": 7.12917,
+      "defects": 3,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 48.875,
+      "configuration_m2": 243.30833333333334,
+      "net_rooms_m2": 151.41,
+      "movement_ratio": 0.20087680241120662,
+      "longest_m": 15.25,
+      "mean_access_m": 7.201241666666667,
+      "kitchen_dining_m": 2.4549,
+      "room_excess_m2": 5.409999999999992,
+      "residual_m2": 7.12917,
+      "defects": 3,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 936,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 48
+    },
+    "seconds": 77.887523955
+  },
+  {
+    "case": "sa-corner",
+    "alternative": "concept_3",
+    "before": {
+      "movement_m2": 61.375,
+      "configuration_m2": 256.85,
+      "net_rooms_m2": 152.325,
+      "movement_ratio": 0.23895269612614364,
+      "longest_m": 14.75,
+      "mean_access_m": 6.57225,
+      "kitchen_dining_m": 14.5652,
+      "room_excess_m2": 6.3249999999999895,
+      "residual_m2": 11.4,
+      "defects": 4,
+      "weak_relations": 1
+    },
+    "after": {
+      "movement_m2": 61.375,
+      "configuration_m2": 256.85,
+      "net_rooms_m2": 152.325,
+      "movement_ratio": 0.23895269612614364,
+      "longest_m": 14.75,
+      "mean_access_m": 6.57225,
+      "kitchen_dining_m": 14.5652,
+      "room_excess_m2": 6.3249999999999895,
+      "residual_m2": 11.4,
+      "defects": 4,
+      "weak_relations": 1
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 922,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 48
+    },
+    "seconds": 96.32360289400003
+  },
+  {
+    "case": "sa-large",
+    "alternative": "concept_1",
+    "before": {
+      "movement_m2": 53.75,
+      "configuration_m2": 331.0375,
+      "net_rooms_m2": 229.01749999999998,
+      "movement_ratio": 0.16236831174715854,
+      "longest_m": 14.25,
+      "mean_access_m": 6.218428571428572,
+      "kitchen_dining_m": 2.8493,
+      "room_excess_m2": 7.25749999999998,
+      "residual_m2": 5.0,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 53.75,
+      "configuration_m2": 331.0375,
+      "net_rooms_m2": 229.01749999999998,
+      "movement_ratio": 0.16236831174715854,
+      "longest_m": 14.25,
+      "mean_access_m": 6.218428571428572,
+      "kitchen_dining_m": 2.8493,
+      "room_excess_m2": 7.25749999999998,
+      "residual_m2": 5.0,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 62,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 21,
+      "HARD_CONSTRAINT": 25,
+      "NO_GAIN_OR_REGRESSION": 2
+    },
+    "seconds": 34.110023429999956
+  },
+  {
+    "case": "sa-large",
+    "alternative": "concept_2",
+    "before": {
+      "movement_m2": 50.0,
+      "configuration_m2": 327.44243827160494,
+      "net_rooms_m2": 229.1975,
+      "movement_ratio": 0.1526985941832204,
+      "longest_m": 8.75,
+      "mean_access_m": 5.74725,
+      "kitchen_dining_m": 5.4041,
+      "room_excess_m2": 7.437499999999983,
+      "residual_m2": 7.8375,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 50.0,
+      "configuration_m2": 327.44243827160494,
+      "net_rooms_m2": 229.1975,
+      "movement_ratio": 0.1526985941832204,
+      "longest_m": 8.75,
+      "mean_access_m": 5.74725,
+      "kitchen_dining_m": 5.4041,
+      "room_excess_m2": 7.437499999999983,
+      "residual_m2": 7.8375,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 62,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 21,
+      "HARD_CONSTRAINT": 25,
+      "NO_GAIN_OR_REGRESSION": 2
+    },
+    "seconds": 34.12429294399999
+  },
+  {
+    "case": "sa-large",
+    "alternative": "concept_3",
+    "before": {
+      "movement_m2": 55.0,
+      "configuration_m2": 333.0375,
+      "net_rooms_m2": 229.76749999999998,
+      "movement_ratio": 0.16514656757872612,
+      "longest_m": 8.75,
+      "mean_access_m": 6.1078,
+      "kitchen_dining_m": 3.1113,
+      "room_excess_m2": 8.007499999999979,
+      "residual_m2": 7.2125,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 55.0,
+      "configuration_m2": 333.0375,
+      "net_rooms_m2": 229.76749999999998,
+      "movement_ratio": 0.16514656757872612,
+      "longest_m": 8.75,
+      "mean_access_m": 6.1078,
+      "kitchen_dining_m": 3.1113,
+      "room_excess_m2": 8.007499999999979,
+      "residual_m2": 7.2125,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 62,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 21,
+      "HARD_CONSTRAINT": 25,
+      "NO_GAIN_OR_REGRESSION": 2
+    },
+    "seconds": 35.20356642899992
+  },
+  {
+    "case": "ye-medium",
+    "alternative": "concept_1",
+    "before": {
+      "movement_m2": 41.0,
+      "configuration_m2": 229.35,
+      "net_rooms_m2": 146.31,
+      "movement_ratio": 0.1787660780466536,
+      "longest_m": 11.75,
+      "mean_access_m": 5.4475727272727275,
+      "kitchen_dining_m": 2.8493,
+      "room_excess_m2": 5.309999999999991,
+      "residual_m2": 4.25,
+      "defects": 3,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 40.25,
+      "configuration_m2": 226.55250000000004,
+      "net_rooms_m2": 144.3425,
+      "movement_ratio": 0.17766301409165644,
+      "longest_m": 11.25,
+      "mean_access_m": 5.3734636363636366,
+      "kitchen_dining_m": 2.4749,
+      "room_excess_m2": 3.3424999999999896,
+      "residual_m2": 3.9,
+      "defects": 3,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": -0.75,
+      "configuration_m2": -2.797499999999957,
+      "net_rooms_m2": -1.9675000000000011,
+      "movement_ratio": -0.0011030639549971522,
+      "longest_m": -0.5,
+      "mean_access_m": -0.0741090909090909,
+      "kitchen_dining_m": -0.37440000000000007,
+      "room_excess_m2": -1.9675000000000011,
+      "residual_m2": -0.3500000000000001,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 82,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 36,
+      "NO_GAIN_OR_REGRESSION": 11,
+      "opening_variants_tested": 13,
+      "MEASURED_NONREGRESSING_GROUP_GAIN": 1
+    },
+    "seconds": 22.966884069999878
+  },
+  {
+    "case": "ye-medium",
+    "alternative": "concept_2",
+    "before": {
+      "movement_m2": 46.25,
+      "configuration_m2": 235.4125,
+      "net_rooms_m2": 147.02249999999998,
+      "movement_ratio": 0.19646365422396858,
+      "longest_m": 8.75,
+      "mean_access_m": 5.461872727272727,
+      "kitchen_dining_m": 4.8213,
+      "room_excess_m2": 6.022499999999989,
+      "residual_m2": 4.0875,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "after": {
+      "movement_m2": 46.25,
+      "configuration_m2": 235.4125,
+      "net_rooms_m2": 147.02249999999998,
+      "movement_ratio": 0.19646365422396858,
+      "longest_m": 8.75,
+      "mean_access_m": 5.461872727272727,
+      "kitchen_dining_m": 4.8213,
+      "room_excess_m2": 6.022499999999989,
+      "residual_m2": 4.0875,
+      "defects": 2,
+      "weak_relations": 0
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 82,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 35,
+      "NO_GAIN_OR_REGRESSION": 13
+    },
+    "seconds": 21.902761390999785
+  },
+  {
+    "case": "ye-medium",
+    "alternative": "concept_3",
+    "before": {
+      "movement_m2": 51.5,
+      "configuration_m2": 240.09999999999997,
+      "net_rooms_m2": 146.56,
+      "movement_ratio": 0.214493960849646,
+      "longest_m": 8.75,
+      "mean_access_m": 5.652745454545454,
+      "kitchen_dining_m": 2.8515,
+      "room_excess_m2": 5.559999999999991,
+      "residual_m2": 6.4625,
+      "defects": 3,
+      "weak_relations": 1
+    },
+    "after": {
+      "movement_m2": 51.5,
+      "configuration_m2": 240.09999999999997,
+      "net_rooms_m2": 146.56,
+      "movement_ratio": 0.214493960849646,
+      "longest_m": 8.75,
+      "mean_access_m": 5.652745454545454,
+      "kitchen_dining_m": 2.8515,
+      "room_excess_m2": 5.559999999999991,
+      "residual_m2": 6.4625,
+      "defects": 3,
+      "weak_relations": 1
+    },
+    "delta": {
+      "movement_m2": 0.0,
+      "configuration_m2": 0.0,
+      "net_rooms_m2": 0.0,
+      "movement_ratio": 0.0,
+      "longest_m": 0.0,
+      "mean_access_m": 0.0,
+      "kitchen_dining_m": 0.0,
+      "room_excess_m2": 0.0,
+      "residual_m2": 0.0,
+      "defects": 0,
+      "weak_relations": 0
+    },
+    "status": "REJECT_AND_REPLAN_UNRESOLVED",
+    "statistics": {
+      "geometric_proposals": 82,
+      "NEW_RESIDUAL_VOID_OR_SLIT": 35,
+      "NO_GAIN_OR_REGRESSION": 13
+    },
+    "seconds": 22.009403408000026
+  }
+]
