@@ -55,7 +55,7 @@ jobs:
         run: |
           python -m assl.stage012_feedback_search \
             --fixture tests/fixtures/assl_architecture_cases.json \
-            --layouts 4 --repacks 2 --seconds 1.0 \
+            --layouts 6 --repacks 2 --seconds 5.0 \
             --out stage012-experimental/feedback_012.json
       - name: Archive evidence even if 009 rejects
         if: always()
