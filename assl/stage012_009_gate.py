@@ -1,7 +1,8 @@
-"""Fail-closed stage-009 verification for stage-012 MILP candidates.
+"""Fail-closed stage-009/010 verification for stage-012 MILP candidates.
 
-Never promote geometric packing into architectural acceptance. The established
-009 auditor reconstructs actual doors, windows, walking routes and access.
+Never promote geometric packing or a 009-only pass into architectural review.
+The established 009 auditor reconstructs openings and routes; the 010 critic
+must also accept the measured design indicators before a review-ready status.
 """
 from __future__ import annotations
 import copy
@@ -30,6 +31,8 @@ def verify_stage012(brief, candidate, baseline_009=None):
         'preliminary_issues': preliminary['issues'],
         '009_status': 'NOT_RUN',
         '009_issues': [],
+        'stage010_status': 'NOT_RUN',
+        'stage010_defects': [],
         'actual_doors_and_routes_verified': False,
         'room_program_preserved': False,
         'stair_identical_between_floors': False,
@@ -76,5 +79,16 @@ def verify_stage012(brief, candidate, baseline_009=None):
     improved = (baseline_009 is not None and evidence['family_hall_delta_m2'] < -0.01)
     evidence['measured_family_hall_improved_vs_009'] = improved
     if official['status'] == 'PASS' and program_ok and stair_ok and improved:
-        evidence['status'] = 'READY_FOR_ARCHITECTURAL_REVIEW'
+        try:
+            from .layout_critic_010 import critique
+            critic = critique(brief, inspected)
+            evidence['stage010_status'] = critic['status']
+            evidence['stage010_defects'] = critic['defects']
+            evidence['stage010_metrics'] = critic['floors']
+            if critic['status'] == 'ACCEPTABLE_DESIGN_INDICATORS':
+                evidence['status'] = 'READY_FOR_ARCHITECTURAL_REVIEW'
+        except Exception as exc:
+            # A missing or broken 010 critic is unresolved, never a pass.
+            evidence['stage010_status'] = 'RUNTIME_ERROR'
+            evidence['stage010_defects'] = [{'type': type(exc).__name__}]
     return evidence, inspected
