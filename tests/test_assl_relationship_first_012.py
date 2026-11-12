@@ -25,6 +25,16 @@ class RelationshipFirstTests(unittest.TestCase):
         self.assertEqual(m.relationship_weights()[('dining', 'kitchen')], 12.0)
         self.assertEqual(m.relationship_weights()[('dining', 'living')], 10.8)
 
+    def test_generated_topologies_keep_straight_corridor_runs_within_010_limit(self):
+        from assl.layout_critic_010 import corridor_metrics
+        for _tag, halls, _stair, guests in m.layouts():
+            guest_distributors = [r for r in guests if r.get('guest_distributor')]
+            ground = corridor_metrics(halls + guest_distributors)
+            upper_only = {'family-entry-spur', 'family-entry-turn'}
+            upper = corridor_metrics([h for h in halls if h.get('id') not in upper_only])
+            self.assertLessEqual(ground['longest_run_m'], 6.0, ground)
+            self.assertLessEqual(upper['longest_run_m'], 6.0, upper)
+
     def test_guest_suite_direct_access_and_separation(self):
         v=m.guest_suite('compact')
         self.assertGreaterEqual(m.contact(v[0],v[1]),1.2)
