@@ -152,13 +152,13 @@ def layouts():
                      id='family-entry-spur')
         turn = rect(9.25, 2.25, 1.5, 1.5, kind='corridor',
                     id='family-entry-turn')
-        growth = rect(11.75, 5.25, 1.5, 3.0, kind='corridor',
+        growth = rect(11.0, 5.25, 3.0, 3.0, kind='corridor',
                       id='family-growth-node')
         stair = rect(7.75, 3.75, 3.0, 4.6, id='shared-stair',
                      kind='stair', name='درج ثابت بين الدورين')
         wing = rect(13.75, 3.75, 1.5, 1.5, kind='corridor',
                     id='east-service-node')
-        cross = rect(13.75, 5.25, 1.5, 2.5, kind='corridor',
+        cross = rect(14.0, 5.25, 1.25, 2.5, kind='corridor',
                      id='east-north-service-node')
 
         walk = [entry, turn, hub, growth]
