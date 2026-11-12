@@ -159,6 +159,10 @@ def layouts():
             # The entry reaches the hub laterally through a 1.5m elbow.
             turn = rect(9.25, 1.5, 1.5, 1.5, kind='corridor',
                         id='family-entry-turn')
+            # A north-side service stem is offset from the entry elbow. Its
+            # maximum continuous axis is 3m hub + 3m stem = the 010 limit.
+            growth = rect(10.25, 6.0, 1.5, 3.0, kind='corridor',
+                          id='family-growth-node')
             if stair_side == 'east':
                 stair = rect(11.75, 2.5, 3.0, 4.6, id='shared-stair',
                              kind='stair', name='درج ثابت بين الدورين')
@@ -174,7 +178,7 @@ def layouts():
                 cross = rect(13.25, 6.0, 1.5, 2.5, kind='corridor',
                              id='east-north-service-node')
 
-            walk = [entry, turn, hub]
+            walk = [entry, turn, hub, growth]
             if branch in ('side', 'side_cross'):
                 walk.append(wing)
             if branch == 'side_cross':
