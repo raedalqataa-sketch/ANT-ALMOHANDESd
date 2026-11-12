@@ -159,8 +159,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         primary.extend({'family':f,'policy':'social_front','core_position':'front'} for f in ('spine','L'))
         primary.append({'family':'spine','policy':'service_aligned','core_position':'rear'})
     if generation_v4:
-        primary.insert(0,{'family':'cluster','policy':'relationship_aware','core_position':'rear'})
-        primary.insert(1,{'family':'meander','policy':'relationship_aware','core_position':'rear'})
+        primary.insert(0,{'family':'meander','policy':'relationship_aware','core_position':'rear'})
         primary.append({'family':'adaptive','policy':'social_front','core_position':'front',
                         'guest_strategy':'side_spine'})
         primary.append({'family':'adaptive','policy':'social_front','core_position':'front',
@@ -230,7 +229,6 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
                               ('cross','family_front','front'),
                               ('spine','social_front','front')])
             if generation_v4:
-                preferred.insert(0,('cluster','relationship_aware','front'))
                 preferred.insert(0,('meander','relationship_aware','rear'))
             tried={(o['family'],o['policy'],o['core_position']) for o in examined}
             repairs=[{'family':f,'policy':p,'core_position':c} for f,p,c in preferred
@@ -311,7 +309,7 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
             'reproducibility':{'stochastic':False,'search_seed':0,'algorithm':'deterministic bounded beam and parameter enumeration','settings':examined},
             'functional_routes':'furniture-aware 0.20m raster with 0.60m design body; recorded polylines',
             'portfolio_selection':'deterministic OR-Tools CP-SAT cardinality-first selection of validated distinct designs',
-            'bounded_relayout':'alternate meander/cluster topology; constrained moves and size changes before regenerating all hosted geometry',
+            'bounded_relayout':'alternate meander/wing topology; constrained moves and size changes before regenerating all hosted geometry',
             'reflow_evidence_count':sum(bool(m.get('layout_rebuild_v4')) for m in chosen),
             'local_repair_attempts':sum(len(m['auto_repair_v4']['attempts']) for m in pool),
             'local_repairs_accepted':sum(m['auto_repair_v4']['accepted_steps'] for m in pool),
