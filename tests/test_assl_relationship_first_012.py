@@ -23,7 +23,7 @@ class RelationshipFirstTests(unittest.TestCase):
         }
         self.assertEqual(m.relationship_weights(), expected)
         self.assertEqual(m.relationship_weights()[('dining', 'kitchen')], 12.0)
-        self.assertEqual(m.relationship_weights()[('living', 'dining')], 10.8)
+        self.assertEqual(m.relationship_weights()[('dining', 'living')], 10.8)
 
     def test_guest_suite_direct_access_and_separation(self):
         v=m.guest_suite('compact')
