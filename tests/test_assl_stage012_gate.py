@@ -47,6 +47,19 @@ def test_connected_entry_preserves_separate_guest_entrance_and_saves_area():
     # This is geometric evidence only, NOT proof of 009 or legal acceptance.
     assert revised["claim_009_verified"] is False
 
+def test_009_pass_alone_cannot_promote_candidate_when_010_rejects():
+    from backend.design.general_models import VillaBrief
+    cases = json.loads((FIX / "assl_architecture_cases.json").read_text())["cases"]
+    brief = VillaBrief.model_validate(next(c["brief"] for c in cases if c["id"] == "sa-corner"))
+    baseline, candidate = _fixture()
+    evidence, inspected = verify_stage012(brief, candidate, baseline)
+    assert evidence["009_status"] == "PASS"
+    assert evidence["stage010_status"] == "REJECT_AND_REPLAN"
+    assert any(item["type"] == "LONG_CORRIDOR" for item in evidence["stage010_defects"])
+    assert evidence["status"] == "REJECT_AND_REPLAN_UNRESOLVED"
+    assert evidence["architecturally_approved"] is False
+
+
 def test_009_gate_is_fail_closed_on_unrepaired_recorded_candidate():
     from backend.design.general_models import VillaBrief
     cases = json.loads((FIX / "assl_architecture_cases.json").read_text())["cases"]
