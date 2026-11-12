@@ -9,7 +9,7 @@ class Strict(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
 
 class SearchOption(Strict):
-    family: Literal['adaptive', 'freeform', 'spine', 'cross', 'cluster', 'meander']
+    family: Literal['adaptive', 'freeform', 'spine', 'cross', 'meander']
     policy: Literal['social_front', 'family_front', 'service_aligned', 'relationship_aware']
     core_position: Literal['front', 'rear']
     guest_strategy: Literal['linear', 'side_spine', 'compact_side']
