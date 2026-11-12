@@ -7,17 +7,8 @@ import math
 from .reference_patterns import graph, route
 from .general_quality import privacy_evidence
 
-# Supported room kinds are mapped to V2 relationships where semantically exact.
-# E017 is intentionally not asserted: this engine has no distinct master_bath kind.
-# Values are transparent design preferences, not statutory route-distance limits.
-RELATIONSHIPS=(
-    ("kitchen", "dining", 1.0, "FOOD_SERVICE", "E007"),
-    ("living", "dining", .9, "FAMILY_COMMON", "E013"),
-    ("master", "bathroom", .8, "MASTER_BATH_ACCESS", None),
-    ("bedroom", "bathroom", .7, "FAMILY_BATH_ACCESS", None),
-    ("laundry", "bedroom", .5, "LAUNDRY_SERVICE", "E019"),
-    ("stair", "living", .5, "STAIR_FAMILY_ACCESS", "E014"),
-)
+# Canonical relationship ontology is shared with the experimental ASSL optimizer.
+from .relationship_catalog import RELATIONSHIPS
 
 
 def inspect(model):
