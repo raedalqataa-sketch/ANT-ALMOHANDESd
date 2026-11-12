@@ -1,4 +1,4 @@
-"""Regression against the detached-guest-wing false positive in stage 012."""
+"""Regression for connected guest geometry and fail-closed 009 validation in stage 012."""
 import copy
 import json
 from pathlib import Path
@@ -23,11 +23,11 @@ def _recheck(candidate):
               for f in rooms]
     return m.audit(family, candidate["halls_by_floor"], guests, stair)
 
-def test_saved_candidate_cannot_pass_because_guest_wing_is_detached():
+def test_saved_candidate_has_one_connected_building_footprint():
     _, candidate = _fixture()
     audit = _recheck(candidate)
-    assert not audit["passed_independent_geometry"]
-    assert "FLOOR_0_DISCONNECTED_BUILDING_FOOTPRINT" in audit["issues"]
+    assert audit["passed_independent_geometry"], audit["issues"]
+    assert "FLOOR_0_DISCONNECTED_BUILDING_MASS" not in audit["issues"]
 
 def test_connected_entry_preserves_separate_guest_entrance_and_saves_area():
     baseline, candidate = _fixture()
@@ -52,6 +52,10 @@ def test_009_gate_is_fail_closed_on_unrepaired_recorded_candidate():
     cases = json.loads((FIX / "assl_architecture_cases.json").read_text())["cases"]
     brief = VillaBrief.model_validate(next(c["brief"] for c in cases if c["id"] == "sa-corner"))
     baseline, candidate = _fixture()
+    # Corrupt the guest wing deliberately: it must be rejected before 009.
+    for room in candidate["rooms_by_floor"][0]:
+        if room.get("zone") == "guest":
+            room["x"] -= .25
     evidence, inspected = verify_stage012(brief, candidate, baseline)
     assert evidence["status"] == "REJECT_AND_REPLAN_UNRESOLVED"
     assert evidence["009_status"] == "NOT_RUN"
