@@ -15,6 +15,16 @@ class RelationshipFirstTests(unittest.TestCase):
         cls.before=json.loads((ROOT/'fixtures'/'assl_openings_009_valid.json').read_text())
         cls.after=json.loads((ROOT/'fixtures'/'assl_milp_012_candidate.json').read_text())
 
+    def test_milp_uses_canonical_functional_relationship_catalogue(self):
+        from backend.design.relationship_catalog import RELATIONSHIPS
+        expected = {
+            tuple(sorted((source, target))): weight * m.RELATIONSHIP_OBJECTIVE_SCALE
+            for source, target, weight, _code, _rule in RELATIONSHIPS
+        }
+        self.assertEqual(m.relationship_weights(), expected)
+        self.assertEqual(m.relationship_weights()[('dining', 'kitchen')], 12.0)
+        self.assertEqual(m.relationship_weights()[('living', 'dining')], 10.8)
+
     def test_guest_suite_direct_access_and_separation(self):
         v=m.guest_suite('compact')
         self.assertGreaterEqual(m.contact(v[0],v[1]),1.2)
