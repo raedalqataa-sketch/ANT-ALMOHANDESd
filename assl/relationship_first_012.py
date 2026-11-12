@@ -446,7 +446,8 @@ def search(time_limit=5,limit=60):
     for idx,(tag,halls,stair,guests) in enumerate(layouts()):
         if idx>=limit:break
         group=[];reports=[]
-        halls_upper=[h for h in halls if h['id']!='family-entry-spur']
+        upper_only={'family-entry-spur','family-entry-turn'}
+        halls_upper=[h for h in halls if h['id'] not in upper_only]
         per_floor_halls=[halls,halls_upper]
         for fi,requests in enumerate(reqs):
             family,rep=optimize_floor(requests,per_floor_halls[fi],stair,guests if fi==0 else [],time_limit=time_limit)
