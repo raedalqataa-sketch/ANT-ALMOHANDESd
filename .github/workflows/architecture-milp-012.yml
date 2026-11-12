@@ -3,8 +3,12 @@ on:
   push:
     branches:
       - feature/architecture-relationship-milp-012-experimental
+      - feature/relational-first-integration-013
     paths:
       - 'assl/relationship_first_012.py'
+      - 'backend/design/relationship_catalog.py'
+      - 'backend/design/functional_intelligence.py'
+      - 'scripts/assl_relationship_verify_012.py'
       - 'assl/stage012_validation_gate.py'
       - 'assl/stage012_feedback_search.py'
       - 'tests/test_assl_relationship_first_012.py'
