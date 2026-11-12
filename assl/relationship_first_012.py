@@ -329,12 +329,22 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     # Use pairwise clash cuts (sparse) rather than coarse tile exclusions;
     # this is an exact continuous rectangle non-overlap condition for candidates.
     conflicts=0
+    pair_conflict_summary=[]
     for i in range(len(req)):
         for j in range(i+1,len(req)):
+            pair_total=len(origins[i])*len(origins[j])
+            pair_clashes=0
             for a in origins[i]:
                 for b in origins[j]:
                     if overlap(choices[a][1],choices[b][1])>EPS:
-                        add({a:1,b:1},-np.inf,1);conflicts+=1
+                        add({a:1,b:1},-np.inf,1)
+                        conflicts+=1
+                        pair_clashes+=1
+            pair_conflict_summary.append({
+                'room_a': req[i]['id'], 'room_b': req[j]['id'],
+                'candidate_pairs': pair_total, 'clashing_pairs': pair_clashes,
+                'fully_blocked': pair_total > 0 and pair_clashes == pair_total,
+            })
     for pi,(i,j,w) in enumerate(pair_weights):
         # |dx|, |dy| from selected room centers. Soft cost, hard geometry.
         for axis in ('x','y'):
@@ -353,7 +363,14 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     result=milp(c=obj,integrality=integrality,bounds=Bounds(np.zeros(vnum),ub),
                 constraints=LinearConstraint(mat,np.array(low),np.array(up)),
                 options={'time_limit':time_limit,'mip_rel_gap':.08})
-    evidence=dict(options=[len(group) for group in groups],no_good_cuts=no_good_cuts,binary_variables=n,
+    evidence=dict(options=[len(group) for group in groups],
+                  room_option_summary=[
+                      {'room_id': room['id'], 'kind': room['kind'], 'count': len(group),
+                       'sample': [{'x': q['x'], 'y': q['y'], 'width': q['width'], 'depth': q['depth']}
+                                  for q, _cost in group[:8]]}
+                      for room, group in zip(req, groups)],
+                  pair_conflict_summary=pair_conflict_summary,
+                  no_good_cuts=no_good_cuts,binary_variables=n,
                   clashes=conflicts,linear_rows=len(low),time_sec=round(time.monotonic()-start,2),
                   solver_status=int(result.status),message=result.message,
                   objective=float(result.fun) if result.fun is not None else None)
