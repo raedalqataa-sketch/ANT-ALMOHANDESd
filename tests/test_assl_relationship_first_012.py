@@ -25,6 +25,20 @@ class RelationshipFirstTests(unittest.TestCase):
         self.assertEqual(m.relationship_weights()[('dining', 'kitchen')], 12.0)
         self.assertEqual(m.relationship_weights()[('dining', 'living')], 10.8)
 
+    def test_bent_relational_graphs_respect_010_straight_run_cap(self):
+        from assl.layout_critic_010 import corridor_metrics
+        generated = list(m.layouts())
+        self.assertEqual(len(generated), 9)
+        self.assertEqual({item[0][2] for item in generated},
+                         {'none', 'east', 'east_cross'})
+        for _tag, halls, _stair, guests in generated:
+            guest_distributors = [r for r in guests if r.get('guest_distributor')]
+            ground = corridor_metrics(halls + guest_distributors)
+            upper_only = {'family-entry-spur', 'family-entry-turn'}
+            upper = corridor_metrics([h for h in halls if h.get('id') not in upper_only])
+            self.assertLessEqual(ground['longest_run_m'], 6.0, ground)
+            self.assertLessEqual(upper['longest_run_m'], 6.0, upper)
+
     def test_guest_suite_direct_access_and_separation(self):
         v=m.guest_suite('compact')
         self.assertGreaterEqual(m.contact(v[0],v[1]),1.2)
