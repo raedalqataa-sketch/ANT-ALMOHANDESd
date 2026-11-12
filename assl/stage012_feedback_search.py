@@ -40,7 +40,8 @@ def reason_codes(result):
 
 
 def candidate_of(topology, halls, stair, guests, floors, reports):
-    per_floor_halls = [halls, [h for h in halls if h.get('id') != 'family-entry-spur']]
+    upper_only = {'family-entry-spur', 'family-entry-turn'}
+    per_floor_halls = [halls, [h for h in halls if h.get('id') not in upper_only]]
     audit = solver.audit(floors, per_floor_halls, guests, stair)
     return {
         'label': 'stage012_feedback_not_architecturally_approved',
@@ -111,7 +112,8 @@ def run_search(brief, baseline, *, max_layouts=12, repacks=4, seconds=1.5, layou
     for layout_idx, (tag, halls, stair, guests) in enumerate(allowed):
         if layout_idx >= max_layouts:
             break
-        upper_halls = [h for h in halls if h.get('id') != 'family-entry-spur']
+        upper_only = {'family-entry-spur', 'family-entry-turn'}
+        upper_halls = [h for h in halls if h.get('id') not in upper_only]
         by_floor_halls = [halls, upper_halls]
         exclusions = [[], []]
         seen_floor = [set(), set()]
