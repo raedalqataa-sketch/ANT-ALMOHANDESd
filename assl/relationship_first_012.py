@@ -142,24 +142,23 @@ def guest_suite(side='compact',entry_x=7.75):
 def layouts():
     """Generate side-serviced, bent family circulation graphs.
 
-    The entry turns into the side of the hub. The stair is on the opposite
-    side from the guest suite, and the north stem is offset from the entry
-    elbow so no straight corridor axis exceeds the 010 screening limit.
+    The south entry turns into the side of the hub. The stair sits beside the
+    turn/hub junction; the offset north stem and optional east service wings
+    preserve a connected graph without a long axial corridor.
     """
     for branch in ('none', 'side', 'side_cross'):
-        hx, hy = 9.25, 5.25
-        hub = rect(hx, hy, 3.0, 3.0, kind='corridor', id='family-hub')
+        hub = rect(10.75, 2.25, 3.0, 3.0, kind='corridor', id='family-hub')
         entry = rect(7.75, 0.0, 1.5, 3.75, kind='corridor',
                      id='family-entry-spur')
-        turn = rect(9.25, 3.75, 1.5, 1.5, kind='corridor',
+        turn = rect(9.25, 2.25, 1.5, 1.5, kind='corridor',
                     id='family-entry-turn')
-        growth = rect(10.75, 8.25, 1.5, 3.0, kind='corridor',
+        growth = rect(11.75, 5.25, 1.5, 3.0, kind='corridor',
                       id='family-growth-node')
-        stair = rect(6.25, 5.25, 3.0, 4.6, id='shared-stair',
+        stair = rect(7.75, 3.75, 3.0, 4.6, id='shared-stair',
                      kind='stair', name='درج ثابت بين الدورين')
-        wing = rect(12.25, 6.75, 3.0, 1.5, kind='corridor',
+        wing = rect(13.75, 3.75, 1.5, 1.5, kind='corridor',
                     id='east-service-node')
-        cross = rect(13.75, 8.25, 1.5, 2.5, kind='corridor',
+        cross = rect(13.75, 5.25, 1.5, 2.5, kind='corridor',
                      id='east-north-service-node')
 
         walk = [entry, turn, hub, growth]
@@ -186,7 +185,7 @@ def layouts():
             continue
         if not any(contact(stair, h) >= 1.2 for h in walk):
             continue
-        yield ('west-stair', hy, branch), walk, stair, guests
+        yield ('side-stair', 2.25, branch), walk, stair, guests
 
 
 def _sizes(room):
