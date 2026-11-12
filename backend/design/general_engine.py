@@ -18,7 +18,7 @@ from .general_geometry import union_polygons,signed_area,annotate
 from .general_quality import resolve_notes,make_stairs,movement_evidence,privacy_evidence,repair_furniture_access
 
 EPS=1e-6
-FAMILIES={'cluster':'عناقيد مترابطة بعقدة حركة جانبية','L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة','meander':'ثلاثة تجمعات مترابطة بممر متعرج'}
+FAMILIES={'L':'جناحان مرتبطان','U':'توزيع حول فناء','stepped':'تكوين متنوع العمق','spine':'توزيع مدمج بممر محوري','cross':'عناقيد غرف حول عقدة حركة','adaptive':'أجنحة متغيرة بتكوين حر مُقيد','freeform':'كتل متغيرة بتراجعات مستقلة متعددة','meander':'ثلاثة تجمعات مترابطة بممر متعرج'}
 
 
 def box(x,y,w,d,**kw):return dict(x=x,y=y,width=w,depth=d,**kw)
@@ -28,9 +28,6 @@ def area(r):return r['width']*r['depth']
 def topology(family,W,D,c,ratio,top):
     """Disjoint cells tile a nonrectangular mass; lanes abut connected halls."""
     a=W*ratio;b=D*top
-    if family=='cluster':
-        from .adaptive_geometry import clustered_topology
-        return clustered_topology(W,D,c,ratio,top)
     if family=='meander':
         from .meander_geometry import meander_topology
         return meander_topology(W,D,c,ratio,top)
@@ -274,7 +271,6 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
                     for d in (.70,.82,.92,1.)
                     for r in (.38,.46,.54,.62)
                     for b in (.36,.45,.55,.64)]
-    if family=='cluster':variations=[(s,d,r,b) for s in (.74,.88,1.) for d in (.78,.9,1.) for r in (.35,.42,.58,.65) for b in (.36,.5,.64)]
     if family=='meander':variations=[(s,d,r,b) for s in (.80,.92,1.) for d in (.84,1.) for r in (.38,.44,.55,.61) for b in (.30,.36,.42)]
     if family=='cross':variations=[(s,d,r,b) for s in (1.,.85,.7) for d in (1.,.85,.7) for r in (.4,.5,.6) for b in (.35,.5,.65)]
     if family=='spine':variations=[(s,d,r,.4) for s in (1.,.85,.7) for d in (1.,.9,.82,.74,.68,.60) for r in (.35,.4,.45,.5,.55,.6,.65)]
@@ -290,7 +286,7 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
     # Two-floor plans are excluded until core/stair direction is independently
     # validated. Original orientations remain in the pool for regression safety.
     can_rotate=(brief.floors==1 and not brief.automatic_features.roof_annex
-        and aw>1.45*ad and family in ('spine','cross','adaptive','freeform','cluster'))
+        and aw>1.45*ad and family in ('spine','cross','adaptive','freeform'))
     variations=[(*v,False) for v in variations]+([(*v,True) for v in variations] if can_rotate else [])
     for ws,ds,ratio,top,rotated in variations:
         W,D=aw*ws,ad*ds
@@ -346,9 +342,6 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
                         previous['depth']=stair['y']-previous['y']
                     else:r.update(y=start,depth=depth,kind='corridor',name='بهو وصول الملحق')
             if brief.flexible_space_policy=='remove':cells=[r for r in cells if r['kind']!='reserve']
-            if architecture_first and family=='cluster' and brief.flexible_space_policy=='remove':
-                from assl.architectural_composer import recenter_front_cluster_rooms
-                cells=recenter_front_cluster_rooms(cells,lanes,halls)
             floors.append(cells+([copy.deepcopy(stair)] if stair else []))
         if failed:continue
         if wells and any(not any(r.get('request_id') and (abs(r['y']+r['depth']-(w['y']-brief.wall_thickness/2))<EPS or abs(r['y']-(w['y']+w['depth']+brief.wall_thickness/2))<EPS) and min(r['x']+r['width'],w['x']+w['width'])-max(r['x'],w['x'])>.7 for r in cells for w in wells) for cells in floors):continue
@@ -630,7 +623,7 @@ def materialize(brief,family,result):
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,b),(a,b),(a,D),(0,D)]
     elif family=='U':
         b=result['halls'][1]['y']+result['halls'][1]['depth'];outline=[(0,0),(W,0),(W,D),(W-a,D),(W-a,b),(a,b),(a,D),(0,D)]
-    elif family in ('spine','cross','adaptive','freeform','cluster','meander'):
+    elif family in ('spine','cross','adaptive','freeform','meander'):
         outline=[(0,0),(W,0),(W,D),(0,D)]
     else:
         first=D*result.get('top_fraction',.33);second=D*min(.8,result.get('top_fraction',.37)+.30)
