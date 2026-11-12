@@ -150,18 +150,19 @@ def layouts():
     for entry_depth in (1.5, 2.0, 2.5):
         for branch in ('none', 'east', 'east_cross'):
             entry_x = 7.75
-            # The elbow overlaps the hub along a 1.5m side opening; the
-            # stair begins at the elbow end and shares the hub's west wall.
+            # The elbow shares a 1.4m side opening with the hub. The stair
+            # is north-shifted beside the hub to free a full room frontage
+            # beyond the offset service stem.
             hub_y = entry_depth + 0.5
             entry = rect(entry_x, 0.0, 1.5, entry_depth,
                          kind='corridor', id='family-entry-spur')
-            turn = rect(entry_x, entry_depth, 3.0, 2.0,
+            turn = rect(entry_x, entry_depth, 3.0, 1.9,
                         kind='corridor', id='family-entry-turn')
-            hub = rect(10.75, hub_y, 3.0, 3.0,
+            hub = rect(10.75, hub_y, 3.0, 2.9,
                        kind='corridor', id='family-hub')
-            growth = rect(12.25, hub_y + 3.0, 1.5, 3.0,
+            growth = rect(12.25, hub_y + 2.9, 1.5, 3.1,
                           kind='corridor', id='family-growth-node')
-            stair = rect(7.75, entry_depth + 2.0, 3.0, 4.6,
+            stair = rect(7.75, hub_y + 1.4, 3.0, 4.6,
                          id='shared-stair', kind='stair',
                          name='درج ثابت بين الدورين')
             walk = [entry, turn, hub, growth]
