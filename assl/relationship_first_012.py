@@ -25,6 +25,8 @@ from scipy.sparse import coo_matrix
 from shapely.geometry import box, LineString, Point
 from shapely.ops import unary_union
 
+from backend.design.relationship_catalog import RELATIONSHIPS
+
 T = 0.20
 PLOT_W, PLOT_D = 15.30, 20.30
 EPS = 1e-6
@@ -236,6 +238,22 @@ def anchors(room,halls,other_fixed,limit_per_room=105):
     return result
 
 
+RELATIONSHIP_OBJECTIVE_SCALE = 12.0
+
+
+def relationship_weights():
+    """Return shared functional preferences as MILP soft-objective weights.
+
+    The MILP uses centre-distance as a linearizable spatial proxy. This is
+    NOT a measured door route; FunctionalGraph/009 remain the route authority.
+    """
+    weights = {}
+    for source, target, weight, _code, _rule in RELATIONSHIPS:
+        key = tuple(sorted((source, target)))
+        weights[key] = max(weights.get(key, 0.0), float(weight) * RELATIONSHIP_OBJECTIVE_SCALE)
+    return weights
+
+
 def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     # Every family room is assigned simultaneously. No sequential blocker room.
     req=sorted(rooms,key=lambda r:(r['kind'],r['id']))
@@ -246,12 +264,14 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     n=len(choices)
     origins=[];k=0
     for group in groups:origins.append(list(range(k,k+len(group))));k+=len(group)
+    # One canonical relationship catalogue feeds both the production graph QA
+    # and this optimizer's soft preference objective. Route QA remains separate.
+    relation_weight_map = relationship_weights()
     pair_weights=[]
     for i,ra in enumerate(req):
         for j,rb in enumerate(req[i+1:],i+1):
             pair=tuple(sorted([ra['kind'],rb['kind']]))
-            w={('dining','kitchen'):12.,('dining','living'):5.,
-               ('bathroom','master'):4.,('bathroom','bedroom'):3.}.get(pair,0.)
+            w=relation_weight_map.get(pair,0.)
             if w:pair_weights.append((i,j,w))
     pairstart=n
     vnum=n+2*len(pair_weights)
