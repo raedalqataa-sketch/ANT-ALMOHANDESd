@@ -162,7 +162,10 @@ def layouts():
                        kind='corridor', id='family-hub')
             growth = rect(12.25, hub_y + 2.9, 1.5, 3.1,
                           kind='corridor', id='family-growth-node')
-            stair = rect(7.75, hub_y + 1.4, 3.0, 4.6,
+            # Place the stair beyond the offset stem. It shares a 1.5m
+            # landing wall with the hall but leaves the hub's west frontage
+            # available for room packing.
+            stair = rect(12.25, hub_y + 6.0, 3.0, 4.6,
                          id='shared-stair', kind='stair',
                          name='درج ثابت بين الدورين')
             walk = [entry, turn, hub, growth]
