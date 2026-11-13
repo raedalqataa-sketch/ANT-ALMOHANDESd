@@ -31,7 +31,10 @@ class RelationshipFirstTests(unittest.TestCase):
         self.assertEqual(len(generated), 9)
         self.assertEqual({item[0][2] for item in generated},
                          {'none', 'east', 'east_cross'})
-        for _tag, halls, _stair, guests in generated:
+        for _tag, halls, stair, guests in generated:
+            stem = next(h for h in halls if h.get('id') == 'family-growth-node')
+            self.assertGreaterEqual(m.contact(stair, stem), 1.2)
+            self.assertEqual(m.overlap(stair, stem), 0.0)
             guest_distributors = [r for r in guests if r.get('guest_distributor')]
             ground = corridor_metrics(halls + guest_distributors)
             upper_only = {'family-entry-spur', 'family-entry-turn'}
