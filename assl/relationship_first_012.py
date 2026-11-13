@@ -158,9 +158,9 @@ def layouts():
                          kind='corridor', id='family-entry-spur')
             turn = rect(entry_x, entry_depth, 3.0, 1.9,
                         kind='corridor', id='family-entry-turn')
-            hub = rect(10.75, hub_y, 3.0, 2.9,
+            hub = rect(10.75, hub_y, 3.0, 3.5,
                        kind='corridor', id='family-hub')
-            growth = rect(12.25, hub_y + 2.9, 1.5, 3.1,
+            growth = rect(12.25, hub_y + 3.5, 1.5, 2.5,
                           kind='corridor', id='family-growth-node')
             # Place the stair beyond the offset stem. It shares a 1.5m
             # landing wall with the hall but leaves the hub's west frontage
