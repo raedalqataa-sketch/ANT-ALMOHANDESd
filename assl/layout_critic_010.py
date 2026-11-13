@@ -30,7 +30,8 @@ def corridor_metrics(halls,narrow_width_m=1.8):
    line=LineString([(v,y-1),(v,yy+1)]) if axis=='x' else LineString([(x-1,v),(xx+1,v)])
    for segment in _line_parts(u.intersection(line)):
     longest_axis=max(longest_axis,segment.length)
-    lo,hi=segment.bounds[1],segment.bounds[3] if axis=='x' else (segment.bounds[0],segment.bounds[2])
+    if axis=='x':lo,hi=segment.bounds[1],segment.bounds[3]
+    else:lo,hi=segment.bounds[0],segment.bounds[2]
     cuts=sorted({lo,hi,*([q for q in (ys if axis=='x' else xs) if lo+1e-7<q<hi-1e-7])})
     run=0.
     for low,high in zip(cuts,cuts[1:]):
