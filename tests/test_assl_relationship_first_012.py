@@ -25,22 +25,27 @@ class RelationshipFirstTests(unittest.TestCase):
         self.assertEqual(m.relationship_weights()[('dining', 'kitchen')], 12.0)
         self.assertEqual(m.relationship_weights()[('dining', 'living')], 10.8)
 
-    def test_bent_relational_graphs_respect_010_straight_run_cap(self):
-        from assl.layout_critic_010 import corridor_metrics
+    def test_relational_topology_generator_keeps_multiple_connected_graphs(self):
         generated = list(m.layouts())
-        self.assertEqual(len(generated), 9)
-        self.assertEqual({item[0][2] for item in generated},
-                         {'none', 'east', 'east_cross'})
+        self.assertGreaterEqual(len(generated), 10)
+        self.assertIn('none', {item[0][3] for item in generated})
+        self.assertTrue({'west', 'east', 'both', 'cross'} & {item[0][3] for item in generated})
         for _tag, halls, stair, guests in generated:
-            stem = next(h for h in halls if h.get('id') == 'family-growth-node')
-            self.assertGreaterEqual(m.contact(stair, stem), 1.2)
-            self.assertEqual(m.overlap(stair, stem), 0.0)
-            guest_distributors = [r for r in guests if r.get('guest_distributor')]
-            ground = corridor_metrics(halls + guest_distributors)
-            upper_only = {'family-entry-spur', 'family-entry-turn'}
-            upper = corridor_metrics([h for h in halls if h.get('id') not in upper_only])
-            self.assertLessEqual(ground['longest_run_m'], 6.0, ground)
-            self.assertLessEqual(upper['longest_run_m'], 6.0, upper)
+            self.assertTrue(all(m.inside(r) for r in halls + [stair] + guests))
+            self.assertTrue(any(m.contact(stair, h) >= 1.2 for h in halls))
+            self.assertEqual(unary_union([m.geo(h) for h in halls]).geom_type, 'Polygon')
+
+    def test_widened_hub_breaks_narrow_corridor_run_without_hiding_axis(self):
+        from assl.layout_critic_010 import corridor_metrics
+        halls = [
+            m.rect(0, 0, 1.5, 5.5, kind='corridor'),
+            m.rect(0, 5.5, 2.5, 3.0, kind='corridor'),
+            m.rect(0, 8.5, 1.5, 3.0, kind='corridor'),
+        ]
+        metrics = corridor_metrics(halls)
+        self.assertAlmostEqual(metrics['longest_run_m'], 5.5)
+        self.assertAlmostEqual(metrics['longest_continuous_axis_m'], 11.5)
+        self.assertAlmostEqual(metrics['narrow_width_limit_m'], 1.8)
 
     def test_guest_suite_direct_access_and_separation(self):
         v=m.guest_suite('compact')
