@@ -140,62 +140,38 @@ def guest_suite(side='compact',entry_x=7.75):
 
 
 def layouts():
-    """Generate bent relational circulation graphs with a capped straight run.
-
-    A south entry spur turns laterally before reaching the family hub. The
-    rear service stem is offset so the longest continuous hall axis is bounded
-    by the 3m hub plus 3m stem. Optional east branches create real alternatives
-    only when a room is actually door-served there and survives 009/010.
-    """
-    for entry_depth in (1.5, 2.0, 2.5):
-        for branch in ('none', 'east', 'east_cross'):
-            entry_x = 7.75
-            # The elbow shares a 1.4m side opening with the hub. The stair
-            # is north-shifted beside the hub to free a full room frontage
-            # beyond the offset service stem.
-            hub_y = entry_depth + 0.5
-            entry = rect(entry_x, 0.0, 1.5, entry_depth,
-                         kind='corridor', id='family-entry-spur')
-            turn = rect(entry_x, entry_depth, 3.0, 1.9,
-                        kind='corridor', id='family-entry-turn')
-            hub = rect(10.75, hub_y, 3.0, 3.5,
-                       kind='corridor', id='family-hub')
-            growth = rect(12.25, hub_y + 3.5, 1.5, 2.5,
-                          kind='corridor', id='family-growth-node')
-            # Place the stair beyond the offset stem. It shares a 1.5m
-            # landing wall with the hall but leaves the hub's west frontage
-            # available for room packing.
-            stair = rect(12.25, hub_y + 6.0, 3.0, 4.6,
-                         id='shared-stair', kind='stair',
-                         name='درج ثابت بين الدورين')
-            walk = [entry, turn, hub, growth]
-            if branch in ('east', 'east_cross'):
-                walk.append(rect(13.75, hub_y + 1.5, 1.5, 1.5,
-                                 kind='corridor', id='east-service-node'))
-            if branch == 'east_cross':
-                walk.append(rect(13.75, hub_y + 3.0, 1.5, 1.5,
-                                 kind='corridor', id='east-cross-node'))
-
-            guests = guest_suite('compact', entry_x)
-            all_fixed = walk + [stair] + guests
-            if not all(inside(item) for item in all_fixed):
-                continue
-            if any(overlap(a, b) > EPS
-                   for a, b in itertools.combinations(walk + [stair], 2)):
-                continue
-            if any(overlap(a, b) > EPS for a in walk for b in guests + [stair]):
-                continue
-            if any(overlap(a, b) > EPS
-                   for a, b in itertools.combinations(guests, 2)):
-                continue
-            if not any(contact(g, h) >= .9 for g in guests for h in walk):
-                continue
-            hallpoly = unary_union([geo(h) for h in walk])
-            if hallpoly.geom_type != 'Polygon':
-                continue
-            if not any(contact(stair, h) >= 1.2 for h in walk):
-                continue
-            yield ('bent-entry', entry_depth, branch), walk, stair, guests
+    """Generate *different* connected movement graphs in buildable envelope."""
+    for guest_mode in ('compact','stacked'):
+        for hx in (6.25,7.25,8.25):
+            for hy in (4.5,5.5,6.5):
+                for branch in ('none','west','east','both','cross'):
+                    hub=rect(hx,hy,2.5,3.,kind='corridor',id='family-hub')
+                    # Entry spur placed on real south street frontage; a
+                    # pedestrian door is reserved on its first boundary.
+                    entry=rect(hx+.5,0.,1.5,hy,kind='corridor',id='family-entry-spur')
+                    rear=rect(hx+.5,hy+3.,1.5,3.0,kind='corridor',id='family-growth-node')
+                    stair=rect(hx+2.5,hy-.5,3.0,4.6,id='shared-stair',kind='stair',name='درج ثابت بين الدورين')
+                    walk=[hub,entry,rear]
+                    if branch in ('west','both','cross'):
+                        walk.append(rect(hx-3.,hy+5.,3.5,1.5,kind='corridor',id='west-service-node'))
+                    if branch in ('east','both','cross'):
+                        walk.append(rect(hx+2.,hy+5.,3.5,1.5,kind='corridor',id='east-service-node'))
+                    if branch == 'cross':
+                        walk.append(rect(hx+.5,hy+6.,1.5,2.5,kind='corridor',id='north-service-node'))
+                    guests=guest_suite(guest_mode,entry['x'])
+                    if not all(inside(x) for x in walk+[stair]+guests):continue
+                    # The building must not fragment into an independent annex
+                    # unless the owner explicitly requests an outbuilding.
+                    if not any(contact(g,h)>=.9 for g in guests for h in walk):continue
+                    if any(overlap(a,b)>EPS for a in walk for b in guests+[stair]):continue
+                    if any(overlap(a,b)>EPS for a,b in itertools.combinations(guests,2)):continue
+                    # Exterior entry spur must remain fully separate from guest zone.
+                    # Intersecting corridors form one connected region.
+                    hallpoly=unary_union([geo(h) for h in walk])
+                    if hallpoly.geom_type!='Polygon':continue
+                    if not all(hallpoly.buffer(1e-7).intersects(geo(h)) for h in walk):continue
+                    if not any(contact(stair,h)>=1.2 for h in walk):continue
+                    yield (guest_mode,hx,hy,branch),walk,stair,guests
 
 
 def _sizes(room):
