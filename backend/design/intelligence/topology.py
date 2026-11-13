@@ -45,7 +45,7 @@ def proposals(brief, *, use_references=True):
     # Conditional ordering only; unverified image country/dimensions never used.
     preferred='reference_hub' if use_references else 'functional_hub'
     specs=[('spine',preferred,'front','linear'),('adaptive',preferred,'rear','linear'),
-           ('cluster',preferred,'front','compact_side'),('spine','social_front','rear','compact_side'),
+           ('spine','social_front','rear','compact_side'),
            ('adaptive','service_aligned','front','side_spine'),('freeform',preferred,'rear','linear')]
     if not any(s['zone']=='guest' for s in graph['spaces']):
         specs=[(f,p,c,'linear') for f,p,c,g in specs]

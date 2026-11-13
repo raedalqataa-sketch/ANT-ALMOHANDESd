@@ -15,6 +15,38 @@ class RelationshipFirstTests(unittest.TestCase):
         cls.before=json.loads((ROOT/'fixtures'/'assl_openings_009_valid.json').read_text())
         cls.after=json.loads((ROOT/'fixtures'/'assl_milp_012_candidate.json').read_text())
 
+    def test_milp_uses_canonical_functional_relationship_catalogue(self):
+        from backend.design.relationship_catalog import RELATIONSHIPS
+        expected = {
+            tuple(sorted((source, target))): weight * m.RELATIONSHIP_OBJECTIVE_SCALE
+            for source, target, weight, _code, _rule in RELATIONSHIPS
+        }
+        self.assertEqual(m.relationship_weights(), expected)
+        self.assertEqual(m.relationship_weights()[('dining', 'kitchen')], 12.0)
+        self.assertEqual(m.relationship_weights()[('dining', 'living')], 10.8)
+
+    def test_relational_topology_generator_keeps_multiple_connected_graphs(self):
+        generated = list(m.layouts())
+        self.assertGreaterEqual(len(generated), 10)
+        self.assertIn('none', {item[0][3] for item in generated})
+        self.assertTrue({'west', 'east', 'both', 'cross'} & {item[0][3] for item in generated})
+        for _tag, halls, stair, guests in generated:
+            self.assertTrue(all(m.inside(r) for r in halls + [stair] + guests))
+            self.assertTrue(any(m.contact(stair, h) >= 1.2 for h in halls))
+            self.assertEqual(unary_union([m.geo(h) for h in halls]).geom_type, 'Polygon')
+
+    def test_widened_hub_breaks_narrow_corridor_run_without_hiding_axis(self):
+        from assl.layout_critic_010 import corridor_metrics
+        halls = [
+            m.rect(0, 0, 1.5, 5.5, kind='corridor'),
+            m.rect(0, 5.5, 2.5, 3.0, kind='corridor'),
+            m.rect(0, 8.5, 1.5, 3.0, kind='corridor'),
+        ]
+        metrics = corridor_metrics(halls)
+        self.assertAlmostEqual(metrics['longest_run_m'], 5.5)
+        self.assertAlmostEqual(metrics['longest_continuous_axis_m'], 11.5)
+        self.assertAlmostEqual(metrics['narrow_width_limit_m'], 1.8)
+
     def test_guest_suite_direct_access_and_separation(self):
         v=m.guest_suite('compact')
         self.assertGreaterEqual(m.contact(v[0],v[1]),1.2)

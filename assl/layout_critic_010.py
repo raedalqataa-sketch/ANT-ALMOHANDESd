@@ -4,27 +4,59 @@ from shapely.geometry import LineString
 from shapely.ops import unary_union
 from .openings_009 import shape,shortest_path,inward,cut,validate,shared_edge
 
-DEFAULTS=dict(long_run_m=6.,kitchen_dining_m=10.,bed_bath_m=12.,max_aspect=2.5,max_excess=1.5)
+DEFAULTS=dict(long_run_m=6.,narrow_width_m=1.8,kitchen_dining_m=10.,bed_bath_m=12.,max_aspect=2.5,max_excess=1.5)
 
-def corridor_metrics(halls):
- u=unary_union([shape(h) for h in halls]);longest=0.
- if u.is_empty:return dict(union_m2=0.,longest_run_m=0.)
+def _line_parts(geometry):
+ if geometry.geom_type=='LineString':return [geometry] if geometry.length>1e-7 else []
+ return [part for part in getattr(geometry,'geoms',[]) if part.geom_type=='LineString' and part.length>1e-7]
+
+def corridor_metrics(halls,narrow_width_m=1.8):
+ """Measure uninterrupted *narrow* corridor runs, not the full axis through a lobby.
+
+ A widened hall junction breaks a narrow corridor run. The overall continuous
+ axis is retained as a diagnostic so this refinement never hides the actual
+ entrance-to-room route lengths, which are reported separately by critique().
+ """
+ u=unary_union([shape(h) for h in halls])
+ if u.is_empty:return dict(union_m2=0.,longest_run_m=0.,longest_narrow_run_m=0.,longest_continuous_axis_m=0.,narrow_width_limit_m=narrow_width_m)
  x,y,xx,yy=u.bounds
- # Continuous sections of dissolved geometry; splitting cells cannot alter runs.
- polys=[u] if u.geom_type=='Polygon' else list(u.geoms)
- xs=sorted({p[0] for poly in polys for p in poly.exterior.coords});ys=sorted({p[1] for poly in polys for p in poly.exterior.coords})
+ polys=[u] if u.geom_type=='Polygon' else list(getattr(u,'geoms',[]))
+ xs=sorted({p[0] for poly in polys for p in poly.exterior.coords})
+ ys=sorted({p[1] for poly in polys for p in poly.exterior.coords})
+ longest_axis=0.;longest_narrow=0.
  for axis,levels in [('x',xs),('y',ys)]:
   for a,b in zip(levels,levels[1:]):
-   v=(a+b)/2;line=LineString([(v,y-1),(v,yy+1)]) if axis=='x' else LineString([(x-1,v),(xx+1,v)])
-   intersection=u.intersection(line);parts=list(intersection.geoms) if hasattr(intersection,'geoms') else [intersection]
-   longest=max(longest,max((p.length for p in parts),default=0))
- return dict(union_m2=round(u.area,5),longest_run_m=round(longest,5))
+   v=(a+b)/2
+   line=LineString([(v,y-1),(v,yy+1)]) if axis=='x' else LineString([(x-1,v),(xx+1,v)])
+   for segment in _line_parts(u.intersection(line)):
+    longest_axis=max(longest_axis,segment.length)
+    if axis=='x':lo,hi=segment.bounds[1],segment.bounds[3]
+    else:lo,hi=segment.bounds[0],segment.bounds[2]
+    cuts=sorted({lo,hi,*([q for q in (ys if axis=='x' else xs) if lo+1e-7<q<hi-1e-7])})
+    run=0.
+    for low,high in zip(cuts,cuts[1:]):
+     mid=(low+high)/2
+     cross=LineString([(x-1,mid),(xx+1,mid)]) if axis=='x' else LineString([(mid,y-1),(mid,yy+1)])
+     parts=_line_parts(u.intersection(cross))
+     width=next((p.length for p in parts
+                 if (p.bounds[0]-1e-7<=v<=p.bounds[2]+1e-7 if axis=='x'
+                     else p.bounds[1]-1e-7<=v<=p.bounds[3]+1e-7)),None)
+     if width is not None and width<=narrow_width_m+1e-7:
+      run+=high-low
+     else:
+      longest_narrow=max(longest_narrow,run);run=0.
+    longest_narrow=max(longest_narrow,run)
+ return dict(union_m2=round(u.area,5),
+             longest_run_m=round(longest_narrow,5),
+             longest_narrow_run_m=round(longest_narrow,5),
+             longest_continuous_axis_m=round(longest_axis,5),
+             narrow_width_limit_m=narrow_width_m)
 
 def critique(brief,p,limits=None):
  limits={**DEFAULTS,**(limits or {})};qa=validate(brief,p);defects=[];floors=[];t=brief.wall_thickness
  if qa['status']!='PASS':defects.append(dict(type='HARD_VALIDATION',evidence=qa['issues']))
  for fi,(rooms,halls,opened) in enumerate(zip(p['rooms_by_floor'],p['halls_by_floor'],p.get('opening_model_009',[]))):
-  all_halls=halls+[r for r in rooms if r.get('guest_distributor')];m=corridor_metrics(all_halls);m['floor']=fi
+  all_halls=halls+[r for r in rooms if r.get('guest_distributor')];m=corridor_metrics(all_halls,limits['narrow_width_m']);m['floor']=fi
   m['configuration_m2']=unary_union([shape(r) for r in rooms+halls]).area;m['movement_ratio']=m['union_m2']/m['configuration_m2']
   routes=qa['floors'][fi]['routes'] if len(qa['floors'])>fi else [];lengths=[r['length_m'] for r in routes if not r['room_id'].endswith('EXTERIOR')]
   m['mean_access_m']=sum(lengths)/len(lengths) if lengths else None

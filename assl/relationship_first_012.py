@@ -25,6 +25,8 @@ from scipy.sparse import coo_matrix
 from shapely.geometry import box, LineString, Point
 from shapely.ops import unary_union
 
+from backend.design.relationship_catalog import RELATIONSHIPS
+
 T = 0.20
 PLOT_W, PLOT_D = 15.30, 20.30
 EPS = 1e-6
@@ -236,6 +238,22 @@ def anchors(room,halls,other_fixed,limit_per_room=105):
     return result
 
 
+RELATIONSHIP_OBJECTIVE_SCALE = 12.0
+
+
+def relationship_weights():
+    """Return shared functional preferences as MILP soft-objective weights.
+
+    The MILP uses centre-distance as a linearizable spatial proxy. This is
+    NOT a measured door route; FunctionalGraph/009 remain the route authority.
+    """
+    weights = {}
+    for source, target, weight, _code, _rule in RELATIONSHIPS:
+        key = tuple(sorted((source, target)))
+        weights[key] = max(weights.get(key, 0.0), float(weight) * RELATIONSHIP_OBJECTIVE_SCALE)
+    return weights
+
+
 def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     # Every family room is assigned simultaneously. No sequential blocker room.
     req=sorted(rooms,key=lambda r:(r['kind'],r['id']))
@@ -246,12 +264,14 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     n=len(choices)
     origins=[];k=0
     for group in groups:origins.append(list(range(k,k+len(group))));k+=len(group)
+    # One canonical relationship catalogue feeds both the production graph QA
+    # and this optimizer's soft preference objective. Route QA remains separate.
+    relation_weight_map = relationship_weights()
     pair_weights=[]
     for i,ra in enumerate(req):
         for j,rb in enumerate(req[i+1:],i+1):
             pair=tuple(sorted([ra['kind'],rb['kind']]))
-            w={('dining','kitchen'):12.,('dining','living'):5.,
-               ('bathroom','master'):4.,('bathroom','bedroom'):3.}.get(pair,0.)
+            w=relation_weight_map.get(pair,0.)
             if w:pair_weights.append((i,j,w))
     pairstart=n
     vnum=n+2*len(pair_weights)
@@ -288,12 +308,22 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     # Use pairwise clash cuts (sparse) rather than coarse tile exclusions;
     # this is an exact continuous rectangle non-overlap condition for candidates.
     conflicts=0
+    pair_conflict_summary=[]
     for i in range(len(req)):
         for j in range(i+1,len(req)):
+            pair_total=len(origins[i])*len(origins[j])
+            pair_clashes=0
             for a in origins[i]:
                 for b in origins[j]:
                     if overlap(choices[a][1],choices[b][1])>EPS:
-                        add({a:1,b:1},-np.inf,1);conflicts+=1
+                        add({a:1,b:1},-np.inf,1)
+                        conflicts+=1
+                        pair_clashes+=1
+            pair_conflict_summary.append({
+                'room_a': req[i]['id'], 'room_b': req[j]['id'],
+                'candidate_pairs': pair_total, 'clashing_pairs': pair_clashes,
+                'fully_blocked': pair_total > 0 and pair_clashes == pair_total,
+            })
     for pi,(i,j,w) in enumerate(pair_weights):
         # |dx|, |dy| from selected room centers. Soft cost, hard geometry.
         for axis in ('x','y'):
@@ -312,7 +342,14 @@ def optimize_floor(rooms,halls,stair,guests,time_limit=7,forbidden=None):
     result=milp(c=obj,integrality=integrality,bounds=Bounds(np.zeros(vnum),ub),
                 constraints=LinearConstraint(mat,np.array(low),np.array(up)),
                 options={'time_limit':time_limit,'mip_rel_gap':.08})
-    evidence=dict(options=[len(group) for group in groups],no_good_cuts=no_good_cuts,binary_variables=n,
+    evidence=dict(options=[len(group) for group in groups],
+                  room_option_summary=[
+                      {'room_id': room['id'], 'kind': room['kind'], 'count': len(group),
+                       'sample': [{'x': q['x'], 'y': q['y'], 'width': q['width'], 'depth': q['depth']}
+                                  for q, _cost in group[:8]]}
+                      for room, group in zip(req, groups)],
+                  pair_conflict_summary=pair_conflict_summary,
+                  no_good_cuts=no_good_cuts,binary_variables=n,
                   clashes=conflicts,linear_rows=len(low),time_sec=round(time.monotonic()-start,2),
                   solver_status=int(result.status),message=result.message,
                   objective=float(result.fun) if result.fun is not None else None)
@@ -398,7 +435,8 @@ def search(time_limit=5,limit=60):
     for idx,(tag,halls,stair,guests) in enumerate(layouts()):
         if idx>=limit:break
         group=[];reports=[]
-        halls_upper=[h for h in halls if h['id']!='family-entry-spur']
+        upper_only={'family-entry-spur','family-entry-turn'}
+        halls_upper=[h for h in halls if h['id'] not in upper_only]
         per_floor_halls=[halls,halls_upper]
         for fi,requests in enumerate(reqs):
             family,rep=optimize_floor(requests,per_floor_halls[fi],stair,guests if fi==0 else [],time_limit=time_limit)

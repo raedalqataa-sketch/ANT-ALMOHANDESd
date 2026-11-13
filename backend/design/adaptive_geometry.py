@@ -123,7 +123,13 @@ def moderate_room_expansion(cells, wall_thickness, area_factor=None):
 
 
 def clustered_topology(width, depth, corridor, front_fraction, split_fraction):
-    """Two room clusters linked by a lateral node, without a full axial hall.
+    """RETIRED legacy helper; excluded from all active generation routes.
+
+    Do not add this function back to family registries, planners, schemas or
+    topology proposals. Retained only as historical source for auditability.
+    
+    Two room clusters linked by a lateral node, without a full axial hall.
+
 
     Orthogonal bounded topology: independent front/back stems yield circulation
     bends and exterior recesses. Occupied cells determine the final silhouette.
