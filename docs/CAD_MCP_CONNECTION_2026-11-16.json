@@ -1,0 +1,59 @@
+{
+  "timestamp_utc": "2026-11-16T00:25:05.593054+00:00",
+  "scope": "stdio_connection_and_discovery_only",
+  "architecturally_approved": false,
+  "servers": {
+    "archlang": {
+      "ok": true,
+      "package": "@chanmeng666/archlang-mcp@0.2.45",
+      "protocol_version": "2024-11-05",
+      "server_info": {
+        "name": "archlang",
+        "version": "0.2.45"
+      },
+      "tool_names": [
+        "compile",
+        "describe",
+        "lint",
+        "validate",
+        "score",
+        "repair",
+        "fix",
+        "finish",
+        "suggest",
+        "complete",
+        "link"
+      ],
+      "tool_count": 11,
+      "tool_calls_performed": false
+    },
+    "aspicio": {
+      "ok": true,
+      "package": "@aspicio/mcp@0.13.2",
+      "protocol_version": "2024-11-05",
+      "server_info": {
+        "name": "aspicio",
+        "title": "Aspicio",
+        "version": "0.13.2",
+        "icons": [
+          {
+            "src": "https://aspicio.frontsail.app/favicon.svg",
+            "mimeType": "image/svg+xml"
+          }
+        ],
+        "websiteUrl": "https://aspicio.frontsail.app"
+      },
+      "tool_names": [
+        "describe_dxf",
+        "render_dxf",
+        "describe_pdf",
+        "render_pdf",
+        "describe_doc",
+        "render_doc"
+      ],
+      "tool_count": 6,
+      "tool_calls_performed": false
+    }
+  },
+  "ok": true
+}

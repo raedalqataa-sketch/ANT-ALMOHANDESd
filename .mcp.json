@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "archlang": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@chanmeng666/archlang-mcp@0.2.45"
+      ]
+    },
+    "aspicio": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@aspicio/mcp@0.13.2"
+      ]
+    }
+  }
+}
