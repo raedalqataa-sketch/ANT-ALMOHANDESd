@@ -130,6 +130,26 @@ def checks(report):
                  label='رسم بياني مستقل لاتصال الفراغات؛ لا يحل محل فحص مسارات الحركة',
                  evidence={'requires_review':report['independent_geometry']['requires_circulation_review'],
                            'floors':report['independent_geometry']['floors']})]
+    verified = {floor["floor"]: floor["verified_opening_routes"]
+                for floor in report["independent_geometry"]["floors"]
+                if floor.get("verified_opening_routes") is not None}
+    if verified:
+        needs_review = False
+        for row in verified.values():
+            guest = row["guest_privacy"]
+            if row["opening_issues"] or row["requested_rooms_without_verified_route"]:
+                needs_review = True
+            if guest is not None and (not guest["verified_guest_entry_rooms"]
+                                      or guest["guest_rooms_without_guest_only_route"]
+                                      or guest["protected_rooms_reachable"]):
+                needs_review = True
+        basic.append(dict(
+            check_id="V4-verified-opening-routes",
+            status="PENDING" if needs_review else "PASS",
+            label="تدقيق هندسة الفتحات واتصال المسارات وفصل نطاق الضيوف",
+            evidence={"floors": verified, "scope": "2D opening and graph audit; "
+                      "guest privacy covers access through modeled doors only"},
+        ))
     return basic+coordination_checks(report['execution_coordination'])
 
 

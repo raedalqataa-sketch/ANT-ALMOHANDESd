@@ -10,8 +10,9 @@ from itertools import combinations
 import networkx as nx
 from shapely.geometry import box as polygon_box
 
+from .architectural_openings import EXTERIOR_IDS, inspect_openings
+
 AREA_TOLERANCE_M2 = 1e-5
-EXTERIOR_IDS = frozenset({"EXTERIOR", "OUTSIDE"})
 
 
 def _rect(entity):
@@ -79,11 +80,13 @@ def inspect(model):
 
         # Corridor cells touch across full edges without a door; this is a
         # *topology* edge only and not proof of an unobstructed real-life route.
+        corridor_graph = nx.create_empty_copy(door_graph)
         halls = [r for r in rooms if r.get("kind") == "corridor" and r.get("id") in shapes]
         for a, b in combinations(halls, 2):
             boundary = shapes[a["id"]].boundary.intersection(shapes[b["id"]].boundary)
             if boundary.length > 0.60:
                 door_graph.add_edge(a["id"], b["id"], kind="corridor_contact")
+                corridor_graph.add_edge(a["id"], b["id"])
 
         accessible = set()
         for source in entry_room_ids:
@@ -92,6 +95,8 @@ def inspect(model):
         unreachable = sorted(set(requested) - accessible)
         floor_reports.append({
             "floor": floor.get("id"),
+            "verified_opening_routes": (inspect_openings(floor, shapes, corridor_graph)
+                                        if "walls" in floor else None),
             "room_count": len(rooms),
             "invalid_rectangles": invalid,
             "duplicate_room_ids": duplicates,
@@ -111,7 +116,7 @@ def inspect(model):
     )
     review = any(row["requested_rooms_without_entry_graph_route"] for row in floor_reports)
     return {
-        "revision": "geos-networkx-crosscheck-1",
+        "revision": "geos-networkx-crosscheck-2",
         "status": "FAIL" if fail else "PASS",
         "requires_circulation_review": review,
         "floors": floor_reports,
