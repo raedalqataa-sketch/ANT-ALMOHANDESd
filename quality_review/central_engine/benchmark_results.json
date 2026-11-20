@@ -1,0 +1,303 @@
+{
+  "riyadh-standard": {
+    "reference_v3": {
+      "status": "DRAFT_REVIEW",
+      "unavailable": [],
+      "alternatives": [
+        {
+          "candidate": "freeform-social_front-front",
+          "revision": "9006607fe5824a47afb4c070cf3d8b34",
+          "largest_floor_m2": 232.18,
+          "gross_circulation_union_m2": 75.6724,
+          "requested_spaces": 9,
+          "pending_checks": 25
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear",
+          "revision": "04f0cc7ea0284962949608da0afc7f85",
+          "largest_floor_m2": 205.54,
+          "gross_circulation_union_m2": 69.436,
+          "requested_spaces": 9,
+          "pending_checks": 25
+        },
+        {
+          "candidate": "freeform-relationship_aware-rear",
+          "revision": "d0506425afbc439c931cb87e48ac90f5",
+          "largest_floor_m2": 232.79,
+          "gross_circulation_union_m2": 75.6724,
+          "requested_spaces": 9,
+          "pending_checks": 25
+        }
+      ],
+      "seconds": 13.75
+    },
+    "central_v4": {
+      "status": "DRAFT_REVIEW",
+      "unavailable": [],
+      "alternatives": [
+        {
+          "candidate": "adaptive-social_front-front-compact-side",
+          "revision": "213b09530fd64810966d310f3c6de957",
+          "largest_floor_m2": 163.04,
+          "gross_circulation_union_m2": 58.8546,
+          "requested_spaces": 9,
+          "pending_checks": 28
+        },
+        {
+          "candidate": "freeform-social_front-front",
+          "revision": "3611cb5c3e4344ff906f3795655c9d8e",
+          "largest_floor_m2": 181.46,
+          "gross_circulation_union_m2": 75.6724,
+          "requested_spaces": 9,
+          "pending_checks": 28
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear",
+          "revision": "c274ae0a54db4ecca7d20103b9527102",
+          "largest_floor_m2": 173.28,
+          "gross_circulation_union_m2": 68.271,
+          "requested_spaces": 9,
+          "pending_checks": 28
+        }
+      ],
+      "run_id": "d3e3bde9f91947fab53ea11511a2f31e",
+      "comparison": [
+        {
+          "revision": "213b09530fd64810966d310f3c6de957",
+          "largest_floor_m2": 163.04,
+          "gross_circulation_union_m2": 58.8546,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 28
+        },
+        {
+          "revision": "3611cb5c3e4344ff906f3795655c9d8e",
+          "largest_floor_m2": 181.46,
+          "gross_circulation_union_m2": 75.6724,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 28
+        },
+        {
+          "revision": "c274ae0a54db4ecca7d20103b9527102",
+          "largest_floor_m2": 173.28,
+          "gross_circulation_union_m2": 68.271,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 28
+        }
+      ],
+      "seconds": 33.46
+    }
+  },
+  "riyadh-luxury": {
+    "reference_v3": {
+      "status": "DRAFT_REVIEW",
+      "unavailable": [],
+      "alternatives": [
+        {
+          "candidate": "adaptive-relationship_aware-rear",
+          "revision": "7ffe924b6c0d48d39c73a8599e7229c2",
+          "largest_floor_m2": 264.28,
+          "gross_circulation_union_m2": 78.2712,
+          "requested_spaces": 9,
+          "pending_checks": 25
+        },
+        {
+          "candidate": "freeform-relationship_aware-rear",
+          "revision": "c1f17fd7480d421ab22457cb675340e5",
+          "largest_floor_m2": 270.14,
+          "gross_circulation_union_m2": 99.4677,
+          "requested_spaces": 9,
+          "pending_checks": 25
+        },
+        {
+          "candidate": "adaptive-social_front-front",
+          "revision": "e66a0c9f73d944b1ac7cdcb8a08cfff9",
+          "largest_floor_m2": 288.89,
+          "gross_circulation_union_m2": 86.43,
+          "requested_spaces": 9,
+          "pending_checks": 25
+        }
+      ],
+      "seconds": 15.55
+    },
+    "central_v4": {
+      "status": "DRAFT_REVIEW",
+      "unavailable": [],
+      "alternatives": [
+        {
+          "candidate": "spine-service_aligned-rear",
+          "revision": "214b4a25726948328ebfea57841f1332",
+          "largest_floor_m2": 180.18,
+          "gross_circulation_union_m2": 77.4872,
+          "requested_spaces": 9,
+          "pending_checks": 28
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear",
+          "revision": "0ab7b067cf7c43499bd8dbe48a39245c",
+          "largest_floor_m2": 194.21,
+          "gross_circulation_union_m2": 78.2712,
+          "requested_spaces": 9,
+          "pending_checks": 28
+        },
+        {
+          "candidate": "spine-relationship_aware-rear",
+          "revision": "463242187edc41aaa7c41369988bd84b",
+          "largest_floor_m2": 180.18,
+          "gross_circulation_union_m2": 77.4872,
+          "requested_spaces": 9,
+          "pending_checks": 28
+        }
+      ],
+      "run_id": "f93c33842b774988815e1edaced3ba5e",
+      "comparison": [
+        {
+          "revision": "214b4a25726948328ebfea57841f1332",
+          "largest_floor_m2": 180.18,
+          "gross_circulation_union_m2": 77.4872,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 28
+        },
+        {
+          "revision": "0ab7b067cf7c43499bd8dbe48a39245c",
+          "largest_floor_m2": 194.21,
+          "gross_circulation_union_m2": 78.2712,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 28
+        },
+        {
+          "revision": "463242187edc41aaa7c41369988bd84b",
+          "largest_floor_m2": 180.18,
+          "gross_circulation_union_m2": 77.4872,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 28
+        }
+      ],
+      "seconds": 49.84
+    }
+  },
+  "sanaa-guest": {
+    "reference_v3": {
+      "status": "DRAFT_REVIEW",
+      "unavailable": [],
+      "alternatives": [
+        {
+          "candidate": "adaptive-relationship_aware-rear",
+          "revision": "f72ca5e873174a5d927f3542a98bc5c8",
+          "largest_floor_m2": 205.2,
+          "gross_circulation_union_m2": 68.7524,
+          "requested_spaces": 9,
+          "pending_checks": 9
+        },
+        {
+          "candidate": "freeform-relationship_aware-rear",
+          "revision": "536d11aea8eb4f87a31fc5172240e4ee",
+          "largest_floor_m2": 209.34,
+          "gross_circulation_union_m2": 67.983,
+          "requested_spaces": 9,
+          "pending_checks": 9
+        },
+        {
+          "candidate": "adaptive-social_front-front",
+          "revision": "7e1d906f6e464d1998260ee11a72a12a",
+          "largest_floor_m2": 229.62,
+          "gross_circulation_union_m2": 71.8202,
+          "requested_spaces": 9,
+          "pending_checks": 9
+        }
+      ],
+      "seconds": 9.16
+    },
+    "central_v4": {
+      "status": "DRAFT_REVIEW",
+      "unavailable": [],
+      "alternatives": [
+        {
+          "candidate": "adaptive-social_front-front-compact-side",
+          "revision": "55abac560455424b96d68fd9330f620e",
+          "largest_floor_m2": 165.12,
+          "gross_circulation_union_m2": 61.8908,
+          "requested_spaces": 9,
+          "pending_checks": 12
+        },
+        {
+          "candidate": "adaptive-social_front-front-side-spine",
+          "revision": "7c8f48d6e018499ea47d87ce23a9fe74",
+          "largest_floor_m2": 173.9,
+          "gross_circulation_union_m2": 70.1529,
+          "requested_spaces": 9,
+          "pending_checks": 12
+        },
+        {
+          "candidate": "adaptive-relationship_aware-rear",
+          "revision": "5e1cc28815754431a7da9d24c365d228",
+          "largest_floor_m2": 171.08,
+          "gross_circulation_union_m2": 68.7524,
+          "requested_spaces": 9,
+          "pending_checks": 12
+        }
+      ],
+      "run_id": "8438cd9482a0412fb239e75672340fe1",
+      "comparison": [
+        {
+          "revision": "55abac560455424b96d68fd9330f620e",
+          "largest_floor_m2": 165.12,
+          "gross_circulation_union_m2": 61.8908,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 12
+        },
+        {
+          "revision": "7c8f48d6e018499ea47d87ce23a9fe74",
+          "largest_floor_m2": 173.9,
+          "gross_circulation_union_m2": 70.1529,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 12
+        },
+        {
+          "revision": "5e1cc28815754431a7da9d24c365d228",
+          "largest_floor_m2": 171.08,
+          "gross_circulation_union_m2": 68.7524,
+          "diagnostic_unallocated_gross_m2": 0.0,
+          "functional_paths": 6,
+          "unreachable_paths": 0,
+          "pending_checks": 12
+        }
+      ],
+      "seconds": 20.07
+    }
+  },
+  "tight-rejection": {
+    "reference_v3": {
+      "status": "REJECTED",
+      "reason": "1 validation error for VillaBrief\n  Value error, المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي [type=value_error, input_value={'project_name': 'تصو...nt': 'auto_rear_corner'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error",
+      "alternatives": [],
+      "seconds": 0.0
+    },
+    "central_v4": {
+      "status": "REJECTED",
+      "reason": "1 validation error for VillaBrief\n  Value error, المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي [type=value_error, input_value={'project_name': 'تصو...nt': 'auto_rear_corner'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error",
+      "alternatives": [],
+      "seconds": 0.0
+    }
+  },
+  "verification": {
+    "targeted_tests_passed": 15,
+    "native_http_smoke": "Actual POST generated 3 candidates, windows measured, PDF/DXF served, non-released files denied, impossible brief rejected.",
+    "comparison_note": "Same three constructive programmes and one infeasible programme. V3 with constitution v2 is a reference profile, not the previous V4 UI or the published clustered site."
+  }
+}

@@ -1,0 +1,1217 @@
+{
+  "method": "Python compilation and selected offline tests in every pinned remote branch; not every suite in each branch",
+  "branches": [
+    {
+      "branch": "chore/engineering-tools-2026-10-23",
+      "commit": "c3584e48a0c4ee480a1707c0301fd983274ae879",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 4.08s\n"
+      },
+      "seconds": 5.7
+    },
+    {
+      "branch": "chore/live-engine-verification-20261023",
+      "commit": "99d0b7bc241765250a6267fb1cb360c2242d4e99",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 4.12s\n"
+      },
+      "seconds": 5.71
+    },
+    {
+      "branch": "chore/pinned-cad-mcp-tools",
+      "commit": "657699b6566687da1edda8af922b6871c3fef336",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 3.98s\n"
+      },
+      "seconds": 5.82
+    },
+    {
+      "branch": "codex/live-engine-proof-gate",
+      "commit": "f8283dfe98d200191ce82cb8e84f0752235470e4",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_release_manifest.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n2 passed in 0.02s\n"
+      },
+      "seconds": 0.7
+    },
+    {
+      "branch": "feat/2024-actual-geometry-overlays",
+      "commit": "db7398d8099b0565c08cbc6de5d25383b8c498a2",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_saudi_2024_overlay.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "......                                                                   [100%]\n6 passed in 0.02s\n"
+      },
+      "seconds": 0.59
+    },
+    {
+      "branch": "feat/automatic-villa-features-v1",
+      "commit": "0c47238ea21da8010735c5cd1ca9de90fdf4526e",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.04s\n"
+      },
+      "seconds": 3.09
+    },
+    {
+      "branch": "feat/gemini-api-integration",
+      "commit": "a0569e9af4ded8b831c3273fe09553b89b100ff5",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_gemini_provider.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".....                                                                    [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n5 passed, 1 warning in 1.41s\n"
+      },
+      "seconds": 2.78
+    },
+    {
+      "branch": "feat/municipal-2024-geometry-phase2",
+      "commit": "cf98fa06346657109985a7ee341cceea7d68d911",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_saudi_2024_geometry.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "........                                                                 [100%]\n8 passed in 0.12s\n"
+      },
+      "seconds": 0.8
+    },
+    {
+      "branch": "feat/municipal-residential-2024-rules",
+      "commit": "a20324982e6203e5e68284b96d03f2c96105d02d",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.14s\n"
+      },
+      "seconds": 3.42
+    },
+    {
+      "branch": "feat/v4-relayout-coordination-rebased-20261023",
+      "commit": "f27d525cd88f4efe145ca1b7e5a95fc7ddde7313",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_layout_mutations_v4.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "...                                                                      [100%]\n3 passed in 0.06s\n"
+      },
+      "seconds": 0.91
+    },
+    {
+      "branch": "feature/adaptive-residential-sa-ye",
+      "commit": "fdf2ef34f08dfb574104121155b659a52fd4e705",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_multi_country_design.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".......                                                                  [100%]\n7 passed in 0.18s\n"
+      },
+      "seconds": 1.04
+    },
+    {
+      "branch": "feature/ai-auto-keys-002",
+      "commit": "32be0b05a4d36ea4e5bf8aee36eb9721d52a57b8",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_ai_lab_credentials.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".........                                                                [100%]\n9 passed in 0.10s\n"
+      },
+      "seconds": 1.0
+    },
+    {
+      "branch": "feature/architectural-alternatives-v1",
+      "commit": "f405dbf1fb5d01f973872087afe98ab965fea9d3",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.32s\n"
+      },
+      "seconds": 3.5
+    },
+    {
+      "branch": "feature/architectural-core-integration",
+      "commit": "9ac8123d3c2f2ce65b2066a05cfdbed0177cc028",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 3.01s\n"
+      },
+      "seconds": 4.68
+    },
+    {
+      "branch": "feature/architectural-engine-v04",
+      "commit": "6a652e841c2525b3a5a1df2b8474705f9d80baad",
+      "features": [],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_design.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..................                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n18 passed, 1 warning in 2.60s\n"
+      },
+      "seconds": 3.69
+    },
+    {
+      "branch": "feature/architectural-intelligence-space-efficiency-004",
+      "commit": "a756632c3fbe825f571d8b4d2d75bd40b5d7c4fd",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_architectural_intelligence.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "............                                                             [100%]\n12 passed in 1.14s\n"
+      },
+      "seconds": 2.39
+    },
+    {
+      "branch": "feature/architectural-intelligence-v1",
+      "commit": "1ddc5140400b69dd51c6443282ee730e66f323f2",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.19s\n"
+      },
+      "seconds": 3.4
+    },
+    {
+      "branch": "feature/architecture-compact-hub-005",
+      "commit": "02d3943d02dec974423a3face81905eaa327ba2e",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_architectural_composer.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".....................                                                    [100%]\n21 passed in 0.05s\n"
+      },
+      "seconds": 0.91
+    },
+    {
+      "branch": "feature/architecture-composition-first-004",
+      "commit": "808eaad21043020f0d07837959b2009fa6a6d91f",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_architectural_composer.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".....................                                                    [100%]\n21 passed in 0.04s\n"
+      },
+      "seconds": 0.9
+    },
+    {
+      "branch": "feature/architecture-constitution-v2",
+      "commit": "138fcebe1befd2d42716e667b188e4d809ea695a",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_constitution_v2.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "...........                                                              [100%]\n11 passed in 14.99s\n"
+      },
+      "seconds": 16.0
+    },
+    {
+      "branch": "feature/architecture-constraint-packing-007",
+      "commit": "c5244f86de4960082ab8b45c8c53db5aafbd8784",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_free_layout_solver.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".........                                                                [100%]\n9 passed in 0.23s\n"
+      },
+      "seconds": 1.02
+    },
+    {
+      "branch": "feature/architecture-diverse-topology-008",
+      "commit": "82446e3cf4f055518c3b5e023dc3ca442aaeff47",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_topology_options.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "......                                                                   [100%]\n6 passed in 0.03s\n"
+      },
+      "seconds": 0.97
+    },
+    {
+      "branch": "feature/architecture-diversity-qa-009",
+      "commit": "b98f566a6915e61e6cc00fbb7dbe5d68b37cdb7c",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_topology_options.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "......                                                                   [100%]\n6 passed in 0.03s\n"
+      },
+      "seconds": 1.0
+    },
+    {
+      "branch": "feature/architecture-door-circulation-validation-009",
+      "commit": "6d60c93e5e4c4467b4b1da8bda982ddb8b1f34a0",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_openings_009.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "...........                                                              [100%]\n11 passed in 3.74s\n"
+      },
+      "seconds": 4.69
+    },
+    {
+      "branch": "feature/architecture-feedback-replan-010",
+      "commit": "b98f566a6915e61e6cc00fbb7dbe5d68b37cdb7c",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.55s\n"
+      },
+      "seconds": 4.06
+    },
+    {
+      "branch": "feature/architecture-feedback-replan-010-codex",
+      "commit": "68f6c9e314af7fb1bb3dee4f106086623c05e6fb",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_replan_010.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".....                                                                    [100%]\n5 passed in 3.71s\n"
+      },
+      "seconds": 4.53
+    },
+    {
+      "branch": "feature/architecture-functional-graph-006",
+      "commit": "c13b7793e598ac5fbfaa43720a2757a8303b6196",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.60s\n"
+      },
+      "seconds": 4.05
+    },
+    {
+      "branch": "feature/architecture-functional-groups-012",
+      "commit": "f6321a87cfad4bed089118a570dbcc41b7ee6e58",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_functional_groups_012.py",
+      "check": {
+        "status": "timeout",
+        "output": ".................."
+      },
+      "seconds": 45.54,
+      "retry": {
+        "branch": "feature/architecture-functional-groups-012",
+        "commit": "f6321a87cfad4bed089118a570dbcc41b7ee6e58",
+        "features": [
+          "assl",
+          "client_web",
+          "backend/design/general_engine.py",
+          "backend/design/architect_planner.py",
+          "backend/design/functional_program.py",
+          "backend/design/layout_rebuild.py",
+          "backend/design/independent_audit.py"
+        ],
+        "syntax": {
+          "status": "pass",
+          "exit_code": 0,
+          "output": ""
+        },
+        "test": "test_assl_functional_groups_012.py",
+        "check": {
+          "status": "pass",
+          "exit_code": 0,
+          "output": "...................                                                      [100%]\n19 passed in 65.06s (0:01:05)\n"
+        },
+        "seconds": 66.01
+      }
+    },
+    {
+      "branch": "feature/architecture-relationship-milp-012-experimental",
+      "commit": "89367f1a42784c7f55b27f415b89e76d110e4014",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_stage012_gate_fail_closed.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".........                                                                [100%]\n9 passed in 0.04s\n"
+      },
+      "seconds": 0.97
+    },
+    {
+      "branch": "feature/architecture-structural-replanning-011",
+      "commit": "5242446d50fec2b72ea692af498d336780e9eb41",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_structural_011.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "............                                                             [100%]\n12 passed in 2.40s\n"
+      },
+      "seconds": 3.3
+    },
+    {
+      "branch": "feature/assl-geometry-qa-003",
+      "commit": "c003686b0b71a86eabb108d0f3bda32f2ceebaca",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.88s\n"
+      },
+      "seconds": 4.3
+    },
+    {
+      "branch": "feature/assl-regulatory-core-v02",
+      "commit": "e39b8d992735d96302272a63f4a028cc7e90f6af",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_integration_gate.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "....                                                                     [100%]\n4 passed in 0.07s\n"
+      },
+      "seconds": 0.91
+    },
+    {
+      "branch": "feature/automatic-architect-intake",
+      "commit": "5641d87cea384a02ce23fb312fe67837c94c1f73",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.37s\n"
+      },
+      "seconds": 3.46
+    },
+    {
+      "branch": "feature/coherent-villa-massing",
+      "commit": "c9ef76d4900c270b88bf7861847609cd3e95f517",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_massing_quality.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "....                                                                     [100%]\n4 passed in 8.51s\n"
+      },
+      "seconds": 9.31
+    },
+    {
+      "branch": "feature/completion-order-release-proof",
+      "commit": "1cfba611d42f2ae11356cf64d647593a14d94a23",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_live_release_provenance.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "........                                                                 [100%]\n8 passed in 0.15s\n"
+      },
+      "seconds": 0.99
+    },
+    {
+      "branch": "feature/customer-engine-ui-005",
+      "commit": "01778882a0633d739c104625dbe4dbaf4615d33d",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.96s\n"
+      },
+      "seconds": 4.43
+    },
+    {
+      "branch": "feature/customer-generation-experience",
+      "commit": "ba2259758730490d3ecac111aa3e49c1709cf164",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_browser_runtime_dependencies.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n2 passed in 0.02s\n"
+      },
+      "seconds": 0.81
+    },
+    {
+      "branch": "feature/functional-adaptive-generation-v3",
+      "commit": "aa7f0974ce1039b2e4da5a62fd117f6697040abe",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.36s\n"
+      },
+      "seconds": 3.48
+    },
+    {
+      "branch": "feature/functional-engine-v3-privacy-repair",
+      "commit": "3727325b82dc98107f222274e4fe7e52da4cf6ad",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_v3_repair_diagnosis.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "......                                                                   [100%]\n6 passed in 0.02s\n"
+      },
+      "seconds": 0.68
+    },
+    {
+      "branch": "feature/guest-distributor-geometry-v2",
+      "commit": "ce8b02017882287bb371049a76f52b619c6c18c1",
+      "features": [
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_guest_distributor_contract.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "...                                                                      [100%]\n3 passed in 0.13s\n"
+      },
+      "seconds": 0.69
+    },
+    {
+      "branch": "feature/logtura-observability-20261023",
+      "commit": "4efbad043eb6659560a4ecb97b024b39a1e6109e",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "telemetry.test.cjs",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "✔ monitoring is disabled by default and does not affect client generation (1.051807ms)\n✔ only a same-origin TLS telemetry endpoint can be configured (0.472573ms)\n✔ safe schema, allowlist, deduplication and unhandled error protection (0.949594ms)\n✔ endpoint fails closed on missing origin configuration and rejects unexpected data (0.55706ms)\n✔ endpoint logs only schema-approved codes (1.389507ms)\n✔ timeout code is supported but arbitrary error text is never sent (0.176276ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 115.86225\n"
+      },
+      "seconds": 0.52
+    },
+    {
+      "branch": "feature/plot-evidence-intake",
+      "commit": "faa91cd65a6f64c10cb0fc6ed60eb4d1eaa66cb3",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_plot_intake.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ".......                                                                  [100%]\n7 passed in 0.14s\n"
+      },
+      "seconds": 0.79
+    },
+    {
+      "branch": "feature/rear-corner-placement",
+      "commit": "053f361d7922c3b562df12f5797c3ba456637559",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_site_placement.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "......                                                                   [100%]\n6 passed in 7.91s\n"
+      },
+      "seconds": 8.8
+    },
+    {
+      "branch": "feature/reference-informed-residential-design",
+      "commit": "b6c1f78f0e038c161be96960cc41fabb19f70c5b",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_reference_patterns.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "......                                                                   [100%]\n6 passed in 0.07s\n"
+      },
+      "seconds": 0.78
+    },
+    {
+      "branch": "feature/relational-first-integration-013",
+      "commit": "9880a59945df37abe04a75aa404638f645d9995f",
+      "features": [
+        "assl",
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_assl_stage012_window_clearance.py",
+      "check": {
+        "status": "fail",
+        "exit_code": 2,
+        "output": "\n==================================== ERRORS ====================================\n________ ERROR collecting tests/test_assl_stage012_window_clearance.py _________\nImportError while importing test module '/tmp/ant-branch-gvbdomqh/tests/test_assl_stage012_window_clearance.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_assl_stage012_window_clearance.py:4: in <module>\n    from assl.relationship_first_012 import rect, exposed, window_strip_potential\nassl/relationship_first_012.py:23: in <module>\n    from scipy.optimize import milp, Bounds, LinearConstraint\nE   ModuleNotFoundError: No module named 'scipy'\n=========================== short test summary info ============================\nERROR tests/test_assl_stage012_window_clearance.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.25s\n"
+      },
+      "seconds": 1.14,
+      "retry": {
+        "branch": "feature/relational-first-integration-013",
+        "commit": "9880a59945df37abe04a75aa404638f645d9995f",
+        "features": [
+          "assl",
+          "client_web",
+          "backend/design/general_engine.py",
+          "backend/design/architect_planner.py",
+          "backend/design/functional_program.py",
+          "backend/design/layout_rebuild.py",
+          "backend/design/independent_audit.py"
+        ],
+        "syntax": {
+          "status": "pass",
+          "exit_code": 0,
+          "output": ""
+        },
+        "test": "test_assl_stage012_window_clearance.py",
+        "check": {
+          "status": "pass",
+          "exit_code": 0,
+          "output": "....                                                                     [100%]\n4 passed in 1.10s\n"
+        },
+        "seconds": 1.83
+      }
+    },
+    {
+      "branch": "feature/space-efficiency-architectural-critic-005",
+      "commit": "94f49b727342abf0ea9bff9353230dba1af84977",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_space_efficiency_cells.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n2 passed in 0.17s\n"
+      },
+      "seconds": 0.81
+    },
+    {
+      "branch": "feature/v4-functional-engine",
+      "commit": "547e60f7062a8b2565a4991cc57aea1e2ec474ce",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_v4_engine.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "............                                                             [100%]\n12 passed in 15.46s\n"
+      },
+      "seconds": 16.3
+    },
+    {
+      "branch": "feature/v4-integrated-candidate-validation",
+      "commit": "3801c3b086a1db3bdac4194ff6e12cb54b0f29ee",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.36s\n"
+      },
+      "seconds": 3.61
+    },
+    {
+      "branch": "fix/generation-worker-lifecycle",
+      "commit": "e6917b283f73e8f55eb3d42d9eb12bd16f994b55",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "worker_session.test.cjs",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "✔ cold cancellation never executes the cancelled design and reuses the loading runtime (2.897964ms)\n✔ warm cancellation terminates execution and a late response cannot resolve a new request (0.428196ms)\n✔ initialization errors are explicit and retry uses a fresh runtime (0.326242ms)\n✔ cancellation during file registration cannot report a successful stale result (0.559494ms)\n✔ a cold timeout rejects the request and never queues its design after readiness (10.604494ms)\nℹ tests 5\nℹ suites 0\nℹ pass 5\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 129.342073\n"
+      },
+      "seconds": 0.53
+    },
+    {
+      "branch": "integration/lovable-browser-engine",
+      "commit": "ed104c7bc5e121d9bcbb00e3338b05ffffbdf4bf",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "lovable_bridge.test.cjs",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "✔ transmits actual room counts and preserves independent guest WC (1.185849ms)\n✔ never invents dimensions, floors, setbacks or sleeping capacity (1.19252ms)\n✔ unknown services require an explicit engineering type (0.212381ms)\n✔ custom room dimensions are explicit minima with a visible conversion notice (1.138257ms)\n✔ retains imported source requirements without fabricating their fulfillment (0.217729ms)\n✔ rejects unsupported floors, project types and invalid quantities (0.452983ms)\nℹ tests 6\nℹ suites 0\nℹ pass 6\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 104.430201\n"
+      },
+      "seconds": 0.51
+    },
+    {
+      "branch": "main",
+      "commit": "9335f580bc28bfd0e780a9807f99da5ca7c4b212",
+      "features": [
+        "client_web",
+        "backend/design/general_engine.py",
+        "backend/design/architect_planner.py",
+        "backend/design/functional_program.py",
+        "backend/design/layout_rebuild.py",
+        "backend/design/independent_audit.py"
+      ],
+      "syntax": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": ""
+      },
+      "test": "test_general.py",
+      "check": {
+        "status": "pass",
+        "exit_code": 0,
+        "output": "..                                                                       [100%]\n=============================== warnings summary ===============================\n../../workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/scratch/ant-client-test-venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n2 passed, 12 deselected, 1 warning in 2.59s\n"
+      },
+      "seconds": 3.96
+    }
+  ],
+  "deep_evaluation": {
+    "branch": "feature/relational-first-integration-013",
+    "check": "relationship generation, validation gate, fail-closed behaviour and window clearance",
+    "passed": 30,
+    "failed": 1,
+    "output": "................F..............                                          [100%]\n=================================== FAILURES ===================================\n________ test_009_pass_alone_cannot_promote_candidate_when_010_rejects _________\n\n    def test_009_pass_alone_cannot_promote_candidate_when_010_rejects():\n        from backend.design.general_models import VillaBrief\n        cases = json.loads((FIX / \"assl_architecture_cases.json\").read_text())[\"cases\"]\n        brief = VillaBrief.model_validate(next(c[\"brief\"] for c in cases if c[\"id\"] == \"sa-corner\"))\n        baseline, candidate = _fixture()\n        evidence, inspected = verify_stage012(brief, candidate, baseline)\n        assert evidence[\"009_status\"] == \"PASS\"\n>       assert evidence[\"stage010_status\"] == \"REJECT_AND_REPLAN\"\nE       AssertionError: assert 'ACCEPTABLE_DESIGN_INDICATORS' == 'REJECT_AND_REPLAN'\nE         \nE         - REJECT_AND_REPLAN\nE         + ACCEPTABLE_DESIGN_INDICATORS\n\ntests/test_assl_stage012_gate.py:57: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_assl_stage012_gate.py::test_009_pass_alone_cannot_promote_candidate_when_010_rejects\n1 failed, 30 passed in 0.90s\n"
+  }
+}

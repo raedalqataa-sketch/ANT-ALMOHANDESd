@@ -1,0 +1,6 @@
+{
+  "riyadh-standard": {"width":24,"depth":32,"country":"SA","region":"الرياض","street_edges":["bottom"],"family":6},
+  "riyadh-luxury": {"width":30,"depth":38,"country":"SA","region":"الرياض","street_edges":["bottom"],"family":6,"floors":"two","output_level":"luxury","design_priority":"prestige"},
+  "sanaa-guest": {"width":24,"depth":32,"country":"YE","region":"صنعاء","street_edges":["bottom"],"family":6,"floors":"two","majlis":true},
+  "tight-rejection": {"width":8,"depth":8,"country":"SA","region":"الرياض","street_edges":["bottom"],"family":12,"floors":"one"}
+}
