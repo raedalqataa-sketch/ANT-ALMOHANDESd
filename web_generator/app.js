@@ -12,7 +12,7 @@
  function error(message){$('error').textContent=message||'';$('error').hidden=!message;}
  function brief(){const b=Object.fromEntries(scalar.map(id=>[id,id==='separate_guest_entry'?$(id).checked:['project_name','entrance_face','notes','city','municipality','district','plan_number','parcel_number','parcel_reference','flexible_space_policy'].includes(id)?$(id).value:Number($(id).value)]));b.setbacks=Object.fromEntries(['north','south','east','west'].map(id=>[id,Number($(id).value)]));b.rooms=structuredClone(state.rooms);b.country='SA';b.apply_saudi_rules=true;b.automatic_features={lightwell:$('auto-lightwell').checked,lightwell_length_m:Number($('well-length').value),roof_annex:$('auto-annex').checked,annex_lounge_min_m2:Number($('annex-area').value),balcony:$('auto-balcony').checked,balcony_depth_m:Number($('balcony-depth').value),balcony_face:$('balcony-face').value,service_yard:$('auto-services').checked,main_street_faces:$('main-street-known').value==='known'?['north','south','east','west'].filter(f=>$('main-'+f).checked):null};try{b.regulatory_geometry=$('regulatory-json').value.trim()?JSON.parse($('regulatory-json').value):null}catch{throw Error('القياسات الهندسية اليدوية ليست JSON صالحًا. راجعها أو امسح الحقل.')}b.boundary_widths=Object.fromEntries(['north','south','east','west'].filter(id=>$('road-'+id).value!=='').map(id=>[id,Number($('road-'+id).value)]));return b;}
  function persist(){try{localStorage.setItem('ant-general-brief-050',JSON.stringify(brief()))}catch{}}
- function changed(){state.stale=!!state.result;$('stale').hidden=!state.stale;$('downloads').replaceChildren();$('choose').disabled=true;state.aiDraft=null;$('ai-review').hidden=true;persist();total();}
+ function changed(){state.stale=!!state.result;$('stale').hidden=!state.stale;$('chosen').hidden=true;$('downloads').replaceChildren();$('choose').disabled=true;state.aiDraft=null;$('ai-review').hidden=true;persist();total();}
  function control(row,key,choices){const el=document.createElement(choices?'select':'input');if(choices)for(const [v,label]of Object.entries(choices)){const op=new Option(label,v);el.add(op)}
   el.value=row[key];el.setAttribute('aria-label',row.name+' — '+({name:'الاسم',kind:'النوع',floor:'الدور',count:'العدد',min_area:'المساحة',min_side:'أقل ضلع',capacity:'سعة النوم'}[key]));
   if(!choices&&key!=='name'){el.type='number';el.step=['count','capacity'].includes(key)?'1':'.1';el.min=({count:1,min_area:3,min_side:1.4,capacity:0})[key];el.max=({count:12,min_area:100,min_side:10,capacity:2})[key]}
@@ -35,13 +35,41 @@
   if(b.plot_width-b.setbacks.east-b.setbacks.west<6||b.plot_depth-b.setbacks.north-b.setbacks.south<6)throw Error('حدود البناء المتبقية بعد الارتدادات أصغر من نطاق البحث.');
  }
  async function request(path,body){const res=await fetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{});let data;try{data=await res.json()}catch{throw Error('تعذر الاتصال بالخدمة.')}if(!res.ok)throw Error(typeof data.detail==='string'?data.detail:'رفض التحقق المدخلات؛ راجع البرنامج والأبعاد.');return data;}
+ function canDraw(model){return model?.release?.drawing_export_allowed === true;}
+ function countStatus(model,status){return (model.checks||[]).filter(c=>c.status===status).length;}
+ function compare(models){
+  const host=$('comparison');host.replaceChildren();host.hidden=models.length<2;
+  if(host.hidden)return;
+  const title=document.createElement('h3');title.textContent='مقارنة التوزيع والمساحات';
+  const table=document.createElement('table');
+  const headers=['البديل','أكبر مسطح دور','مساحة الممرات','الفراغات المطلوبة','اتصال المسارات المقاسة','بنود تحتاج مراجعة'];
+  const head=table.createTHead().insertRow();for(const name of headers){const th=document.createElement('th');th.scope='col';th.textContent=name;head.append(th);}
+  const body=table.createTBody();
+  for(const model of models){
+   const row=body.insertRow();const first=document.createElement('th');first.scope='row';first.textContent=model.search.family_label_ar;row.append(first);
+   const movement=model.functional_program_v4?.movement;
+   const metric=value=>Number.isFinite(value)?value+' م²':'—';
+   const values=[metric(model.metrics.floor_built_m2),metric(model.metrics.circulation_m2),model.metrics.requested_spaces??'—',
+    movement?.routes?.length?`${movement.routes.length-movement.unreachable.length} من ${movement.routes.length}`:'لم يُقس',countStatus(model,'PENDING')];
+   for(const value of values)row.insertCell().textContent=String(value);
+  }
+  const scroll=document.createElement('div');scroll.className='comparison-scroll';scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','جدول المقارنة القابل للتمرير');scroll.append(table);host.append(title,scroll);
+ }
  const url=path=>window.AntFiles?window.AntFiles.url(path):path;
  function link(path,label){const a=document.createElement('a');a.href=url(path);a.download=path.split('/').pop();a.textContent=label;return a;}
  function renderSelected(){const m=state.selected;if(!m)return;$('viewer').hidden=false;$('empty').hidden=true;$('floor-tabs').replaceChildren();
-  for(const f of [...m.floors,...(m.previews.SITE?[{id:'SITE',name:'الموقع والمواقف'}]:[])]){const button=document.createElement('button');button.textContent=f.name;button.dataset.floor=f.id;button.classList.toggle('active',state.floor===f.id);button.onclick=()=>{state.floor=f.id;state.zoom=1;renderSelected()};$('floor-tabs').append(button)}
-  const path=m.previews[state.floor];$('plan').hidden=!path;if(path)$('plan').src=url(path);else $('plan').removeAttribute('src');$('plan-wrap').style.display=path?'':'none';$('plan').style.width=(100*state.zoom)+'%';$('plan').style.maxWidth=(850*state.zoom)+'px';
+  const previews=canDraw(m)?m.previews:{};
+ for(const f of [...(canDraw(m)?m.floors:[]),...(previews.SITE?[{id:'SITE',name:'الموقع والمواقف'}]:[])]){const button=document.createElement('button');button.textContent=f.name;button.dataset.floor=f.id;button.classList.toggle('active',state.floor===f.id);button.setAttribute('aria-pressed',String(state.floor===f.id));button.onclick=()=>{state.floor=f.id;state.zoom=1;renderSelected()};$('floor-tabs').append(button)}
+  const path=previews[state.floor];$('plan').hidden=!path;if(path)$('plan').src=url(path);else $('plan').removeAttribute('src');$('plan-wrap').style.display=path?'':'none';$('plan').style.width=(100*state.zoom)+'%';$('plan').style.maxWidth=(850*state.zoom)+'px';
   $('selection-state').textContent=m.model_revision_id.slice(0,12)+' · '+(m.release.drawing_export_allowed?'مسودة للمراجعة':'الرسم محجوب لفشل الفحص');
-  $('downloads').replaceChildren();if(!state.stale){for(const [ext,path]of Object.entries(m.downloads))$('downloads').append(link(path,ext==='dxf'?'↓ DXF 2010':'↓ '+ext.toUpperCase()));if(path)$('downloads').append(link(path,'↓ SVG · '+state.floor));}
+  $('downloads').replaceChildren();
+  if(!state.stale){
+   for(const [ext,path] of Object.entries(m.downloads||{})){
+    if(typeof path==='string'&&(canDraw(m)||ext==='json'))$('downloads').append(link(path,ext==='dxf'?'↓ DXF 2010':'↓ '+ext.toUpperCase()));
+   }
+   if(path)$('downloads').append(link(path,'↓ SVG · '+state.floor));
+  }
+  for(const id of ['zoom-in','zoom-out','zoom-fit'])$(id).disabled=!path;
   $('checks').replaceChildren();for(const c of m.checks){const d=document.createElement('details');d.className=c.status==='PASS'?'pass':c.status==='FAIL'?'fail':'pending';const sm=document.createElement('summary');sm.textContent=(c.status==='PASS'?'✓ ':c.status==='FAIL'?'× ':'◷ ')+c.label;const pre=document.createElement('pre');pre.textContent=Object.keys(c.evidence||{}).length?JSON.stringify(c.evidence,null,2):c.status==='PASS'?'اجتاز الفحص الجزئي المحدد.':'هذا البند لم يُتحقق منه.';d.append(sm);if(c.source){const src=document.createElement('a');src.href=c.source.url||'https://momah.gov.sa/ar/node/15715';src.target='_blank';src.rel='noopener';src.textContent='المصدر الرسمي · '+(c.source.section||c.source.id);src.className='rule-source';d.append(src)}if(c.evidence?.required_action){const note=document.createElement('p');note.className='note';note.textContent=c.evidence.required_action;d.append(note)}d.append(pre);$('checks').append(d)}
   $('feature-results').replaceChildren();const names={lightwell:'المنور',roof_annex:'الملحق العلوي',balcony:'الشرفة',service_yard:'ساحة الخدمات'};for(const row of m.feature_generation||[]){const p=document.createElement('p');p.className='feature-result '+(row.status==='GENERATED'?'generated':'unavailable');p.textContent=(row.status==='GENERATED'?'✓ أُنشئ ':'× تعذر إنشاء ')+names[row.feature]+(row.reason?' — '+row.reason:'');$('feature-results').append(p)}if(!(m.feature_generation||[]).length)$('feature-results').textContent='لم تطلب إضافات تلقائية لهذا البديل.';
   $('metrics').textContent=`أكبر مسطح دور مقترح: ${m.metrics.floor_built_m2} م². الفراغات المطلوبة: ${m.metrics.requested_spaces}. سعة الأسرّة المرسومة: ${m.metrics.bed_capacity}. مساحة الممرات في الأدوار: ${m.metrics.circulation_m2} م². مساحة الملحق: ${m.metrics.annex_built_m2||0} م². الشرفات: ${m.metrics.balcony_m2||0} م². المساحات المرنة الزائدة المقترحة: ${m.metrics.proposed_flexible_m2} م²؛ تحتاج تحديد الاستعمال أو تقليل الكتلة.`;
@@ -51,19 +79,40 @@
   const pending=m.checks.filter(c=>c.status==='PENDING').length,failed=m.checks.filter(c=>c.status==='FAIL').length;$('compliance-summary').hidden=false;$('compliance-summary').textContent=`${m.regulatory_profile?.jurisdiction==='YE'?'اشتراطات البناء اليمنية المحلية غير موثقة، والارتدادات تصميمية افتراضية':'المطابقة الشاملة للكود السعودي غير معتمدة'}. ${failed} فحوص فاشلة و${pending} بنود تحتاج بيانات أو مراجعة. ${m.regulatory_profile?.city||'المدينة غير محددة'} · اختيار المقترح لا يمثل اعتمادًا نظاميًا.`;
   let chosen;try{chosen=JSON.parse(localStorage.getItem('ant-general-choice-050')||'null')}catch{}
   $('chosen').textContent=chosen?.revision===m.model_revision_id?'اخترت هذا المقترح. الاختيار محفوظ في هذا المتصفح، ولا يمثل اعتمادًا تنفيذيًا.':'';
-  for(const b of $('alternatives').children)b.classList.toggle('active',b.dataset.family===m.candidate_id);
+  $('chosen').hidden=!$('chosen').textContent||state.stale;
+  for(const b of $('alternatives').children){
+   const active=b.dataset.family===m.candidate_id;
+   b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+  }
  }
  function renderResult(){const r=state.result;$('alternatives').replaceChildren();$('unavailable').replaceChildren();
-  for(const m of r.candidates){const b=document.createElement('button');b.className='alternative';b.dataset.family=m.candidate_id;const shape=document.createElement('span');shape.className='shape '+(m.design_option?'adaptive':({L:'l',U:'u',stepped:'step'}[m.candidate_id]||'adaptive'));shape.setAttribute('aria-hidden','true');const content=document.createElement('span'),title=document.createElement('strong'),small=document.createElement('small');title.textContent=m.search.family_label_ar;small.textContent=`${m.metrics.floor_built_m2} م² / أكبر دور · ${m.release.drawing_export_allowed?'متاح للمراجعة':'فشل فحص هندسي'}`;content.append(title,small);b.append(shape,content);b.onclick=()=>{state.selected=m;state.floor=m.site_placement?.active?'SITE':'GF';state.zoom=1;renderSelected()};$('alternatives').append(b)}
-  for(const u of r.unavailable){const p=document.createElement('p');p.className='unavailable';p.textContent=u.label+': '+u.reason;$('unavailable').append(p)}
-  const count=r.candidates.filter(m=>m.release.drawing_export_allowed).length;$('result-summary').textContent=r.planning?.design_selection?`${count} بدائل اجتازت الفحوص من أصل ${r.candidates.length} مقترحات مدروسة، مرتبة حسب أولوية العميل؛ ليست مخططات تنفيذية معتمدة.`:`${count} مقترحات قابلة للمعاينة من أصل 3 أنماط؛ الطلب نفسه محفوظ في تقرير كل بديل.`;
-  state.selected=r.candidates.find(m=>m.release.drawing_export_allowed)||r.candidates[0]||null;if(state.selected)renderSelected();else{$('viewer').hidden=true;$('empty').hidden=false;$('empty').querySelector('h3').textContent='لم يجد البحث حلًا ضمن الحدود المدخلة';$('empty').querySelector('p').textContent='راجع أسباب التعذر أعلاه؛ لم تُحذف أي غرفة لتصنيع نتيجة.';}
+  const approved=r.candidates.filter(canDraw);
+  compare(approved);
+  for(const m of r.candidates){
+   const button=document.createElement('button');button.type='button';button.className='alternative';button.dataset.family=m.candidate_id;
+   const thumbnail=canDraw(m)&&(m.previews.GF||m.previews.SITE);
+   if(thumbnail){const img=document.createElement('img');img.src=url(thumbnail);img.alt='';img.loading='lazy';img.className='alternative-plan';button.append(img);}
+   const content=document.createElement('span'),title=document.createElement('strong'),small=document.createElement('small');
+   title.textContent=m.search.family_label_ar;
+   small.textContent=canDraw(m)?`${m.metrics.floor_built_m2} م² · متاح للمراجعة`:'الرسم محجوب لفشل الفحص';
+   content.append(title,small);button.append(content);
+   button.onclick=()=>{state.selected=m;state.floor=m.site_placement?.active?'SITE':'GF';state.zoom=1;renderSelected();};
+   $('alternatives').append(button);
+  }
+  const unavailable=$('unavailable-panel');
+  const failures=r.unavailable||[];
+  for(const u of failures){const p=document.createElement('p');p.className='unavailable';p.textContent=u.label+': '+u.reason;$('unavailable').append(p);}
+  unavailable.hidden=!failures.length;unavailable.open=approved.length===0;
+  const count=approved.length;
+  const shortfall=count<3?' لم يجد البحث ثلاثة بدائل مجتازة ضمن الطلب وحدود البحث.':'';
+  $('result-summary').textContent=(count?`${count} من 3 بدائل متاحة للمراجعة الهندسية.`:'لم يجد البحث بديلًا مجتازًا للفحوص.')+shortfall;
+  state.selected=approved[0]||r.candidates[0]||null;if(state.selected){state.floor=state.selected.site_placement?.active?'SITE':'GF';state.zoom=1;renderSelected();}else{$('compliance-summary').hidden=true;$('viewer').hidden=true;$('empty').hidden=false;$('empty').querySelector('h3').textContent='لم يجد البحث حلًا ضمن الحدود المدخلة';$('empty').querySelector('p').textContent='راجع أسباب التعذر أعلاه؛ لم تُحذف أي غرفة لتصنيع نتيجة.';}
  }
  $('brief-form').onsubmit=async event=>{event.preventDefault();if(state.busy)return;error('');try{const b=brief();validate(b);persist();state.busy=true;$('generate').disabled=true;$('generate').textContent='جارٍ البحث ورسم البدائل…';$('engine-state').textContent='يجري تحميل المحرك عند أول استخدام، ثم فحص البرنامج وتوليد الملفات…';
    const result=await request('/api/v3/design',b);state.result=result;const unchanged=canonical(brief())===canonical(b);if(unchanged&&result.candidates.length){restore(result.candidates[0].brief);persist()}state.stale=!unchanged;$('stale').hidden=!state.stale;renderResult();$('engine-state').textContent='اكتمل البحث الهندسي. البنود المعلقة تظهر مع كل مقترح.';
    try{localStorage.setItem('ant-general-last-050',JSON.stringify({candidates:result.candidates.map(m=>m.downloads.json),unavailable:result.unavailable}))}catch{}
    $('results').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(e){error(e.message);$('engine-state').textContent='لم يكتمل التوليد. راجع الرسالة والمدخلات.';}finally{state.busy=false;$('generate').disabled=false;$('generate').innerHTML='توليد المقترحات الثلاثة <span>←</span>';}};
+  }catch(e){error(e.message);$('engine-state').textContent='لم يكتمل التوليد. راجع الرسالة والمدخلات.';}finally{state.busy=false;$('generate').disabled=false;$('generate').innerHTML='توليد البدائل';}};
  $('add-room').onclick=()=>{if(state.rooms.length>=30)return error('الحد الأقصى 30 صفًا.');state.rooms.push({id:uid(),name:'فراغ جديد',kind:'bedroom',floor:0,count:1,min_area:16,min_side:3.2,capacity:1});renderRooms();changed()};
  for(const n of [1,2])$(n===1?'one-floor':'two-floors').onclick=()=>{$('floors').value=n;state.rooms=defaultRooms(n);renderRooms();changed()};
  for(const id of [...scalar,'north','south','east','west','road-north','road-south','road-east','road-west'])$(id).addEventListener(['floors','entrance_face','municipality','flexible_space_policy','separate_guest_entry','dining_seats'].includes(id)?'change':'input',changed);

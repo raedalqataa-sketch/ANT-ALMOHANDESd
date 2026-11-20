@@ -12,7 +12,9 @@ window.AntStartAutomatic=async(draft,send)=>{
  const response=await fetch('/api/v3/auto-design?constitution_v2=true&generation_v3=true&generation_v4=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft.intent)});
  const result=await response.json();if(!response.ok)throw Error(typeof result.detail==='string'?result.detail:'راجع بيانات الأرض والأسرة؛ تعذر تكوين برنامج ضمن حدود المحرك.');
  window.AntApplyAutomaticResult(result);
- title.textContent='البرنامج الذي اقترحناه لأسرتك';text.textContent='أنت قدمت بيانات الأرض والأسرة؛ هذه قرارات مقترحة من النظام وليست مدخلات طلبنا منك حسابها.';
+ const explanation=document.createElement('details');explanation.className='result-details results-explanation';
+ const overview=document.createElement('summary');overview.textContent='البرنامج المقترح والافتراضات والفحوص التفصيلية';explanation.append(overview);
+ document.querySelector('#results').after(explanation);box.remove();
  const program=document.createElement('div');program.id='auto-program';
  const dl=document.createElement('dl');dl.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:20px 0';
  for(const row of result.planning.program){const cell=document.createElement('div'),name=document.createElement('dt'),value=document.createElement('dd');name.textContent=row.name+' × '+row.count;value.textContent=(row.floor?'الدور الأول':'الدور الأرضي')+' · مساحة مقترحة من '+row.min_area+' م²';cell.append(name,value);dl.append(cell);}program.append(dl);
@@ -91,6 +93,6 @@ window.AntStartAutomatic=async(draft,send)=>{
  const assumptions=document.createElement('details'),summary=document.createElement('summary');summary.textContent='كيف حُسبت الارتدادات؟ وما الافتراضات التي تحتاج مراجعة؟';assumptions.append(summary);
  for(const warning of result.planning.warnings){const p=document.createElement('p');p.textContent=warning;assumptions.append(p);}
  const numbers=document.createElement('p');numbers.textContent='الارتدادات المقترحة بالمتر: '+Object.entries(result.planning.setbacks.values).map(([k,v])=>({north:'شمال',south:'جنوب',east:'شرق',west:'غرب'}[k])+': '+v).join('، ');assumptions.append(numbers);
- if(draft.intent.country==='SA'){const source=document.createElement('a');source.href='https://momah.gov.sa/ar/node/15715';source.target='_blank';source.rel='noopener';source.textContent='المرجع السعودي المتاح للارتدادات · يلزم اعتماد البلدية';assumptions.append(source);}else{const caution=document.createElement('p');caution.textContent='اليمن: الارتدادات قيم تصميمية افتراضية؛ لم تُتحقق اشتراطات المحافظة والسلطة المختصة.';assumptions.append(caution);}program.append(assumptions);box.append(program);
+ if(draft.intent.country==='SA'){const source=document.createElement('a');source.href='https://momah.gov.sa/ar/node/15715';source.target='_blank';source.rel='noopener';source.textContent='المرجع السعودي المتاح للارتدادات · يلزم اعتماد البلدية';assumptions.append(source);}else{const caution=document.createElement('p');caution.textContent='اليمن: الارتدادات قيم تصميمية افتراضية؛ لم تُتحقق اشتراطات المحافظة والسلطة المختصة.';assumptions.append(caution);}program.append(assumptions);explanation.append(program);
  window.AntEmbeddedNotify(result);
 };

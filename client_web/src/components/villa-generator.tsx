@@ -9,13 +9,16 @@ const enginePath = import.meta.env.BASE_URL + 'villa-engine/generate/index.html?
 /** Same-origin bridge to the unchanged Python geometric engine in a Web Worker.
  * No project/database save, credentials, cloud compute, or engineering approval.
  */
-export function VillaGenerator({ draft }: { draft: ClientDraft | AutomaticDraft }) {
+export function VillaGenerator({ draft, onEdit }: { draft: ClientDraft | AutomaticDraft; onEdit?: () => void }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const section = useRef<HTMLElement>(null);
   const imported = useRef(false);
   const [session, setSession] = useState('');
   const [height, setHeight] = useState(1000);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('جارٍ فتح إعدادات محرك التوليد…');
+
+  useEffect(() => { section.current?.focus(); }, []);
 
   useEffect(() => {
     if (!session) { setSession(crypto.randomUUID()); return; }
@@ -38,11 +41,11 @@ export function VillaGenerator({ draft }: { draft: ClientDraft | AutomaticDraft 
         if (!Number.isInteger(message.roomCount) || message.roomCount < 0 || message.roomCount > 36) return;
         imported.current = true;
         window.clearInterval(retry); window.clearTimeout(timeout);
-        setStatus('mode' in draft && draft.mode==='automatic' ? 'نقترح الآن البرنامج والمساحات ونبحث عن البدائل الهندسية…' : `نُقلت متطلبات ${message.roomCount} فراغًا إلى المحرك. أكمل البيانات الفارغة أدناه ثم اضغط «توليد المقترحات الثلاثة». لم يُنشأ مسقط بعد.`);
+        setStatus('mode' in draft && draft.mode==='automatic' ? 'نقترح الآن البرنامج والمساحات ونبحث عن البدائل الهندسية…' : `نُقلت متطلبات ${message.roomCount} فراغًا إلى المحرك. أكمل البيانات الفارغة أدناه ثم اضغط «توليد البدائل». لم يُنشأ مسقط بعد.`);
       } else if (message.type === 'RESULT' && imported.current) {
         if (!Array.isArray(message.candidates) || message.candidates.length > 3) return;
         const available = message.candidates.filter((candidate: { reviewable?: unknown }) => candidate.reviewable === true).length;
-        setStatus(available ? `اكتمل البحث: ${available} مقترحات قابلة للمراجعة. عاين الفحوص ثم نزّل الملفات من المحرك أدناه؛ لا اعتماد تنفيذي.` : 'اكتمل البحث دون مقترح مجتاز للفحوص. راجع أسباب التعذر أدناه؛ ملفات الرسم محجوبة.');
+        setStatus(available ? `اكتمل البحث: ${available} مقترحات قابلة للمراجعة. عاين الفحوص ثم نزّل الملفات من المحرك أدناه؛ مسودات للمراجعة.` : 'اكتمل البحث دون مقترح مجتاز للفحوص. راجع أسباب التعذر أدناه؛ ملفات الرسم محجوبة.');
       } else if (message.type === 'ERROR') {
         window.clearInterval(retry); window.clearTimeout(timeout);
         setError(typeof message.error === 'string' ? message.error : 'تعذر نقل المتطلبات إلى المحرك.');
@@ -59,7 +62,7 @@ export function VillaGenerator({ draft }: { draft: ClientDraft | AutomaticDraft 
     const link = document.createElement('a'); link.href = url; link.download = 'ant-client-requirements.json'; link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
-  return <section aria-label="محرك توليد مساقط الفلل" className="mt-8 min-w-0 space-y-4 border-t pt-6">
+  return <section ref={section} tabIndex={-1} aria-label="محرك توليد مساقط الفلل" className="mt-8 min-w-0 space-y-4 border-t pt-6">
     <h3 className="font-display text-xl">من متطلباتك إلى المقترحات</h3>
     <p className="text-sm leading-7 text-muted-foreground">يعمل محرك التوليد في متصفحك. لا تُحفظ هذه العملية كمشروع في الخادم، ولا تمنح المخطط اعتمادًا. الرجوع لتعديل المتطلبات يغلق المحرك ويلغي العملية الجارية؛ أعد نقل المتطلبات بعد التعديل.</p>
     <p role="status" className="border-r-2 border-accent pr-3 text-sm leading-7">{status}</p>
@@ -68,6 +71,7 @@ export function VillaGenerator({ draft }: { draft: ClientDraft | AutomaticDraft 
       <Button type="button" variant="outline" onClick={downloadSource}>تنزيل متطلبات العميل كاملة</Button>
       <Button type="button" variant="outline" onClick={() => { setHeight(1000); setSession(crypto.randomUUID()); }}>إعادة فتح المحرك</Button>
     </div>
+    {onEdit && <Button type="button" variant="outline" onClick={onEdit}>عدّل الطلب وأعد التوليد</Button>}
     {session && <iframe key={session} ref={frame} title="إعداد وتوليد المقترحات بواسطة محرك التوليد" src={enginePath} sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups" className="block w-full min-w-0 rounded-md border bg-card" style={{ height, maxWidth: '100%' }} onLoad={() => frame.current?.contentWindow?.postMessage({ channel, nonce: session, type: 'HELLO' }, location.origin)} />}
   </section>;
 }

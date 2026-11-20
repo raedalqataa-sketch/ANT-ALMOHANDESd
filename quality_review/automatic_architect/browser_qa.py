@@ -13,6 +13,7 @@ with sync_playwright() as p:
  page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
  page.goto(BASE+'/client/');page.get_by_role('button',name='التالي',exact=True).wait_for()
  page.get_by_role('button',name='التالي',exact=True).click();assert page.get_by_role('alert').is_visible()
+ page.get_by_text('المدينة والحي · اختياري',exact=True).click()
  page.get_by_label('المدينة · اختياري',exact=True).fill('الرياض')
  page.get_by_label('المنطقة / المحافظة',exact=True).fill('الرياض')
  assert page.locator('#architect-regions option').count()==13
@@ -34,8 +35,6 @@ with sync_playwright() as p:
  # Street width is deliberately unknown: no setback, room, floor or dimension entry.
  page.screenshot(path=str(OUT/'desktop-land.png'),full_page=True)
  page.get_by_role('button',name='التالي',exact=True).click();page.get_by_label('عدد أفراد الأسرة',exact=True).fill('6')
- page.get_by_label('مستوى المخرجات',exact=True).select_option(LEVEL)
- page.get_by_label('أولوية التصميم',exact=True).select_option(PRIORITY)
  page.get_by_label('نوع المبنى',exact=True).select_option('investment')
  page.get_by_label('عدد الوحدات المقترح',exact=True).fill('5')
  with page.expect_download() as d:page.get_by_role('button',name='تنزيل متطلبات المشروع بصيغة JSON',exact=True).click()
@@ -48,12 +47,14 @@ with sync_playwright() as p:
  assert page.get_by_label('عرض الأرض (م)',exact=True).input_value()=='24'
  page.get_by_role('button',name='التالي',exact=True).click();assert page.get_by_label('عدد أفراد الأسرة',exact=True).input_value()=='6'
  page.get_by_role('button',name='التالي',exact=True).click()
+ page.get_by_label('مستوى المخرجات',exact=True).select_option(LEVEL)
+ page.get_by_label('أولوية التصميم',exact=True).select_option(PRIORITY)
  page.set_viewport_size({'width':390,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path=str(OUT/'mobile-review.png'),full_page=True)
- page.set_viewport_size({'width':1440,'height':1000});page.get_by_role('button',name='صمّم مقترحاتي الثلاثة',exact=True).click()
+ page.set_viewport_size({'width':1440,'height':1000});page.get_by_role('button',name='ولّد البدائل',exact=True).click()
  page.locator('iframe').wait_for();frame=page.frames[1];frame.locator('#auto-progress').wait_for(timeout=45000)
  assert frame.locator('.workspace').is_hidden()
  frame.wait_for_function('AntGeneral.result!==null',timeout=600000)
- assert frame.locator('#auto-program').is_visible();result=frame.evaluate('AntGeneral.result')
+ assert frame.locator('#auto-program').count()==1;result=frame.evaluate('AntGeneral.result')
  assert frame.evaluate('AntGeneral.floor') in ('SITE','GF')
  (OUT/'all-candidates.json').write_text(json.dumps(result,ensure_ascii=False))
  assert result['planning']['reference_design']['project_count']==6
