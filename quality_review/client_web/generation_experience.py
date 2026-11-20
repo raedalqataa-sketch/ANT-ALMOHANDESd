@@ -2,6 +2,7 @@
 import argparse
 import asyncio
 import json
+import shutil
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -98,7 +99,7 @@ async def main():
         ("failure", "SA", (8, 8), "standard", "one", 12),
     ]
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(executable_path="/usr/bin/chromium")
+        browser = await playwright.chromium.launch(executable_path=shutil.which("chromium"))
         capacity = asyncio.Semaphore(2)
 
         async def run(case):

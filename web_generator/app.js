@@ -60,7 +60,7 @@
  function renderSelected(){const m=state.selected;if(!m)return;$('viewer').hidden=false;$('empty').hidden=true;$('floor-tabs').replaceChildren();
   const previews=canDraw(m)?m.previews:{};
  for(const f of [...(canDraw(m)?m.floors:[]),...(previews.SITE?[{id:'SITE',name:'الموقع والمواقف'}]:[])]){const button=document.createElement('button');button.textContent=f.name;button.dataset.floor=f.id;button.classList.toggle('active',state.floor===f.id);button.setAttribute('aria-pressed',String(state.floor===f.id));button.onclick=()=>{state.floor=f.id;state.zoom=1;renderSelected()};$('floor-tabs').append(button)}
-  const path=previews[state.floor];$('plan').hidden=!path;if(path)$('plan').src=url(path);else $('plan').removeAttribute('src');$('plan-wrap').style.display=path?'':'none';$('plan').style.width=(100*state.zoom)+'%';$('plan').style.maxWidth=(850*state.zoom)+'px';
+  const path=previews[state.floor];$('plan').hidden=!path;if(path)$('plan').src=url(path);else $('plan').removeAttribute('src');$('plan-wrap').style.display=path?'':'none';$('plan').style.width=(100*state.zoom)+'%';$('plan').style.maxWidth=(850*state.zoom)+'px';$('plan').style.maxHeight=(600*state.zoom)+'px';
   $('selection-state').textContent=m.model_revision_id.slice(0,12)+' · '+(m.release.drawing_export_allowed?'مسودة للمراجعة':'الرسم محجوب لفشل الفحص');
   $('downloads').replaceChildren();
   if(!state.stale){

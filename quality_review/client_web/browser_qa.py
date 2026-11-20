@@ -1,6 +1,6 @@
 """Full public five-step intake -> real Python -> actual CAD/PDF downloads."""
 from pathlib import Path
-import json,os
+import json,os,shutil
 from urllib.parse import urlsplit,parse_qs
 from playwright.sync_api import sync_playwright
 OUT=Path(os.environ.get('ANT_CLIENT_QA_OUTPUT','/workspace/ant-client-web-qa'));OUT.mkdir(exist_ok=True)
@@ -12,7 +12,7 @@ wb=Workbook();sheet=wb.active;sheet.title='متطلبات';sheet.append(['الح
 for row in [('اسم المشروع','فيلا اختبار العميل','اختبار فقط'),('عرض الأرض (م)',24,''),('عمق الأرض (م)',32,''),('عدد الأدوار',2,''),('الموقع','الرياض',''),('اتجاه الشمال','شمال',''),('غرف النوم',3,'يُراجع العدد في الخطوة الرابعة'),('الحمامات',1,''),('خصوصية','مدخل ضيوف مستقل',''),('مطلب خاص','مراجعة مسبح مستقبلي','غير محول إلى قيد'),('قيمة نصية','A & B < محفوظ',''),('حقل فارغ',None,'يبقى فارغًا')]:sheet.append(row)
 wb.save(FIXTURE)
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
+ browser=p.chromium.launch(headless=True,args=['--no-sandbox'],executable_path=shutil.which('chromium'))
  context=browser.new_context(viewport={'width':1440,'height':1000},accept_downloads=True)
  page=context.new_page();errors=[];requests=[]
  page.on('pageerror',lambda e:errors.append(str(e)))
