@@ -10,7 +10,16 @@ window.AntStartAutomatic=async(draft,send)=>{
  send('IMPORTED',{roomCount:0,roomRows:0,automatic:true});
  new ResizeObserver(()=>send('RESIZE',{height:Math.min(20000,Math.max(900,document.documentElement.scrollHeight))})).observe(document.body);
  const response=await fetch('/api/v3/auto-design?constitution_v2=true&generation_v3=true&generation_v4=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(draft.intent)});
- const result=await response.json();if(!response.ok)throw Error(typeof result.detail==='string'?result.detail:'راجع بيانات الأرض والأسرة؛ تعذر تكوين برنامج ضمن حدود المحرك.');
+ const result=await response.json();
+ if(!response.ok){
+  const detail=typeof result.detail==='string'?result.detail:'';
+  title.textContent='تعذّر إكمال التوليد';
+  text.textContent='راجع تفاصيل الخطأ في صفحة المتطلبات ثم أعد المحاولة.';
+  if(detail.includes('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي')){
+   throw Error('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث. راجع أبعاد الأرض والاحتياجات ثم جرّب من جديد.');
+  }
+  throw Error('تعذر إكمال التوليد. تحقق من بيانات الأرض والأسرة أو أعد فتح المحرك.');
+ }
  window.AntApplyAutomaticResult(result);
  const explanation=document.createElement('details');explanation.className='result-details results-explanation';
  const overview=document.createElement('summary');overview.textContent='البرنامج المقترح والافتراضات والفحوص التفصيلية';explanation.append(overview);

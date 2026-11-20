@@ -30,6 +30,9 @@ def main():
   if mismatched:raise ValueError('Unreviewed base runtime; source mismatch: '+', '.join(mismatched))
  # Retain the verified runtime packages and overlay current reviewed source.
  for source in (ROOT/'backend').rglob('*.py'):entries[str(source.relative_to(ROOT))]=source.read_bytes()
+ # General-engine guest layouts call these validators before emitting drawings.
+ for name in ('quality_review/space_efficiency.py','quality_review/unallocated_geometry.py'):
+  entries[name]=(ROOT/name).read_bytes()
  # V2 is data-driven: bundle the policy JSON alongside the Python validator.
  policy=ROOT/'constitution/architecture_v2/ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.json'
  if not policy.exists():raise ValueError('Missing V2 policy catalog: cannot build browser engine')
@@ -76,7 +79,7 @@ def main():
  marker="    await ready;"
  assert marker in worker
  worker=worker.replace(marker,marker+"\n    if(data.operation==='initialize'){postMessage({id:data.id,ready:true});return;}")
- worker=worker.replace('from backend.design.general_engine import generate_general','from backend.design.general_engine import generate_general\nfrom backend.design.architect_planner import ClientIntent,generate_automatic')
+ worker=worker.replace('from backend.design.general_engine import generate_general','from backend.design.general_engine import generate_general\nfrom backend.design.architect_planner import ClientIntent,generate_automatic\nfrom quality_review.space_efficiency import measure_candidate\nfrom quality_review.unallocated_geometry import measure_model')
  worker=worker.replace("data.operation==='general'", "(data.operation==='general'||data.operation==='automatic')")
  worker=worker.replace("python.runPython('json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')", "python.runPython(data.operation==='automatic'?'json.dumps(generate_automatic(ClientIntent(**json.loads(options_json)),constitution_v2=True,generation_v3=True,generation_v4=True),ensure_ascii=False)':'json.dumps(generate_general(VillaBrief(**json.loads(options_json))),ensure_ascii=False)')")
  (generate/'worker.js').write_text(worker)
