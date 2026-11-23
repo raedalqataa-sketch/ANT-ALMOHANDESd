@@ -25,7 +25,7 @@ from .structural_grid import draw_grid, family_grid_profile, unsupported_grid_po
 GROUND_WC = dict(id="ground-family-wc", name="حمام العائلة", kind="bathroom",
                  floor=0, count=1, min_area=6, min_side=1.8)
 
-def upper_layout_options(stair, thickness, children, min_area, min_side, grid):
+def upper_layout_options(stair, thickness, children, min_area, min_side, grid, terrace_side="east"):
     """Explore room groupings and wing dimensions in the stair's local frame."""
     stair_width = stair["stair"]["gross_width_m"]
     for west, east, south in product(range(3), range(3), range(2)):
@@ -48,6 +48,10 @@ def upper_layout_options(stair, thickness, children, min_area, min_side, grid):
                 ("family-terrace","terrace","تراس صالة العائلة",(-3.2,-terrace_depth,0,0)),
                 ("master-terrace","terrace","تراس الماستر",(lounge_width+master_width,-depth-suite_depth,lounge_width+master_width+1.8,-depth)),
             ]
+            if terrace_side == "south":
+                plan[-1] = ("master-terrace","terrace","تراس الماستر",
+                            (lounge_width,-depth-suite_depth-1.8,
+                             lounge_width+master_width,-depth-suite_depth))
             child_boxes = []
             for side, count in (("west",west),("east",east)):
                 if not count:
@@ -82,11 +86,13 @@ def upper_layout_options(stair, thickness, children, min_area, min_side, grid):
                 rid=f"child-{index}"
                 plan.append((rid,"bedroom",f"غرفة الأبناء {index}",bounds))
                 links.append(("upper-living",rid))
-            yield plan,links
+            yield (west,east,south),plan,links
 
 
-def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7):
+def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7, wing_group=None, terrace_side="east"):
     """Generate and validate the ground floor before composing upper levels."""
+    if terrace_side not in ("east", "south"):
+        raise ValueError("Unsupported master terrace side")
     if type(children) is not int or not 1<=children<=5:
         raise ValueError("Upper program supports one to five children's bedrooms")
     if not all(isfinite(v) and v>0 for v in (child_area_m2, child_min_side_m)):
@@ -117,7 +123,8 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
     best = None
     failures = {}
     tested = accepted = 0
-    for program, links in upper_layout_options(stair,brief.wall_thickness,children,child_area_m2,child_min_side_m,grid):
+    feasible_groups = set()
+    for group, program, links in upper_layout_options(stair,brief.wall_thickness,children,child_area_m2,child_min_side_m,grid,terrace_side):
         tested += 1
         try:
             first,doors,footprint = check_upper(brief,stair,program,links)
@@ -146,11 +153,14 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
             reason="Fixed support point crosses an upper room or opening"
             failures[reason]=failures.get(reason,0)+1
             continue
+        feasible_groups.add(group)
+        if wing_group is not None and wing_group != group:
+            continue
         if best is None or score<best[0]:
-            best=(score,first,doors,covered,footprint.area,upper_axes)
+            best=(score,first,doors,covered,footprint.area,upper_axes,group)
     if best is None:
         raise ValueError(f"No upper layout meets the program after {tested} attempts: {failures}")
-    _,first,doors,covered,area,upper_axes=best
+    _,first,doors,covered,area,upper_axes,group=best
     ground_parts=unary_union([ground_footprint.buffer(thickness/2,join_style=2)]+[
         Polygon(platform["landing_polygon"]) for platform in ground.get("entrance_platforms",[])]+[
         Polygon(step["polygon"]) for platform in ground.get("entrance_platforms",[]) for step in platform["treads"]])
@@ -168,7 +178,8 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
                 footprint_metrics=footprint_metrics,
                 structural_grid=grid,
                 structural_wall_axes=[ground_axes,upper_axes,roof_axes],
-                upper_search=dict(attempted=tested,accepted=accepted,rejections=failures))
+                wing_group=group, upper_search=dict(attempted=tested,accepted=accepted,rejections=failures,
+                                  feasible_groups=sorted(feasible_groups)))
 
 
 def check_upper(brief, stair, program, links):
