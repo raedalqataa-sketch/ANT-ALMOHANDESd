@@ -177,7 +177,7 @@ def compose(brief,variant=0,*,grid=None):
     return dict(schema=SCHEMA,strategy='clustered',functional_scheme=SCHEMES[variant],composition_profile=SCHEMES[variant],id=SCHEMES[variant],rooms_by_floor=[rooms],halls_by_floor=[halls],connection_requirements=links,entries=[dict(node=n,guest_entry=e,role='principal' if n=='main-foyer' else 'secondary') for n,e in entry_specs(groups).items()],brief_snapshot=brief.model_dump(mode='json'),assumptions=['Prototype for architect review; passes do not constitute architectural approval.','Guest and family daily circulation separated; dining serving connection controlled.','Structure, acoustic/visual privacy, stair headroom and statutory compliance remain pending.'])
 
 
-def solve_central(brief,*,progress=None,on_candidate=None,on_frame=None,grid=None):
+def solve_central(brief,*,progress=None,on_candidate=None,on_frame=None,grid=None,variant=0):
     """Exactly one front-suite concept. No alternate-layout/retry loop."""
     from .preview import emit_preview
     from .openings import construct_clustered
@@ -185,7 +185,7 @@ def solve_central(brief,*,progress=None,on_candidate=None,on_frame=None,grid=Non
     from assl.openings_009 import validate
     from assl.layout_critic_010 import critique
     if progress:progress('composition',0,1,'تكوين المجموعات حول الصالة العائلية')
-    try:p=compose(brief,0,grid=grid)
+    try:p=compose(brief,variant,grid=grid)
     except ValueError as e:return dict(strategy='clustered',generation_mode='central',requested_results=1,status='UNSUPPORTED_OR_UNRESOLVED',proposals=[],rejected=[],failures=[dict(reason=str(e))])
     emit_preview(on_frame,p['rooms_by_floor'][0]+p['halls_by_floor'][0],'composition','الصالة في القلب ومجموعات مترابطة')
     if progress:progress('composition',1,1,'اكتمل تكوين المقترح الوحيد')
