@@ -144,3 +144,20 @@ app.mount('/generator-assets',StaticFiles(directory=ROOT/'web_generator'),name='
 @app.get('/generate/')
 def general_frontend():
     return FileResponse(ROOT/'web_generator'/'index.html')
+
+
+from backend.design.plan_editor_api import router as plan_editor_router
+
+app.include_router(plan_editor_router)
+
+
+@app.get('/editor')
+@app.get('/editor/')
+def composition_editor():
+    return FileResponse(ROOT/'frontend'/'composition'/'editor.html')
+
+
+app.mount('/composition', StaticFiles(directory=ROOT/'frontend'/'composition', html=True),
+          name='composition')
+app.mount('/massing', StaticFiles(directory=ROOT/'frontend'/'massing', html=True),
+          name='massing')

@@ -1,0 +1,196 @@
+{
+  "project_name": "Reference ground-floor limited round",
+  "plot_width": 30.0,
+  "plot_depth": 35.0,
+  "floors": 1,
+  "setbacks": {
+    "north": 3.0,
+    "south": 3.0,
+    "east": 3.0,
+    "west": 3.0
+  },
+  "entrance_face": "south",
+  "wall_thickness": 0.2,
+  "main_entry_width": 1.5,
+  "corridor_width": 1.5,
+  "compact_core": false,
+  "proposed_room_area_factor": null,
+  "floor_height": 3.2,
+  "rooms": [
+    {
+      "id": "men",
+      "name": "مجلس رجال",
+      "kind": "majlis",
+      "floor": 0,
+      "count": 1,
+      "min_area": 35.0,
+      "min_side": 5.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "arabic",
+      "name": "صالة طعام الضيوف",
+      "kind": "dining",
+      "floor": 0,
+      "count": 1,
+      "min_area": 12.25,
+      "min_side": 3.5,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "women",
+      "name": "مجلس نساء",
+      "kind": "majlis",
+      "floor": 0,
+      "count": 1,
+      "min_area": 21.2,
+      "min_side": 4.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "living",
+      "name": "صالة عائلية",
+      "kind": "living",
+      "floor": 0,
+      "count": 1,
+      "min_area": 25.0,
+      "min_side": 5.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "dining",
+      "name": "طعام",
+      "kind": "dining",
+      "floor": 0,
+      "count": 1,
+      "min_area": 26.8,
+      "min_side": 4.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "kitchen",
+      "name": "مطبخ",
+      "kind": "kitchen",
+      "floor": 0,
+      "count": 1,
+      "min_area": 20.0,
+      "min_side": 4.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "store",
+      "name": "مستودع",
+      "kind": "storage",
+      "floor": 0,
+      "count": 1,
+      "min_area": 5.0,
+      "min_side": 1.5,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "men-wc",
+      "name": "حمام ضيوف الرجال ومغاسل",
+      "kind": "bathroom",
+      "floor": 0,
+      "count": 1,
+      "min_area": 7.0,
+      "min_side": 2.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "women-wc",
+      "name": "حمام ضيوف النساء ومغاسل",
+      "kind": "bathroom",
+      "floor": 0,
+      "count": 1,
+      "min_area": 7.0,
+      "min_side": 2.0,
+      "capacity": 0,
+      "ensuite_for": null
+    },
+    {
+      "id": "elder",
+      "name": "غرفة كبار السن والضيف",
+      "kind": "bedroom",
+      "floor": 0,
+      "count": 1,
+      "min_area": 16.0,
+      "min_side": 3.5,
+      "capacity": 1,
+      "ensuite_for": null
+    },
+    {
+      "id": "elder-bath",
+      "name": "حمام الغرفة الأرضية",
+      "kind": "bathroom",
+      "floor": 0,
+      "count": 1,
+      "min_area": 7.0,
+      "min_side": 2.0,
+      "capacity": 0,
+      "ensuite_for": "elder"
+    }
+  ],
+  "guest_groups": [
+    {
+      "id": "men",
+      "rooms": [
+        "men",
+        "arabic",
+        "men-wc"
+      ],
+      "entry": "men"
+    },
+    {
+      "id": "women",
+      "rooms": [
+        "women",
+        "women-wc"
+      ],
+      "entry": "women"
+    }
+  ],
+  "spatial_requirements": [],
+  "country": "SA",
+  "city": "",
+  "region": "",
+  "neighborhood": "",
+  "building_type": "villa",
+  "district": "",
+  "plan_number": "",
+  "parcel_number": "",
+  "design_parking_count": 1,
+  "dining_seats": 6,
+  "municipality": "",
+  "parcel_reference": "",
+  "boundary_widths": {},
+  "apply_saudi_rules": false,
+  "regulatory_geometry": null,
+  "automatic_features": {
+    "lightwell": false,
+    "lightwell_length_m": 2.0,
+    "roof_annex": false,
+    "annex_lounge_min_m2": 14.0,
+    "balcony": false,
+    "balcony_depth_m": 1.0,
+    "balcony_face": "auto",
+    "service_yard": false,
+    "main_street_faces": null
+  },
+  "separate_guest_entry": true,
+  "flexible_space_policy": "remove",
+  "reference_strategy": "none",
+  "adaptive_search": false,
+  "massing_strategy": "legacy",
+  "site_placement": "legacy",
+  "stair_headroom": 2.1,
+  "notes": ""
+}

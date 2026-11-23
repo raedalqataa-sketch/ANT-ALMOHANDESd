@@ -94,6 +94,35 @@ def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,l
         raise HTTPException(422,str(exc))
 
 
+class MassingRequest(Strict):
+    proposal: dict
+
+
+@router.post('/concepts/massing')
+def concept_massing(request: MassingRequest):
+    from assl.layout_critic_010 import critique
+    from assl.openings_009 import validate
+    from assl.strategies.guest_access import check_guest_wc_routes
+    from assl.strategies.styled_massing import build_styles
+    from shapely.errors import ShapelyError
+
+    proposal = request.proposal
+    try:
+        brief = VillaBrief.model_validate(proposal["brief_snapshot"])
+        if not 1 <= len(proposal["rooms_by_floor"]) <= 3 or sum(
+                len(floor) for floor in proposal["rooms_by_floor"]) > 120:
+            raise ValueError("MASSING_MODEL_OUTSIDE_SUPPORTED_SCOPE")
+        quality = validate(brief, proposal)
+        if (quality["status"] != "PASS"
+                or check_guest_wc_routes(proposal)["status"] == "FAIL"
+                or critique(brief, {**proposal, "validation_009": quality})["status"]
+                != "ACCEPTABLE_DESIGN_INDICATORS"):
+            raise ValueError("MASSING_BLOCKED: selected plan failed independent checks")
+        return build_styles(proposal)
+    except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
 @router.get('/ai-status')
 def ai_status():
     provider = _provider()

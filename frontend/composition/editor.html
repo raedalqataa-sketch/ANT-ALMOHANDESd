@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>أنت المهندس — مساحة تعديل المسقط</title>
+    <link rel="stylesheet" href="/composition/plan-editor.css" />
+    <script src="/composition/browser-client.js?v=8"></script><script type="module" src="/composition/plan-editor.js?v=3"></script>
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/editor"
+        ><span class="brand-mark">أ</span
+        ><span>أنت المهندس<small>مساحة تطوير المقترح</small></span></a
+      >
+      <div class="project">
+        <strong id="project-title">من مقترحك… إلى مساحتك</strong
+        ><span id="revision">لم يُفتح مقترح بعد</span>
+      </div>
+      <div class="top-actions">
+        <label class="secondary file"
+          >فتح مقترحات
+          <input
+            id="file"
+            type="file"
+            accept=".json,application/json"
+            hidden /></label
+        ><button id="save" class="primary" disabled>حفظ نسخة معدّلة</button>
+      </div>
+    </header>
+    <p class="subtle" style="margin:0;padding:8px 24px">الحفظ على هذا الجهاز والمتصفح فقط. نزّل JSON قبل تغيير الجهاز. <a href="/composition/">اختيار نوع التكوين</a></p><main class="workspace">
+      <aside class="inspector">
+        <div class="section-title">
+          <span class="eyebrow">المقترح المختار</span
+          ><span id="save-state" class="tag">ابدأ هنا</span>
+        </div>
+        <select id="proposals" aria-label="اختيار المقترح" disabled>
+          <option>افتح ملف مخرجات المحرك</option>
+        </select>
+        <p class="subtle intro">
+          اختر مقترحًا، ثم غيّر توزيع المساحة بما يناسبك.
+        </p>
+        <button id="sample" class="sample">↗ افتح مسقط المرجع المولّد</button>
+        <details id="client-brief" class="client-brief" hidden open>
+          <summary>مدخلات العميل المستخدمة</summary>
+          <p class="subtle">البرنامج الأصلي للمقترح المختار، محفوظ للمقارنة.</p>
+          <div id="brief-summary"></div>
+          <table><thead><tr><th>الفراغ</th><th>المساحة الدنيا</th></tr></thead><tbody id="brief-rooms"></tbody></table>
+        </details>
+        <section class="properties">
+          <div class="section-title">
+            <h2>الفراغ المحدد</h2>
+            <span id="lock" class="subtle"></span>
+          </div>
+          <h3 id="room-name">اختر فراغًا من المسقط</h3>
+          <div class="area">
+            <strong id="room-area">—</strong><span>م² مساحة صافية</span>
+          </div>
+          <div class="fields">
+            <label
+              >الموقع الأفقي (م)<input
+                id="x"
+                type="number"
+                step=".05"
+                disabled /></label
+            ><label
+              >الموقع الرأسي (م)<input
+                id="y"
+                type="number"
+                step=".05"
+                disabled /></label
+            ><label
+              >العرض (م)<input
+                id="width"
+                type="number"
+                min=".5"
+                step=".05"
+                disabled /></label
+            ><label
+              >العمق (م)<input
+                id="depth"
+                type="number"
+                min=".5"
+                step=".05"
+                disabled
+            /></label>
+          </div>
+          <p class="subtle">
+            العرض والعمق لغلاف المضلع؛ المساحة الصافية يحسبها الفحص بعد خصم
+            الجدران.
+          </p>
+          <div class="pair">
+            <button id="apply-position" class="secondary" disabled>
+              تطبيق الموقع</button
+            ><button id="apply-size" class="secondary" disabled>
+              تطبيق الأبعاد
+            </button>
+          </div>
+          <div class="wall-controls">
+            <label
+              >إزاحة الجدار المحدد (م)<input
+                id="wall-offset"
+                type="number"
+                step=".05"
+                value="0.10" /></label
+            ><button id="apply-wall" class="secondary" disabled>
+              تحريك الجدار المشترك
+            </button>
+            <p class="subtle">
+              الموجب للخارج. اختر جدارًا برتقاليًا من المسقط؛ يتكيّف الفراغ
+              المجاور معه.
+            </p>
+          </div>
+        </section>
+        <section class="checks">
+          <div class="section-title">
+            <h2>مراجعة التعديل</h2>
+            <button id="check" class="text-button" disabled>
+              افحص الآن ↗
+            </button>
+          </div>
+          <div id="validation" class="validation neutral">
+            افتح مقترحًا لبدء المراجعة.
+          </div>
+          <ul id="issues"></ul>
+          <div id="downloads" class="downloads"></div>
+        </section>
+        <p class="footer-note">
+          تُحفظ التعديلات كمراجعات مستقلة. يتاح PDF وDXF بعد اجتياز الفحوص؛
+          الاعتماد التنفيذي يحتاج مراجعة مختص.
+        </p>
+      </aside>
+      <section class="drawing">
+        <div class="toolbar">
+          <div class="tools" role="group" aria-label="أدوات تعديل المسقط">
+            <button
+              data-tool="move"
+              class="active"
+              title="اسحب الفراغ"
+              disabled
+            >
+              ↔ إزاحة</button
+            ><button
+              data-tool="resize"
+              title="اسحب المقبض لتغيير الحجم"
+              disabled
+            >
+              ⤢ توسيع</button
+            ><button data-tool="wall" title="اسحب الجدار المشترك" disabled>
+              ▯ جدار</button
+            ><button data-tool="pan" title="تحريك العرض" disabled>
+              ✥ تنقّل
+            </button>
+          </div>
+          <div class="history">
+            <button id="undo" title="تراجع" disabled>↶</button
+            ><button id="redo" title="إعادة" disabled>↷</button
+            ><span class="divider"></span
+            ><button id="zoom-in" title="تقريب" disabled>＋</button
+            ><button id="zoom-out" title="إبعاد" disabled>−</button
+            ><button id="fit" title="احتواء المسقط" disabled>⌖</button>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <svg
+            id="canvas"
+            aria-label="المسقط المعماري القابل للتعديل"
+            role="img"
+            tabindex="0"
+            xmlns="http://www.w3.org/2000/svg"
+          ></svg>
+          <div id="welcome" class="welcome">
+            <span class="welcome-icon">⌑</span>
+            <h1>مساحة تجرب فيها أفكارك</h1>
+            <p>
+              حرّك فراغًا، وسّع آخر، أو عدّل الجدار المشترك.<br />ثم راجع
+              النتيجة واحفظ المقترح الجديد.
+            </p>
+            <button id="welcome-sample" class="primary">
+              ابدأ بمسقط المرجع</button
+            ><small>أو افتح ملف JSON من مخرجات الاستراتيجية الثانية.</small>
+          </div>
+          <div id="busy" class="busy" hidden>
+            <span></span><strong>جارٍ تجهيز المسقط…</strong>
+          </div>
+          <div id="legend" class="legend" hidden>
+            <span><i class="family"></i>عائلي</span
+            ><span><i class="guest"></i>ضيافة</span
+            ><span><i class="service"></i>خدمات</span
+            ><span>◌ محدد للتعديل</span>
+          </div>
+        </div>
+        <div class="statusbar">
+          <span id="hint"
+            >التعديلات على هندسة المسقط الفعلية، وليست رسمًا فوق الصورة.</span
+          ><label
+            ><input id="snap" type="checkbox" checked />خطوة الحركة 5 سم</label
+          ><span id="zoom-label">100%</span>
+        </div>
+      </section>
+    </main>
+    <div id="toast" role="status" hidden></div>
+    <script type="module">
+      if (location.protocol === "file:")
+        document.getElementById("hint").textContent =
+          "الحفظ على هذا المتصفح فقط؛ نزّل نسخة JSON للاحتفاظ بتعديلاتك.";
+    </script>
+  </body>
+</html>
