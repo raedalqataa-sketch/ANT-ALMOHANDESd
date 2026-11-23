@@ -7,7 +7,7 @@ import json
 import os
 from urllib.request import Request, urlopen
 from urllib.error import URLError
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import Field
 from .general_models import VillaBrief, Strict, SpaceRequest
 from .general_engine import generate_general
@@ -82,6 +82,16 @@ def design(brief: VillaBrief):
         return generate_general(brief)
     except ValueError as exc:
         raise HTTPException(422, str(exc))
+
+
+@router.post('/concepts/clustered')
+def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=1)):
+    """Opt-in experimental polygon composition; no provider or deployment call."""
+    from assl.free_layout_solver import solve_free_concepts
+    try:
+        return solve_free_concepts(brief,strategy='clustered',max_results=max_results)
+    except ValueError as exc:
+        raise HTTPException(422,str(exc))
 
 
 @router.get('/ai-status')
