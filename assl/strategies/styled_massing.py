@@ -154,7 +154,7 @@ def frame_windows(mesh, floors, thickness, height, accent):
                 mesh.extrude(trim,z+bottom,z+top,accent)
 
 
-def build_styles(proposal):
+def build_styles(proposal, progress=None):
     floors, thickness, height = base_geometry(proposal)
     opening_model = floors[0][4]
     outside = [d for d in opening_model["doors"] if "OUTSIDE" in d["connects"]]
@@ -165,7 +165,9 @@ def build_styles(proposal):
     receiving = next(r for r in proposal["rooms_by_floor"][0]+proposal["halls_by_floor"][0]
                      if r["id"] == entry["receiving_room"])
     variants = []
-    for key, title, caption, wall, accent in STYLES:
+    for index, (key, title, caption, wall, accent) in enumerate(STYLES):
+        if progress:
+            progress(30+index*16, "رفع الكتلة بطراز "+title)
         mesh = Mesh()
         for i,(footprint,shell,doors,windows,_) in enumerate(floors):
             z = i*height

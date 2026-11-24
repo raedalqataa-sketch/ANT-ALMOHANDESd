@@ -161,3 +161,7 @@ app.mount('/composition', StaticFiles(directory=ROOT/'frontend'/'composition', h
           name='composition')
 app.mount('/massing', StaticFiles(directory=ROOT/'frontend'/'massing', html=True),
           name='massing')
+
+@app.get('/render/')
+def render_frontend():
+    return FileResponse(ROOT/'frontend'/'massing'/'render.html')

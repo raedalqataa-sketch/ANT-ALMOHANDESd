@@ -89,7 +89,7 @@ def upper_layout_options(stair, thickness, children, min_area, min_side, grid, t
             yield (west,east,south),plan,links
 
 
-def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7, wing_group=None, terrace_side="east"):
+def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7, wing_group=None, terrace_side="east", progress=None):
     """Generate and validate the ground floor before composing upper levels."""
     if terrace_side not in ("east", "south"):
         raise ValueError("Unsupported master terrace side")
@@ -105,6 +105,8 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
         data["rooms"].append(GROUND_WC)
         brief = type(brief).model_validate(data)
     grid = family_grid_profile(brief) if isinstance(brief,VillaBrief) else None
+    if progress:
+        progress(12, "تكوين الدور الأرضي وفحصه")
     ground_result = solve_central(brief, grid=grid)
     if not ground_result["proposals"]:
         raise ValueError(f"Ground floor rejected: {ground_result['failures']}")
@@ -120,6 +122,8 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
     roof_misses=unsupported_grid_points(grid,roof_axes,roof_only=True) if grid is not None else []
     if ground_misses or roof_misses:
         raise ValueError(f"Fixed grid misses wall runs: ground={ground_misses}; stair enclosure={roof_misses}")
+    if progress:
+        progress(55, "توزيع الدور الأول حول الدرج وفحص المسارات")
     best = None
     failures = {}
     tested = accepted = 0
@@ -160,6 +164,8 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
             best=(score,first,doors,covered,footprint.area,upper_axes,group)
     if best is None:
         raise ValueError(f"No upper layout meets the program after {tested} attempts: {failures}")
+    if progress:
+        progress(86, "تم فحص ارتباط الدورين")
     _,first,doors,covered,area,upper_axes,group=best
     ground_parts=unary_union([ground_footprint.buffer(thickness/2,join_style=2)]+[
         Polygon(platform["landing_polygon"]) for platform in ground.get("entrance_platforms",[])]+[

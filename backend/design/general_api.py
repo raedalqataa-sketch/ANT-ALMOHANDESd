@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import Field
+from typing import Literal
 from .general_models import VillaBrief, Strict, SpaceRequest
 from .general_engine import generate_general
 
@@ -98,10 +99,32 @@ def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,l
         raise HTTPException(422,str(exc))
 
 
-def _family_stack_proposal(brief):
+@router.post('/concepts/clustered/stream')
+def stream_clustered(brief: VillaBrief, first_floor: bool = False):
+    from .progress_stream import stream_work
+    from assl.strategies.clustered import solve_clustered
+
+    def run(progress):
+        progress(4, "التحقق من برنامج العميل")
+        if first_floor:
+            return {"status":"CONCEPT_READY_FOR_ARCHITECT_REVIEW",
+                    "proposals":[_family_stack_proposal(brief, progress)]}
+        if brief.spatial_requirements:
+            raise ValueError("SPATIAL_REQUIREMENTS_NEED_RELATIONAL_STRATEGY")
+
+        def report(phase, done, total, detail):
+            start, span = (10, 36) if phase == "composition" else (50, 46)
+            progress(start + int(span*done/max(1,total)),detail)
+
+        return solve_clustered(brief,max_results=1,progress=report)
+
+    return stream_work(run)
+
+
+def _family_stack_proposal(brief, progress=None):
     from assl.strategies.clustered_multilevel import build_family_stack, level_windows
 
-    stack = build_family_stack(brief)
+    stack = build_family_stack(brief, progress=progress)
     rooms = stack["first"]
     windows = level_windows([r for r in rooms if r["kind"] != "terrace"],
                             stack["doors"], brief.wall_thickness)
@@ -116,14 +139,25 @@ class MassingRequest(Strict):
 
 @router.post('/concepts/massing')
 def concept_massing(request: MassingRequest):
+    return _checked_massing(request.proposal)
+
+
+@router.post('/concepts/massing/stream')
+def stream_massing(request: MassingRequest):
+    from .progress_stream import stream_work
+    return stream_work(lambda progress: _checked_massing(request.proposal, progress))
+
+
+def _checked_massing(proposal, progress=None):
     from assl.layout_critic_010 import critique
     from assl.openings_009 import validate
     from assl.strategies.guest_access import check_guest_wc_routes
     from assl.strategies.styled_massing import build_styles
     from shapely.errors import ShapelyError
 
-    proposal = request.proposal
     try:
+        if progress:
+            progress(7, "فحص المسقط والمراجعة المختارة")
         brief = VillaBrief.model_validate(proposal["brief_snapshot"])
         if not 1 <= len(proposal["rooms_by_floor"]) <= 3 or sum(
                 len(floor) for floor in proposal["rooms_by_floor"]) > 120:
@@ -149,9 +183,45 @@ def concept_massing(request: MassingRequest):
                 "opening_model_009": [*expected["opening_model_009"],
                                       {"doors": first["doors"], "windows": first["windows"]}],
             }
-        return build_styles(proposal)
+        return build_styles(proposal, progress)
     except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+class RenderCamera(Strict):
+    mode: Literal["orbit","elevation"] = "orbit"
+    yaw: float = Field(ge=-6.284,le=6.284)
+    pitch: float = Field(ge=0,le=1.4)
+    zoom: float = Field(ge=.6,le=2.5)
+    side: Literal["east","west","north","south"] | None = None
+
+
+class RenderRequest(MassingRequest):
+    style: str
+    revision: str = Field(pattern=r"^[a-f0-9]{64}$")
+    camera: RenderCamera
+
+
+@router.post('/concepts/render/stream')
+def stream_render(request: RenderRequest):
+    from math import pi
+    from .blender_render import render_image
+    from .progress_stream import stream_work
+
+    def run(progress):
+        progress(4,"مطابقة الطراز مع مراجعة المسقط")
+        model = _checked_massing(request.proposal)
+        if model["revision"] != request.revision:
+            raise ValueError("تغيّرت مراجعة المسقط. اختر الطراز مجددًا.")
+        camera = request.camera.model_dump()
+        if camera["mode"] == "elevation":
+            sides = {"east":-pi/2, "west":pi/2, "north":pi, "south":0}
+            if camera["side"] is None:
+                raise ValueError("اختر جهة الواجهة.")
+            camera.update(yaw=sides[camera["side"]],pitch=0)
+        return render_image(model, request.style, camera, progress)
+
+    return stream_work(run)
 
 
 @router.get('/ai-status')
