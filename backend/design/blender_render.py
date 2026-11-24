@@ -29,7 +29,7 @@ def render_image(model, style_id, camera, progress):
         with TemporaryDirectory() as temp:
             root = Path(temp)
             scene, image = root/"scene.json", root/"render.png"
-            scene.write_text(json.dumps({"faces":style["faces"],"camera":camera}))
+            scene.write_text(json.dumps({"faces":style["faces"],"camera":camera,"style":style_id}))
             progress(12, "إعداد الخامات والإضاءة والكاميرا في Blender")
             threads = min(8, max(1, len(os.sched_getaffinity(0)) if hasattr(os,"sched_getaffinity") else os.cpu_count() or 1))
             command = [blender,"--background","--factory-startup","--threads",str(threads),
