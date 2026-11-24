@@ -1,6 +1,7 @@
 """Headless Blender scene. Run under Blender's bundled Python."""
 import json
 import math
+import os
 from pathlib import Path
 import sys
 
@@ -129,9 +130,9 @@ def main(input_path, output_path):
     scene.render.engine = "CYCLES"
     import _cycles
     denoise = bool(getattr(_cycles, "with_openimagedenoise", False))
-    scene.cycles.samples = 48 if denoise else 80
+    scene.cycles.samples = min(256,max(8,int(os.getenv("ANT_RENDER_SAMPLES", "32" if denoise else "64"))))
     scene.cycles.adaptive_threshold = .085 if denoise else .055
-    scene.cycles.adaptive_min_samples = 6 if denoise else 12
+    scene.cycles.adaptive_min_samples = min(scene.cycles.samples,6 if denoise else 12)
     scene.cycles.use_denoising = denoise
     scene.cycles.use_auto_tile = False
     scene.cycles.max_bounces = 6
