@@ -179,7 +179,9 @@ def build_styles(proposal, progress=None):
             mesh.extrude(terraces.difference(footprint),z-.18,z,"#a09a8e")
             mesh.extrude(shell.difference(doors),z,z+.9,wall)
             mesh.extrude(shell.difference(doors.union(windows)),z+.9,z+2.15,wall)
-            mesh.extrude(shell,z+2.15,z+height,wall)
+            # The slab supplies the top surface. Terminating the wall below it
+            # removes coincident faces that caused dark seams in Cycles.
+            mesh.extrude(shell,z+2.15,z+max(2.15,height-.18),wall)
             glass = shell.intersection(windows)
             mesh.extrude(glass,z+.9,z+2.15,"#618a9b")
             roof = footprint.difference(floors[i+1][0]) if i+1<len(floors) else footprint
