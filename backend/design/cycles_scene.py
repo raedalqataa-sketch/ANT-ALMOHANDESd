@@ -130,10 +130,12 @@ def main(input_path, output_path):
     import _cycles
     denoise = bool(getattr(_cycles, "with_openimagedenoise", False))
     scene.cycles.samples = 48 if denoise else 80
-    scene.cycles.adaptive_threshold = .055
+    scene.cycles.adaptive_threshold = .085 if denoise else .055
+    scene.cycles.adaptive_min_samples = 6 if denoise else 12
     scene.cycles.use_denoising = denoise
     scene.cycles.use_auto_tile = False
-    scene.cycles.max_bounces = 8
+    scene.cycles.max_bounces = 6
+    scene.cycles.diffuse_bounces = 2
     scene.view_settings.view_transform = "AgX"
     scene.render.resolution_x = 3840
     scene.render.resolution_y = 2160
