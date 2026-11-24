@@ -12,9 +12,9 @@
   }
   window.AntComposition = {
     prepare: async () => true,
-    generate: (strategy, brief) => {
+    generate: (strategy, brief, _onProgress, options = {}) => {
       if (strategy !== "clustered") throw Error("مسار التكوين غير متاح");
-      return request("/api/v3/concepts/clustered", brief);
+      return request("/api/v3/concepts/clustered?first_floor="+Boolean(options.firstFloor), brief);
     },
     editor: request
   };

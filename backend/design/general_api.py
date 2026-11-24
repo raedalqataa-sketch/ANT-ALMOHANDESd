@@ -85,13 +85,29 @@ def design(brief: VillaBrief):
 
 
 @router.post('/concepts/clustered')
-def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=1)):
+def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=1),
+                       first_floor: bool = False):
     """Opt-in experimental polygon composition; no provider or deployment call."""
     from assl.free_layout_solver import solve_free_concepts
     try:
+        if first_floor:
+            proposal = _family_stack_proposal(brief)
+            return {'status': 'CONCEPT_READY_FOR_ARCHITECT_REVIEW', 'proposals': [proposal]}
         return solve_free_concepts(brief,strategy='clustered',max_results=max_results)
     except ValueError as exc:
         raise HTTPException(422,str(exc))
+
+
+def _family_stack_proposal(brief):
+    from assl.strategies.clustered_multilevel import build_family_stack, level_windows
+
+    stack = build_family_stack(brief)
+    rooms = stack["first"]
+    windows = level_windows([r for r in rooms if r["kind"] != "terrace"],
+                            stack["doors"], brief.wall_thickness)
+    return {**stack["ground"], "first_floor": {
+        "rooms": rooms, "doors": stack["doors"], "windows": [w for w, _ in windows],
+    }}
 
 
 class MassingRequest(Strict):
@@ -118,6 +134,21 @@ def concept_massing(request: MassingRequest):
                 or critique(brief, {**proposal, "validation_009": quality})["status"]
                 != "ACCEPTABLE_DESIGN_INDICATORS"):
             raise ValueError("MASSING_BLOCKED: selected plan failed independent checks")
+        if "first_floor" in proposal:
+            if len(proposal["rooms_by_floor"]) != 1:
+                raise ValueError("MASSING_AMBIGUOUS_FIRST_FLOOR")
+            expected = _family_stack_proposal(brief)
+            fields = ("rooms_by_floor", "halls_by_floor", "opening_model_009", "first_floor")
+            for field in fields:
+                if json.loads(json.dumps(expected[field])) != proposal[field]:
+                    raise ValueError("MASSING_FIRST_FLOOR_CHANGED: regenerate the coordinated floors")
+            first = expected["first_floor"]
+            proposal = {
+                **expected, "rooms_by_floor": [*expected["rooms_by_floor"], first["rooms"]],
+                "halls_by_floor": [*expected["halls_by_floor"], []],
+                "opening_model_009": [*expected["opening_model_009"],
+                                      {"doors": first["doors"], "windows": first["windows"]}],
+            }
         return build_styles(proposal)
     except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
         raise HTTPException(422, str(exc)) from exc

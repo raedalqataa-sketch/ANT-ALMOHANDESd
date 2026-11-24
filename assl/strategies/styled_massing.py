@@ -169,13 +169,22 @@ def build_styles(proposal):
         mesh = Mesh()
         for i,(footprint,shell,doors,windows,_) in enumerate(floors):
             z = i*height
-            mesh.extrude(footprint,z-.18,z,"#a09a8e")
+            rooms = proposal["rooms_by_floor"][i]
+            landing_void = unary_union([net_shape(room,thickness) for room in rooms
+                                        if i and room["kind"] == "stair"])
+            mesh.extrude(footprint.difference(landing_void),z-.18,z,"#a09a8e")
+            terraces = unary_union([shape(room) for room in rooms if room["kind"] == "terrace"])
+            mesh.extrude(terraces.difference(footprint),z-.18,z,"#a09a8e")
             mesh.extrude(shell.difference(doors),z,z+.9,wall)
             mesh.extrude(shell.difference(doors.union(windows)),z+.9,z+2.15,wall)
             mesh.extrude(shell,z+2.15,z+height,wall)
             glass = shell.intersection(windows)
             mesh.extrude(glass,z+.9,z+2.15,"#618a9b")
             roof = footprint.difference(floors[i+1][0]) if i+1<len(floors) else footprint
+            if i+1 < len(floors):
+                roof = roof.difference(unary_union([
+                    shape(room) for room in proposal["rooms_by_floor"][i+1]
+                    if room["kind"] == "terrace"]))
             mesh.extrude(roof,z+height-.18,z+height,"#aaa59a")
         for platform in proposal.get("entrance_platforms", ()):
             level = platform["level_m"]
