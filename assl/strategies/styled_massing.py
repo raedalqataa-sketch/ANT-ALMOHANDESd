@@ -8,13 +8,14 @@ from shapely.geometry import Point, Polygon, box
 from shapely.ops import triangulate, unary_union
 
 from assl.openings_009 import wall_cut
+from .classical_facade import add_portal, stair_pilasters, terrace_railings
 from .geometry import net_shape, shape
 
 STYLES = (
     ("modern", "مودرن", "إطار غرافيتي ومظلة أفقية وشرائح خشبية", "#e6ddcc", "#353a3f"),
     ("najdi", "نجدي معاصر", "بوابة حجرية وحواجز سقف مسنّنة", "#c8a77e", "#967252"),
     ("mediterranean", "متوسطي", "مدخل مقوّس وسقف مائل بلون القرميد", "#f1dfc4", "#ab543c"),
-    ("classical", "كلاسيكي مبسّط", "أعمدة مدخل وكورنيش متدرّج", "#e5dfd4", "#b0a08a"),
+    ("classical", "كلاسيكي مبسّط", "مدخل كلاسيكي متعدد الطبقات وكرانيش وإطارات بارزة", "#e5dfd4", "#b0a08a"),
 )
 
 
@@ -64,7 +65,7 @@ def base_geometry(proposal):
     return floors, thickness, height
 
 
-def decorate(mesh, style, roof, levels, entry, receiving, accent, thickness):
+def decorate(mesh, style, roof, levels, entry, receiving, accent, thickness, custom_portal=False):
     top = levels
     def band(projection, z, height, color):
         mesh.extrude(roof.buffer(projection, join_style=2).difference(
@@ -84,6 +85,9 @@ def decorate(mesh, style, roof, levels, entry, receiving, accent, thickness):
             band(projection, z, height, accent)
     else:
         band(.17, top-.1, .21, accent)
+
+    if custom_portal:
+        return
 
     x, y = entry["center"]
     along_x = entry["axis"] == "x"
@@ -199,7 +203,18 @@ def build_styles(proposal, progress=None):
         base_faces = len(mesh.faces)
         if key == "modern":
             frame_windows(mesh,floors,thickness,height,accent)
-        decorate(mesh,key,floors[-1][0],height*len(floors),entry,receiving,accent,thickness)
+        custom_portal = False
+        if key == "classical":
+            custom_portal = add_portal(mesh,entry,shape(receiving),floors[0][0],
+                                       thickness,height,wall,accent)
+            frame_windows(mesh,floors,thickness,height,accent)
+            stair_pilasters(mesh,proposal,floors,entry,shape(receiving),thickness,height,accent)
+            for level, (facade, *_rest) in enumerate(floors):
+                for room in proposal["rooms_by_floor"][level]:
+                    if room["kind"] == "terrace":
+                        terrace_railings(mesh,shape(room),facade,level*height,wall)
+        decorate(mesh,key,floors[-1][0],height*len(floors),entry,receiving,accent,thickness,
+                 custom_portal=custom_portal)
         variants.append(dict(id=key,title=title,caption=caption,faces=mesh.faces,base_faces=base_faces))
     geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
     geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
