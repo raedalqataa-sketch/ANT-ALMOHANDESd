@@ -132,6 +132,7 @@ def main(input_path, output_path):
     scene.cycles.samples = 48 if denoise else 80
     scene.cycles.adaptive_threshold = .055
     scene.cycles.use_denoising = denoise
+    scene.cycles.use_auto_tile = False
     scene.cycles.max_bounces = 8
     scene.view_settings.view_transform = "AgX"
     scene.render.resolution_x = 3840
