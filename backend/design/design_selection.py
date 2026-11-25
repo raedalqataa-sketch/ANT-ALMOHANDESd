@@ -13,7 +13,7 @@ WEIGHTS={
 MAX_SLEEPING_ASPECT_RATIO = 2.0  # Design quality threshold, not a building-code rule.
 
 def measure(model):
-    rows={};route_lengths=[];social=0;ratios=[];sleeping_ratios=[];functional=[]
+    rows={};route_lengths=[];unreachable_routes=[];social=0;ratios=[];sleeping_ratios=[];functional=[]
     for f in model['floors']:
         cells=f['cells'];x=min(r['x'] for r in cells);y=min(r['y'] for r in cells)
         w=max(r['x']+r['width'] for r in cells)-x;d=max(r['y']+r['depth'] for r in cells)-y
@@ -51,12 +51,16 @@ def measure(model):
                     if new<distances.get(nxt,math.inf):distances[nxt]=new;todo.append((new,nxt))
             return None
         for ka,kb in [('kitchen','dining'),('living','dining'),('master','bathroom'),('bedroom','bathroom')]:
-            for a in (r for r in rooms if r['kind']==ka):
-                distances=[distance(a['id'],b['id']) for b in rooms if b['kind']==kb and b.get('zone')!='guest']
+            for a in (r for r in rooms if r['kind']==ka and r.get('zone')!='guest'):
+                targets=[b for b in rooms if b['kind']==kb and b.get('zone')!='guest']
+                if not targets:continue
+                distances=[distance(a['id'],b['id']) for b in targets]
                 distances=[v for v in distances if v is not None]
                 if distances:
                     value=min(distances);route_lengths.append(value)
                     functional.append({'floor':f['id'],'from':a['id'],'to_kind':kb,'door_graph_route_m':round(value,3)})
+                else:
+                    unreachable_routes.append({'floor':f['id'],'from':a['id'],'to_kind':kb})
     qs=list(model.get('massing_quality',{}).get('floors',{}).values())
     area=sum(model['metrics']['floor_built_by_id'].values())
     public_built=area or 1
@@ -69,12 +73,12 @@ def measure(model):
       'social_area_m2':round(social,3),'social_ratio':round(social/public_built,5),
       'max_room_aspect_ratio':round(max(ratios,default=1),4),
       'max_sleeping_aspect_ratio':round(max(sleeping_ratios,default=1),4),
-      'functional_routes':functional,'normalized_rooms':rows}
+      'functional_routes':functional,'unreachable_functional_routes':unreachable_routes,'normalized_rooms':rows}
 
 def objective_score(metrics,priority):
     components={'area':metrics['total_built_m2']/250,'circulation':metrics['circulation_ratio']/.20,
         'compactness':metrics['normalized_perimeter']+(1-metrics['envelope_fill']),
-        'routes':metrics['mean_functional_route_m']/12,'social':1-min(metrics['social_ratio'],.65)/.65}
+        'routes':metrics['mean_functional_route_m']/12+4*len(metrics.get('unreachable_functional_routes',[]))/max(1,len(metrics.get('functional_routes',[]))+len(metrics.get('unreachable_functional_routes',[]))),'social':1-min(metrics['social_ratio'],.65)/.65}
     weights=WEIGHTS[priority]
     components['program_excess']=metrics['program_excess_ratio']
     weights={**weights,'program_excess':.15}
