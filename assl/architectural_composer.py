@@ -222,8 +222,11 @@ def assess_layout(layout,t,*,facade_clear_m=.90):
             # Shared wall long enough for an eventual door, before actual
             # door placement; guest rooms must meet a guest distributor.
             possible=[hall for hall in corridors if shared_edge(room,hall)>=.90]
-            if room.get('zone')=='guest' and room.get('guest_vestibule'):
-                possible=[h for h in possible if h.get('guest_distributor')]
+            if room.get('zone')=='guest':
+                from .guest_groups import room_vestibules
+                assigned=room_vestibules(room,[h for h in corridors if h.get('guest_distributor')])
+                possible=[h for h in possible if h in assigned]
+                if any(shared_edge(room,h)<.90 for h in assigned):possible=[]
             if not possible:
                 issues.append({'floor':fi,'room_id':rid,'reason':'NO_CORRIDOR_CONNECTION_POTENTIAL'})
             rooms_evidence.append({'floor':fi,'room_id':rid,'kind':kind,

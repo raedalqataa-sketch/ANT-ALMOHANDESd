@@ -32,6 +32,7 @@ def _connected(rectangles):
 
 def audit_preliminary_concept(brief,proposal):
     from backend.design.general_engine import expanded_program
+    from .guest_groups import prepare_program,memberships,room_vestibules
     t=brief.wall_thickness
     W=brief.plot_width-brief.setbacks.east-brief.setbacks.west-t
     D=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-t
@@ -43,7 +44,8 @@ def audit_preliminary_concept(brief,proposal):
                 'legal_code_certification':False}
     all_stairs=[]
     for idx,(rooms,walk) in enumerate(zip(floors,halls)):
-        expected=sorted(r['id'] for r in expanded_program(brief,idx))
+        program=prepare_program(brief,expanded_program(brief,idx))
+        expected=sorted(r['id'] for r in program)
         actual=sorted(r['id'] for r in rooms if r.get('request_id'))
         if expected!=actual:
             issues.append({'floor':idx,'reason':'REQUESTED_ROOMS_LOST_OR_DUPLICATED',
@@ -82,19 +84,30 @@ def audit_preliminary_concept(brief,proposal):
                 issues.append({'floor':idx,'reason':'NO_DIRECT_EXTERIOR_FACADE_POTENTIAL',
                                'id':r['id']})
         guest=[r for r in rooms if r.get('guest_distributor')]
-        if idx==0 and brief.separate_guest_entry and any(r.get('kind')=='majlis'
-                for r in rooms):
+        requested_guests=[r for r in program if r.get('zone')=='guest']
+        legacy=(len(requested_guests)==2 and
+                sorted(r['kind'] for r in requested_guests)==['bathroom','majlis'] and
+                not brief.guest_groups)
+        expected_memberships={} if legacy else memberships(program)
+        expected_entries={e for es in expected_memberships.values() for e in es}
+        if legacy:
             if len(guest)!=1:
-                issues.append({'floor':0,'reason':'GUEST_VESTIBULE_MISSING_OR_DUPLICATED'})
-            else:
-                v=guest[0]
-                linked=[r for r in rooms if r.get('guest_vestibule')==v.get('id')]
-                kinds=[r.get('kind') for r in linked]
-                if 'majlis' not in kinds or 'bathroom' not in kinds or any(
-                    edge_contact(r,v)<.9 for r in linked):
-                    issues.append({'floor':0,'reason':'GUEST_SUITE_NOT_ADJACENT_TO_OWN_VESTIBULE'})
-                if facade_exposure(v,shapes)<.9-EPS:
-                    issues.append({'floor':0,'reason':'INDEPENDENT_GUEST_ENTRY_FACADE_MISSING'})
+                issues.append({'floor':idx,'reason':'GUEST_VESTIBULE_MISSING_OR_DUPLICATED'})
+        elif sorted(v.get('guest_entry','') for v in guest)!=sorted(expected_entries):
+            issues.append({'floor':idx,'reason':'GUEST_ENTRY_MEMBERSHIP_MISMATCH'})
+        for requested in requested_guests:
+            r=next((q for q in rooms if q['id']==requested['id']),None)
+            if r is None:continue
+            if r.get('zone')!='guest' or (not legacy and
+                    sorted(r.get('guest_entries',[]))!=sorted(expected_memberships[r['id']])):
+                issues.append({'floor':idx,'reason':'GUEST_ROOM_MEMBERSHIP_MISMATCH','id':r['id']})
+            hosts=room_vestibules(r,guest)
+            required_count=1 if legacy else len(expected_memberships[r['id']])
+            if len(hosts)!=required_count or any(edge_contact(r,v)<.9-EPS for v in hosts):
+                issues.append({'floor':idx,'reason':'GUEST_SUITE_NOT_ADJACENT_TO_OWN_VESTIBULE','id':r['id']})
+        for v in guest:
+            if facade_exposure(v,shapes)<.9-EPS:
+                issues.append({'floor':idx,'reason':'INDEPENDENT_GUEST_ENTRY_FACADE_MISSING','id':v['id']})
         by_floor.append({'floor':idx,'room_count':len([r for r in rooms if r.get('request_id')]),
                          'family_hall_union_m2':round(union_area(walk),3),
                          'footprint_union_m2':round(union_area(shapes),3),

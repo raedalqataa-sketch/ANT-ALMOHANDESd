@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>التكوين الكتلي | أنت المهندس</title>
+  <link rel="stylesheet" href="/massing/style.css">
+</head>
+<body>
+  <header><a href="/composition/?strategy=clustered">← العودة إلى المساقط</a><strong>أنت المهندس</strong></header>
+  <main>
+    <h1>التكوين الكتلي</h1>
+    <p id="status" role="status">جارٍ رفع المسقط المختار…</p>
+    <div id="phase-progress" class="generation-progress" hidden>
+  <div id="phase-ring" class="progress-ring" role="progressbar" aria-label="تقدم العملية" aria-valuemin="0" aria-valuemax="100"><strong id="phase-percent"></strong></div>
+  <div><span id="phase-detail"></span><div id="phase-elapsed"></div></div>
+</div>
+    <div id="workspace" hidden>
+      <section class="viewer" aria-label="عارض الكتلة">
+        <canvas id="stage" tabindex="0" aria-label="الكتلة ثلاثية الأبعاد. استخدم الأسهم لتدويرها."></canvas>
+        <div class="tools">
+          <button type="button" id="right" aria-label="دور يمينًا">↻</button>
+          <button type="button" id="left" aria-label="دور يسارًا">↺</button>
+          <button type="button" id="zoom-in" aria-label="تقريب">+</button>
+          <button type="button" id="zoom-out" aria-label="إبعاد">−</button>
+          <button type="button" id="reset">إعادة ضبط المنظور</button>
+        </div>
+      </section>
+      <aside>
+        <h2>اختر الطراز</h2>
+        <div id="styles"></div>
+        <button type="button" class="primary" id="save">اختيار الطراز والانتقال للرندر</button>
+        <p id="choice" role="status"></p>
+      </aside>
+    </div>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

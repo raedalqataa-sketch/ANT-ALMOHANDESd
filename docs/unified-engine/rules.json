@@ -1,0 +1,30 @@
+{
+  "precedence": ["verified_local_code_and_safety", "approved_project_decisions", "client_program_and_functional_constraints", "massing_preferences"],
+  "sources": ["Project Vision and Strategic Charter V1.0", "ANT_ALMOHANDES_UNIFIED_ARCH_RULES_V2.1.json", "مواصفة قواعد توليد مساقط الفلل، القسم 2", "دليل تصميمي مستخلص من نماذج مساقط الفلل"],
+  "scope": "Implementation register; pending gates require evidence before acceptance",
+  "rules": [
+    ["Z01", "guest program", "guest graph forbids family living, bedrooms and inner kitchen", "block"],
+    ["Z02", "guest hall", "door-to-door path from guest entrance; document proximity target", "block or unresolved until target is defined"],
+    ["Z03", "guest WC", "guest hall reaches WC through public circulation", "block"],
+    ["Z04", "kitchen and dining", "measure hosted-door service path or prove adjacency", "block or unresolved without distance criterion"],
+    ["Z05", "pantry", "check kitchen proximity and service-only route", "block"],
+    ["Z06", "service access applicable", "check route from side/rear access without crossing guest halls", "block"],
+    ["Z07", "stair", "access from shared foyer or distributor", "block"],
+    ["Z08", "bedrooms", "guest path exclusion and measured visibility", "block"],
+    ["Z09", "required furnished space", "fixture geometry, clearance and access", "block"],
+    ["Z10", "swing doors", "leaf sweeps vs furniture, other leaves and clear corridor", "block critical conflicts; document lower-severity review"],
+    ["Z11", "multiple levels", "aligned stair, landing, opening and clearance", "block"],
+    ["Z12", "service equipment applicable", "maintenance clearance and access outside private rooms", "block or unresolved without equipment geometry"]
+  ],
+  "design_preferences": ["family lounge as distributor", "coordinated porch, steps and entry", "functional chamfer, curve, projection or recess tested against furnishing"],
+  "v2_1_gates": {
+    "SPACE_PROGRAM": "Compare IDs, clear dimensions and area with the confirmed brief",
+    "ROUTE_CONNECTIVITY": "Use actual opening graph and usable movement region",
+    "PRIVACY": "Use access restrictions and visibility evidence",
+    "DOOR_CLEARANCE": "Audit hosting and swept geometry",
+    "FURNITURE_FIT": "Check full furniture program and clearances",
+    "NATURAL_LIGHT_AIR": "Identify exterior openings and review performance and local requirements",
+    "EXPORT_INTEGRITY": "Reopen and compare version, units, layers and openings",
+    "professional_and_site_gates": "Keep unknown or under review when verified plot, applicable code or discipline inputs are absent"
+  }
+}

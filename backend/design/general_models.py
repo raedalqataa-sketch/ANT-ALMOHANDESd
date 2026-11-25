@@ -23,7 +23,31 @@ class SpaceRequest(Strict):
     min_area: float = Field(ge=3, le=100)
     min_side: float = Field(ge=1.4, le=10)
     capacity: int = Field(default=0, ge=0, le=2)
+    ensuite_for: str | None = Field(default=None,pattern=r'^[a-zA-Z0-9_-]{1,45}$')
 
+
+class GuestGroup(Strict):
+    """ASSL hospitality membership; equal entry keys share one vestibule.
+
+    A service request may belong to multiple groups without being duplicated.
+    """
+    id: str = Field(pattern=r'^[a-zA-Z0-9_-]{1,45}$')
+    rooms: list[str] = Field(min_length=1, max_length=36)
+    entry: str | None = Field(default=None, pattern=r'^[a-zA-Z0-9_-]{1,45}$')
+
+
+
+class SpatialRequirement(Strict):
+    source:str=Field(pattern=r'^[a-zA-Z0-9_-]{1,45}$')
+    target:str=Field(pattern=r'^[a-zA-Z0-9_-]{1,45}$')
+    relation:Literal['adjacent','near','separate']
+    max_distance_m:float|None=Field(default=None,gt=0,le=50)
+
+    @model_validator(mode='after')
+    def valid_distance(self):
+        if self.source==self.target:raise ValueError('علاقة الغرفة بنفسها غير مدعومة')
+        if (self.relation=='near') != (self.max_distance_m is not None):raise ValueError('حدد مسافة لعلاقة near فقط')
+        return self
 
 
 # Optional dimensions for preliminary 2024 municipal checks.
@@ -115,19 +139,20 @@ class AutomaticFeatures(Strict):
     main_street_faces: list[Literal['north','south','east','west']] | None = None
 
 
-class VillaBrief(Strict):
+class VillaProgram(Strict):
     project_name: str = Field(default='فيلا جديدة', min_length=1, max_length=100)
-    plot_width: float = Field(ge=8, le=60)
-    plot_depth: float = Field(ge=8, le=80)
     floors: int = Field(default=2, ge=1, le=2)
-    setbacks: Setbacks
     entrance_face: Literal['north','south','east','west'] = 'south'
     wall_thickness: float = Field(default=.2, ge=.15, le=.4)
+    main_entry_width: float = Field(default=1.0, ge=.9, le=2.4)
+    entry_plinth_height_m: float = Field(default=0.0, ge=0, le=1.2)
     corridor_width: float = Field(default=1.5, ge=1.2, le=2.4)
     compact_core: bool = False  # opt-in V4: reserve a program-sized stair, not the full room wing
     proposed_room_area_factor: float | None = Field(default=None, ge=1, le=2.5)
     floor_height: float = Field(default=3.2, ge=2.8, le=3.8)
     rooms: list[SpaceRequest] = Field(min_length=1, max_length=30)
+    guest_groups: list[GuestGroup] = Field(default_factory=list, max_length=12)
+    spatial_requirements:list[SpatialRequirement]=Field(default_factory=list,max_length=40)
     country: Literal['SA','YE'] = 'SA'
     city: str = Field(default='',max_length=100)
     region: str = Field(default='',max_length=100)
@@ -168,16 +193,53 @@ class VillaBrief(Strict):
                 raise ValueError('اختر التوليد التلقائي أو القياسات اليدوية للعنصر نفسه، ولا تجمعهما')
         if len({r.id for r in self.rooms}) != len(self.rooms):
             raise ValueError('معرفات صفوف البرنامج يجب أن تكون فريدة')
+        if len({g.id for g in self.guest_groups}) != len(self.guest_groups):
+            raise ValueError('معرفات مجموعات الضيافة يجب أن تكون فريدة')
+        known={r.id:r for r in self.rooms}
+        for room in self.rooms:
+            if room.ensuite_for:
+                parent=known.get(room.ensuite_for)
+                if room.kind!='bathroom' or parent is None or parent.kind not in ('bedroom','master') or room.floor!=parent.floor or room.count!=1 or parent.count!=1:
+                    raise ValueError('الحمام الخاص يحتاج غرفة نوم واحدة معروفة في الدور نفسه')
+        pairs={}
+        for relation in self.spatial_requirements:
+            if relation.source not in known or relation.target not in known:raise ValueError('علاقة مكانية تشير إلى فراغ غير موجود')
+            if known[relation.source].floor!=known[relation.target].floor:raise ValueError('العلاقات المكانية الحالية تخص الدور نفسه')
+            key=tuple(sorted((relation.source,relation.target)))
+            pairs.setdefault(key,set()).add(relation.relation)
+            if {'adjacent','separate'}<=pairs[key]:raise ValueError('علاقتا الالتصاق والفصل متعارضتان')
+        if self.guest_groups:
+            requests={r.id:r for r in self.rooms}
+            covered=set()
+            for group in self.guest_groups:
+                if len(set(group.rooms))!=len(group.rooms):
+                    raise ValueError('لا تكرر غرفة داخل مجموعة الضيافة')
+                if any(i not in requests or requests[i].floor!=0 or
+                       requests[i].kind not in ('majlis','bathroom','storage','dining') for i in group.rooms):
+                    raise ValueError('مجموعة الضيافة تحتاج غرف ضيافة وخدمات أرضية معروفة')
+                covered.update(group.rooms)
+            if any(r.kind=='majlis' and r.floor==0 and r.id not in covered for r in self.rooms):
+                raise ValueError('يجب ربط جميع مجالس الأرضي بمجموعات الضيافة')
         if sum(r.count for r in self.rooms)>36:
             raise ValueError('هذا الإصدار يدعم حتى 36 فراغًا مطلوبًا')
         if any(r.floor>=self.floors for r in self.rooms):
             raise ValueError('أحد الفراغات موضوع في دور غير موجود')
         if any(not any(r.floor==f for r in self.rooms) for f in range(self.floors)):
             raise ValueError('أضف برنامجًا لكل دور مطلوب')
-        if self.plot_width-self.setbacks.west-self.setbacks.east<6 or self.plot_depth-self.setbacks.north-self.setbacks.south<6:
-            raise ValueError('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي')
         if any(r.capacity and r.kind not in ('master','bedroom') for r in self.rooms):
             raise ValueError('سعة النوم تخص غرف النوم فقط')
+        return self
+
+
+class VillaBrief(VillaProgram):
+    plot_width: float = Field(ge=8, le=60)
+    plot_depth: float = Field(ge=8, le=80)
+    setbacks: Setbacks
+
+    @model_validator(mode='after')
+    def valid_buildable_envelope(self):
+        if self.plot_width-self.setbacks.west-self.setbacks.east<6 or self.plot_depth-self.setbacks.north-self.setbacks.south<6:
+            raise ValueError('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي')
         return self
 
 

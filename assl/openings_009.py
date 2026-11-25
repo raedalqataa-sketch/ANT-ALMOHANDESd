@@ -8,15 +8,21 @@ import heapq
 import math
 from shapely.geometry import box, Point, LineString
 from shapely.ops import unary_union
+from .guest_groups import entry_door_id,room_vestibules
 
 EPS=1e-6
 
-def shape(r):return box(r['x'],r['y'],r['x']+r['width'],r['y']+r['depth'])
+def shape(r):
+ if 'polygon' in r:
+  from shapely.geometry import Polygon
+  return Polygon(r['polygon'])
+ return box(r['x'],r['y'],r['x']+r['width'],r['y']+r['depth'])
 
 def shared_edge(a,b):
  boundary=shape(a).boundary.intersection(shape(b).boundary)
  if boundary.is_empty or boundary.length<EPS or boundary.geom_type!='LineString':return None
  (x,y),(xx,yy)=boundary.coords[0],boundary.coords[-1]
+ if abs(y-yy)>=EPS and abs(x-xx)>=EPS:return None
  axis='x' if abs(y-yy)<EPS else 'y'
  lo,hi=sorted((x,xx) if axis=='x' else (y,yy))
  return dict(axis=axis,fixed=y if axis=='x' else x,lo=lo,hi=hi,length=hi-lo)
@@ -92,21 +98,40 @@ def centre(edge,width,fraction):
 def cut(o,t):
  x,y=o['center'];w=o['width'];return box(x-w/2,y-t,x+w/2,y+t) if o['axis']=='x' else box(x-t,y-w/2,x+t,y+w/2)
 
+def wall_cut(o,t):
+ """Full-width rectangular cut gives open passages square wall returns."""
+ return cut(dict(o,width=o["wall_span_m"]),t) if o.get("open_passage") else cut(o,t)
+
 def inward(o,r,distance):
  p=list(o['center']);a=1 if o['axis']=='x' else 0
  mid=r['y']+r['depth']/2 if a else r['x']+r['width']/2
  p[a]+=distance*(1 if mid>p[a] else -1)
  return p
 
-def swing(o,r,t):
- """A 90-degree leaf swept sector, inside the receiving room's clear net area."""
- a=0 if o['axis']=='x' else 1;hinge=inward(o,r,t/2+.001);hinge[a]-=o['width']/2
- mid=inward(o,r,t/2+.1);sign=1 if mid[1-a]>o['center'][1-a] else -1
- pts=[hinge]
- for i in range(19):
-  angle=math.pi/2*i/18;p=list(hinge);p[a]+=o['width']*math.cos(angle);p[1-a]+=sign*o['width']*math.sin(angle);pts.append(p)
+def leaf_swings(o,r,t):
+ """Real independent leaf sectors; legacy doors keep one left hinge."""
  from shapely.geometry import Polygon
- return Polygon(pts)
+ if o.get("open_passage"):return []
+ widths=o.get('leaf_widths',[o['width']])
+ if len(widths) not in (1,2) or any(not math.isfinite(w) or w<=0 for w in widths) or abs(sum(widths)-o['width'])>EPS:
+  raise ValueError('INVALID_DOOR_LEAVES')
+ a=0 if o['axis']=='x' else 1
+ base=inward(o,r,t/2+.001);mid=inward(o,r,t/2+.1)
+ sign=1 if mid[1-a]>o['center'][1-a] else -1
+ result=[]
+ for index,width in enumerate(widths):
+  direction=-1 if index else 1;hinge=list(base)
+  hinge[a]+=o['width']/2 if index else -o['width']/2
+  pts=[hinge]
+  for i in range(19):
+   angle=math.pi/2*i/18;p=list(hinge);p[a]+=direction*width*math.cos(angle);p[1-a]+=sign*width*math.sin(angle);pts.append(p)
+  result.append(Polygon(pts))
+ return result
+
+
+def swing(o,r,t):
+ """Union of actual leaf sweeps for collision/body checks."""
+ return unary_union(leaf_swings(o,r,t))
 
 def window_clear(w,r,objects,t):
  if not all(math.isfinite(v) for v in (*w['center'],w['width'],w['height'],w['operable_fraction'])) or w['width']<=0 or w['height']<=0 or not 0<w['operable_fraction']<=1:return False
@@ -118,6 +143,53 @@ def window_clear(w,r,objects,t):
  if any(probe.intersection(shape(q).buffer(t/2,join_style=2)).area>EPS for q in objects if q['id']!=r['id']):return False
  return True
 
+def _outdoor_region(brief,objects):
+ t=brief.wall_thickness;ox=brief.setbacks.west+t/2;oy=brief.setbacks.south+t/2
+ return box(-ox,-oy,brief.plot_width-ox,brief.plot_depth-oy).difference(
+  unary_union([shape(r) for r in objects]).buffer(t/2,join_style=2))
+
+
+def exterior_route(brief,entry,receiving,objects,*,outdoor=None):
+ """Same physical plot, endpoint offsets and body width as unchanged validate."""
+ from backend.design.general_models import VillaBrief
+ inside=inward(entry,receiving,.65)
+ out=[2*entry['center'][i]-inside[i] for i in (0,1)]
+ if not isinstance(brief,VillaBrief):
+  # Check clearance at the door against the generated building itself.
+  # This endpoint is outside the entry, not a street or parcel boundary.
+  approach=[entry['center'][i]+3*(out[i]-entry['center'][i]) for i in (0,1)]
+  mass=unary_union([shape(room) for room in objects]).buffer(brief.wall_thickness/2,join_style=2)
+  outside=box(*mass.bounds).buffer(3,join_style=2).difference(mass)
+  return shortest_path(outside,approach,out)
+ t=brief.wall_thickness;ox=brief.setbacks.west+t/2;oy=brief.setbacks.south+t/2
+ if outdoor is None:outdoor=_outdoor_region(brief,objects)
+ face=brief.entrance_face;W=brief.plot_width;D=brief.plot_depth
+ street=([out[0],-oy+.4] if face=='south' else [out[0],D-oy-.4] if face=='north' else [W-ox-.4,out[1]] if face=='east' else [-ox+.4,out[1]])
+ return shortest_path(outdoor,street,out)
+
+
+def choose_guest_entry(brief,target,edges,objects,doors,*,fraction=.5,outdoor=None):
+ """Choose a real hosted opening with an outdoor body route, no room moves.
+
+ Keep the old preferred face/position when valid. At most three legitimate
+ positions per exposed interval are examined; room/topology budgets stay fixed.
+ """
+ t=brief.wall_thickness;ids={r['id']:r for r in objects}
+ if outdoor is None:outdoor=_outdoor_region(brief,objects)
+ for edge in sorted(edges,key=lambda e:-e['length']):
+  if edge['length']<1.3-EPS:continue
+  for f in dict.fromkeys((fraction,0.,1.)):
+   entry=dict(id=entry_door_id(target),kind='door',axis=edge['axis'],center=centre(edge,1.,f),
+              width=1.,connects=['OUTSIDE',target['id']],receiving_room=target['id'])
+   if not opening_fits(entry,edge):continue
+   sector=swing(entry,target,t)
+   if not shape(target).buffer(-t/2).buffer(.003).covers(sector):continue
+   if any(cut(entry,t/2).intersection(cut(d,t/2)).area>EPS or
+          sector.intersection(swing(d,ids[d['receiving_room']],t)).area>EPS for d in doors):continue
+   if exterior_route(brief,entry,target,objects,outdoor=outdoor) is not None:return entry
+ return None
+
+
 def construct(brief,proposal,fraction=.5):
  """Build new opening decisions on a copy; never change rooms or stairs."""
  p=copy.deepcopy(proposal);floors=[];t=brief.wall_thickness
@@ -125,15 +197,21 @@ def construct(brief,proposal,fraction=.5):
  for fi,(rooms,halls) in enumerate(zip(p['rooms_by_floor'],p['halls_by_floor'])):
   hs=[dict(h,id=f'hall-{fi}-{i}') for i,h in enumerate(halls)]
   objects=rooms+hs;doors=[];windows=[];errors=[]
+  vestibules=[v for v in rooms if v.get('guest_distributor')]
   for r in rooms:
    if r.get('guest_distributor'):continue
-   hosts=([v for v in rooms if v.get('guest_distributor')] if r.get('zone')=='guest' else hs)
+   hosts=room_vestibules(r,vestibules) if r.get('zone')=='guest' else hs
    edges=[(h,shared_edge(r,h)) for h in hosts];edges=[(h,e) for h,e in edges if e and e['length']>=1.2-EPS]
    if not edges:errors.append('NO_DOOR_HOST:'+r['id']);continue
-   h,e=max(edges,key=lambda v:v[1]['length']);o=dict(id=f'door-{fi}-{len(doors)}',kind='door',axis=e['axis'],center=centre(e,.9,fraction),width=.9,connects=[h['id'],r['id']],receiving_room=r['id'])
-   doors.append(o)
+   selected=edges if r.get('zone')=='guest' else [max(edges,key=lambda v:v[1]['length'])]
+   for h,e in selected:
+    o=dict(id=f'door-{fi}-{len(doors)}',kind='door',axis=e['axis'],center=centre(e,.9,fraction),width=.9,connects=[h['id'],r['id']],receiving_room=r['id'])
+    doors.append(o)
   if fi==0:
-   for label,targets in [('family-entry',[h for h in hs if halls[int(h['id'].split('-')[-1])].get('id')=='family-entry-spur']),('guest-entry',[r for r in rooms if r.get('guest_distributor')])]:
+   outdoor=_outdoor_region(brief,objects) if vestibules else None
+   entry_targets=[('family-entry',[h for h in hs if halls[int(h['id'].split('-')[-1])].get('id')=='family-entry-spur'])]
+   entry_targets += [(entry_door_id(v),[v]) for v in vestibules]
+   for label,targets in entry_targets:
     if not targets:errors.append('MISSING_ENTRY_TARGET:'+label);continue
     target=targets[0];edges=exposed_edges(target,objects)
     if label=='family-entry':
@@ -142,6 +220,10 @@ def construct(brief,proposal,fraction=.5):
      edges=[e for e in edges if e['axis']==a and abs(e['fixed']-fixed)<EPS]
     edges=[e for e in edges if e['length']>=1.3-EPS]
     if not edges:errors.append('NO_EXTERIOR_ENTRY_EDGE:'+label);continue
+    if label!='family-entry':
+     entry=choose_guest_entry(brief,target,edges,objects,doors,fraction=fraction,outdoor=outdoor)
+     if entry is None:errors.append('NO_REACHABLE_EXTERIOR_ENTRY:'+label);continue
+     doors.append(entry);continue
     e=max(edges,key=lambda v:v['length']);doors.append(dict(id=label,kind='door',axis=e['axis'],center=centre(e,1.,fraction),width=1.,connects=['OUTSIDE',target['id']],receiving_room=target['id']))
   for r in rooms:
    if r['kind'] not in ('bedroom','master','kitchen','bathroom'):continue
@@ -159,6 +241,9 @@ def construct(brief,proposal,fraction=.5):
 
 def validate(brief,p):
  """Rebuild evidence from coordinates/hosts; never trust stored status flags."""
+ if p.get('schema') in ('assl-clustered-1','assl-clustered-2','assl-relational-1'):
+  from .strategies.validation import validate_clustered
+  return validate_clustered(brief,p)
  from .free_layout_audit import audit_preliminary_concept
  audit=audit_preliminary_concept(brief,p);issues=list(audit['issues']);evidence=[];t=brief.wall_thickness
  model=p.get('opening_model_009')
@@ -166,9 +251,15 @@ def validate(brief,p):
  for fi,f in enumerate(model):
   rooms=p['rooms_by_floor'][fi];halls=[dict(h,id=f'hall-{fi}-{i}') for i,h in enumerate(p['halls_by_floor'][fi])];objects=rooms+halls;ids={r['id']:r for r in objects}
   doors=f['doors'];valid=[];routes=[];windows=[]
+  vestibules=[v for v in rooms if v.get('guest_distributor')]
+  expected_entries={entry_door_id(v):v['id'] for v in vestibules}
+  expected_entries['family-entry']=next((h['id'] for h,source in zip(halls,p['halls_by_floor'][fi]) if source.get('id')=='family-entry-spur'),None)
   for o in doors:
    a,b=o['connects'];r=ids.get(b);other=ids.get(a)
    if r is None:issues.append('BAD_DOOR_TARGET');continue
+   if o.get('receiving_room')!=b:issues.append('BAD_RECEIVING_ROOM:'+o['id']);continue
+   if a=='OUTSIDE' and (fi!=0 or expected_entries.get(o['id'])!=b):
+    issues.append('UNAUTHORIZED_EXTERIOR_ENTRY:'+o['id']);continue
    edges=exposed_edges(r,objects) if a=='OUTSIDE' else [shared_edge(r,other)] if other else []
    if o['width']<.9-EPS or not any(opening_fits(o,e) for e in edges):issues.append('INVALID_DOOR_HOST:'+o['id']);continue
    if not shape(r).buffer(-t/2).buffer(.003).covers(swing(o,r,t)):
@@ -176,6 +267,8 @@ def validate(brief,p):
    # Family doors must never create a shortcut across a private room.
    if a!='OUTSIDE' and not (other['kind']=='corridor' and (bool(other.get('guest_distributor'))==(r.get('zone')=='guest'))):
     issues.append('PRIVATE_OR_MIXED_TRANSIT:'+o['id']);continue
+   if a!='OUTSIDE' and r.get('zone')=='guest' and other not in room_vestibules(r,vestibules):
+    issues.append('UNAUTHORIZED_GUEST_HOST:'+o['id']);continue
    valid.append(o)
   for i,a in enumerate(valid):
    for b in valid[i+1:]:
@@ -195,29 +288,34 @@ def validate(brief,p):
    start=inward(sd,host,.6) if host else None
   for r in rooms:
    if r.get('guest_distributor'):continue
-   door=next((d for d in valid if r['id'] in d['connects']),None)
-   if door is None:issues.append('ROOM_WITHOUT_VALID_DOOR:'+r['id']);continue
-   if r['id'] in guest_ids:
-    ge=next((d for d in valid if d['id']=='guest-entry'),None);v=ids[door['connects'][0]]
-    region=shape(v).buffer(-t/2).union(shape(r).buffer(-t/2)).union(cut(door,t))
-    origin=inward(ge,v,.6) if ge else None
-   else:
-    region=family_halls.union(shape(r).buffer(-t/2)).union(cut(door,t));origin=start
-   target=inward(door,r,.65)
-   route=shortest_path(region,origin,target) if origin else None
-   if not route:issues.append('NO_BODY_ROUTE:'+r['id'])
-   else:routes.append(dict(room_id=r['id'],guest=r['id'] in guest_ids,**route))
+   required=room_vestibules(r,vestibules) if r['id'] in guest_ids else [None]
+   if not required:issues.append('ROOM_WITHOUT_GUEST_MEMBERSHIP:'+r['id']);continue
+   for host in required:
+    door=next((d for d in valid if d['connects'][1]==r['id'] and (host is None or d['connects'][0]==host['id'])),None)
+    if door is None:issues.append('ROOM_WITHOUT_VALID_DOOR:'+r['id']);continue
+    if host is not None:
+     ge=next((d for d in valid if d['id']==entry_door_id(host)),None)
+     region=shape(host).buffer(-t/2).union(shape(r).buffer(-t/2)).union(cut(door,t))
+     origin=inward(ge,host,.6) if ge else None
+    else:
+     region=family_halls.union(shape(r).buffer(-t/2)).union(cut(door,t));origin=start
+    target=inward(door,r,.65)
+    route=shortest_path(region,origin,target) if origin else None
+    if not route:issues.append('NO_BODY_ROUTE:'+r['id'])
+    else:routes.append(dict(room_id=r['id'],guest=r['id'] in guest_ids,
+                           entry_id=entry_door_id(host) if host else ('family-entry' if fi==0 else 'stair'),**route))
   if fi==0:
-   ge=next((d for d in valid if d['id']=='guest-entry'),None)
-   if not ge:issues.append('NO_VALID_GUEST_ENTRY')
-   # Audit guest graph from the vestibule, not merged OUTSIDE entry nodes.
-   v=next((r for r in rooms if r.get('guest_distributor')),None)
+   for v in vestibules:
+    if not any(d['id']==entry_door_id(v) for d in valid):issues.append('NO_VALID_GUEST_ENTRY:'+entry_door_id(v))
+   # Every guest origin is checked; OUTSIDE never joins independent networks.
    internal=[d for d in valid if 'OUTSIDE' not in d['connects']]
-   if v and any(accessible(internal,v['id'],r['id'],set()) for r in rooms if r.get('zone')!='guest' and not r.get('guest_distributor')):issues.append('GUEST_FAMILY_GRAPH_LEAK')
+   for v in vestibules:
+    if any(accessible(internal,v['id'],r['id'],set()) for r in objects if r.get('zone')!='guest'):
+     issues.append('GUEST_FAMILY_GRAPH_LEAK:'+v['id'])
    # Geometric outdoor route inside the plot, around actual occupied footprint.
    W=brief.plot_width;D=brief.plot_depth;ox=brief.setbacks.west+t/2;oy=brief.setbacks.south+t/2
    outdoor=box(-ox,-oy,W-ox,D-oy).difference(unary_union([shape(r) for r in objects]).buffer(t/2,join_style=2))
-   for entry_id in ('guest-entry','family-entry'):
+   for entry_id in [entry_door_id(v) for v in vestibules]+['family-entry']:
     entry=next((d for d in valid if d['id']==entry_id),None)
     if entry is None:continue
     receiving=ids[entry['connects'][1]];inside=inward(entry,receiving,.65)
@@ -226,7 +324,7 @@ def validate(brief,p):
     street=([out[0],-oy+.4] if face=='south' else [out[0],D-oy-.4] if face=='north' else [W-ox-.4,out[1]] if face=='east' else [-ox+.4,out[1]])
     ext=shortest_path(outdoor,street,out)
     if not ext:issues.append('NO_OUTDOOR_APPROACH:'+entry_id)
-    else:routes.append(dict(room_id=entry_id+'-EXTERIOR',guest=entry_id=='guest-entry',**ext))
+    else:routes.append(dict(room_id=entry_id+'-EXTERIOR',guest=entry_id!='family-entry',**ext))
   for r in rooms:
    if r['kind'] not in ('bedroom','master','kitchen','bathroom'):continue
    found=[]

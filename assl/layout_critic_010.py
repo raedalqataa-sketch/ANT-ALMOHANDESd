@@ -6,8 +6,9 @@ from .openings_009 import shape,shortest_path,inward,cut,validate,shared_edge
 
 DEFAULTS=dict(long_run_m=6.,kitchen_dining_m=10.,bed_bath_m=12.,max_aspect=2.5,max_excess=1.5)
 
-def corridor_metrics(halls):
- u=unary_union([shape(h) for h in halls]);longest=0.
+def corridor_metrics(halls, *, region=None):
+ u=unary_union([shape(h) for h in halls]) if region is None else region
+ longest=0.
  if u.is_empty:return dict(union_m2=0.,longest_run_m=0.)
  x,y,xx,yy=u.bounds
  # Continuous sections of dissolved geometry; splitting cells cannot alter runs.
@@ -21,6 +22,9 @@ def corridor_metrics(halls):
  return dict(union_m2=round(u.area,5),longest_run_m=round(longest,5))
 
 def critique(brief,p,limits=None):
+ if p.get('schema') in ('assl-clustered-1','assl-clustered-2','assl-relational-1'):
+  from .strategies.validation import critique_clustered
+  return critique_clustered(brief,p,limits)
  limits={**DEFAULTS,**(limits or {})};qa=validate(brief,p);defects=[];floors=[];t=brief.wall_thickness
  if qa['status']!='PASS':defects.append(dict(type='HARD_VALIDATION',evidence=qa['issues']))
  for fi,(rooms,halls,opened) in enumerate(zip(p['rooms_by_floor'],p['halls_by_floor'],p.get('opening_model_009',[]))):

@@ -102,13 +102,15 @@ def initial_core(W,D,seed,t,*,style='axial'):
     return halls,stair
 
 
-def guest_suite(requests,hub,W,D,t):
+def guest_suite(requests,hub,W,D,t,*,obstacles=(),diagnostics=None,placement_check=None):
     guests=[r for r in requests if r.get("zone")=="guest"]
     if not guests:return [],None
     council=[r for r in guests if r["kind"]=="majlis"]
     bathroom=[r for r in guests if r["kind"]=="bathroom"]
-    if len(guests)!=2 or len(council)!=1 or len(bathroom)!=1:
-        return None,"UNSUPPORTED_GUEST_PROGRAM_UNRESOLVED"
+    if (len(guests)!=2 or len(council)!=1 or len(bathroom)!=1
+            or any(r.get('guest_entries') for r in guests)):
+        from .guest_groups import pack_groups
+        return pack_groups(requests,hub,W,D,t,obstacles,diagnostics=diagnostics,placement_check=placement_check)
     m,b=council[0],bathroom[0]
     mw,md,_=room_shapes(m,t)[0]
     bw,bd,_=room_shapes(b,t)[0]
@@ -132,6 +134,8 @@ def guest_suite(requests,hub,W,D,t):
     if any(overlap_area(a,b)>EPS for a,b in
            ((maj,v),(maj,bath),(v,bath))):
         return None,"GUEST_SUITE_INTERNAL_OVERLAP"
+    if placement_check is not None and not placement_check([maj,v,bath]):
+        return None,'NO_ATTACHED_ACCESSIBLE_GUEST_CONFIGURATION'
     return [maj,v,bath],None
 
 
@@ -140,6 +144,11 @@ def anchors(hall,w,d,seed,*,grid=None,minimum_contact=.9):
     unit=GRID if grid is None else grid
     rounded=lambda value:round(round(value/unit)*unit,6)
     hx,hy,hw,hd=(hall[k] for k in ("x","y","width","depth"))
+    def parallel(value,start,span,extent):
+        # Snap only along the host wall, and only without losing contact.
+        contact=lambda v:max(0.,min(start+span,v+extent)-max(start,v))
+        snapped=rounded(value)
+        return snapped if contact(snapped)>=contact(value) else value
     order=("south","west","north","east")
     for direction in (order[seed%4:]+order[:seed%4]):
         if direction in ("north","south"):
@@ -147,7 +156,7 @@ def anchors(hall,w,d,seed,*,grid=None,minimum_contact=.9):
                 hx+hw-1.,hx+1.-w)
             y=hy-d if direction=="north" else hy+hd
             for x in xs:
-                c=rect(rounded(x),rounded(y),w,d)
+                c=dict(x=parallel(x,hx,hw,w),y=y,width=w,depth=d)
                 if edge_contact(hall,c)>=minimum_contact:
                     yield c
         else:
@@ -155,7 +164,7 @@ def anchors(hall,w,d,seed,*,grid=None,minimum_contact=.9):
                 hy+hd-1.,hy+1.-d)
             x=hx-w if direction=="west" else hx+hw
             for y in ys:
-                c=rect(rounded(x),rounded(y),w,d)
+                c=dict(x=x,y=parallel(y,hy,hd,d),width=w,depth=d)
                 if edge_contact(hall,c)>=minimum_contact:
                     yield c
 
@@ -166,7 +175,10 @@ def hall_extensions(halls,objects,W,D,seed):
         # The original entry spur should not grow back into a mandatory
         # axial corridor; branch from the compact hub/most recent nodes.
         if h.get("id")=="family-entry-spur":continue
-        for length in (2.5,4.,5.5):
+        # Allow a compact node as deep as the 1.5m branch is wide. A
+        # retained room may block a longer stem while leaving a real side
+        # door host; collision/contact checks below remain authoritative.
+        for length in (1.5,2.5,4.,5.5):
             for axis in range(4):
                 if axis==0:
                     c=rect(snap(h["x"]+h["width"]/2-.75),
@@ -219,8 +231,91 @@ def state_cost(rooms,halls):
             8.*max(0,len(halls)-3))
 
 
+def _composition_components(objects):
+    """Same real edge/overlap connectivity as the independent footprint audit."""
+    seen=set();count=0
+    for i in range(len(objects)):
+        if i in seen:continue
+        count+=1;seen.add(i);todo=[i]
+        while todo:
+            a=todo.pop()
+            for j,b in enumerate(objects):
+                if j not in seen and (edge_contact(objects[a],b)>=.01 or overlap_area(objects[a],b)>1e-5):
+                    seen.add(j);todo.append(j)
+    return count
+
+
+def joint_state_key(state):
+    # This ranks actual partial composition, never requires guests to attach
+    # before family rooms exist. Unchanged full validation remains mandatory.
+    return _composition_components(state.rooms+state.halls),state.score
+
+
+def refine_joint_contact(room,branch,rooms,halls,W,D,*,portal_contact=.9):
+    """Replace one existing branch proposal with a nearby real contact event.
+
+    Only an end-hosted family room can move; its dimensions stay exact. The
+    existing branch absorbs at most one grid cell, within original lengths.
+    No extra branch/candidate or guest-family opening is created.
+    """
+    if branch is None:return room,branch
+    objects=rooms+halls
+    best=(room,branch);best_count=_composition_components(objects+[room,branch])
+    if best_count<=1:return best
+    best_move=math.inf
+    for target in (q for q in rooms if q.get('zone')=='guest'):
+        for start,extent,other in (('y','depth','width'),('x','width','depth')):
+            if branch[extent]+EPS<branch[other]:continue
+            for sign in (1,-1):
+                end=branch[start]+(branch[extent] if sign==1 else 0)
+                room_edge=room[start]+(0 if sign==1 else room[extent])
+                if abs(room_edge-end)>EPS:continue
+                face=target[start]+(0 if sign==1 else target[extent])
+                delta=face-(room[start]+(room[extent] if sign==1 else 0))
+                if abs(delta)>GRID or abs(delta)<EPS:continue
+                r=dict(room);h=dict(branch)
+                r[start]+=delta
+                if sign==1:h[extent]+=delta
+                else:h[start]+=delta;h[extent]-=delta
+                if not 1.5-EPS<=h[extent]<=5.5+EPS:continue
+                if not clear(h,objects,W,D) or not clear(r,objects+[h],W,D):continue
+                if edge_contact(r,h)<portal_contact or edge_contact(r,target)<.01:continue
+                if not any(edge_contact(h,old)>=1.2-EPS for old in halls):continue
+                count=_composition_components(objects+[r,h])
+                if count<best_count or (count==best_count and count<_composition_components(objects+[room,branch]) and abs(delta)<best_move):
+                    best=(r,h);best_count=count;best_move=abs(delta)
+    return best
+
+
+def room_placement_witness(request,state,W,D,t,seed,*,max_branches=4,
+                           shape_grid=None,portal_contact=.9):
+    """One feasible next-room footprint using the unchanged placement options.
+
+    A temporary witness protects successors from cost pruning; it does not
+    insert a room/branch, change dimensions, or certify a complete floor.
+    """
+    from .architectural_composer import facade_exposure,DIRECT_EXTERIOR_KINDS
+    objects=state.rooms+state.halls
+    for w,d,_ in room_shapes(request,t,grid=shape_grid)[:6]:
+        hosts=[(h,None) for h in state.halls]
+        if len(state.halls)<2+max_branches:
+            hosts.extend((h,h) for h in hall_extensions(state.halls,objects,W,D,seed))
+        for host,branch in hosts:
+            occupied=objects+([branch] if branch else [])
+            for candidate in anchors(host,w,d,seed,grid=shape_grid,minimum_contact=portal_contact):
+                occupied=objects+([branch] if branch else [])
+                if not clear(candidate,occupied,W,D):continue
+                candidate,refined_branch=refine_joint_contact(candidate,branch,state.rooms,state.halls,W,D,
+                                                             portal_contact=portal_contact)
+                occupied=objects+([refined_branch] if refined_branch else [])
+                if request['kind'] in DIRECT_EXTERIOR_KINDS and facade_exposure(candidate,occupied+[candidate])<.9-EPS:continue
+                return dict(room={**candidate,**copy.deepcopy(request)},branch=refined_branch)
+    return None
+
+
 def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
-               max_branches=4,protect_large_rooms=False,priority_order=None,shape_grid=None,portal_contact=.9):
+               max_branches=4,protect_large_rooms=False,priority_order=None,shape_grid=None,portal_contact=.9,
+               placement_check=None):
     base_halls,stair=core
     occupied=[stair]+guest_ground
     if any(overlap_area(stair,g)>EPS for g in guest_ground):
@@ -269,10 +364,13 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
                             if not clear(candidate,old+[branch],W,D):
                                 continue
                             r={**candidate,**copy.deepcopy(room)}
-                            proposed.append((r,branch,shape_penalty+.5))
+                            r,refined_branch=refine_joint_contact(r,branch,state.rooms,state.halls,W,D,
+                                                                 portal_contact=portal_contact)
+                            proposed.append((r,refined_branch,shape_penalty+.5))
             # Prefer measured closeness and minimal added hall area, but retain
             # diverse options to avoid greedy one-configuration traps.
             proposed.sort(key=lambda item:(
+                _composition_components(state.rooms+state.halls+[item[0]]+([item[1]] if item[1] else [])),
                 relation_distance(item[0],state.rooms)*.60+
                 (area(item[1])*3 if item[1] else 0)+item[2]*2+
                 .03*(item[0]["x"]+item[0]["y"])))
@@ -297,7 +395,17 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
         if not expansions:
             failed="CANNOT_PLACE_ROOM:"+room["id"]
             break
-        expansions.sort(key=lambda s:s.score)
+        # Retain only states that can place the next required room in the
+        # existing order. Cost/relationship ranking and beam size stay intact.
+        if idx+1<len(family):
+            successor=family[idx+1]
+            expansions=[s for s in expansions if room_placement_witness(
+                successor,s,W,D,t,seed,max_branches=max_branches,
+                shape_grid=shape_grid,portal_contact=portal_contact) is not None]
+            if not expansions:
+                failed="NO_NEXT_ROOM_SPACE:"+successor['id']
+                break
+        expansions.sort(key=joint_state_key)
         next_states=[];seen=set();bucket_counts={}
         # Keep several different circulation-growth depths alive rather
         # than allowing the cheapest first bedroom to block the only exit.
@@ -338,6 +446,7 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
                if r.get("request_id") and r["kind"] in
                ("bedroom","master","kitchen","bathroom")):
             continue
+        if placement_check is not None and not placement_check(rooms,halls):continue
         candidates.append(state)
     if not candidates:
         return None,"NO_VALID_EXTERNAL_FRONTAGE_OR_ACCESS_FINAL_STATE"
@@ -345,13 +454,21 @@ def pack_floor(requests,W,D,t,seed,core,guest_ground,*,beam_width=12,
 
 
 def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
-                        topologies=('axial',),orient_to_frontage=False):
+                        topologies=('axial',),orient_to_frontage=False,guest_diagnostics=None,strategy='orthogonal',optimizer='ortools'):
     """Return real geometric proposals or explicit named failures.
 
     The candidate generator is independent of the existing fixed-lane search.
     Its shapes remain preliminary until actual wall/door/window/privacy and
     municipal checks are separately executed.
     """
+    if strategy!='relational' and brief.spatial_requirements:raise ValueError('SPATIAL_REQUIREMENTS_NEED_RELATIONAL_STRATEGY')
+    if strategy=='relational':
+        from .strategies.relational_search import solve_relational
+        return solve_relational(brief,max_results=max_results,optimizer=optimizer)
+    if strategy=='clustered':
+        from .strategies.clustered import solve_clustered
+        return solve_clustered(brief,max_results=max_results)
+    if strategy!='orthogonal':raise ValueError('UNKNOWN_COMPOSITION_STRATEGY:'+str(strategy))
     from backend.design.general_engine import expanded_program
     t=brief.wall_thickness
     from .topology_options import (local_envelope,transform_candidate,
@@ -360,7 +477,8 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
     real_D=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-t
     face=brief.entrance_face if orient_to_frontage else 'south'
     W,D=local_envelope(real_W,real_D,face)
-    requested=[expanded_program(brief,f) for f in range(brief.floors)]
+    from .guest_groups import prepare_program
+    requested=[prepare_program(brief,expanded_program(brief,f)) for f in range(brief.floors)]
     failures=[];solutions=[];signatures=set()
     by_topology={style:[] for style in topologies}
     for style in topologies:
@@ -369,7 +487,22 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
             if core is None:
                 failures.append({"seed":seed,"style":style,"reason":"CORE_OUTSIDE_BUILDABLE_AREA"})
                 continue
-            guest,error=guest_suite(requested[0],core[0][0],W,D,t)
+            trace={}
+            def composition(rooms,halls,phase):
+                from .footprint_access import check_composition
+                physical=transform_candidate(dict(floors=[rooms],halls_by_floor=[halls]),W,D,face)
+                report=check_composition(brief,physical['floors'][0],physical['halls_by_floor'][0],
+                                         complete=phase!='guest')
+                stats=trace.setdefault('composition_selection',{}).setdefault(phase,dict(checked=0,rejected=0,first_failure=None))
+                stats['checked']+=1
+                if report['status']!='PASS':
+                    stats['rejected']+=1
+                    if stats['first_failure'] is None:stats['first_failure']=report
+                return report['status']=='PASS'
+            guest,error=guest_suite(requested[0],core[0][0],W,D,t,obstacles=core[0]+[core[1]],diagnostics=trace,
+                placement_check=lambda rooms:composition([core[1]]+rooms,core[0],'guest'))
+            if guest_diagnostics is not None:
+                guest_diagnostics.append(dict(seed=seed,style=style,packing=trace))
             if error:
                 failures.append({"seed":seed,"style":style,"reason":error});continue
             floors=[];halls_by_floor=[]
@@ -381,7 +514,8 @@ def solve_free_concepts(brief,*,seeds=range(8),max_results=3,
                 program,W,D,t,seed,core,guest_on_floor,
                 beam_width=24 if style!='axial' and W<20. else 12,
                 max_branches=5 if style!='axial' and W<20. else 4,
-                protect_large_rooms=style!='axial' and W<20.)
+                protect_large_rooms=style!='axial' and W<20.,
+                placement_check=(lambda rooms,halls:composition(rooms,halls,'ground_floor')) if floor_idx==0 else None)
                 if not state:
                     problem={"floor":floor_idx,"reason":reason};break
                 floors.append(state.rooms)
