@@ -66,7 +66,7 @@ def functional_routes(model):
         for kind,target in [('kitchen','dining'),('living','dining'),('bedroom','bathroom'),('master','bathroom')]:
             targets=[r for r in required if r['kind']==target and r.get('zone')!='guest']
             if not targets:continue # User's program may have no dining/ensuite on this floor.
-            for a in (r for r in required if r['kind']==kind):
+            for a in (r for r in required if r['kind']==kind and r.get('zone')!='guest'):
                 choices=[(route(rooms,g,a['id'],b['id']),b) for b in targets]
                 choices=[(d,b) for d,b in choices if d is not None]
                 if not choices:
@@ -77,9 +77,10 @@ def functional_routes(model):
 
 def wet_alignment(model):
     aligned=total=0;pairs=[]
-    for lower,upper in zip(model['floors'],model['floors'][1:]):
-        below=[r for r in lower['rooms'] if r['kind'] in WET and r.get('request_id')]
-        above=[r for r in upper['rooms'] if r['kind'] in WET and r.get('request_id')]
+    floors=sorted(model['floors'],key=lambda f:f.get('level_m',0))
+    for lower,upper in zip(floors,floors[1:]):
+        below=[r for r in lower['rooms'] if r['kind'] in WET and (r.get('request_id') or r.get('generated_feature_room'))]
+        above=[r for r in upper['rooms'] if r['kind'] in WET and (r.get('request_id') or r.get('generated_feature_room'))]
         for r in above:
             area=r['width']*r['depth'];overlap=0
             for q in below:
@@ -88,6 +89,31 @@ def wet_alignment(model):
             total+=area;aligned+=min(area,overlap)
     return {'ratio':round(aligned/total,5) if total else None,'overlap_m2':round(aligned,4),'upper_wet_area_m2':round(total,4),'pairs':pairs,
         'scope':'2D net wet-room overlap only; shafts, drainage gradients and structure are NOT verified'}
+
+def bathroom_distribution(model):
+    """Report adjacent family bathrooms and actual hosted-door service coverage.
+    Adjacency alone is not a defect; no plumbing or ensuite certification.
+    """
+    adjacent=[];coverage=[]
+    for floor in model['floors']:
+        rooms,g=graph(floor)
+        baths=[r for r in rooms.values() if r['kind']=='bathroom' and r.get('zone')!='guest']
+        for a,b in combinations(baths,2):
+            shared=[w['id'] for w in floor['walls'] if {a['id'],b['id']}<=set(w['room_ids'])]
+            if shared:adjacent.append({'floor':floor['id'],'bathrooms':[a['id'],b['id']],'shared_walls':shared})
+        for room in rooms.values():
+            if room['kind'] not in ('bedroom','master','living') or room.get('zone')=='guest':continue
+            choices=[(route(rooms,g,room['id'],b['id']),b['id']) for b in baths]
+            choices=[(d,b) for d,b in choices if d is not None]
+            nearest=min(choices) if choices else None
+            coverage.append({'floor':floor['id'],'room':room['id'],
+                'bathroom':nearest[1] if nearest else None,
+                'route_m':round(nearest[0],3) if nearest else None,
+                'status':'MEASURED' if nearest else 'UNREACHABLE' if baths else 'NO_FAMILY_BATH_ON_FLOOR'})
+    measured=[r['route_m'] for r in coverage if r['status']=='MEASURED']
+    return {'adjacent_pairs':adjacent,'coverage':coverage,
+        'mean_route_m':round(sum(measured)/len(measured),3) if measured else None,
+        'scope':'same-floor hosted-door graph; adjacency is diagnostic, not a violation'}
 
 def outlook(model):
     result=[]
@@ -115,16 +141,18 @@ def outlook(model):
     return result
 
 def measure(model):
-    paths=functional_routes(model);stack=wet_alignment(model);views=outlook(model)
+    paths=functional_routes(model);stack=wet_alignment(model);views=outlook(model);baths=bathroom_distribution(model)
     usable=[r for r in paths if r['reachable']];failures=[r for r in paths if not r['reachable']]
     # Numeric scales are explicit engineering preferences, NOT extracted laws.
     detours=[max(0,r['route_m']/max(r['direct_m'],1)-1) for r in usable]
     penalties=[min(sum(detours)/max(1,len(detours))/2,1)] if usable else []
+    if failures:penalties.append(len(failures)/len(paths))
+    if baths['mean_route_m'] is not None:penalties.append(min(baths['mean_route_m']/12,1))
     if stack['ratio'] is not None:penalties.append(1-stack['ratio'])
     depths=[v['best_unobstructed_own_plot_depth_m'] for v in views if v['best_unobstructed_own_plot_depth_m'] is not None]
     if depths:penalties.append(1-sum(min(d/4,1) for d in depths)/len(depths))
     return {'revision':REVISION,'sources':list(PROJECTS),'legal_rule':False,'functional_routes':paths,'missing_functional_routes':failures,
-        'wet_alignment':stack,'living_outlook':views,'design_penalty':round(sum(penalties)/len(penalties),6) if penalties else 0,
+        'wet_alignment':stack,'bathroom_distribution':baths,'living_outlook':views,'design_penalty':round(sum(penalties)/len(penalties),6) if penalties else 0,
         'scales':{'route_detour_scale':2,'outlook_depth_scale_m':4,'status':'design heuristics, not dimensions read from images or legal requirements'},
         'scope':'visual design patterns only; no owner data, survey reconstruction, 3D daylight, privacy certification or local-code approval'}
 
