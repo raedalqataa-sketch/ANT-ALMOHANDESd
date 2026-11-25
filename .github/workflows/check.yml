@@ -1,7 +1,7 @@
 name: Check architectural drafts
 on:
   push:
-    branches: [main]
+    branches: [main, feature/replit-continuation]
   pull_request:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
