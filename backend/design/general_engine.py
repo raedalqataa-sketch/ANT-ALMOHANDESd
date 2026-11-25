@@ -878,7 +878,7 @@ def search_feasibility_evidence(brief:VillaBrief):
         'legal_buildability_certified':False}
 
 
-def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4,repair_layout=False,assl_space_optimize=False):
+def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,search_options=None,emit_drawings=True,candidate_validator=None,validation_budget=4,repair_layout=False,assl_space_optimize=False,architecture_first=False):
     """Search physical layouts; an optional V4 validator participates in candidate choice.
 
     The budget bounds expensive room/furniture path checks. No unchecked alternative
@@ -888,6 +888,8 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         raise ValueError('validation_budget must be positive')
     if type(assl_space_optimize) is not bool:
         raise ValueError('assl_space_optimize must be boolean')
+    if type(architecture_first) is not bool:
+        raise ValueError('architecture_first must be boolean')
     from .general_drawing import drawing,review_drawing
     from .presentation import scene_svg,scene_pdf,scene_dxf
     out=Path(output_dir) if output_dir else Path(__file__).resolve().parents[2]/'outputs'
@@ -903,9 +905,9 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         label=FAMILIES[family]
         guest_strategy=option.get('guest_strategy','linear')
         if guest_strategy not in ('linear','side_spine','compact_side'):raise ValueError('unsupported guest composition')
-        result=search(brief,family,policy,core_position,guest_strategy,assl_space_optimize=assl_space_optimize)
-        if not result and guest_strategy=='compact_side':result=search(brief,family,policy,core_position,'side_spine',assl_space_optimize=assl_space_optimize)
-        if not result and guest_strategy!='linear':result=search(brief,family,policy,core_position,assl_space_optimize=assl_space_optimize)
+        result=search(brief,family,policy,core_position,guest_strategy,assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
+        if not result and guest_strategy=='compact_side':result=search(brief,family,policy,core_position,'side_spine',assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
+        if not result and guest_strategy!='linear':result=search(brief,family,policy,core_position,assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
         if not result:
             evidence=search_feasibility_evidence(brief)
             impossibility=evidence['classification']=='PROVEN_ENVELOPE_SHORTFALL'
@@ -919,9 +921,9 @@ def generate_general(brief:VillaBrief,output_dir=None,candidate_families=None,*,
         reference_movement=None
         if guest_strategy!='linear':
             if guest_strategy=='compact_side':
-                side_fallback=search(brief,family,policy,core_position,'side_spine',assl_space_optimize=assl_space_optimize)
+                side_fallback=search(brief,family,policy,core_position,'side_spine',assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
                 if side_fallback:alternatives.extend({**r,'guest_strategy_fallback':True} for r in [side_fallback]+side_fallback.get('alternatives',[]))
-            fallback=search(brief,family,policy,core_position,assl_space_optimize=assl_space_optimize)
+            fallback=search(brief,family,policy,core_position,assl_space_optimize=assl_space_optimize,architecture_first=architecture_first)
             if fallback:
                 # Keep an original layout within the bounded preflight budget,
                 # even when new guest compositions repeatedly fail validation.
