@@ -709,7 +709,7 @@ def validate_general(model,brief):
         expected={r['id']:r for r in expanded_program(brief,fi)}
         actual={r['id'].removeprefix(f['id']+'-'):r for r in f['rooms'] if r.get('request_id')}
         add(f'{f["id"]}-program',set(expected)==set(actual) and sum(bool(r.get('request_id')) for r in f['rooms'])==len(expected),'تغطية جميع الفراغات المطلوبة في دورها',{'expected':len(expected),'actual':len(actual)})
-        bad=[r['id'] for key,r in actual.items() if area(r)+EPS<expected[key]['min_area'] or min(r['width'],r['depth'])+EPS<expected[key]['min_side']]
+        bad=[r['id'] for key,r in actual.items() if key not in expected or area(r)+EPS<expected[key]['min_area'] or min(r['width'],r['depth'])+EPS<expected[key]['min_side']]
         add(f'{f["id"]}-sizes',not bad,'الحد الأدنى للمساحات والأبعاد الصافية',{'invalid':bad})
         rooms=f['rooms'];collisions=[(a['id'],b['id']) for i,a in enumerate(rooms) for b in rooms[i+1:] if overlap(a,b)]
         add(f'{f["id"]}-overlap',not collisions,'عدم تداخل الغرف والممرات',{'collisions':collisions})
@@ -717,7 +717,7 @@ def validate_general(model,brief):
         add(f'{f["id"]}-site',all(inside(bounds,r) for r in rooms),'الالتزام بحدود الأرض والارتدادات المدخلة')
         corridors={r['id'] for r in rooms if r['kind']=='corridor'}
         # Connectivity uses touching gross hall cells, not near-by room centers.
-        halls=[r for r in f['cells'] if r['kind']=='corridor' and not r.get('guest_distributor')];seen={halls[0]['id']};changed=True
+        halls=[r for r in f['cells'] if r['kind']=='corridor' and not r.get('guest_distributor')];seen={halls[0]['id']} if halls else set();changed=True
         def touches(a,b):
             dx=min(a['x']+a['width'],b['x']+b['width'])-max(a['x'],b['x'])
             dy=min(a['y']+a['depth'],b['y']+b['depth'])-max(a['y'],b['y'])
@@ -727,8 +727,8 @@ def validate_general(model,brief):
             for a in halls:
                 if a['id'] not in seen and any(b['id'] in seen and touches(a,b) for b in halls):seen.add(a['id']);changed=True
         missing=[r['id'] for r in rooms if r['kind']!='corridor' and not any(o['kind']=='door' and r['id'] in o['connects'] and (set(o['connects'])&corridors or (r.get('guest_parent') and f['id']+'-'+r['guest_parent'] in o['connects'])) for o in f['openings'])]
-        add(f'{f["id"]}-doors',not missing and len(seen)==len(halls),'كل فراغ يتصل بباب بممر مترابط',{'missing_doors':missing,'connected_halls':len(seen)})
-        missing_windows=[r['id'] for r in rooms if r.get('request_id') and not any(o['kind']=='window' and r['id'] in o['connects'] for o in f['openings'])]
+        add(f'{f["id"]}-doors',bool(halls) and not missing and len(seen)==len(halls),'كل فراغ يتصل بباب بممر مترابط',{'missing_doors':missing,'connected_halls':len(seen)})
+        missing_windows=[r['id'] for r in rooms if r.get('request_id') and not any(o['kind']=='window' and r['id'] in o['connects'] and 'OUTSIDE' in o['connects'] and any(w['id']==o['wall_id'] and w['exterior'] for w in f['walls']) for o in f['openings'])]
         add(f'{f["id"]}-windows',not missing_windows,'نافذة خارجية فعلية لكل فراغ مطلوب',{'missing':missing_windows})
         entry=any(o.get('main_entry') for o in f['openings'])
         if fi==0:add('entrance',entry,'باب دخول خارجي متصل بالموزع')
@@ -736,7 +736,7 @@ def validate_general(model,brief):
         walls={w['id']:w for w in f['walls']}
         for o in f['openings']:
             w=walls.get(o['wall_id']);axis=0 if w and w['axis']=='horizontal' else 1
-            if not w or abs(o['center'][1-axis]-w['start'][1-axis])>EPS or o['center'][axis]-o['width']/2<w['start'][axis]-EPS or o['center'][axis]+o['width']/2>w['end'][axis]+EPS or not any(i in w['room_ids'] for i in o['connects']):short.append(o['id'])
+            if not w or abs(o['center'][1-axis]-w['start'][1-axis])>EPS or o['center'][axis]-o['width']/2<w['start'][axis]-EPS or o['center'][axis]+o['width']/2>w['end'][axis]+EPS or set(o['connects']) != (set(w['room_ids']) | ({'OUTSIDE'} if w['exterior'] else set())) or o['width']<=0 or o['height']<=0 or o['sill']<0 or o['sill']+o['height']>brief.floor_height+EPS or (o['kind']=='window' and not w['exterior']):short.append(o['id'])
         for wall in f['walls']:
             ports=sorted([o for o in f['openings'] if o['wall_id']==wall['id']],key=lambda o:o['center'][0 if wall['axis']=='horizontal' else 1])
             ax=0 if wall['axis']=='horizontal' else 1
@@ -782,11 +782,11 @@ def validate_general(model,brief):
     if brief.floors==2 or brief.automatic_features.roof_annex:
         invalid=[]
         for s in model['stairs']:
-            room=next(r for f in model['floors'] for r in f['rooms'] if r['id']==s['room_id'])
-            if s['required_depth_m']>s['depth']+EPS or s['width']<2*s['flight_width_m']+.1 or not all(inside(room,q) for q in s['flights']+[s['landing'],s['entry_apron']]):invalid.append(s['id'])
+            room=next((r for f in model['floors'] for r in f['rooms'] if r['id']==s['room_id'] and r['kind']=='stair'),None)
+            if room is None or s['required_depth_m']>s['depth']+EPS or s['width']<2*s['flight_width_m']+.1 or not all(inside(room,q) for q in s['flights']+[s['landing'],s['entry_apron']]):invalid.append(s['id'])
         add('stair-geometry',len(model['stairs'])==brief.floors and not invalid,'هندسة مسيري الدرج والبسطات وعدد القوائم داخل البئر',{'stairs':model['stairs'],'invalid':invalid,'scope':'proposed dimensions only; headroom not verified against beams or floor slabs'})
         cores=[r for f in model['floors'] for r in f['rooms'] if r['kind']=='stair']
-        add('vertical-core',len(cores)==brief.floors+int(brief.automatic_features.roof_annex) and all(abs(cores[0][k]-c[k])<EPS for c in cores[1:] for k in ('x','y','width','depth')),'تطابق حدود بئر الدرج بين الدورين')
+        add('vertical-core',len(cores)==brief.floors+int(brief.automatic_features.roof_annex) and len({r['floor_id'] for r in cores})==len(cores) and all(abs(cores[0][k]-c[k])<EPS for c in cores[1:] for k in ('x','y','width','depth')),'تطابق حدود بئر الدرج بين الدورين')
     for id,label,reason in [
         ('visual-privacy','الخصوصية البصرية والصوتية وإطلالات النوافذ','فصل مسار الضيوف مقاس في فحص مستقل؛ الرؤية الكاملة والصوت تحتاج مراجعة تصميم.'),
         ('local-code','اعتماد الارتدادات والاشتراطات المحلية ومعدلات التهوية','يلزم تحديد الدولة والمدينة ومرجع الاشتراطات الرسمي؛ الأرقام المدخلة ليست اعتمادًا قانونيًا.'),
