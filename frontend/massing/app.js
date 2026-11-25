@@ -5,7 +5,7 @@ const get = id => document.getElementById(id);
 const canvas = get("stage");
 const status = get("status");
 const renderPage = document.body.dataset.renderPage === "true";
-const initial = {yaw:-.86, pitch:renderPage ? .24 : .52, zoom:1};
+const initial = {yaw:-.86, pitch:renderPage ? .24 : .52, zoom:1, pan_x:0, pan_y:0};
 let camera = {...initial};
 const progress = createProgressView({
   container:get("phase-progress"),ring:get("phase-ring"),value:get("phase-percent"),
@@ -26,9 +26,9 @@ function viewer(canvas) {
     gl.attachShader(program,shader);
   }
   attach(gl.VERTEX_SHADER,
-    "attribute vec3 point,tint; uniform vec3 center; uniform vec2 yaw,pitch,scale; uniform float depth,perspective; varying vec3 color;"
+    "attribute vec3 point,tint; uniform vec3 center; uniform vec2 yaw,pitch,scale,pan; uniform float depth,perspective; varying vec3 color;"
     +"void main(){vec3 p=point-center; float x=yaw.x*p.x-yaw.y*p.y; float y=yaw.y*p.x+yaw.x*p.y;"
-    +"float distance=y*pitch.x-p.z*pitch.y; gl_Position=vec4(x*scale.x,(p.z*pitch.x+y*pitch.y)*scale.y,distance*depth,1.0+distance*perspective); color=tint;}");
+    +"float distance=y*pitch.x-p.z*pitch.y; float w=1.0+distance*perspective; gl_Position=vec4(x*scale.x+2.0*pan.x*w,(p.z*pitch.x+y*pitch.y)*scale.y-2.0*pan.y*w,distance*depth,w); color=tint;}");
   attach(gl.FRAGMENT_SHADER,
     "precision mediump float; varying vec3 color; void main(){gl_FragColor=vec4(color,1.0);}");
   gl.linkProgram(program);
@@ -38,7 +38,7 @@ function viewer(canvas) {
   const point=gl.getAttribLocation(program,"point"), tint=gl.getAttribLocation(program,"tint");
   gl.enableVertexAttribArray(point);
   gl.enableVertexAttribArray(tint);
-  const uniforms=Object.fromEntries(["center","yaw","pitch","scale","depth","perspective"].map(
+  const uniforms=Object.fromEntries(["center","yaw","pitch","scale","depth","perspective","pan"].map(
     key=>[key,gl.getUniformLocation(program,key)]));
   function upload(style) {
     const data=[];
@@ -68,6 +68,7 @@ function viewer(canvas) {
     gl.uniform3fv(uniforms.center,center);
     gl.uniform2f(uniforms.yaw,Math.cos(camera.yaw),Math.sin(camera.yaw));
     gl.uniform2f(uniforms.pitch,Math.cos(camera.pitch),Math.sin(camera.pitch));
+    gl.uniform2f(uniforms.pan,camera.pan_x||0,camera.pan_y||0);
     if (renderPage) {
       const inverseDistance=camera.zoom/(diameter*1.18);
       const scale=camera.side?2*camera.zoom/(diameter*1.14):2*43/36*inverseDistance;
@@ -142,6 +143,32 @@ async function load() {
       list.append(button);
     }
     select(active);
+    const openingSchedule=get("opening-schedule");
+    for(const floor of project.facade_openings || []) for(const window of floor) {
+      const row=document.createElement("p");
+      row.textContent=window.room_id+" · "+(window.floor+1)+" · "+window.source_width.toFixed(2)+" ← "+window.width.toFixed(2)+" م";
+      openingSchedule.append(row);
+    }
+    for(const review of project.facade_review || []) {
+      const row=document.createElement("p");
+      row.textContent=review.room_id+" · تحتاج الفتحة إلى مراجعة";
+      openingSchedule.append(row);
+    }
+    get("download-cad").onclick=async()=>{
+      const button=get("download-cad"), style=active.id;
+      button.disabled=true;
+      try {
+        const response=await fetch("/api/v3/concepts/massing/dxf",{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({proposal,revision:project.revision,style})});
+        if(!response.ok) throw Error("تعذر التصدير من مراجعة المسقط الحالية.");
+        const url=URL.createObjectURL(await response.blob());
+        const link=document.createElement("a");
+        link.href=url;link.download="ANT-"+project.revision.slice(0,12)+"-"+style+".zip";
+        document.body.append(link);link.click();link.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+      }catch(error){get("choice").textContent=error.message;}
+      finally{button.disabled=false;}
+    };
     get("save").onclick=()=>{
       try {
         localStorage.setItem(choiceKey,active.id);
@@ -164,7 +191,7 @@ async function load() {
   for(const button of document.querySelectorAll("[data-side]")){
     button.onclick=()=>{
       const side=button.dataset.side;
-      camera.yaw=sides[side][0];camera.pitch=0;
+      camera.yaw=sides[side][0];camera.pitch=0;camera.pan_x=0;camera.pan_y=0;
       chooseView(side);
       paint();
     };
@@ -176,13 +203,20 @@ async function load() {
   get("zoom-in").onclick=()=>zoom(1.15);
   get("zoom-out").onclick=()=>zoom(1/1.15);
   get("reset").onclick=()=>{camera={...initial};chooseView(null);paint();};
-  let down;
+  let down, panning=false;
+  if(get("pan")) get("pan").onclick=()=>{panning=!panning;get("pan").setAttribute("aria-pressed",String(panning));};
+  canvas.onwheel=e=>{e.preventDefault();zoom(e.deltaY<0?1.1:1/1.1);};
   canvas.onpointerdown=e=>{down=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);};
   canvas.onpointermove=e=>{
     if (!down) return;
-    chooseView(null);
-    camera.yaw+=(e.clientX-down[0])*.013;
-    camera.pitch=Math.max(.09,Math.min(1.4,camera.pitch+(e.clientY-down[1])*.01));
+    if(panning || camera.side || e.shiftKey){
+      camera.pan_x=Math.max(-1,Math.min(1,camera.pan_x+(e.clientX-down[0])/canvas.clientWidth));
+      camera.pan_y=Math.max(-1,Math.min(1,camera.pan_y+(e.clientY-down[1])/canvas.clientHeight));
+    }else{
+      chooseView(null);
+      camera.yaw+=(e.clientX-down[0])*.013;
+      camera.pitch=Math.max(0,Math.min(1.4,camera.pitch+(e.clientY-down[1])*.01));
+    }
     down=[e.clientX,e.clientY];
     paint();
   };
@@ -205,13 +239,13 @@ function configureCapture(project,proposal,style) {
     get("phase-detail").textContent="بدء الرندر";
     const side=camera.side||null;
     const snapshot={mode:side?"elevation":"orbit",side,
-      yaw:Math.atan2(Math.sin(camera.yaw),Math.cos(camera.yaw)),pitch:camera.pitch,zoom:camera.zoom};
+      yaw:Math.atan2(Math.sin(camera.yaw),Math.cos(camera.yaw)),pitch:camera.pitch,zoom:camera.zoom,pan_x:camera.pan_x,pan_y:camera.pan_y};
     const description=side?sides[side][1]:"المنظور الملتقط";
     try {
       const image=await streamRequest("/api/v3/concepts/render/stream",{
-        proposal,revision:project.revision,style:style.id,camera:snapshot
+        proposal,revision:project.revision,style:style.id,facade_sha256:style.facade_sha256,camera:snapshot
       },progress.update);
-      if(image.revision!==project.revision||image.style!==style.id)throw Error("الصورة لا تطابق المراجعة المختارة.");
+      if(image.revision!==project.revision||image.style!==style.id||image.facade_sha256!==style.facade_sha256)throw Error("الصورة لا تطابق المراجعة المختارة.");
       const bytes=Uint8Array.from(atob(image.image),character=>character.charCodeAt(0));
       const nextUrl=URL.createObjectURL(new Blob([bytes],{type:"image/png"}));
       const preview=get("render-image");

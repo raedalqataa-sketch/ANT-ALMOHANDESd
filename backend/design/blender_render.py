@@ -7,6 +7,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+from struct import pack, unpack
+from zlib import crc32
 from subprocess import PIPE, STDOUT, Popen
 from tempfile import TemporaryDirectory
 from threading import BoundedSemaphore, Timer
@@ -60,8 +62,16 @@ def render_image(model, style_id, camera, progress):
                 finally:
                     timer.cancel()
             progress(98,"تجهيز صورة PNG للتنزيل")
-            return {"image":base64.b64encode(image.read_bytes()).decode("ascii"),
-                    "width":3840,"height":2160,"style":style_id,
-                    "revision":model["revision"],"camera":camera}
+            png=image.read_bytes()
+            if png[:8]!=b"\x89PNG\r\n\x1a\n" or png[12:16]!=b"IHDR":
+                raise ValueError("Invalid Blender PNG")
+            width,height=unpack(">II",png[16:24])
+            metadata={"revision":model["revision"],"style":style_id,
+                      "facade_sha256":style["facade_sha256"],"camera":camera}
+            info=b"ANT\x00"+json.dumps(metadata,separators=(",",":")).encode()
+            chunk=b"tEXt"+info
+            png=png[:33]+pack(">I",len(info))+chunk+pack(">I",crc32(chunk))+png[33:]
+            return {"image":base64.b64encode(png).decode("ascii"),
+                    "width":width,"height":height,**metadata}
     finally:
         SLOTS.release()

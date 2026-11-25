@@ -96,7 +96,7 @@ def audit_preliminary_concept(brief,proposal):
         elif sorted(v.get('guest_entry','') for v in guest)!=sorted(expected_entries):
             issues.append({'floor':idx,'reason':'GUEST_ENTRY_MEMBERSHIP_MISMATCH'})
         for requested in requested_guests:
-            r=next((q for q in rooms if q['id']==requested['id']),None)
+            r=next((q for q in rooms if q.get('id')==requested['id']),None)
             if r is None:continue
             if r.get('zone')!='guest' or (not legacy and
                     sorted(r.get('guest_entries',[]))!=sorted(expected_memberships[r['id']])):

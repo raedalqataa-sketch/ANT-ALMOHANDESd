@@ -7,13 +7,13 @@ import shapely
 from shapely.geometry import Point, Polygon, box
 from shapely.ops import triangulate, unary_union
 
-from assl.openings_009 import wall_cut
-from .geometry import net_shape, shape
+from assl.openings_009 import cut, opening_fits, wall_cut, window_clear
+from .geometry import exposed_edges, net_shape, shape
 
 STYLES = (
     ("modern", "مودرن", "إطار غرافيتي ومظلة أفقية وشرائح خشبية", "#e6ddcc", "#353a3f"),
     ("najdi", "نجدي معاصر", "بوابة حجرية وحواجز سقف مسنّنة", "#c8a77e", "#967252"),
-    ("mediterranean", "متوسطي", "مدخل مقوّس وسقف مائل بلون القرميد", "#f1dfc4", "#ab543c"),
+    ("contemporary", "حديث معاصر", "بوابة حجرية عميقة ونوافذ مؤطرة ودرجات الكتلة", "#d8c4a5", "#f0e2c8"),
     ("classical", "كلاسيكي مبسّط", "أعمدة مدخل وكورنيش متدرّج", "#e5dfd4", "#b0a08a"),
 )
 
@@ -45,12 +45,59 @@ class Mesh:
                     self.face([(*a,z0), (*b,z0), (*b,z1), (*a,z1)], color)
 
 
-def base_geometry(proposal):
+def facade_schedule(proposal, thickness, height):
+    """Derive a measurable facade opening schedule while retaining the approved plan."""
+    schedules, review = [], []
+    for index, (rooms, halls, level) in enumerate(zip(
+            proposal["rooms_by_floor"], proposal["halls_by_floor"],
+            proposal["opening_model_009"], strict=True)):
+        enclosed = [r for r in rooms+halls if r["kind"] != "terrace"]
+        windows = level["windows"]
+        doors = level["doors"]
+        scheduled = []
+        for number, window in enumerate(windows, 1):
+            candidates = [(r,e) for r in enclosed for e in exposed_edges(r,enclosed)
+                          if (not window.get("room_id") or r["id"]==window["room_id"])
+                          and opening_fits(window,e)]
+            if not candidates:
+                raise ValueError("FACADE_WINDOW_HAS_NO_EXTERIOR_HOST")
+            room, edge = max(candidates,key=lambda item:item[1]["length"])
+            kind = room["kind"]
+            axis = 0 if window["axis"]=="x" else 1
+            center = window["center"][axis]
+            available = 2*min(center-edge["lo"]-.38,edge["hi"]-.38-center)
+            maximum = 5.65 if kind in ("majlis","living","dining") else 1.35 if kind=="bathroom" else 3.75
+            trial_width = round(max(window["width"], min(available,maximum,edge["length"]*.76)),5)
+            sill = 1.55 if kind=="bathroom" else .95 if kind in ("kitchen","storage") else .30 if kind in ("majlis","living","dining") else .65
+            head = min(height-.28, 2.89)
+            sill = min(sill,head-.65)
+            trial = {**window, "id":window.get("id",f"window-{number}"),"room_id":room["id"],
+                     "width":trial_width,"height":head-sill,"operable_fraction":window.get("operable_fraction",.5)}
+            obstacles = [*doors, *scheduled, *windows[number:]]
+            # Widening must not consume a door, another opening, or an exterior return.
+            if not opening_fits(trial,edge) or not window_clear(trial,room,enclosed,thickness) or any(
+                    cut(trial,thickness).intersects(cut(o,thickness)) for o in obstacles):
+                trial["width"] = window["width"]
+            for other in scheduled:
+                if cut(trial,thickness).intersection(cut(other,thickness)).area>1e-6:
+                    raise ValueError("FACADE_WINDOW_OVERLAP")
+            scheduled.append({**trial,"source_width":window["width"],"sill":sill,"head":head,
+                              "floor":index,"privacy":kind=="bathroom"})
+        covered = {w["room_id"] for w in scheduled}
+        for room in rooms:
+            if (room.get("request_id") and room["kind"]!="storage" or index and room["kind"] in {"living","master","bedroom","bathroom"}) and room["id"] not in covered:
+                review.append({"floor":index,"room_id":room["id"],"reason":"WINDOW_REVIEW_REQUIRED"})
+        schedules.append(scheduled)
+    return schedules,review
+
+
+def base_geometry(proposal, schedule):
     brief = proposal["brief_snapshot"]
     thickness, height = brief["wall_thickness"], brief["floor_height"]
     floors = []
-    for rooms, halls, openings in zip(proposal["rooms_by_floor"], proposal["halls_by_floor"],
-                                       proposal["opening_model_009"], strict=True):
+    for rooms, halls, original, windows in zip(proposal["rooms_by_floor"], proposal["halls_by_floor"],
+                                       proposal["opening_model_009"], schedule, strict=True):
+        openings={**original,"windows":windows}
         enclosed = [room for room in rooms+halls if room["kind"] != "terrace"]
         footprint = unary_union([shape(room) for room in enclosed]).buffer(thickness/2, join_style=2)
         shell = unary_union([shape(room).buffer(thickness/2, join_style=2).difference(
@@ -116,25 +163,14 @@ def decorate(mesh, style, roof, levels, entry, receiving, accent, thickness):
             block(a-.07,b+.07,.95,1.25,2.2,2.36,accent)
         block(-width-.5,width+.5,near,1.27,2.36,2.63,accent)
     else:
-        radius=width+.1
-        for i in range(16):
-            a,b=(math.pi*k/16 for k in (i,i+1))
-            for depth in (.95,1.19):
-                points=[world(r*math.cos(theta),depth,1.62+r*math.sin(theta))
-                        for r,theta in ((radius,a),(radius,b),(radius+.16,b),(radius+.16,a))]
-                mesh.face(points,accent)
         for sign in (-1,1):
-            a,b=sorted((sign*radius,sign*(radius+.16)))
-            block(a,b,.95,1.19,0,1.62,accent)
-        span=radius+.34
-        ridge=min(3.45,max(3.02,1.62+radius+.45))
-        eave=ridge-.25
-        for sign in (-1,1):
-            mesh.face([world(0,near,ridge),world(0,1.4,ridge),
-                       world(sign*span,1.4,eave),world(sign*span,near,eave)],accent)
+            a,b=sorted((sign*(width+.14),sign*(width+.43)))
+            block(a,b,near,1.18,0,2.83,accent)
+        block(-width-.43,width+.43,near,1.18,2.63,2.83,accent)
+        block(-width-.43,width+.43,near,1.30,2.83,3.01,accent)
 
 
-def frame_windows(mesh, floors, thickness, height, accent):
+def frame_windows(mesh, floors, thickness, height, accent, style):
     for index, (footprint, _, _, _, openings) in enumerate(floors):
         z = index*height
         for window in openings["windows"]:
@@ -146,16 +182,26 @@ def frame_windows(mesh, floors, thickness, height, accent):
             if inside[0] == inside[1]:
                 continue
             direction = 1 if not inside[0] else -1
-            a,b = sorted((direction*(thickness/2-.01), direction*(thickness/2+.16)))
+            projection={"contemporary":.50,"modern":.26,"classical":.24,"najdi":.21}[style]
+            a,b = sorted((direction*(thickness/2-.01), direction*(thickness/2+projection)))
             w = window["width"]/2
-            for lo,hi,bottom,top in ((-w-.09,-w,.81,2.24),(w,w+.09,.81,2.24),
-                                     (-w,w,.81,.9),(-w,w,2.15,2.24)):
+            sill,head=window["sill"],window["head"]
+            rim=.15 if style=="contemporary" else .09
+            for lo,hi,bottom,top in ((-w-rim,-w,sill-rim,head+rim),(w,w+rim,sill-rim,head+rim),
+                                     (-w,w,sill-rim,sill),(-w,w,head,head+rim)):
                 trim = box(x+lo,y+a,x+hi,y+b) if along_x else box(x+a,y+lo,x+b,y+hi)
                 mesh.extrude(trim,z+bottom,z+top,accent)
+            for i in range(1,max(1,math.ceil(2*w/1.45))):
+                u=-w+2*w*i/math.ceil(2*w/1.45)
+                n0,n1=sorted((direction*(thickness/2-.025),direction*(thickness/2+.035)))
+                strip=box(x+u-.027,y+n0,x+u+.027,y+n1) if along_x else box(x+n0,y+u-.027,x+n1,y+u+.027)
+                mesh.extrude(strip,z+sill,z+head,"#353a3f")
 
 
 def build_styles(proposal, progress=None):
-    floors, thickness, height = base_geometry(proposal)
+    brief=proposal["brief_snapshot"]
+    schedule,review=facade_schedule(proposal,brief["wall_thickness"],brief["floor_height"])
+    floors, thickness, height = base_geometry(proposal,schedule)
     opening_model = floors[0][4]
     outside = [d for d in opening_model["doors"] if "OUTSIDE" in d["connects"]]
     entry = next((d for d in outside if d["receiving_room"] == "main-foyer"), None)
@@ -177,13 +223,16 @@ def build_styles(proposal, progress=None):
             mesh.extrude(footprint.difference(landing_void),z-.18,z,"#a09a8e")
             terraces = unary_union([shape(room) for room in rooms if room["kind"] == "terrace"])
             mesh.extrude(terraces.difference(footprint),z-.18,z,"#a09a8e")
-            mesh.extrude(shell.difference(doors),z,z+.9,wall)
-            mesh.extrude(shell.difference(doors.union(windows)),z+.9,z+2.15,wall)
-            # The slab supplies the top surface. Terminating the wall below it
-            # removes coincident faces that caused dark seams in Cycles.
-            mesh.extrude(shell,z+2.15,z+max(2.15,height-.18),wall)
-            glass = shell.intersection(windows)
-            mesh.extrude(glass,z+.9,z+2.15,"#618a9b")
+            portals=schedule[i]
+            door_head=min(2.15,height-.18)
+            breaks=sorted({0.,door_head,height-.18,*(w[k] for w in portals for k in ("sill","head"))})
+            for low,high in zip(breaks,breaks[1:]):
+                active=unary_union([wall_cut(w,thickness) for w in portals if w["sill"]<=low and w["head"]>=high])
+                cuts=active.union(doors) if high<=door_head else active
+                mesh.extrude(shell.difference(cuts),z+low,z+high,wall)
+            for w in portals:
+                glass=shell.intersection(wall_cut(w,thickness))
+                mesh.extrude(glass,z+w["sill"],z+w["head"],"#939d98" if w["privacy"] else "#618a9b")
             roof = footprint.difference(floors[i+1][0]) if i+1<len(floors) else footprint
             if i+1 < len(floors):
                 roof = roof.difference(unary_union([
@@ -197,11 +246,51 @@ def build_styles(proposal, progress=None):
                 level = step["level_m"]
                 mesh.extrude(Polygon(step["polygon"]),level-.14,level,"#a09a8e")
         base_faces = len(mesh.faces)
-        if key == "modern":
-            frame_windows(mesh,floors,thickness,height,accent)
+        frame_windows(mesh,floors,thickness,height,accent,key)
         decorate(mesh,key,floors[-1][0],height*len(floors),entry,receiving,accent,thickness)
         variants.append(dict(id=key,title=title,caption=caption,faces=mesh.faces,base_faces=base_faces))
     geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
     geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
     digest = hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
-    return dict(proposal_id=proposal["id"],revision=digest, floors=len(floors),units="m",styles=variants)
+    for variant in variants:
+        variant["facade_sha256"]=hashlib.sha256(json.dumps(variant["faces"],separators=(",",":")).encode()).hexdigest()
+    return dict(proposal_id=proposal["id"],revision=digest, floors=len(floors),units="m",
+                styles=variants,facade_openings=schedule,facade_review=review)
+
+
+def export_style_dxf(model, style_id):
+    """A single compressed CAD file made of the same faces as the viewer."""
+    import ezdxf
+    from io import BytesIO, StringIO
+    from zipfile import ZIP_DEFLATED, ZipFile
+
+    style = next((s for s in model["styles"] if s["id"] == style_id), None)
+    if style is None:
+        raise ValueError("MASSING_STYLE_NOT_AVAILABLE")
+    doc = ezdxf.new("R2010")
+    doc.units = 6
+    doc.header["$MEASUREMENT"] = 1
+    space = doc.modelspace()
+    meta = doc.ezdxf_metadata()
+    meta["ANT_PLAN_REVISION"] = model["revision"]
+    meta["ANT_FACADE_SHA256"] = style["facade_sha256"]
+    meta["ANT_STYLE"] = style_id
+    for vertices,color in style["faces"]:
+        layer = "FACADE-"+color[1:].upper()
+        if layer not in doc.layers:
+            doc.layers.new(layer,dxfattribs={"color":7})
+        entity = space.add_3dface(vertices,dxfattribs={"layer":layer})
+        entity.rgb = tuple(int(color[i:i+2],16) for i in (1,3,5))
+    stream = StringIO()
+    doc.write(stream)
+    stream.seek(0)
+    reopened = ezdxf.read(stream)
+    audit = reopened.audit()
+    if audit.errors or audit.fixes or reopened.units != 6 or reopened.dxfversion != "AC1024":
+        raise ValueError("MASSING_DXF_AUDIT_FAILED")
+    if len(reopened.modelspace().query("3DFACE")) != len(style["faces"]):
+        raise ValueError("MASSING_DXF_FACE_COUNT_MISMATCH")
+    result=BytesIO()
+    with ZipFile(result,"w",ZIP_DEFLATED) as archive:
+        archive.writestr(f"ANT-{model['revision'][:12]}-{style_id}.dxf",stream.getvalue().encode("utf-8"))
+    return result.getvalue()

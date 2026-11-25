@@ -8,6 +8,7 @@ import os
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import Response
 from pydantic import Field
 from typing import Literal
 from .general_models import VillaBrief, Strict, SpaceRequest
@@ -188,17 +189,39 @@ def _checked_massing(proposal, progress=None):
         raise HTTPException(422, str(exc)) from exc
 
 
+class StyleExportRequest(MassingRequest):
+    style: str
+    revision: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+@router.post('/concepts/massing/dxf')
+def download_massing(request: StyleExportRequest):
+    from assl.strategies.styled_massing import export_style_dxf
+    model = _checked_massing(request.proposal)
+    if model["revision"] != request.revision:
+        raise HTTPException(409,"تغيّرت مراجعة المسقط.")
+    try:
+        payload=export_style_dxf(model,request.style)
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+    return Response(payload,media_type="application/zip",
+                    headers={"Content-Disposition":f'attachment; filename="ANT-{model["revision"][:12]}-{request.style}.zip"'})
+
+
 class RenderCamera(Strict):
     mode: Literal["orbit","elevation"] = "orbit"
     yaw: float = Field(ge=-6.284,le=6.284)
     pitch: float = Field(ge=0,le=1.4)
     zoom: float = Field(ge=.6,le=2.5)
     side: Literal["east","west","north","south"] | None = None
+    pan_x: float = Field(default=0,ge=-1,le=1)
+    pan_y: float = Field(default=0,ge=-1,le=1)
 
 
 class RenderRequest(MassingRequest):
     style: str
     revision: str = Field(pattern=r"^[a-f0-9]{64}$")
+    facade_sha256: str | None = Field(default=None,pattern=r"^[a-f0-9]{64}$")
     camera: RenderCamera
 
 
@@ -213,6 +236,9 @@ def stream_render(request: RenderRequest):
         model = _checked_massing(request.proposal)
         if model["revision"] != request.revision:
             raise ValueError("تغيّرت مراجعة المسقط. اختر الطراز مجددًا.")
+        selected=next((s for s in model["styles"] if s["id"]==request.style),None)
+        if not selected or request.facade_sha256 and request.facade_sha256!=selected["facade_sha256"]:
+            raise ValueError("تغيّر الطراز. أعد اختياره من شاشة الكتل.")
         camera = request.camera.model_dump()
         if camera["mode"] == "elevation":
             sides = {"east":-pi/2, "west":pi/2, "north":pi, "south":0}

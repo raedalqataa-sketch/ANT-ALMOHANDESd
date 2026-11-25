@@ -127,6 +127,9 @@ def main(input_path, output_path):
         camera.data.ortho_scale = diameter*1.14/zoom
     else:
         camera.data.lens = 43
+    camera.data.sensor_fit="HORIZONTAL"
+    camera.data.shift_x=-view.get("pan_x",0)
+    camera.data.shift_y=view.get("pan_y",0)*9/16
     scene.render.engine = "CYCLES"
     import _cycles
     denoise = bool(getattr(_cycles, "with_openimagedenoise", False))
@@ -138,8 +141,11 @@ def main(input_path, output_path):
     scene.cycles.max_bounces = 6
     scene.cycles.diffuse_bounces = 2
     scene.view_settings.view_transform = "AgX"
-    scene.render.resolution_x = 3840
-    scene.render.resolution_y = 2160
+    width = int(os.environ.get("ANT_RENDER_WIDTH", "3840"))
+    if width not in (1280,1920,3840):
+        raise ValueError("Unsupported render width")
+    scene.render.resolution_x = width
+    scene.render.resolution_y = width*9//16
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGB"
