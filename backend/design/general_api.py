@@ -86,37 +86,35 @@ def design(brief: VillaBrief):
 
 
 @router.post('/concepts/clustered')
-def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=1),
+def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=2),
                        first_floor: bool = False):
     """Opt-in experimental polygon composition; no provider or deployment call."""
-    from assl.free_layout_solver import solve_free_concepts
+    from assl.strategies.clustered import solve_client_clustered
     try:
         if first_floor:
             proposal = _family_stack_proposal(brief)
             return {'status': 'CONCEPT_READY_FOR_ARCHITECT_REVIEW', 'proposals': [proposal]}
-        return solve_free_concepts(brief,strategy='clustered',max_results=max_results)
+        return solve_client_clustered(brief, max_results=max_results)
     except ValueError as exc:
         raise HTTPException(422,str(exc))
 
 
 @router.post('/concepts/clustered/stream')
-def stream_clustered(brief: VillaBrief, first_floor: bool = False):
+def stream_clustered(brief: VillaBrief, first_floor: bool = False,
+                     max_results: int = Query(default=1, ge=1, le=2)):
     from .progress_stream import stream_work
-    from assl.strategies.clustered import solve_clustered
+    from assl.strategies.clustered import solve_client_clustered
 
     def run(progress):
         progress(4, "التحقق من برنامج العميل")
         if first_floor:
             return {"status":"CONCEPT_READY_FOR_ARCHITECT_REVIEW",
                     "proposals":[_family_stack_proposal(brief, progress)]}
-        if brief.spatial_requirements:
-            raise ValueError("SPATIAL_REQUIREMENTS_NEED_RELATIONAL_STRATEGY")
-
         def report(phase, done, total, detail):
-            start, span = (10, 36) if phase == "composition" else (50, 46)
+            start, span = {"composition": (10, 36), "alternatives": (10, 86)}.get(phase, (50, 46))
             progress(start + int(span*done/max(1,total)),detail)
 
-        return solve_clustered(brief,max_results=1,progress=report)
+        return solve_client_clustered(brief, max_results=max_results, progress=report)
 
     return stream_work(run)
 

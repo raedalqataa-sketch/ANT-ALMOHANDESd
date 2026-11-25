@@ -825,7 +825,7 @@ $("approve-massing").onclick = () =>
       identity: ui.savedIdentity,
     }));
     location.href = "/massing/?edit=" + handoff;
-  }, "جارٍ فتح النسخة المعتمدة…");
+  }, "جارٍ فتح النسخة المختارة…");
 $("file").onchange = async (e) => {
   try {
     const file = e.target.files[0];

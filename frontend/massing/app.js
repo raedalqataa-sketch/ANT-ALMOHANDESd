@@ -90,7 +90,7 @@ function planSource() {
   if (handoff !== null) {
     const saved = JSON.parse(sessionStorage.getItem("ant-massing-editor:" + handoff));
     if (!saved?.editor_revision || !saved.identity) {
-      throw Error("افتح النسخة المعتمدة من المحرّر في علامة التبويب هذه.");
+      throw Error("افتح النسخة المختارة من المحرّر في علامة التبويب هذه.");
     }
     return {request:{editor_revision:saved.editor_revision}, identity:saved.identity, query:"?"+new URLSearchParams({edit:handoff})};
   }
@@ -103,7 +103,7 @@ function verifyPlanIdentity(result, identity) {
   if (identity && (result.version_id !== identity.version_id
       || result.geometry_fingerprint !== identity.geometry_fingerprint
       || result.revision !== identity.geometry_fingerprint)) {
-    throw Error("النتيجة لا تطابق النسخة المعتمدة من المحرّر.");
+    throw Error("النتيجة لا تطابق النسخة المختارة من المحرّر.");
   }
 }
 

@@ -207,3 +207,60 @@ def solve_central(brief,*,progress=None,on_candidate=None,on_frame=None,grid=Non
     accepted=p['validation_009']['status']=='PASS' and p['quality_010']['status']=='ACCEPTABLE_DESIGN_INDICATORS'
     if accepted and on_candidate:on_candidate(p)
     return dict(strategy='clustered',generation_mode='central',requested_results=1,status='CONCEPT_READY_FOR_ARCHITECT_REVIEW' if accepted else 'REJECT_AND_REPLAN',proposals=[p] if accepted else [],rejected=[] if accepted else [p],failures=[] if accepted else [dict(reason=(p['validation_009']['issues'] or [d['type'] for d in p['quality_010']['defects']])[0])])
+
+
+def solve_central_alternatives(brief, *, progress=None):
+    """Run the two supported functional arrangements against the same brief."""
+    proposals, rejected, failures = [], [], []
+    for variant, scheme in enumerate(SCHEMES):
+        def report(phase, done, total, detail):
+            if progress:
+                stage = .4 + .6 * done / total if phase == 'checking' else .4 * done / total
+                progress('alternatives', variant + stage, len(SCHEMES), detail)
+
+        result = solve_central(brief, variant=variant, progress=report)
+        proposals.extend(result['proposals'])
+        rejected.extend(result['rejected'])
+        failures.extend({**failure, 'scheme': scheme} for failure in result['failures'])
+
+    if len(proposals) == 2:
+        # The schemes can collapse to the same layout if neither optional
+        # wing is requested. Compare zoning relative to the family lounge.
+        def zones(proposal):
+            rooms = proposal['rooms_by_floor'][0]
+            lounge = next(room for room in rooms if room['kind'] == 'living')
+            origin = shape(lounge).centroid
+            result = {}
+            for room in rooms:
+                if room['kind'] not in ('bedroom', 'master', 'majlis'):
+                    continue
+                center = shape(room).centroid
+                dx, dy = center.x - origin.x, center.y - origin.y
+                result[room['id']] = (
+                    ('east' if dx > 0 else 'west') if abs(dx) > abs(dy)
+                    else ('north' if dy > 0 else 'south')
+                )
+            return result
+
+        first, second = map(zones, proposals)
+        differences = [
+            {'space_id': key, 'first': first[key], 'second': second[key]}
+            for key in first if first[key] != second[key]
+        ]
+        if differences:
+            proposals[0]['functional_differences'] = [
+                {'space_id': row['space_id'], 'direction': row['first']} for row in differences
+            ]
+            proposals[1]['functional_differences'] = [
+                {'space_id': row['space_id'], 'direction': row['second']} for row in differences
+            ]
+        else:
+            proposals.pop()
+            failures.append({'scheme': SCHEMES[1], 'reason': 'NO_FUNCTIONAL_ZONING_DIFFERENCE'})
+
+    return {
+        'strategy': 'clustered', 'generation_mode': 'central',
+        'requested_results': 2,
+        'status': 'CONCEPTS_READY_FOR_REVIEW' if proposals else 'REJECT_AND_REPLAN',
+        'proposals': proposals, 'rejected': rejected, 'failures': failures,
+    }

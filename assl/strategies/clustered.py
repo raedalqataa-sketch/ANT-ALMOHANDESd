@@ -158,8 +158,7 @@ def generate_clustered(brief,*,max_results=1):
 
 
 def solve_clustered(brief,*,max_results=1,progress=None,on_candidate=None,on_frame=None):
-    guest_ids={rid for g in brief.guest_groups for rid in g.rooms}
-    if any(r.kind=='dining' and r.id in guest_ids for r in brief.rooms):
+    if _uses_central_program(brief):
         from .central_clustered import solve_central
         return solve_central(brief,progress=progress,on_candidate=on_candidate,on_frame=on_frame)
     from .openings import construct_clustered
@@ -192,3 +191,22 @@ def solve_clustered(brief,*,max_results=1,progress=None,on_candidate=None,on_fra
     return dict(strategy='clustered',status='CONCEPTS_READY_FOR_REVIEW' if accepted else 'REJECT_AND_REPLAN',
                 proposals=accepted,rejected=rejected,failures=raw['failures'],
                 supported_scope='Ground floor; 1–2 explicit guest entry groups, primary 1–2 councils, secondary 1 council, at most one WC per group, one living/dining/kitchen and optional pantry; no shared services yet.')
+
+
+def _uses_central_program(brief):
+    guest_ids = {room_id for group in brief.guest_groups for room_id in group.rooms}
+    return any(room.kind == 'dining' and room.id in guest_ids for room in brief.rooms)
+
+
+def solve_client_clustered(brief, *, max_results=1, progress=None):
+    """Return only alternatives with measured functional differences."""
+    if brief.spatial_requirements:
+        raise ValueError('SPATIAL_REQUIREMENTS_NEED_RELATIONAL_STRATEGY')
+    if max_results == 2 and _uses_central_program(brief):
+        from .central_clustered import solve_central_alternatives
+        return solve_central_alternatives(brief, progress=progress)
+    result = solve_clustered(brief, max_results=1, progress=progress)
+    if max_results == 2:
+        result['failures'].append({'reason': 'NO_VERIFIED_SECOND_FUNCTIONAL_SCHEME'})
+        result['requested_results'] = max_results
+    return result
