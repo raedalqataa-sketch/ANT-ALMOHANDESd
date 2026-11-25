@@ -127,6 +127,11 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         cost=25*detached('kitchen','dining')+14*detached('living','dining')
         cost+=9*detached('master','bathroom')+8*detached('bedroom','bathroom')
         for group in groups:
+            if architecture_first:
+                family_kinds={r['kind'] for r in group if r.get('zone')!='guest'}
+                private=family_kinds & {'master','bedroom'}
+                social=family_kinds & {'living','dining','kitchen'}
+                if private and social:cost+=12
             guest=any(r.get('zone')=='guest' for r in group)
             family=any(r.get('zone')!='guest' and r.get('request_id')
                        for r in group)
@@ -320,10 +325,15 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
     can_rotate=(brief.floors==1 and not brief.automatic_features.roof_annex
         and aw>1.45*ad and family in ('spine','cross','adaptive','freeform','cluster'))
     variations=[(*v,False) for v in variations]+([(*v,True) for v in variations] if can_rotate else [])
-    for ws,ds,ratio,top,rotated in variations:
+    variations=[(*v,False) for v in variations]+([(*v,True) for v in variations] if family=='cluster' else [])
+    for ws,ds,ratio,top,rotated,hub in variations:
         W,D=aw*ws,ad*ds
         c=max(brief.corridor_width+brief.wall_thickness,1.9 if brief.automatic_features.roof_annex else 0)
-        shape=topology(family,D,W,c,ratio,top) if rotated else topology(family,W,D,c,ratio,top)
+        if hub:
+            from .adaptive_geometry import clustered_hub_topology
+            shape=clustered_hub_topology(D,W,c,ratio,top) if rotated else clustered_hub_topology(W,D,c,ratio,top)
+        else:
+            shape=topology(family,D,W,c,ratio,top) if rotated else topology(family,W,D,c,ratio,top)
         attempts+=1
         if not shape:continue
         halls,lanes=copy.deepcopy(shape)
