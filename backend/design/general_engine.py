@@ -259,7 +259,9 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
             cells.append(cell);start+=length
         remaining=lane['y' if axis=='y' else 'x']+capacities[i]-start
         if remaining>t+.05:
-            if remaining<1.6 and cells and cells[-1].get('request_id') and not cells[-1].get('reference_shape'):
+            if (not architecture_first and policy not in ('functional_hub','reference_hub')
+                    and remaining<1.6 and cells and cells[-1].get('request_id')
+                    and not cells[-1].get('reference_shape')):
                 cells[-1]['depth' if axis=='y' else 'width']+=remaining
             else:
                 cells.append(box(lane['x'] if axis=='y' else start,start if axis=='y' else lane['y'],lane['width'] if axis=='y' else remaining,remaining if axis=='y' else lane['depth'],kind='reserve',name='مساحة مرنة مقترحة',door_side=lane['door_side']))
