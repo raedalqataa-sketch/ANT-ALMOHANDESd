@@ -130,3 +130,23 @@ def test_real_v2_generation_carries_audit_and_keeps_exports_nonexecutive(tmp_pat
         assert audit["release_decision"] == "DRAFT_REVIEW"
         assert audit["executive_approval"] is False
         assert candidate["release"]["executive_issue_allowed"] is False
+
+
+def test_verified_failure_takes_precedence_over_missing_gate_evidence():
+    for failed_check in ("GF-program", "GF-sizes"):
+        model = sample_model()
+        model["checks"] = [{"check_id": failed_check, "status": "FAIL"}]
+        result = assess_candidate(model)
+        space = gate(result, "SPACE_PROGRAM")
+        assert space["status"] == "FAIL"
+        assert failed_check in space["evidence_check_ids"]
+        assert "SPACE_PROGRAM" in result["hard_failures"]
+        assert result["release_decision"] == "BLOCKED"
+
+
+def test_partial_passing_evidence_remains_review_with_check_ids():
+    model = sample_model()
+    model["checks"] = [{"check_id": "GF-program", "status": "PASS"}]
+    space = gate(assess_candidate(model), "SPACE_PROGRAM")
+    assert space["status"] == "REVIEW"
+    assert space["evidence_check_ids"] == ["GF-program"]
