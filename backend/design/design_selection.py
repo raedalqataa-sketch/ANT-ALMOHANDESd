@@ -12,6 +12,28 @@ WEIGHTS={
 }
 MAX_SLEEPING_ASPECT_RATIO = 2.0  # Design quality threshold, not a building-code rule.
 
+def space_efficiency(model):
+    """Net room areas from final geometry, not stale pre-repair metrics."""
+    floors=[]
+    for floor in model['floors']:
+        buckets={'functional':0.,'circulation':0.,'reserve':0.,'vertical_core':0.,'other':0.}
+        for room in floor['rooms']:
+            kind=room['kind']
+            key=('circulation' if kind=='corridor' else 'reserve' if kind=='reserve'
+                 else 'vertical_core' if kind in ('stair','lift','elevator') else
+                 'functional' if room.get('request_id') or room.get('generated_feature_room') else 'other')
+            buckets[key]+=room['width']*room['depth']
+        net=sum(buckets.values())
+        floors.append({'floor':floor['id'],'net_m2':net,**buckets})
+    totals={key:sum(f[key] for f in floors) for key in
+            ('functional','circulation','reserve','vertical_core','other','net_m2')}
+    net=totals['net_m2']
+    return {'floors':floors,'totals':totals,
+            'functional_net_ratio':totals['functional']/net if net else 0.,
+            'reserve_net_ratio':totals['reserve']/net if net else 0.,
+            'scope':'net room areas; reserve space is a preference, not a code violation'}
+
+
 def measure(model):
     rows={};route_lengths=[];unreachable_routes=[];social=0;ratios=[];sleeping_ratios=[];functional=[]
     for f in model['floors']:
@@ -66,7 +88,8 @@ def measure(model):
     public_built=area or 1
     required=sum(r['min_area']*r['count'] for r in model['brief']['rooms'])
     proposed=sum(r['width']*r['depth'] for f in model['floors'] for r in f['rooms'] if r.get('request_id'))
-    return {'program_excess_ratio':round(max(0,proposed/max(required,1)-1),5),'total_built_m2':round(area,3),'circulation_ratio':round(model['metrics']['circulation_m2']/public_built,5),
+    efficiency=space_efficiency(model)
+    return {'space_efficiency':efficiency,'program_excess_ratio':round(max(0,proposed/max(required,1)-1),5),'total_built_m2':round(area,3),'circulation_ratio':round(efficiency['totals']['circulation']/public_built,5),
       'normalized_perimeter':round(sum(q['normalized_perimeter'] for q in qs)/len(qs),5) if qs else 2,
       'envelope_fill':round(sum(q['envelope_fill'] for q in qs)/len(qs),5) if qs else .5,
       'mean_functional_route_m':round(sum(route_lengths)/len(route_lengths),3) if route_lengths else 0,
@@ -82,6 +105,9 @@ def objective_score(metrics,priority):
     weights=WEIGHTS[priority]
     components['program_excess']=metrics['program_excess_ratio']
     weights={**weights,'program_excess':.15}
+    if 'space_efficiency' in metrics:
+        components['unassigned_reserve']=metrics['space_efficiency']['reserve_net_ratio']
+        weights['unassigned_reserve']={'efficiency':.40,'usability':.25,'prestige':.10}[priority]
     return round(sum(weights[k]*v for k,v in components.items()),6),components,weights
 
 def semantic_layout(model):
