@@ -131,6 +131,32 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
             family=any(r.get('zone')!='guest' and r.get('request_id')
                        for r in group)
             if guest and family:cost+=18
+        # Estimate room centres in the same order used by the relationship-aware
+        # materializer. This is a search heuristic, not measured walking distance.
+        rank={'kitchen':0,'dining':1,'living':2,'office':3,'master':4,
+              'bedroom':5,'bathroom':6,'laundry':7,'storage':8,'majlis':9}
+        positions={}
+        for lane,group in zip(lanes,groups):
+            axis=lane['axis'];cursor=lane['y' if axis=='y' else 'x']
+            ordered_group=sorted(group,key=lambda q:(
+                0 if q.get('zone')=='guest' else 1,
+                (q.get('guest_parent') or q['id']) if q.get('zone')=='guest' else '',
+                (1 if q.get('guest_distributor') else 2 if q.get('guest_parent') else 0)
+                if q.get('zone')=='guest' else rank.get(q['kind'],10),q['id']))
+            for room in ordered_group:
+                length=planned_length(room,lane,t)
+                point=(lane['x']+lane['width']/2,cursor+length/2) if axis=='y' else (cursor+length/2,lane['y']+lane['depth']/2)
+                if room.get('zone')!='guest':
+                    positions.setdefault(room['kind'],[]).append(point)
+                cursor+=length
+        for first,second,weight in (
+            ('kitchen','dining',3.),('dining','living',2.),
+            ('master','bathroom',2.),('bedroom','bathroom',2.),
+            ('kitchen','storage',1.),('laundry','bathroom',.5)):
+            if first in positions and second in positions:
+                distances=[min(abs(a[0]-b[0])+abs(a[1]-b[1])
+                               for b in positions[second]) for a in positions[first]]
+                cost+=weight*sum(distances)/len(distances)
         return cost
     fallback_allocation=None
     for bundle in ordered:
