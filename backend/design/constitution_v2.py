@@ -95,17 +95,21 @@ def _matching(rows, token):
 def _from_checks(rows, tokens):
     """Require evidence for every applicable token, never interpret absence as PASS."""
     seen = []
+    missing_required = False
     for token in tokens:
         group = _matching(rows, token)
         # A reference check may be absent if the reference preferences were disabled.
         if token == "REF-functional-route" and not group:
             continue
         if not group:
-            return "REVIEW", seen, "لا توجد أدلة فحص مكتملة لجميع البنود"
+            missing_required = True
+            continue
         seen.extend(group)
     active = [r for r in seen if r.get("status") != "NOT_APPLICABLE"]
     if any(r.get("status") == "FAIL" for r in active):
         return "FAIL", [r["check_id"] for r in active], "فشل فحص هندسي موثق"
+    if missing_required:
+        return "REVIEW", [r["check_id"] for r in seen], "لا توجد أدلة فحص مكتملة لجميع البنود"
     if any(r.get("status") not in ("PASS", "NOT_APPLICABLE") for r in active):
         return "REVIEW", [r["check_id"] for r in active], "توجد بنود غير مكتملة"
     if not active:
