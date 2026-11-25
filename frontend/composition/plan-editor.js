@@ -3,6 +3,8 @@ const $ = (id) => document.getElementById(id),
 const ui = {
   sid: null,
   version: 0,
+  savedIdentity: null,
+  savedMassingReady: false,
   model: null,
   areas: {},
   ops: [],
@@ -137,6 +139,9 @@ function controls() {
     $(id).disabled = !ready;
   for (const el of document.querySelectorAll("[data-tool]"))
     el.disabled = !ready;
+  const approve = $("approve-massing");
+  approve.hidden = !(ui.version > 0 && ui.savedMassingReady && ui.checked && !dirty());
+  approve.disabled = !ready || approve.hidden;
   $("undo").disabled = !ready || ui.cursor === 0;
   $("redo").disabled = !ready || ui.cursor >= ui.ops.length;
   for (const id of ["x", "y", "width", "depth", "apply-position", "apply-size"])
@@ -477,6 +482,11 @@ function setResult(data, { saved = false } = {}) {
   if (saved) {
     ui.sid = data.session_id;
     ui.version = data.version;
+    ui.savedMassingReady = data.massing_ready;
+    ui.savedIdentity = {
+      version_id: data.version_id,
+      geometry_fingerprint: data.geometry_fingerprint,
+    };
     ui.saved = JSON.stringify(data.operations);
     ui.ops = data.operations;
     ui.cursor = ui.ops.length;
@@ -799,12 +809,23 @@ $("save").onclick = () =>
       operations: operations(),
     });
     setResult(data, { saved: true });
-    toast(
-      data.exportable
+    if (data.exportable && !data.massing_ready) {
+      toast("حُفظ المقترح وأصبحت ملفاته متاحة. يجب اجتياز فحص مسار الضيافة قبل استعراض الكتل.");
+    } else {
+      toast(data.exportable
         ? "حُفظ المقترح المعدّل، وأصبحت ملفاته متاحة."
-        : "حُفظت المسودة مع المشكلات. تصدير الرسم محجوب حتى تصحيحها.",
-    );
+        : "حُفظت المسودة مع المشكلات. تصدير الرسم محجوب حتى تصحيحها.");
+    }
   }, "جارٍ فحص النسخة وحفظها…");
+$("approve-massing").onclick = () =>
+  busy(() => {
+    const handoff = crypto.randomUUID();
+    sessionStorage.setItem("ant-massing-editor:" + handoff, JSON.stringify({
+      editor_revision: { session_id: ui.sid, version: ui.version },
+      identity: ui.savedIdentity,
+    }));
+    location.href = "/massing/?edit=" + handoff;
+  }, "جارٍ فتح النسخة المعتمدة…");
 $("file").onchange = async (e) => {
   try {
     const file = e.target.files[0];

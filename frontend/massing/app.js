@@ -85,14 +85,36 @@ function viewer(canvas) {
   return {upload,render};
 }
 
-async function load() {
-  const cached=sessionStorage.getItem("ant-massing-proposal");
+function planSource() {
+  const handoff = new URLSearchParams(location.search).get("edit");
+  if (handoff !== null) {
+    const saved = JSON.parse(sessionStorage.getItem("ant-massing-editor:" + handoff));
+    if (!saved?.editor_revision || !saved.identity) {
+      throw Error("افتح النسخة المعتمدة من المحرّر في علامة التبويب هذه.");
+    }
+    return {request:{editor_revision:saved.editor_revision}, identity:saved.identity, query:"?"+new URLSearchParams({edit:handoff})};
+  }
+  const cached = sessionStorage.getItem("ant-massing-proposal");
   if (!cached) throw Error("اختر مسقطًا من صفحة التكوين أولًا.");
-  const proposal=JSON.parse(cached);
+  return {request:{proposal:JSON.parse(cached)}, query:""};
+}
+
+function verifyPlanIdentity(result, identity) {
+  if (identity && (result.version_id !== identity.version_id
+      || result.geometry_fingerprint !== identity.geometry_fingerprint
+      || result.revision !== identity.geometry_fingerprint)) {
+    throw Error("النتيجة لا تطابق النسخة المعتمدة من المحرّر.");
+  }
+}
+
+async function load() {
+  const {request, identity, query} = planSource();
   progress.start();
-  const project=await streamRequest("/api/v3/concepts/massing/stream",{proposal},progress.update);
-  const choiceKey="ant-massing-style:"+project.revision;
-  const saved=localStorage.getItem(choiceKey);
+  const project=await streamRequest("/api/v3/concepts/massing/stream",request,progress.update);
+  verifyPlanIdentity(project, identity);
+  const choiceKey="ant-massing-style:"+(identity ? identity.version_id+":" : "")+project.revision;
+  const choiceStorage=identity ? sessionStorage : localStorage;
+  const saved=choiceStorage.getItem(choiceKey);
   if (renderPage) {
     project.styles=project.styles.filter(style=>style.id===saved);
     if (!project.styles.length) throw Error("اختر الطراز قبل فتح الرندر.");
@@ -118,7 +140,8 @@ async function load() {
   status.textContent="المسقط المختار · عدد الأدوار "+project.floors+" · مراجعة "+project.revision.slice(0,10);
   if (renderPage) {
     get("render-style").textContent=active.title+" · زاوية التصوير";
-    configureCapture(project, proposal, active);
+    get("back-to-styles").href="/massing/"+query;
+    configureCapture(project, request, identity, active);
   } else {
     function select(style) {
       active=style;
@@ -144,8 +167,8 @@ async function load() {
     select(active);
     get("save").onclick=()=>{
       try {
-        localStorage.setItem(choiceKey,active.id);
-        location.href="/render/";
+        choiceStorage.setItem(choiceKey,active.id);
+        location.href="/render/"+query;
       } catch {
         get("choice").textContent="تعذّر حفظ الطراز في هذا المتصفح.";
       }
@@ -196,7 +219,7 @@ async function load() {
   new ResizeObserver(paint).observe(canvas);
 }
 
-function configureCapture(project,proposal,style) {
+function configureCapture(project,request,identity,style) {
   const button=get("capture");
   let imageUrl;
   button.onclick=async()=>{
@@ -209,8 +232,9 @@ function configureCapture(project,proposal,style) {
     const description=side?sides[side][1]:"المنظور الملتقط";
     try {
       const image=await streamRequest("/api/v3/concepts/render/stream",{
-        proposal,revision:project.revision,style:style.id,camera:snapshot
+        ...request,version_id:identity?.version_id,revision:project.revision,style:style.id,camera:snapshot
       },progress.update);
+      verifyPlanIdentity(image, identity);
       if(image.revision!==project.revision||image.style!==style.id)throw Error("الصورة لا تطابق المراجعة المختارة.");
       const bytes=Uint8Array.from(atob(image.image),character=>character.charCodeAt(0));
       const nextUrl=URL.createObjectURL(new Blob([bytes],{type:"image/png"}));

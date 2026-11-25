@@ -8,7 +8,7 @@ import os
 from urllib.request import Request, urlopen
 from urllib.error import URLError
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import Field
+from pydantic import Field, model_validator
 from typing import Literal
 from .general_models import VillaBrief, Strict, SpaceRequest
 from .general_engine import generate_general
@@ -133,19 +133,44 @@ def _family_stack_proposal(brief, progress=None):
     }}
 
 
+class EditorRevision(Strict):
+    session_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+    version: int = Field(ge=1, le=200)
+
+
 class MassingRequest(Strict):
-    proposal: dict
+    proposal: dict | None = None
+    editor_revision: EditorRevision | None = None
+
+    @model_validator(mode="after")
+    def require_one_source(self):
+        if (self.proposal is None) == (self.editor_revision is None):
+            raise ValueError("Select exactly one plan source")
+        return self
+
+
+def _massing_for_request(request, progress=None):
+    if request.editor_revision is None:
+        return _checked_massing(request.proposal, progress)
+    from .plan_editor_api import load_massing_revision
+
+    ref = request.editor_revision
+    proposal, identity = load_massing_revision(ref.session_id, ref.version)
+    model = _checked_massing(proposal, progress)
+    if model["revision"] != identity["geometry_fingerprint"]:
+        raise ValueError("EDITOR_GEOMETRY_MISMATCH")
+    return {**model, **identity}
 
 
 @router.post('/concepts/massing')
 def concept_massing(request: MassingRequest):
-    return _checked_massing(request.proposal)
+    return _massing_for_request(request)
 
 
 @router.post('/concepts/massing/stream')
 def stream_massing(request: MassingRequest):
     from .progress_stream import stream_work
-    return stream_work(lambda progress: _checked_massing(request.proposal, progress))
+    return stream_work(lambda progress: _massing_for_request(request, progress))
 
 
 def _checked_massing(proposal, progress=None):
@@ -200,6 +225,7 @@ class RenderRequest(MassingRequest):
     style: str
     revision: str = Field(pattern=r"^[a-f0-9]{64}$")
     camera: RenderCamera
+    version_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}:[0-9]{1,3}$")
 
 
 @router.post('/concepts/render/stream')
@@ -210,8 +236,9 @@ def stream_render(request: RenderRequest):
 
     def run(progress):
         progress(4,"مطابقة الطراز مع مراجعة المسقط")
-        model = _checked_massing(request.proposal)
-        if model["revision"] != request.revision:
+        model = _massing_for_request(request)
+        if (model["revision"] != request.revision
+                or model.get("version_id") != request.version_id):
             raise ValueError("تغيّرت مراجعة المسقط. اختر الطراز مجددًا.")
         camera = request.camera.model_dump()
         if camera["mode"] == "elevation":
@@ -219,7 +246,10 @@ def stream_render(request: RenderRequest):
             if camera["side"] is None:
                 raise ValueError("اختر جهة الواجهة.")
             camera.update(yaw=sides[camera["side"]],pitch=0)
-        return render_image(model, request.style, camera, progress)
+        result = render_image(model, request.style, camera, progress)
+        if request.editor_revision is not None:
+            result.update(version_id=model["version_id"], geometry_fingerprint=model["geometry_fingerprint"])
+        return result
 
     return stream_work(run)
 

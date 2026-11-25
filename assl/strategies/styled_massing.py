@@ -158,6 +158,12 @@ def frame_windows(mesh, floors, thickness, height, accent):
                 mesh.extrude(trim,z+bottom,z+top,accent)
 
 
+def geometry_fingerprint(proposal):
+    geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
+    geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
+    return hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
+
+
 def build_styles(proposal, progress=None):
     floors, thickness, height = base_geometry(proposal)
     opening_model = floors[0][4]
@@ -216,7 +222,4 @@ def build_styles(proposal, progress=None):
         decorate(mesh,key,floors[-1][0],height*len(floors),entry,receiving,accent,thickness,
                  custom_portal=custom_portal)
         variants.append(dict(id=key,title=title,caption=caption,faces=mesh.faces,base_faces=base_faces))
-    geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
-    geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
-    digest = hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
-    return dict(proposal_id=proposal["id"],revision=digest, floors=len(floors),units="m",styles=variants)
+    return dict(proposal_id=proposal["id"],revision=geometry_fingerprint(proposal), floors=len(floors),units="m",styles=variants)

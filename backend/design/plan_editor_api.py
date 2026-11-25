@@ -4,6 +4,8 @@ from datetime import datetime,timezone
 from pathlib import Path
 from uuid import uuid4
 from fastapi import APIRouter,HTTPException
+from assl.strategies.guest_access import check_guest_wc_routes
+from assl.strategies.styled_massing import geometry_fingerprint
 from fastapi.responses import FileResponse
 from pydantic import BaseModel,ConfigDict,Field
 from .plan_editing import refresh_and_validate,apply_operations
@@ -43,9 +45,50 @@ def _evaluate(baseline,operations):
     except (ValueError,KeyError,TypeError,IndexError,ShapelyError) as e:raise HTTPException(422,str(e))
 
 
-def _public(session,revision):
-    return dict(session_id=session['id'],version=revision['version'],operations=revision['operations'],
-                **revision['result'],saved_at=revision['saved_at'],editor_url='/editor?session='+session['id'])
+def _identity(sid, revision):
+    return {
+        "version_id": f"{sid}:{revision['version']}",
+        "geometry_fingerprint": geometry_fingerprint(revision['result']['proposal']),
+    }
+
+
+def _massing_ready(result):
+    proposal = result['proposal']
+    return (
+        result['exportable']
+        and 'first_floor' not in proposal
+        and len(proposal['rooms_by_floor']) == len(proposal['halls_by_floor']) == 1
+        and check_guest_wc_routes(proposal)['status'] != 'FAIL'
+    )
+
+
+def load_massing_revision(sid, version):
+    with LOCK:
+        session = _load(sid)
+        if not 1 <= version <= session['version']:
+            raise HTTPException(404, 'REVISION_NOT_FOUND')
+        try:
+            revision = json.loads((_folder(sid) / f'revision-{version}.json').read_text())
+        except FileNotFoundError:
+            raise HTTPException(404, 'REVISION_NOT_FOUND')
+    proposal = revision['result']['proposal']
+    if not _massing_ready(revision['result']):
+        raise HTTPException(422, 'EDITOR_REVISION_FAILED_CHECKS')
+    return proposal, _identity(sid, revision)
+
+
+def _public(session, revision):
+    return {
+        'session_id': session['id'],
+        'version': revision['version'],
+        'operations': revision['operations'],
+        **revision['result'],
+        **_identity(session['id'], revision),
+        'massing_ready': _massing_ready(revision['result']),
+        'saved_at': revision['saved_at'],
+        'editor_url': '/editor?session=' + session['id'],
+    }
+
 
 
 @router.post('/sessions')
@@ -58,7 +101,7 @@ def create_session(request:Create):
         from .general_models import VillaBrief
         from assl.strategies.clustered import _program
         from assl.strategies.geometry import shape
-        if len(proposal['rooms_by_floor'])!=1 or len(proposal['halls_by_floor'])!=1:raise ValueError('EDITOR_GROUND_FLOOR_ONLY')
+        if 'first_floor' in proposal or len(proposal['rooms_by_floor'])!=1 or len(proposal['halls_by_floor'])!=1:raise ValueError('EDITOR_GROUND_FLOOR_ONLY')
         objects=proposal['rooms_by_floor'][0]+proposal['halls_by_floor'][0]
         if proposal['schema']=='assl-clustered-2':
             from assl.strategies.central_clustered import program
