@@ -143,6 +143,27 @@ def clustered_topology(width, depth, corridor, front_fraction, split_fraction):
     for x,y,size in ((front,0.,junction),(rear,junction+corridor,depth-junction-corridor)):
         lanes.extend([dict(x=0.,y=y,width=x,depth=size,axis='y',door_side='east'),
                       dict(x=x+corridor,y=y,width=width-x-corridor,depth=size,axis='y',door_side='west')])
+    # Extend the lateral node into the unused middle band when it can host
+    # real room wings. These wings occupy the band above/below the node only
+    # in a separate topology; do not overlap the existing front/rear lanes.
+    return halls,lanes
+
+
+def clustered_hub_topology(width, depth, corridor, center_fraction, split_fraction):
+    """Four independent wings served by a cross-shaped circulation hub."""
+    if min(width,depth,corridor)<=0:return None
+    x=width*center_fraction-corridor/2
+    y=depth*split_fraction-corridor/2
+    right=width-x-corridor
+    rear=depth-y-corridor
+    if min(x,y,right,rear)<3.2:return None
+    halls=[dict(x=x,y=0.,width=corridor,depth=depth),
+           dict(x=0.,y=y,width=x,depth=corridor),
+           dict(x=x+corridor,y=y,width=right,depth=corridor)]
+    lanes=[]
+    for xx,ww,side in ((0.,x,'east'),(x+corridor,right,'west')):
+        for yy,dd in ((0.,y),(y+corridor,rear)):
+            lanes.append(dict(x=xx,y=yy,width=ww,depth=dd,axis='y',door_side=side))
     return halls,lanes
 
 
