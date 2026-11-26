@@ -10,17 +10,10 @@ from ezdxf.addons import Importer
 from ezdxf.math import Matrix44
 
 from backend.design.general_models import VillaBrief
-from .clustered_multilevel import build_family_stack, draw_level
+from .clustered_multilevel import FAMILY_PROFILES as PROFILES, build_family_stack, draw_level
 from .export import export_dxf
 from .geometry import shape
 from .structural_grid import draw_grid
-
-PROFILES = (
-    ((1, 1, 1), "east", "BEDROOMS ON THREE SIDES"),
-    ((2, 1, 0), "east", "TWO BEDROOMS IN WEST WING"),
-    ((1, 1, 1), "south", "SOUTH MASTER TERRACE"),
-)
-
 
 def export_alternatives(brief, archive_path):
     candidates = [

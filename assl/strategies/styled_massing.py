@@ -161,6 +161,8 @@ def frame_windows(mesh, floors, thickness, height, accent):
 def geometry_fingerprint(proposal):
     geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
     geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
+    if "slab_openings_by_floor" in proposal:
+        geometry["slab_openings_by_floor"] = proposal["slab_openings_by_floor"]
     return hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
 
@@ -184,6 +186,8 @@ def build_styles(proposal, progress=None):
             rooms = proposal["rooms_by_floor"][i]
             landing_void = unary_union([net_shape(room,thickness) for room in rooms
                                         if i and room["kind"] == "stair"])
+            if "slab_openings_by_floor" in proposal:
+                landing_void = unary_union([Polygon(p) for p in proposal["slab_openings_by_floor"][i]])
             mesh.extrude(footprint.difference(landing_void),z-.18,z,"#a09a8e")
             terraces = unary_union([shape(room) for room in rooms if room["kind"] == "terrace"])
             mesh.extrude(terraces.difference(footprint),z-.18,z,"#a09a8e")

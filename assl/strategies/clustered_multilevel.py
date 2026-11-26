@@ -2,14 +2,14 @@
 from collections import defaultdict
 from copy import deepcopy
 from itertools import product
-from math import ceil, isfinite
+from math import ceil, isclose, isfinite
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import ezdxf
 from ezdxf import bbox
-from shapely.geometry import LineString, Polygon, box
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 from assl.openings_009 import cut, inward, leaf_swings
@@ -18,12 +18,45 @@ from .central_clustered import solve_central
 from .concept_massing import draw_concept_massing
 from .export import export_dxf
 from .geometry import entity, exposed_edges, net_shape, shape, shared_edges
-from .stairs import u_frame, u_treads
+from .stairs import u_frame, u_treads, validate_u_stair
 from .structural_grid import draw_grid, family_grid_profile, unsupported_grid_points, wall_axis_segments
 
 
 GROUND_WC = dict(id="ground-family-wc", name="حمام العائلة", kind="bathroom",
                  floor=0, count=1, min_area=6, min_side=1.8)
+
+FAMILY_PROFILES = (
+    ((1, 1, 1), "east", "BEDROOMS ON THREE SIDES"),
+    ((2, 1, 0), "east", "TWO BEDROOMS IN WEST WING"),
+    ((1, 1, 1), "south", "SOUTH MASTER TERRACE"),
+)
+UPPER_ROOM_KINDS = {
+    "stair-core": "stair", "upper-living": "living", "upper-family-wc": "bathroom",
+    "suite-vestibule": "corridor", "upper-master-wc": "bathroom", "upper-master": "master",
+    "family-terrace": "terrace", "master-terrace": "terrace",
+}
+
+
+def upper_connections(children):
+    return [
+        ("stair-core", "upper-living"), ("upper-living", "upper-family-wc"),
+        ("upper-living", "suite-vestibule"), ("suite-vestibule", "upper-master"),
+        ("suite-vestibule", "upper-master-wc"), ("upper-living", "family-terrace"),
+        ("upper-master", "master-terrace"),
+        *(("upper-living", f"child-{index}") for index in range(1, children + 1)),
+    ]
+
+
+def upper_stair_opening(stair, thickness):
+    """Cut the stairwell while preserving the upper landing at its doorway."""
+    point = u_frame(stair)
+    profile = stair["stair"]
+    left = thickness / 2
+    front = left + profile["entry_apron_m"]
+    right = profile["gross_width_m"] - left
+    back = profile["gross_depth_m"] - left
+    return [list(point(x, y)) for x, y in ((left,front), (right,front), (right,back), (left,back))]
+
 
 def upper_layout_options(stair, thickness, children, min_area, min_side, grid, terrace_side="east"):
     """Explore room groupings and wing dimensions in the stair's local frame."""
@@ -76,17 +109,10 @@ def upper_layout_options(stair, thickness, children, min_area, min_side, grid, t
                     continue
                 room_depth = max(min_side,min_area/(suite_split-thickness))+thickness
                 child_boxes.append((0,-depth-room_depth,suite_split,-depth))
-            links = [
-                ("stair-core","upper-living"), ("upper-living","upper-family-wc"),
-                ("upper-living","suite-vestibule"), ("suite-vestibule","upper-master"),
-                ("suite-vestibule","upper-master-wc"), ("upper-living","family-terrace"),
-                ("upper-master","master-terrace"),
-            ]
             for index, bounds in enumerate(child_boxes,1):
                 rid=f"child-{index}"
                 plan.append((rid,"bedroom",f"غرفة الأبناء {index}",bounds))
-                links.append(("upper-living",rid))
-            yield (west,east,south),plan,links
+            yield (west,east,south),plan,upper_connections(children)
 
 
 def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7, wing_group=None, terrace_side="east", progress=None):
@@ -194,6 +220,12 @@ def check_upper(brief, stair, program, links):
     for rid, kind, name, (x0, y0, x1, y1) in program:
         polygon = Polygon([frame(x0,y0), frame(x1,y0), frame(x1,y1), frame(x0,y1)])
         first.append(entity(rid, kind, polygon, name=name))
+    doors, footprint = inspect_upper(brief, first, links)
+    return first, doors, footprint
+
+
+def inspect_upper(brief, first, links):
+    """Check the given upper geometry and find compatible opening hosts."""
     t = brief.wall_thickness
     ids = {room["id"]: room for room in first}
     doors = []
@@ -252,7 +284,7 @@ def check_upper(brief, stair, program, links):
         if room["kind"] in ("bedroom","master") and not any(
             edge["length"]>=1.25 for edge in exposed_edges(room,[r for r in first if r["kind"]!="terrace"])):
             raise ValueError(f"No exposed facade for bedroom: {room['id']}")
-    return first,doors,first_footprint
+    return doors,first_footprint
 
 
 def level_windows(enclosed, doors, thickness):
@@ -275,6 +307,122 @@ def level_windows(enclosed, doors, thickness):
                 windows.append((window,points))
                 break
     return windows
+
+
+def family_proposals(brief, max_results, progress=None):
+    """Generate one default stack or two specified functional arrangements."""
+    proposals, failures = [], []
+    profiles = FAMILY_PROFILES[:2] if max_results == 2 else ((None, "east", None),)
+    for index, (group, terrace_side, _) in enumerate(profiles):
+        def report(percent, detail):
+            progress((100 * index + percent) // len(profiles), detail)
+
+        try:
+            stack = build_family_stack(
+                brief, wing_group=group, terrace_side=terrace_side, progress=report if progress else None
+            )
+            ground = stack["ground"]
+            upper = stack["first"]
+            enclosed = [room for room in upper if room["kind"] != "terrace"]
+            windows = [w for w, _ in level_windows(enclosed, stack["doors"], brief.wall_thickness)]
+            proposal = {
+                **ground,
+                "id": f'{ground["id"]}-upper-{"".join(map(str, stack["wing_group"]))}',
+                "rooms_by_floor": [ground["rooms_by_floor"][0], upper],
+                "halls_by_floor": [ground["halls_by_floor"][0], []],
+                "opening_model_009": [
+                    ground["opening_model_009"][0], {"doors": stack["doors"], "windows": windows},
+                ],
+                "upper_wing_group": stack["wing_group"],
+            }
+            proposals.append(check_family_proposal(stack["brief"], proposal))
+        except ValueError as error:
+            failures.append({"upper_wing_group": group, "reason": str(error)})
+    return {
+        "status": "CONCEPT_READY_FOR_ARCHITECT_REVIEW" if proposals else "REJECT_AND_REPLAN",
+        "requested_results": max_results,
+        "proposals": proposals,
+        "failures": failures,
+    }
+
+
+def check_family_proposal(brief, proposal):
+    """Validate the selected geometry itself and keep both floors in one model."""
+    rooms = proposal["rooms_by_floor"]
+    halls = proposal["halls_by_floor"]
+    openings = proposal["opening_model_009"]
+    if "first_floor" in proposal:
+        if len(rooms) != 1 or len(halls) != 1 or len(openings) != 1:
+            raise ValueError("MASSING_AMBIGUOUS_FIRST_FLOOR")
+        first = proposal["first_floor"]
+        rooms = [*rooms, first["rooms"]]
+        halls = [*halls, []]
+        openings = [*openings, {"doors": first["doors"], "windows": first["windows"]}]
+        proposal = {key: value for key, value in proposal.items() if key != "first_floor"}
+    if len(rooms) != 2 or len(halls) != 2 or len(openings) != 2 or halls[1]:
+        raise ValueError("MASSING_FAMILY_LEVELS_INVALID")
+
+    ground, upper = rooms
+    stair = next((room for room in ground if room["id"] == "stair-core"), None)
+    upper_stair = next((room for room in upper if room["id"] == "stair-core"), None)
+    if (stair is None or stair != upper_stair or stair.get("kind") != "stair"
+            or stair.get("stair", {}).get("layout") != "u-shaped"
+            or not validate_u_stair(stair, brief)):
+        raise ValueError("MASSING_STAIR_LEVELS_MISALIGNED")
+    profile = stair["stair"]
+    if (profile["risers_per_flight"] * 2 != profile["risers"]
+            or profile["intermediate_landing_count"] != 1
+            or not isclose(profile["riser_height_m"] * profile["risers"], brief.floor_height, abs_tol=1e-6)
+            or not isclose(profile["intermediate_landing_level_m"], brief.floor_height / 2, abs_tol=1e-6)):
+        raise ValueError("MASSING_STAIR_LANDING_LEVEL_INVALID")
+
+    kinds = {**UPPER_ROOM_KINDS, **{f"child-{i}": "bedroom" for i in range(1, 4)}}
+    if len(upper) != len(kinds) or {room["id"]: room["kind"] for room in upper} != kinds:
+        raise ValueError("MASSING_UPPER_PROGRAM_MISMATCH")
+    thickness = brief.wall_thickness
+    for room in upper:
+        polygon = shape(room)
+        if (not polygon.is_valid or polygon.is_empty or polygon.area <= 1e-6
+                or len(room["polygon"]) != 4):
+            raise ValueError("MASSING_UPPER_ROOM_GEOMETRY_INVALID")
+        x, y, right, top = polygon.bounds
+        if not all(isclose(room[key], value, abs_tol=1e-6, rel_tol=0)
+                   for key, value in zip(("x", "y", "width", "depth"), (x, y, right-x, top-y))):
+            raise ValueError("MASSING_UPPER_ROOM_BOUNDS_MISMATCH")
+        if room["kind"] == "bedroom":
+            clear = net_shape(room, thickness)
+            x, y, right, top = clear.bounds
+            if clear.area < 11.5 - 1e-6 or min(right-x, top-y) < 2.7 - 1e-6:
+                raise ValueError("MASSING_UPPER_BEDROOM_DIMENSIONS")
+
+    doors, _ = inspect_upper(brief, upper, upper_connections(3))
+    enclosed = [room for room in upper if room["kind"] != "terrace"]
+    windows = [w for w, _ in level_windows(enclosed, doors, thickness)]
+    if openings[1] != {"doors": doors, "windows": windows}:
+        raise ValueError("MASSING_UPPER_OPENINGS_MISMATCH")
+
+    grid = family_grid_profile(brief)
+    if grid is not None:
+        ground_axes = wall_axis_segments(ground+halls[0], openings[0]["doors"]+openings[0]["windows"], thickness)
+        if (unsupported_grid_points(grid, ground_axes)
+                or unsupported_grid_points(grid, wall_axis_segments(upper, doors+windows, thickness))
+                or unsupported_grid_points(grid, wall_axis_segments([stair], [], thickness), roof_only=True)):
+            raise ValueError("MASSING_FAMILY_GRID_MISMATCH")
+
+    opening = upper_stair_opening(stair, thickness)
+    cutout = Polygon(opening)
+    clear_stair = net_shape(stair, thickness)
+    landing = clear_stair.difference(cutout)
+    approach = Point(inward(doors[0], stair, .65)).buffer(.30)
+    if cutout.area <= 0 or not clear_stair.buffer(1e-6).covers(cutout) or not landing.buffer(1e-6).covers(approach):
+        raise ValueError("MASSING_STAIR_OPENING_OR_LANDING_INVALID")
+    slab_openings = [[], [opening]]
+    if proposal.get("slab_openings_by_floor", slab_openings) != slab_openings:
+        raise ValueError("MASSING_SLAB_OPENING_MISMATCH")
+    return {
+        **proposal, "rooms_by_floor": rooms, "halls_by_floor": halls,
+        "opening_model_009": openings, "slab_openings_by_floor": slab_openings,
+    }
 
 
 def draw_level(space, rooms, doors, thickness, offset):

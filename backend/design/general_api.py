@@ -92,8 +92,8 @@ def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,l
     from assl.strategies.clustered import solve_client_clustered
     try:
         if first_floor:
-            proposal = _family_stack_proposal(brief)
-            return {'status': 'CONCEPT_READY_FOR_ARCHITECT_REVIEW', 'proposals': [proposal]}
+            from assl.strategies.clustered_multilevel import family_proposals
+            return family_proposals(brief, max_results)
         return solve_client_clustered(brief, max_results=max_results)
     except ValueError as exc:
         raise HTTPException(422,str(exc))
@@ -108,8 +108,8 @@ def stream_clustered(brief: VillaBrief, first_floor: bool = False,
     def run(progress):
         progress(4, "التحقق من برنامج العميل")
         if first_floor:
-            return {"status":"CONCEPT_READY_FOR_ARCHITECT_REVIEW",
-                    "proposals":[_family_stack_proposal(brief, progress)]}
+            from assl.strategies.clustered_multilevel import family_proposals
+            return family_proposals(brief, max_results, progress)
         def report(phase, done, total, detail):
             start, span = {"composition": (10, 36), "alternatives": (10, 86)}.get(phase, (50, 46))
             progress(start + int(span*done/max(1,total)),detail)
@@ -117,18 +117,6 @@ def stream_clustered(brief: VillaBrief, first_floor: bool = False,
         return solve_client_clustered(brief, max_results=max_results, progress=report)
 
     return stream_work(run)
-
-
-def _family_stack_proposal(brief, progress=None):
-    from assl.strategies.clustered_multilevel import build_family_stack, level_windows
-
-    stack = build_family_stack(brief, progress=progress)
-    rooms = stack["first"]
-    windows = level_windows([r for r in rooms if r["kind"] != "terrace"],
-                            stack["doors"], brief.wall_thickness)
-    return {**stack["ground"], "first_floor": {
-        "rooms": rooms, "doors": stack["doors"], "windows": [w for w, _ in windows],
-    }}
 
 
 class EditorRevision(Strict):
@@ -182,30 +170,30 @@ def _checked_massing(proposal, progress=None):
         if progress:
             progress(7, "فحص المسقط والمراجعة المختارة")
         brief = VillaBrief.model_validate(proposal["brief_snapshot"])
-        if not 1 <= len(proposal["rooms_by_floor"]) <= 3 or sum(
-                len(floor) for floor in proposal["rooms_by_floor"]) > 120:
+        floors = proposal["rooms_by_floor"]
+        is_family_stack = "first_floor" in proposal or (
+            proposal.get("schema") == "assl-clustered-2" and len(floors) == 2
+        )
+        if not 1 <= len(floors) <= 3 or sum(map(len, floors)) > 120:
             raise ValueError("MASSING_MODEL_OUTSIDE_SUPPORTED_SCOPE")
-        quality = validate(brief, proposal)
+        ground = proposal
+        if is_family_stack:
+            ground = {
+                **proposal, "rooms_by_floor": floors[:1],
+                "halls_by_floor": proposal["halls_by_floor"][:1],
+                "opening_model_009": proposal["opening_model_009"][:1],
+            }
+        quality = validate(brief, ground)
         if (quality["status"] != "PASS"
-                or check_guest_wc_routes(proposal)["status"] == "FAIL"
-                or critique(brief, {**proposal, "validation_009": quality})["status"]
+                or check_guest_wc_routes(ground)["status"] == "FAIL"
+                or critique(brief, {**ground, "validation_009": quality})["status"]
                 != "ACCEPTABLE_DESIGN_INDICATORS"):
             raise ValueError("MASSING_BLOCKED: selected plan failed independent checks")
-        if "first_floor" in proposal:
-            if len(proposal["rooms_by_floor"]) != 1:
-                raise ValueError("MASSING_AMBIGUOUS_FIRST_FLOOR")
-            expected = _family_stack_proposal(brief)
-            fields = ("rooms_by_floor", "halls_by_floor", "opening_model_009", "first_floor")
-            for field in fields:
-                if json.loads(json.dumps(expected[field])) != proposal[field]:
-                    raise ValueError("MASSING_FIRST_FLOOR_CHANGED: regenerate the coordinated floors")
-            first = expected["first_floor"]
-            proposal = {
-                **expected, "rooms_by_floor": [*expected["rooms_by_floor"], first["rooms"]],
-                "halls_by_floor": [*expected["halls_by_floor"], []],
-                "opening_model_009": [*expected["opening_model_009"],
-                                      {"doors": first["doors"], "windows": first["windows"]}],
-            }
+        if is_family_stack:
+            from assl.strategies.clustered_multilevel import check_family_proposal
+            proposal = check_family_proposal(brief, proposal)
+        elif "slab_openings_by_floor" in proposal:
+            raise ValueError("MASSING_UNVERIFIED_SLAB_OPENINGS")
         return build_styles(proposal, progress)
     except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
         raise HTTPException(422, str(exc)) from exc

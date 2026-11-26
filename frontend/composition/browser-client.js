@@ -15,7 +15,7 @@
     generate: async (strategy, brief, onProgress, options = {}) => {
       if (strategy !== "clustered") throw Error("مسار التكوين غير متاح");
       const {streamRequest} = await import("./stream.mjs");
-      return streamRequest("/api/v3/concepts/clustered/stream?first_floor="+Boolean(options.firstFloor)+"&max_results="+(options.firstFloor ? 1 : 2), brief, onProgress);
+      return streamRequest("/api/v3/concepts/clustered/stream?first_floor="+Boolean(options.firstFloor)+"&max_results=2", brief, onProgress);
     },
     editor: request
   };
