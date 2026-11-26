@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>أنت المهندس — مساحة تعديل المسقط</title>
     <link rel="stylesheet" href="/composition/plan-editor.css" />
-    <script src="/composition/browser-client.js?v=8"></script><script type="module" src="/composition/plan-editor.js?v=6"></script>
+    <script src="/composition/browser-client.js?v=8"></script><script type="module" src="/composition/plan-editor.js?v=7"></script>
   </head>
   <body>
     <header class="top">
@@ -26,6 +26,7 @@
             accept=".json,application/json"
             hidden /></label
         ><button id="save" class="primary" disabled>حفظ نسخة معدّلة</button>
+        <button id="apply-edits" class="primary" disabled>تنفيذ التعديلات والانتقال للواجهات</button>
         <button id="approve-massing" class="secondary" hidden disabled>اختيار النسخة وتوليد الواجهات</button>
       </div>
     </header>
@@ -48,6 +49,9 @@
           <div id="brief-summary"></div>
           <table><thead><tr><th>الفراغ</th><th>المساحة الدنيا</th></tr></thead><tbody id="brief-rooms"></tbody></table>
         </details>
+        <label id="editor-floor-control" hidden>الدور المراد تحريره
+          <select id="editor-floor"><option value="0">الدور الأرضي</option><option value="1">الدور الأول</option></select>
+        </label>
         <section class="properties">
           <div class="section-title">
             <h2>الفراغ المحدد</h2>
@@ -111,8 +115,31 @@
               الموجب للخارج. اختر جدارًا برتقاليًا من المسقط؛ يتكيّف الفراغ
               المجاور معه.
             </p>
+            <div class="pair">
+              <button id="open-partition" class="secondary" type="button" disabled>إزالة الفاصل العائلي</button>
+              <button id="close-partition" class="secondary" type="button" disabled>إرجاع الجدار بباب</button>
+            </div>
           </div>
         </section>
+        <details id="activity-control">
+          <summary>إضافة أو حذف نشاط في الأرضي</summary>
+          <p class="subtle">حدد فراغًا عائليًا مضيفًا، ثم اضبط موضع النشاط الجديد ملاصقًا له.</p>
+          <div class="fields">
+            <label>اسم النشاط<input id="activity-name" maxlength="65" value="مستودع"></label>
+            <label>النوع<select id="activity-kind">
+              <option value="storage">مستودع</option><option value="office">مكتب</option><option value="laundry">غسيل</option>
+              <option value="bathroom">حمام</option><option value="living">صالة</option><option value="bedroom">غرفة نوم</option>
+            </select></label>
+            <label>س (م)<input id="activity-x" type="number" step=".05"></label>
+            <label>ص (م)<input id="activity-y" type="number" step=".05"></label>
+            <label>العرض (م)<input id="activity-width" type="number" min=".5" step=".05" value="2.4"></label>
+            <label>العمق (م)<input id="activity-depth" type="number" min=".5" step=".05" value="2.4"></label>
+          </div>
+          <div class="pair">
+            <button id="add-activity" type="button" class="secondary" disabled>إضافة النشاط</button>
+            <button id="delete-activity" type="button" class="secondary" disabled>حذف الفراغ المحدد</button>
+          </div>
+        </details>
         <section class="checks">
           <div class="section-title">
             <h2>مراجعة التعديل</h2>

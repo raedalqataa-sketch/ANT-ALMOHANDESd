@@ -169,7 +169,7 @@ def mesh_fingerprint(style):
 def geometry_fingerprint(proposal):
     geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
     geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
-    for key in ("slab_openings_by_floor", "upper_program"):
+    for key in ("slab_openings_by_floor", "upper_program", "transferred_suite"):
         if key in proposal:
             geometry[key] = proposal[key]
     return hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()

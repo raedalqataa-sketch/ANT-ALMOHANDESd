@@ -13,3 +13,9 @@
 .upper-program label{display:inline-flex;flex-wrap:wrap;align-items:center;gap:.45rem;margin:.4rem .3rem}
 .upper-program input,.upper-program select{max-width:100%;font:inherit;padding:.4rem}
 .upper-program input{width:6rem}
+
+#text-program textarea{display:block;width:100%;resize:vertical;font:inherit;padding:.75rem;border-radius:.65rem;border:1px solid #cddbd2}
+#fit-options,#program-review{padding:1rem;border:1px solid #b99d5b;border-radius:.6rem;background:#fbf6e7;margin:1rem 0}
+#fit-options p{margin:0}
+.actions button[aria-pressed=true]{outline:2px solid #375a4d;outline-offset:2px}
+.proposal-next:not([hidden]){display:flex;flex-wrap:wrap;gap:.5rem}

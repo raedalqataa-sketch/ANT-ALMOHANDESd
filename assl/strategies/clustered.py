@@ -9,6 +9,7 @@ from shapely.geometry import Polygon,box
 from shapely.affinity import translate,rotate
 from shapely.ops import unary_union
 from backend.design.general_engine import expanded_program
+from backend.design.general_models import VillaBrief
 from assl.guest_groups import prepare_program
 from .geometry import entity,shape,sized,chamfer
 from .stairs import make_stair, require_clustered_floor_height
@@ -129,11 +130,13 @@ def _compose(brief,variant=0):
     def turn(pt):
         theta=math.radians(angle);return [pt[0]*math.cos(theta)-pt[1]*math.sin(theta),pt[0]*math.sin(theta)+pt[1]*math.cos(theta)]
     rotated=[rotate(shape(r),angle,origin=(0,0)) for r in objects];bounds=unary_union(rotated).bounds
-    W=brief.plot_width-brief.setbacks.west-brief.setbacks.east-t
-    D=brief.plot_depth-brief.setbacks.south-brief.setbacks.north-t
-    bw,bd=bounds[2]-bounds[0],bounds[3]-bounds[1]
-    if bw>W+1e-6 or bd>D+1e-6:raise ValueError('CLUSTER_EXCEEDS_BUILDABLE_ENVELOPE')
-    dx=(W-bw)/2-bounds[0];dy=(D-bd)/2-bounds[1]
+    dx,dy=-bounds[0],-bounds[1]
+    if isinstance(brief,VillaBrief):
+        W=brief.plot_width-brief.setbacks.west-brief.setbacks.east-t
+        D=brief.plot_depth-brief.setbacks.south-brief.setbacks.north-t
+        bw,bd=bounds[2]-bounds[0],bounds[3]-bounds[1]
+        if bw>W+1e-6 or bd>D+1e-6:raise ValueError('CLUSTER_EXCEEDS_BUILDABLE_ENVELOPE')
+        dx=(W-bw)/2-bounds[0];dy=(D-bd)/2-bounds[1]
     for r,poly in zip(objects,rotated):
         meta={k:v for k,v in r.items() if k not in ('id','kind','x','y','width','depth','polygon')}
         if 'stair' in meta:meta['stair']['rotation_deg']=angle

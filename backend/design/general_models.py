@@ -1,6 +1,6 @@
 """Customer-owned villa brief; no adopted-family program is injected."""
 from typing import Literal,Annotated
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, model_validator
 
 
 class Strict(BaseModel):
@@ -240,6 +240,31 @@ class VillaBrief(VillaProgram):
     def valid_buildable_envelope(self):
         if self.plot_width-self.setbacks.west-self.setbacks.east<6 or self.plot_depth-self.setbacks.north-self.setbacks.south<6:
             raise ValueError('المساحة المتاحة بعد الارتدادات أصغر من نطاق البحث الحالي')
+        return self
+
+
+class CompositionPlotBrief(VillaBrief):
+    @model_validator(mode="after")
+    def valid_buildable_envelope(self):
+        # Intake reports the deficit before calling an engine that requires a usable envelope.
+        return self
+
+
+CompositionBrief = CompositionPlotBrief | VillaProgram
+ProposalBrief = VillaBrief | VillaProgram
+PROPOSAL_BRIEF = TypeAdapter(ProposalBrief)
+
+
+class TransferredSuite(Strict):
+    bedroom: SpaceRequest
+    bathroom: SpaceRequest
+
+    @model_validator(mode="after")
+    def validate_suite(self):
+        if (self.bedroom.kind not in ("bedroom", "master") or self.bathroom.kind != "bathroom"
+                or self.bathroom.ensuite_for != self.bedroom.id or self.bathroom.id == self.bedroom.id
+                or any(r.count != 1 or r.floor != 0 for r in (self.bedroom, self.bathroom))):
+            raise ValueError("VERTICAL_REQUIRES_ONE_LINKED_BEDROOM_SUITE")
         return self
 
 

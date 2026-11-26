@@ -8,7 +8,7 @@ from assl.strategies.guest_access import check_guest_wc_routes
 from assl.strategies.styled_massing import geometry_fingerprint
 from fastapi.responses import FileResponse
 from pydantic import BaseModel,ConfigDict,Field
-from .plan_editing import refresh_and_validate,apply_operations
+from .plan_editing import refresh_and_validate,apply_operations,room_areas
 from shapely.errors import ShapelyError
 
 router=APIRouter(prefix='/api/editor',tags=['manual-plan-editor'])
@@ -57,7 +57,8 @@ def _massing_ready(result):
     return (
         result['exportable']
         and 'first_floor' not in proposal
-        and len(proposal['rooms_by_floor']) == len(proposal['halls_by_floor']) == 1
+        and len(proposal['rooms_by_floor']) == len(proposal['halls_by_floor'])
+        and len(proposal['rooms_by_floor']) in (1, 2)
         and check_guest_wc_routes(proposal)['status'] != 'FAIL'
     )
 
@@ -98,18 +99,25 @@ def create_session(request:Create):
     # A bounded supported-schema import; all status flags are recomputed.
     if proposal.get('schema') not in ('assl-clustered-1','assl-clustered-2','assl-relational-1'):raise HTTPException(422,'UNSUPPORTED_EDITOR_SCHEMA')
     try:
-        from .general_models import VillaBrief
+        from .general_models import PROPOSAL_BRIEF
         from assl.strategies.clustered import _program
         from assl.strategies.geometry import shape
-        if 'first_floor' in proposal or len(proposal['rooms_by_floor'])!=1 or len(proposal['halls_by_floor'])!=1:raise ValueError('EDITOR_GROUND_FLOOR_ONLY')
+        brief = PROPOSAL_BRIEF.validate_python(proposal["brief_snapshot"])
+        if "first_floor" in proposal or len(proposal["rooms_by_floor"]) == 2:
+            if proposal["schema"] != "assl-clustered-2":
+                raise ValueError("EDITOR_UNSUPPORTED_MULTI_FLOOR")
+            from assl.strategies.clustered_multilevel import check_family_proposal
+            proposal = check_family_proposal(brief, proposal)
+        if len(proposal["rooms_by_floor"]) != len(proposal["halls_by_floor"]) or len(proposal["rooms_by_floor"]) not in (1, 2):
+            raise ValueError("EDITOR_UNSUPPORTED_MULTI_FLOOR")
         objects=proposal['rooms_by_floor'][0]+proposal['halls_by_floor'][0]
         if proposal['schema']=='assl-clustered-2':
             from assl.strategies.central_clustered import program
-            expected,_,_=program(VillaBrief.model_validate(proposal['brief_snapshot']))
+            expected,_,_=program(brief)
         elif proposal['schema']=='assl-relational-1':
             from assl.strategies.relational import program_view
-            expected,_,_=program_view(VillaBrief.model_validate(proposal['brief_snapshot']))
-        else:expected,_,_=_program(VillaBrief.model_validate(proposal['brief_snapshot']))
+            expected,_,_=program_view(brief)
+        else:expected,_,_=_program(brief)
         requests={r['id']:r for r in expected}
         if len(objects)>80 or len({r['id'] for r in objects})!=len(objects):raise ValueError('EDITOR_GEOMETRY_LIMIT')
         for r in objects:
@@ -147,8 +155,7 @@ def geometry_preview(sid:str,request:Edit):
         if session['version']!=request.base_version:raise HTTPException(409,'STALE_REVISION:reload-before-saving')
     try:
         p=apply_operations(session['baseline'],request.operations)
-        from assl.strategies.geometry import net_shape
-        return dict(proposal=p,verified=False,areas={r['id']:round(net_shape(r,p['brief_snapshot']['wall_thickness']).area,4) for r in p['rooms_by_floor'][0]+p['halls_by_floor'][0]})
+        return dict(proposal=p,verified=False,areas=room_areas(p))
     except (ValueError,KeyError,TypeError,IndexError,ShapelyError) as e:raise HTTPException(422,str(e))
 
 
@@ -187,8 +194,11 @@ def download(sid:str,version:int,ext:str):
             # Revalidate saved geometry; no trusted PASS flags or stale draw files.
             result=_evaluate(session['baseline'],revision['operations'])
             if not result['exportable']:raise HTTPException(422,dict(code='EXPORT_BLOCKED',issues=result['issues']))
-            from .general_models import VillaBrief
-            brief=VillaBrief.model_validate(session['baseline']['brief_snapshot']);p=result['proposal']
+            from .general_models import PROPOSAL_BRIEF, VillaBrief
+            p=result['proposal']
+            brief=PROPOSAL_BRIEF.validate_python(p['brief_snapshot'])
+            if len(p["rooms_by_floor"]) != 1 or (ext == "pdf" and not isinstance(brief, VillaBrief)):
+                raise HTTPException(422, 'EDITOR_DOCUMENT_FORMAT_UNAVAILABLE')
             if ext=='pdf':
                 from assl.strategies.presentation import pdf
                 pdf(brief,p,path)

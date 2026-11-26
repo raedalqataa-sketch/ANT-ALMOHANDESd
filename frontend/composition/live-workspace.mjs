@@ -13,7 +13,7 @@ export function createLiveWorkspace(ui,draw){
  ui.toggle.onclick=()=>{paused=!paused;ui.toggle.textContent=paused?'استئناف العرض الحي':'إيقاف العرض الحي';ui.toggle.setAttribute('aria-pressed',String(paused));if(paused){clearTimeout(timer);timer=null;}else paint();};
  return {
   start(brief){clearTimeout(timer);timer=null;latest=null;paused=false;active=true;lastPaint=0;
-   const t=brief.wall_thickness??.2,s=brief.setbacks||{};bounds=[-1,-1,brief.plot_width-s.west-s.east-t+2,brief.plot_depth-s.north-s.south-t+2];
+   const t=brief.wall_thickness??.2,s=brief.setbacks||{};bounds=brief.setbacks?[-1,-1,brief.plot_width-s.west-s.east-t+2,brief.plot_depth-s.north-s.south-t+2]:undefined;
    total=Array.isArray(brief.rooms)?brief.rooms.reduce((n,r)=>n+(r.count??1),0):0;ui.container.hidden=false;ui.canvas.replaceChildren();ui.canvas.textContent='تجهيز المحرك… سيظهر التكوين هنا عند بدء البحث.';
    ui.stage.textContent='تجهيز بيئة التوليد';ui.steps.setAttribute('data-phase','loading');ui.summary.textContent='يعرض أحد التكوينات الجاري بحثها؛ قد تتحرك الكتل أو تُستبدل أثناء البحث. هذه المعاينة لا تعني قبول التصميم.';ui.count.textContent=`0 / ${total} فراغات في التكوين المعروض`;accepted(0);ui.toggle.textContent='إيقاف العرض الحي';ui.toggle.setAttribute('aria-pressed','false');
   },

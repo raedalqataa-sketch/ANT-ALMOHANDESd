@@ -13,7 +13,7 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 from assl.openings_009 import cut, inward, leaf_swings
-from backend.design.general_models import UpperFloorProgram, VillaBrief, VillaProgram
+from backend.design.general_models import TransferredSuite, UpperFloorProgram, VillaBrief, VillaProgram
 from .central_clustered import solve_central
 from .concept_massing import draw_concept_massing
 from .export import export_dxf
@@ -58,7 +58,7 @@ def upper_stair_opening(stair, thickness):
     return [list(point(x, y)) for x, y in ((left,front), (right,front), (right,back), (left,back))]
 
 
-def upper_layout_options(stair, thickness, children, min_area, min_side, grid, terrace_side="east"):
+def upper_layout_options(stair, thickness, children, min_area, min_side, grid, terrace_side="east", transferred_suite=None):
     """Explore room groupings and wing dimensions in the stair's local frame."""
     stair_width = stair["stair"]["gross_width_m"]
     for west, east, south in product(range(3), range(3), range(2)):
@@ -72,6 +72,17 @@ def upper_layout_options(stair, thickness, children, min_area, min_side, grid, t
             suite_split = lounge_width-1.8
             master_width = 4.6
             suite_depth = 4.3
+            if transferred_suite:
+                bedroom, bathroom = transferred_suite.bedroom, transferred_suite.bathroom
+                bath_width = max(1.8, bathroom.min_side+thickness)
+                suite_split = lounge_width-bath_width
+                if suite_split <= thickness:
+                    continue
+                bath_depth = max(2.4, bathroom.min_side+thickness,
+                                 bathroom.min_area/(bath_width-thickness)+thickness)
+                suite_depth = max(1.9+bath_depth, bedroom.min_side+thickness)
+                master_width = max(master_width, bedroom.min_side+thickness,
+                                   bedroom.min_area/(suite_depth-thickness)+thickness)
             plan = [
                 ("upper-living", "living", "صالة العائلة والموزع", (0,-depth,lounge_width,0)),
                 ("upper-family-wc","bathroom","حمام الأبناء المشترك",(stair_width,0,lounge_width,2.75)),
@@ -115,7 +126,7 @@ def upper_layout_options(stair, thickness, children, min_area, min_side, grid, t
             yield (west,east,south),plan,upper_connections(children)
 
 
-def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7, wing_group=None, terrace_side="east", progress=None):
+def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_m=2.7, wing_group=None, terrace_side="east", progress=None, transferred_suite=None):
     """Generate and validate the ground floor before composing upper levels."""
     if terrace_side not in ("east", "south"):
         raise ValueError("Unsupported master terrace side")
@@ -154,7 +165,7 @@ def build_family_stack(brief, *, children=3, child_area_m2=11.5, child_min_side_
     failures = {}
     tested = accepted = 0
     feasible_groups = set()
-    for group, program, links in upper_layout_options(stair,brief.wall_thickness,children,child_area_m2,child_min_side_m,grid,terrace_side):
+    for group, program, links in upper_layout_options(stair,brief.wall_thickness,children,child_area_m2,child_min_side_m,grid,terrace_side,transferred_suite):
         tested += 1
         try:
             first,doors,footprint = check_upper(brief,stair,program,links)
@@ -309,7 +320,7 @@ def level_windows(enclosed, doors, thickness):
     return windows
 
 
-def family_proposals(brief, max_results, progress=None, *, upper_program=None):
+def family_proposals(brief, max_results, progress=None, *, upper_program=None, transferred_suite=None, terrace_side="east"):
     """Generate one default stack or two specified functional arrangements."""
     proposals, failures = [], []
     program = (upper_program or UpperFloorProgram()).model_dump()
@@ -323,7 +334,8 @@ def family_proposals(brief, max_results, progress=None, *, upper_program=None):
 
         try:
             stack = build_family_stack(
-                brief, **program, wing_group=group, progress=report if progress else None
+                brief, **program, wing_group=group, progress=report if progress else None,
+                transferred_suite=transferred_suite, terrace_side=terrace_side
             )
             ground = stack["ground"]
             upper = stack["first"]
@@ -340,6 +352,13 @@ def family_proposals(brief, max_results, progress=None, *, upper_program=None):
                 "upper_wing_group": stack["wing_group"],
                 "upper_program": program,
             }
+            if transferred_suite:
+                proposal["transferred_suite"] = transferred_suite.model_dump()
+                names = {"upper-master": transferred_suite.bedroom.name,
+                         "upper-master-wc": transferred_suite.bathroom.name}
+                for room in upper:
+                    if room["id"] in names:
+                        room["name"] = names[room["id"]]
             proposals.append(check_family_proposal(stack["brief"], proposal))
         except ValueError as error:
             failures.append({"upper_wing_group": group, "reason": str(error)})
@@ -404,13 +423,23 @@ def check_family_proposal(brief, proposal):
                     or min(right-x, top-y) < program.child_min_side_m - 1e-6):
                 raise ValueError("MASSING_UPPER_BEDROOM_DIMENSIONS")
 
+    if "transferred_suite" in proposal:
+        suite = TransferredSuite.model_validate(proposal["transferred_suite"])
+        by_id = {room["id"]: room for room in upper}
+        for request, room_id in ((suite.bedroom, "upper-master"), (suite.bathroom, "upper-master-wc")):
+            clear = net_shape(by_id[room_id], thickness)
+            if (by_id[room_id]["name"] != request.name or clear.is_empty
+                    or clear.area < request.min_area-1e-6
+                    or min(clear.bounds[2]-clear.bounds[0], clear.bounds[3]-clear.bounds[1]) < request.min_side-1e-6):
+                raise ValueError("VERTICAL_TRANSFER_REQUIREMENTS_NOT_MET")
+
     doors, _ = inspect_upper(brief, upper, upper_connections(program.children))
     enclosed = [room for room in upper if room["kind"] != "terrace"]
     windows = [w for w, _ in level_windows(enclosed, doors, thickness)]
     if openings[1] != {"doors": doors, "windows": windows}:
         raise ValueError("MASSING_UPPER_OPENINGS_MISMATCH")
 
-    grid = family_grid_profile(brief)
+    grid = family_grid_profile(brief) if isinstance(brief, VillaBrief) else None
     if grid is not None:
         ground_axes = wall_axis_segments(ground+halls[0], openings[0]["doors"]+openings[0]["windows"], thickness)
         if (unsupported_grid_points(grid, ground_axes)

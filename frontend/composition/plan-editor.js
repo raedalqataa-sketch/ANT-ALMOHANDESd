@@ -2,6 +2,7 @@ const $ = (id) => document.getElementById(id),
   NS = "http://www.w3.org/2000/svg";
 const ui = {
   sid: null,
+  floor: 0,
   version: 0,
   savedIdentity: null,
   savedMassingReady: false,
@@ -31,7 +32,7 @@ function canOpen() {
 }
 function objects() {
   return ui.model
-    ? [...ui.model.rooms_by_floor[0], ...ui.model.halls_by_floor[0]]
+    ? [...ui.model.rooms_by_floor[ui.floor], ...ui.model.halls_by_floor[ui.floor]]
     : [];
 }
 function selected() {
@@ -98,6 +99,12 @@ function friendly(s) {
     return "الدرج محمي. هذا التعديل يمس حدوده؛ اختر جدارًا آخر.";
   if (s.includes("UNSUPPORTED_EDITOR_SCHEMA"))
     return "هذه النسخة تدعم ملفات الاستراتيجية الثانية فقط. افتح ملف GROUND_FLOOR.json.";
+  if (s.includes("EDITOR_PARTITION_REQUIRES_FAMILY_CONNECTION"))
+    return "اختر فاصلًا مشتركًا بين فراغين عائليين، من دون مساس بباب خصوصية.";
+  if (s.includes("EDITOR_ACTIVITY_LINKED"))
+    return "الفراغ مرتبط بمجموعة ضيافة أو حمام خاص أو علاقة مطلوبة. راجع البرنامج قبل حذفه.";
+  if (s.includes("EDITOR_SELECT_FAMILY_HOST"))
+    return "اختر فراغًا عائليًا مضيفًا للنشاط الجديد.";
   if (s.includes("INVALID_EDITED_POLYGON"))
     return "ينتج عن الإزاحة مضلع غير صالح. جرّب مسافة أصغر.";
   return s;
@@ -123,6 +130,8 @@ function issueLabel(code) {
     CLIENT_NEAR: "مسار الوصول أطول من المسافة التي طلبها العميل",
     CLIENT_SEPARATE: "يتلامس فراغان طلب العميل فصلهما",
     FUNCTIONAL_DISTANCE: "المسافة بين الفراغات الوظيفية طويلة",
+    CENTRAL_UNSUPPORTED_PROGRAM: "نوع النشاط المضاف خارج نطاق الفحص الحالي",
+    MASSING_UPPER_BEDROOM_DIMENSIONS: "تعديل تجاوز الحد الأدنى لغرفة في الدور الأول",
     ROOM_PROPORTION_OR_EXCESS: "نسب الغرفة أو الزيادة في مساحتها تحتاج مراجعة",
   };
   const [key, ...rest] = code.split(":");
@@ -135,7 +144,7 @@ function controls() {
   const ready = !!ui.model && !ui.busy,
     r = selected(),
     editable = ready && r && r.kind !== "stair";
-  for (const id of ["save", "check", "zoom-in", "zoom-out", "fit"])
+  for (const id of ["save", "apply-edits", "check", "zoom-in", "zoom-out", "fit"])
     $(id).disabled = !ready;
   for (const el of document.querySelectorAll("[data-tool]"))
     el.disabled = !ready;
@@ -147,6 +156,12 @@ function controls() {
   for (const id of ["x", "y", "width", "depth", "apply-position", "apply-size"])
     $(id).disabled = !editable;
   $("apply-wall").disabled = !editable || ui.edge === null;
+  $("editor-floor").disabled = !ready;
+  $("activity-control").hidden = ui.floor !== 0;
+  for (const id of ["open-partition","close-partition"])
+    $(id).disabled = !editable || ui.edge === null || ui.floor !== 0;
+  $("add-activity").disabled = !editable || ui.floor !== 0;
+  $("delete-activity").disabled = !editable || !r?.request_id || ui.floor !== 0;
   $("file").disabled = ui.busy;
   $("sample").disabled = ui.busy;
   $("welcome-sample").disabled = ui.busy;
@@ -196,7 +211,8 @@ function verdict() {
   const downloads = $("downloads");
   downloads.replaceChildren();
   if (ui.sid && ui.checked && !dirty())
-    for (const ext of ui.exportable ? ["json", "pdf", "dxf"] : ["json"]) {
+    for (const ext of ui.exportable && ui.model.rooms_by_floor.length === 1
+      ? (ui.model.brief_snapshot.setbacks ? ["json","pdf","dxf"] : ["json","dxf"]) : ["json"]) {
       const a = document.createElement("a");
       a.href = `/api/editor/sessions/${ui.sid}/revisions/${ui.version}/files/${ext}`;
       a.textContent = "↓ " + ext.toUpperCase();
@@ -282,10 +298,11 @@ function draw() {
       fill: "url(#grid)",
     }),
   );
-  const b = ui.model.brief_snapshot,
-    W = b.plot_width - b.setbacks.west - b.setbacks.east - b.wall_thickness,
-    D = b.plot_depth - b.setbacks.north - b.setbacks.south - b.wall_thickness;
-  canvas.append(
+  const b = ui.model.brief_snapshot;
+  if (b.setbacks) {
+    const W = b.plot_width - b.setbacks.west - b.setbacks.east - b.wall_thickness;
+    const D = b.plot_depth - b.setbacks.north - b.setbacks.south - b.wall_thickness;
+    canvas.append(
     svg("rect", {
       x: 0,
       y: -D,
@@ -296,7 +313,8 @@ function draw() {
       "stroke-width": 0.025,
       "stroke-dasharray": ".2 .15",
     }),
-  );
+    );
+  }
   for (const r of objects()) {
     const color =
       r.kind === "corridor"
@@ -319,7 +337,7 @@ function draw() {
     });
     canvas.append(poly);
   }
-  for (const q of ui.model.furniture_by_floor?.[0] || [])
+  for (const q of ui.model.furniture_by_floor?.[ui.floor] || [])
     canvas.append(
       svg("rect", {
         x: q.x,
@@ -335,8 +353,8 @@ function draw() {
     );
   const ids = Object.fromEntries(objects().map((r) => [r.id, r]));
   for (const o of [
-    ...(ui.model.opening_model_009?.[0]?.doors || []),
-    ...(ui.model.opening_model_009?.[0]?.windows || []),
+    ...(ui.model.opening_model_009?.[ui.floor]?.doors || []),
+    ...(ui.model.opening_model_009?.[ui.floor]?.windows || []),
   ]) {
     const x = o.center[0],
       y = o.center[1],
@@ -377,7 +395,7 @@ function draw() {
         svg("line",{x1:hinge[0],y1:-hinge[1],x2:pts[18][0],y2:-pts[18][1],stroke:"#4e6653","stroke-width":.035,"pointer-events":"none"}));
     }
   }
-  for (const platform of ui.model.entrance_platforms || []) {
+  for (const platform of ui.floor === 0 ? ui.model.entrance_platforms || [] : []) {
     for(const polygon of [platform.landing_polygon,...platform.treads.map(q=>q.polygon)])
       canvas.append(svg("polygon",{points:polygon.map(q=>`${q[0]},${-q[1]}`).join(" "),fill:"#e9dfca",stroke:"#7c806c","stroke-width":.025,"pointer-events":"none"}));
     for(const riser of platform.riser_lines){const [a,c]=riser.points;canvas.append(svg("line",{x1:a[0],y1:-a[1],x2:c[0],y2:-c[1],stroke:"#646b5a","stroke-width":.025}));}
@@ -468,13 +486,21 @@ function showBrief() {
   const b=ui.model.brief_snapshot,faces={south:'جنوبي',north:'شمالي',east:'شرقي',west:'غربي'};
   $('client-brief').hidden=false;
   $('brief-summary').replaceChildren();
-  const lines=[`الأرض: ${b.plot_width} × ${b.plot_depth} م`, `المدخل: ${faces[b.entrance_face]} · الأدوار: ${b.floors}`,`الارتدادات: شمال ${b.setbacks.north}، جنوب ${b.setbacks.south}، شرق ${b.setbacks.east}، غرب ${b.setbacks.west} م`];
+  const lines=[`المدخل: ${faces[b.entrance_face]} · الأدوار: ${ui.model.rooms_by_floor.length}`];
+  if(b.setbacks)lines.push(`الأرض: ${b.plot_width} × ${b.plot_depth} م`,
+   `الارتدادات: شمال ${b.setbacks.north}، جنوب ${b.setbacks.south}، شرق ${b.setbacks.east}، غرب ${b.setbacks.west} م`);
+  else lines.push('دراسة من دون حدود أرض');
+
   for(const text of lines){const row=document.createElement('div');row.textContent=text;$('brief-summary').append(row)}
   $('brief-rooms').replaceChildren();
   for(const room of b.rooms){const row=document.createElement('tr'),name=document.createElement('td'),area=document.createElement('td');name.textContent=room.name+(room.count>1?` × ${room.count}`:'');area.textContent=`${room.min_area} م²`;row.append(name,area);$('brief-rooms').append(row)}
 }
 function setResult(data, { saved = false } = {}) {
+  const previousSession = ui.sid;
   ui.model = data.proposal;
+  if ((saved && previousSession !== data.session_id) || ui.floor >= ui.model.rooms_by_floor.length) ui.floor = 0;
+  $("editor-floor-control").hidden = ui.model.rooms_by_floor.length === 1;
+  $("editor-floor").value = ui.floor;
   ui.areas = data.areas || {};
   ui.checked = data.verified !== false;
   ui.exportable = !!data.exportable;
@@ -565,7 +591,7 @@ async function commit(op) {
   await busy(async () => {
     const previous = ui.ops,
       position = ui.cursor;
-    ui.ops = [...operations(), op];
+    ui.ops = [...operations(), {...op, floor:ui.floor}];
     ui.cursor = ui.ops.length;
     try {
       await geometry();
@@ -802,30 +828,47 @@ $("check").onclick = () =>
         : "ظهرت مشكلات؛ راجع الملاحظات الجانبية.",
     );
   }, "جارٍ فحص الحركة والأبواب والتأثيث…");
-$("save").onclick = () =>
-  busy(async () => {
-    const data = await request(`/api/editor/sessions/${ui.sid}/revisions`, {
-      base_version: ui.version,
-      operations: operations(),
+function openFacades(){
+  const handoff=crypto.randomUUID();
+  sessionStorage.setItem("ant-massing-editor:"+handoff,JSON.stringify({
+    editor_revision:{session_id:ui.sid,version:ui.version},
+    identity:ui.savedIdentity,
+  }));
+  location.href="/facades/?edit="+handoff;
+}
+function saveEdits(continueToFacades){
+  return busy(async()=>{
+    const data=await request(`/api/editor/sessions/${ui.sid}/revisions`,{
+      base_version:ui.version,operations:operations(),
     });
-    setResult(data, { saved: true });
-    if (data.exportable && !data.massing_ready) {
-      toast("حُفظ المقترح وأصبحت ملفاته متاحة. يجب اجتياز فحص مسار الضيافة قبل استعراض الكتل.");
-    } else {
-      toast(data.exportable
-        ? "حُفظ المقترح المعدّل، وأصبحت ملفاته متاحة."
-        : "حُفظت المسودة مع المشكلات. تصدير الرسم محجوب حتى تصحيحها.");
-    }
-  }, "جارٍ فحص النسخة وحفظها…");
-$("approve-massing").onclick = () =>
-  busy(() => {
-    const handoff = crypto.randomUUID();
-    sessionStorage.setItem("ant-massing-editor:" + handoff, JSON.stringify({
-      editor_revision: { session_id: ui.sid, version: ui.version },
-      identity: ui.savedIdentity,
-    }));
-    location.href = "/facades/?edit=" + handoff;
-  }, "جارٍ فتح النسخة المختارة…");
+    setResult(data,{saved:true});
+    if(continueToFacades&&data.massing_ready){openFacades();return;}
+    toast(data.massing_ready
+      ?"حُفظ المسقط المعدّل واجتاز فحوص الانتقال للواجهات."
+      :"حُفظت المسودة. راجع نتائج الفحص قبل الانتقال للواجهات.");
+  },"جارٍ فحص النسخة وحفظها…");
+}
+$("save").onclick=()=>saveEdits(false);
+$("apply-edits").onclick=()=>saveEdits(true);
+$("approve-massing").onclick=()=>busy(openFacades);
+$("editor-floor").onchange=()=>{
+ ui.floor=Number($("editor-floor").value);
+ ui.selected=null;ui.edge=null;ui.view=null;ui.initial=null;
+ draw();inspection();verdict();
+};
+$("open-partition").onclick=()=>commit({type:"partition",room_id:ui.selected,edge:ui.edge,open:true});
+$("close-partition").onclick=()=>commit({type:"partition",room_id:ui.selected,edge:ui.edge,open:false});
+$("delete-activity").onclick=()=>{
+ if(confirm("هل تريد حذف الفراغ المحدد من المسقط والبرنامج؟"))commit({type:"delete_space",room_id:ui.selected});
+};
+$("add-activity").onclick=()=>{
+ const host=selected();
+ if(!host)return;
+ const value=(id,fallback)=>$(id).value===""?fallback:$(id).valueAsNumber;
+ commit({type:"add_space",room_id:host.id,name:$("activity-name").value.trim(),kind:$("activity-kind").value,
+   x:value("activity-x",host.x+host.width),y:value("activity-y",host.y),
+   width:$("activity-width").valueAsNumber,depth:$("activity-depth").valueAsNumber});
+};
 $("file").onchange = async (e) => {
   try {
     const file = e.target.files[0];

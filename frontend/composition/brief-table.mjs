@@ -32,16 +32,19 @@ export function toTableState(brief){
  if((brief.guest_groups||[]).some(g=>!Array.isArray(g.rooms)||g.rooms.some(id=>!known.has(id))))throw Error('مجموعة الضيافة في الملف تشير إلى غرفة غير موجودة.');
  return {fields:Object.fromEntries(FIELDS.map(([key,,,,,fallback])=>[key,at(brief,key)??fallback])),rooms:brief.rooms.map(r=>({...clone(r),group_ids:(brief.guest_groups||[]).filter(g=>g.rooms.includes(r.id)).map(g=>g.id)})),groups:clone(brief.guest_groups||[])};
 }
-export function tableToBrief(base,state){
+const siteField=key=>key==="plot_width"||key==="plot_depth"||key.startsWith("setbacks.");
+export function tableToBrief(base,state,{withoutSite=false}={}){
  const b=clone(base);
+ if(withoutSite){delete b.plot_width;delete b.plot_depth;delete b.setbacks;}
  for(const[key,label,type,min,max]of FIELDS){
+  if(withoutSite&&siteField(key))continue;
   let v=state.fields[key];
   if(type==='number')v=number(v,label,min,max);
   else if(type==='text'){v=String(v??'').trim();if(!v||v.length>100)throw Error('أدخل اسم مشروع من 1 إلى 100 حرف.');}
   else {if(!Object.hasOwn(type,String(v)))throw Error('اختر قيمة صحيحة: '+label);if(key==='compact_core')v=String(v)==='true';else if(['floors','dining_seats'].includes(key))v=Number(v);}
   put(b,key,v);
  }
- if(b.setbacks.east+b.setbacks.west+b.wall_thickness>=b.plot_width||b.setbacks.north+b.setbacks.south+b.wall_thickness>=b.plot_depth)throw Error('الارتدادات لا تترك مساحة بناء داخل الأرض.');
+ if(!withoutSite&&(b.setbacks.east+b.setbacks.west+b.wall_thickness>=b.plot_width||b.setbacks.north+b.setbacks.south+b.wall_thickness>=b.plot_depth))throw Error('الارتدادات لا تترك مساحة بناء داخل الأرض.');
  if(!state.rooms.length||state.rooms.length>30)throw Error('أدخل من 1 إلى 30 صفًا للغرف.');
  const ids=new Set(),groupIds=new Set(state.groups.map(g=>g.id));
  if(groupIds.size!==state.groups.length||state.groups.length>12)throw Error('مجموعات الضيافة مكررة أو أكثر من الحد المتاح.');
@@ -70,7 +73,7 @@ export function tableToBrief(base,state){
 }
 const groupName=(group,index)=>({men:'ضيافة الرجال',women:'ضيافة النساء'}[group.id]||`ضيافة ${index+1}`);
 export function createBriefTable({container,document:doc=globalThis.document,onChange=()=>{}}){
- let base,state,fields={},roomRefs=[],groupRefs=[],controls=[],locked=false;
+ let base,state,fields={},roomRefs=[],groupRefs=[],controls=[],locked=false,withoutSite=false;
  const el=(tag,text)=>{const e=doc.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
  function input(value,label,options=null){const e=el(options?'select':'input');e.setAttribute('aria-label',label);if(options){const list={...options};if(value!==undefined&&!Object.hasOwn(list,String(value)))list[value]=String(value)+' — محفوظ';for(const[v,text]of Object.entries(list)){const o=el('option',text);o.value=v;e.append(o);}}else{e.type='text';e.inputMode='decimal';}e.value=String(value??'');e.disabled=locked;e.oninput=()=>onChange();e.onchange=()=>onChange();controls.push(e);return e;}
  function button(text,run){const e=el('button',text);e.type='button';e.className='secondary';e.disabled=locked;e.onclick=run;controls.push(e);return e;}
@@ -83,7 +86,7 @@ export function createBriefTable({container,document:doc=globalThis.document,onC
   const assumed=FIELDS.filter(([key])=>['floors','main_entry_width','entry_plinth_height_m'].includes(key)&&at(base,key)==null);
   if(assumed.length){const values=assumed.map(([key,label,type,,,fallback])=>label+': '+(typeof type==='object'?type[String(fallback)]:fallback));const notice=el('p','الملف المستورد لا يحدد بعض القيم؛ استُخدمت القيم الأصلية التالية: '+values.join('، ')+'. راجعها في الجدول قبل التوليد.');notice.className='brief-scope';notice.setAttribute('role','status');container.append(notice);}
   container.append(el('h3','بيانات الأرض والمداخل'));const land=table(['البيان','القيمة']);
-  for(const[key,label,type]of FIELDS){const e=input(state.fields[key],label,typeof type==='object'?type:null);if(type==='text')e.inputMode='text';e.setAttribute('data-field',key);fields[key]=e;row(land,[el('span',label),e]);}
+  for(const[key,label,type]of FIELDS){const e=input(state.fields[key],label,typeof type==='object'?type:null);if(type==='text')e.inputMode='text';e.setAttribute('data-field',key);fields[key]=e;row(land,[el('span',label),e]);if(siteField(key))e.closest('tr').hidden=withoutSite;}
   container.append(el('h3','مجموعات الضيافة ومداخلها'));
   const groups=table(['المجموعة','المدخل','تعديل']);
   state.groups.forEach((g,index)=>{const options={'':'مدخل مستقل لهذه المجموعة'};state.groups.forEach((other,j)=>{options[other.entry||other.id]='المدخل: '+groupName(other,j);});const e=input(g.entry??'',groupName(g,index)+' — المدخل',options);groupRefs.push({source:g,entry:e});row(groups,[el('span',groupName(g,index)),e,button('حذف المجموعة',()=>changeStructure(()=>{state.groups=state.groups.filter(q=>q.id!==g.id);state.rooms.forEach(r=>r.group_ids=r.group_ids.filter(id=>id!==g.id));}))]);});
@@ -101,5 +104,5 @@ export function createBriefTable({container,document:doc=globalThis.document,onC
   container.append(button('إضافة غرفة',()=>changeStructure(()=>{let n=1;while(state.rooms.some(r=>r.id==='room-'+n))n++;state.rooms.push({id:'room-'+n,name:'غرفة جديدة',kind:'bedroom',floor:0,count:1,min_area:16,min_side:3.5,capacity:1,ensuite_for:null,group_ids:[]});})));
   if(base.spatial_requirements?.length)container.append(el('p',`توجد ${base.spatial_requirements.length} علاقة مكانية مستوردة؛ ستُرسل كاملة مع البرنامج. إدارة العلاقات الإضافية من الملف المستورد.`));
  }
- return {load(brief){const next=toTableState(brief);base=clone(brief);state=next;render();onChange();},read(){if(!base)throw Error('انتظر تحميل برنامج العميل.');return tableToBrief(base,raw());},setDisabled(value){locked=value;controls.forEach(e=>e.disabled=value);container.setAttribute('aria-busy',String(value));}};
+ return {load(brief){const next=toTableState(brief);base=clone(brief);state=next;render();onChange();},read(){if(!base)throw Error('انتظر تحميل برنامج العميل.');return tableToBrief(base,raw(),{withoutSite});},setWithoutSite(value){withoutSite=value;for(const[key,e]of Object.entries(fields))if(siteField(key))e.closest("tr").hidden=value;onChange();},setDisabled(value){locked=value;controls.forEach(e=>e.disabled=value);container.setAttribute('aria-busy',String(value));}};
 }

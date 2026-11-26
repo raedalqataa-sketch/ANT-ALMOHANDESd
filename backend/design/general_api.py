@@ -10,7 +10,7 @@ from urllib.error import URLError
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import Field, model_validator
 from typing import Annotated, Literal
-from .general_models import UpperFloorProgram, VillaBrief, Strict, SpaceRequest
+from .general_models import CompositionBrief, PROPOSAL_BRIEF, UpperFloorProgram, VillaBrief, Strict, SpaceRequest
 from .general_engine import generate_general
 
 router = APIRouter(prefix='/api/v3', tags=['general-villa-generator'])
@@ -85,40 +85,73 @@ def design(brief: VillaBrief):
         raise HTTPException(422, str(exc))
 
 
-@router.post('/concepts/clustered')
-def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=2),
-                       first_floor: bool = False,
-                       upper_program: Annotated[UpperFloorProgram, Depends()] = None):
-    """Opt-in experimental polygon composition; no provider or deployment call."""
+def _composition_result(brief, max_results, first_floor, upper_program, fit_action, progress=None):
     from assl.strategies.clustered import solve_client_clustered
+    from assl.strategies.clustered_multilevel import family_proposals
+    from .composition_recovery import attach_fit_evidence, recover
+
+    if isinstance(brief, VillaBrief):
+        width = brief.plot_width-brief.setbacks.east-brief.setbacks.west
+        depth = brief.plot_depth-brief.setbacks.north-brief.setbacks.south
+        if min(width,depth) < 6:
+            return attach_fit_evidence({
+                "status":"REJECT_AND_REPLAN", "requested_results":max_results, "proposals":[],
+                "failures":[{"reason":"BUILDABLE_ENVELOPE_BELOW_SEARCH_SCOPE"}],
+            }, brief)
+    if fit_action:
+        if not isinstance(brief, VillaBrief):
+            raise ValueError("RECOVERY_REQUIRES_SITE")
+        return recover(brief, fit_action, max_results, upper_program=upper_program,
+                       first_floor=first_floor, progress=progress)
+
+    def report(phase, done, total, detail):
+        start, span = {"composition": (10, 36), "alternatives": (10, 86)}.get(phase, (50, 46))
+        progress(start + int(span*done/max(1,total)),detail)
+
+    result = (family_proposals(brief, max_results, progress, upper_program=upper_program) if first_floor
+              else solve_client_clustered(brief, max_results=max_results, progress=report if progress else None))
+    if isinstance(brief, VillaBrief):
+        return attach_fit_evidence(result, brief)
+    return {**result, "site_status":"SITE_NOT_ASSESSED"}
+
+
+@router.post('/concepts/clustered')
+def clustered_concepts(brief: CompositionBrief, max_results:int=Query(default=1,ge=1,le=2),
+                       first_floor: bool = False,
+                       upper_program: Annotated[UpperFloorProgram, Depends()] = None,
+                       fit_action: Literal["adapt", "vertical"] | None = None):
     try:
-        if first_floor:
-            from assl.strategies.clustered_multilevel import family_proposals
-            return family_proposals(brief, max_results, upper_program=upper_program)
-        return solve_client_clustered(brief, max_results=max_results)
+        return _composition_result(brief, max_results, first_floor, upper_program, fit_action)
     except ValueError as exc:
-        raise HTTPException(422,str(exc))
+        raise HTTPException(422, str(exc)) from exc
 
 
 @router.post('/concepts/clustered/stream')
-def stream_clustered(brief: VillaBrief, first_floor: bool = False,
+def stream_clustered(brief: CompositionBrief, first_floor: bool = False,
                      max_results: int = Query(default=1, ge=1, le=2),
-                     upper_program: Annotated[UpperFloorProgram, Depends()] = None):
+                     upper_program: Annotated[UpperFloorProgram, Depends()] = None,
+                     fit_action: Literal["adapt", "vertical"] | None = None):
     from .progress_stream import stream_work
-    from assl.strategies.clustered import solve_client_clustered
 
     def run(progress):
         progress(4, "التحقق من برنامج العميل")
-        if first_floor:
-            from assl.strategies.clustered_multilevel import family_proposals
-            return family_proposals(brief, max_results, progress, upper_program=upper_program)
-        def report(phase, done, total, detail):
-            start, span = {"composition": (10, 36), "alternatives": (10, 86)}.get(phase, (50, 46))
-            progress(start + int(span*done/max(1,total)),detail)
-
-        return solve_client_clustered(brief, max_results=max_results, progress=report)
-
+        return _composition_result(brief, max_results, first_floor, upper_program, fit_action, progress)
     return stream_work(run)
+
+
+class CompositionDescription(Strict):
+    brief: CompositionBrief
+    text: str = Field(min_length=3, max_length=4000)
+
+
+@router.post('/concepts/program-draft')
+def composition_program_draft(request: CompositionDescription):
+    from .composition_text import draft_from_text
+
+    try:
+        return draft_from_text(request.brief, request.text)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 class EditorRevision(Strict):
@@ -213,7 +246,7 @@ def _checked_plan(proposal, progress=None):
     try:
         if progress:
             progress(7, "فحص المسقط والمراجعة المختارة")
-        brief = VillaBrief.model_validate(proposal["brief_snapshot"])
+        brief = PROPOSAL_BRIEF.validate_python(proposal["brief_snapshot"])
         floors = proposal["rooms_by_floor"]
         is_family_stack = "first_floor" in proposal or (
             proposal.get("schema") == "assl-clustered-2" and len(floors) == 2

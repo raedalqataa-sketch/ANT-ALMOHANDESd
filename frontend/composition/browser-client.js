@@ -18,6 +18,7 @@
       const params = new URLSearchParams({
         first_floor: Boolean(options.firstFloor), max_results: 2, ...options.upperProgram
       });
+      if (options.fitAction) params.set("fit_action", options.fitAction);
       return streamRequest("/api/v3/concepts/clustered/stream?" + params, brief, onProgress);
     },
     editor: request
