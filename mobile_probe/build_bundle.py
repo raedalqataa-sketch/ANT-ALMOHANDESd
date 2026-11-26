@@ -37,10 +37,18 @@ def pack_engine(out):
         z.writestr('backend/__init__.py','')
 
 
+def build(out, extra_pure=None, extra_runtime=()):
+    runtime=out/'runtime';wheels=out/'wheels'
+    _build(out, runtime, wheels, {**PURE, **(extra_pure or {})}, [*PACKAGES, *extra_runtime])
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,default=ROOT/'mobile_probe/build')
-    args=parser.parse_args();out=args.output;runtime=out/'runtime';wheels=out/'wheels'
+    build(parser.parse_args().output)
+
+
+def _build(out, runtime, wheels, pure, runtime_packages):
     runtime.mkdir(parents=True,exist_ok=True);wheels.mkdir(exist_ok=True)
     fetch(BASE+'pyodide-lock.json',runtime/'pyodide-lock.json')
     lock=json.loads((runtime/'pyodide-lock.json').read_text());packages=lock['packages'];resolved=set()
@@ -49,13 +57,13 @@ def main():
         if name in resolved:return
         resolved.add(name)
         for dep in packages[name]['depends']:resolve(dep)
-    for name in PACKAGES:resolve(name)
+    for name in runtime_packages:resolve(name)
     tasks=[(BASE+n,runtime/n,None) for n in ['pyodide.js','pyodide.asm.js','pyodide.asm.wasm','python_stdlib.zip']]
     tasks.extend([('https://raw.githubusercontent.com/pyodide/pyodide/0.29.3/LICENSE',out/'PYODIDE-LICENSE',None),('https://raw.githubusercontent.com/python/cpython/v3.13.2/LICENSE',out/'CPYTHON-LICENSE',None)])
     for name in sorted(resolved):
         p=packages[name];tasks.append((BASE+p['file_name'],runtime/p['file_name'],p['sha256']))
     pure_versions={}
-    for package,version in PURE.items():
+    for package,version in pure.items():
         meta=json.load(urllib.request.urlopen(f'https://pypi.org/pypi/{package}/{version}/json',timeout=45))
         f=next(f for f in meta['urls'] if f['filename'].endswith('none-any.whl'))
         tasks.append((f['url'],wheels/f['filename'],f['digests']['sha256']));pure_versions[package]=version

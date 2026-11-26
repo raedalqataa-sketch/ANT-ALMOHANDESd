@@ -1,0 +1,51 @@
+name: Customer journey in the browser
+on:
+  push:
+    branches: [work/editor-to-massing]
+    paths:
+      - 'browser_customer/**'
+      - 'mobile_probe/**'
+      - 'lovable_integration/browser_dependencies.py'
+      - 'frontend/**'
+      - 'backend/**'
+      - 'assl/**'
+      - 'requirements/**'
+      - 'constitution/**'
+      - 'quality_review/**'
+      - '.github/workflows/customer-browser-build.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: customer-browser-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the static customer site
+        run: python -m browser_customer.build --output "site/${GITHUB_REPOSITORY#*/}" --prefix "/${GITHUB_REPOSITORY#*/}"
+      - name: Verify local calculation in Chromium
+        run: |
+          python -m pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+          python -m http.server 8000 --directory site &
+          server=$!
+          trap 'kill "$server"' EXIT
+          for attempt in {1..20}; do
+            if curl --silent --fail "http://127.0.0.1:8000/${GITHUB_REPOSITORY#*/}/" > /dev/null; then break; fi
+            sleep 1
+          done
+          python -m browser_customer.smoke "http://127.0.0.1:8000/${GITHUB_REPOSITORY#*/}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ant-customer-browser
+          path: site/${{ github.event.repository.name }}
+          include-hidden-files: true

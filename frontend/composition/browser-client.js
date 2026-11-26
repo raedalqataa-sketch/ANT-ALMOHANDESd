@@ -11,7 +11,7 @@
     return data;
   }
   window.AntComposition = {
-    prepare: async () => true,
+    prepare: async () => window.AntBrowserEngine?.prepare() ?? true,
     generate: async (strategy, brief, onProgress, options = {}) => {
       if (strategy !== "clustered") throw Error("مسار التكوين غير متاح");
       const {streamRequest} = await import("./stream.mjs");

@@ -155,6 +155,7 @@ async function load() {
       list.append(button);
     }
     select(active);
+    get("save").hidden = Boolean(window.AntBrowserEngine);
     get("save").onclick=()=>{
       try {
         choiceStorage.setItem(choiceKey,active.id);
