@@ -353,7 +353,7 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
             i,l=min(eligible,key=lambda p:p[1]['depth'])
             core_depth=4.6 if l['depth']>=7.0 else l['depth']
             retreat=1.6 if brief.automatic_features.roof_annex else 0
-            core_width=min(l['width'],3.0) if brief.compact_core else l['width']
+            core_width=min(l['width'],3.0) if (brief.compact_core or architecture_first) else l['width']
             core_x=l['x']+l['width']-core_width if l['door_side']=='east' else l['x']
             stair=box(core_x,l['y']+l['depth']-core_depth-retreat,core_width,core_depth,id='stair',kind='stair',name='درج مشترك',door_side=l['door_side'])
             if core_position=='front' and not brief.automatic_features.roof_annex:
