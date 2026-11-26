@@ -7,10 +7,10 @@ import json
 import os
 from urllib.request import Request, urlopen
 from urllib.error import URLError
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import Field, model_validator
-from typing import Literal
-from .general_models import VillaBrief, Strict, SpaceRequest
+from typing import Annotated, Literal
+from .general_models import UpperFloorProgram, VillaBrief, Strict, SpaceRequest
 from .general_engine import generate_general
 
 router = APIRouter(prefix='/api/v3', tags=['general-villa-generator'])
@@ -87,13 +87,14 @@ def design(brief: VillaBrief):
 
 @router.post('/concepts/clustered')
 def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,le=2),
-                       first_floor: bool = False):
+                       first_floor: bool = False,
+                       upper_program: Annotated[UpperFloorProgram, Depends()] = None):
     """Opt-in experimental polygon composition; no provider or deployment call."""
     from assl.strategies.clustered import solve_client_clustered
     try:
         if first_floor:
             from assl.strategies.clustered_multilevel import family_proposals
-            return family_proposals(brief, max_results)
+            return family_proposals(brief, max_results, upper_program=upper_program)
         return solve_client_clustered(brief, max_results=max_results)
     except ValueError as exc:
         raise HTTPException(422,str(exc))
@@ -101,7 +102,8 @@ def clustered_concepts(brief: VillaBrief, max_results:int=Query(default=1,ge=1,l
 
 @router.post('/concepts/clustered/stream')
 def stream_clustered(brief: VillaBrief, first_floor: bool = False,
-                     max_results: int = Query(default=1, ge=1, le=2)):
+                     max_results: int = Query(default=1, ge=1, le=2),
+                     upper_program: Annotated[UpperFloorProgram, Depends()] = None):
     from .progress_stream import stream_work
     from assl.strategies.clustered import solve_client_clustered
 
@@ -109,7 +111,7 @@ def stream_clustered(brief: VillaBrief, first_floor: bool = False,
         progress(4, "التحقق من برنامج العميل")
         if first_floor:
             from assl.strategies.clustered_multilevel import family_proposals
-            return family_proposals(brief, max_results, progress)
+            return family_proposals(brief, max_results, progress, upper_program=upper_program)
         def report(phase, done, total, detail):
             start, span = {"composition": (10, 36), "alternatives": (10, 86)}.get(phase, (50, 46))
             progress(start + int(span*done/max(1,total)),detail)

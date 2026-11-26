@@ -1,30 +1,48 @@
 import json
+import os
 from copy import deepcopy
 from pathlib import Path
 
 import pytest
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 from shapely.geometry import Point, Polygon
 from shapely.ops import unary_union
 
 from assl.openings_009 import inward
+from assl.strategies.geometry import net_shape
 from assl.strategies.styled_massing import geometry_fingerprint
-from backend.design.general_api import MassingRequest, clustered_concepts, concept_massing
-from backend.design.general_models import VillaBrief
+from backend.design.general_api import MassingRequest, concept_massing
+from backend.main import app
 
 
-@pytest.fixture(scope="module")
-def proposals():
+CASES = (
+    ({"children": 2, "child_area_m2": 11.0, "child_min_side_m": 2.6}, [[1, 1, 0], [0, 1, 1]]),
+    ({"children": 3, "child_area_m2": 11.5, "child_min_side_m": 2.7}, [[1, 1, 1], [2, 1, 0]]),
+)
+
+
+@pytest.fixture(scope="module", params=CASES, ids=["two-bedrooms", "three-bedrooms"])
+def proposals(request):
+    program, groups = request.param
     reference = Path(__file__).resolve().parents[1] / "frontend/composition/reference-brief.json"
-    brief = VillaBrief.model_validate_json(reference.read_bytes())
-    response = clustered_concepts(brief, first_floor=True, max_results=2)
+    with TestClient(app) as client:
+        result = client.post(
+            "/api/v3/concepts/clustered/stream",
+            params={"first_floor": "true", "max_results": 2, **program},
+            json=json.loads(reference.read_text()),
+        )
+    assert result.status_code == 200
+    response = json.loads(result.text.splitlines()[-1])["result"]
     assert response["requested_results"] == 2
     assert not response["failures"]
-    return json.loads(json.dumps(response["proposals"]))
+    plans = response["proposals"]
+    assert [p["upper_wing_group"] for p in plans] == groups
+    assert all(p["upper_program"] == program for p in plans)
+    return plans
 
 
 def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(proposals, monkeypatch):
-    assert [p["upper_wing_group"] for p in proposals] == [[1, 1, 1], [2, 1, 0]]
     assert proposals[0]["rooms_by_floor"][0] == proposals[1]["rooms_by_floor"][0]
     assert proposals[0]["rooms_by_floor"][1] != proposals[1]["rooms_by_floor"][1]
     assert len({geometry_fingerprint(p) for p in proposals}) == 2
@@ -33,12 +51,28 @@ def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(propo
         pytest.fail("Massing must inspect the selected model without generating a new plan")
 
     monkeypatch.setattr("assl.strategies.clustered_multilevel.build_family_stack", reject_regeneration)
+    models = []
+    verification = []
     for proposal in proposals:
         model = concept_massing(MassingRequest(proposal=proposal))
         assert model["floors"] == 2 and len(model["styles"]) == 4
         assert model["revision"] == geometry_fingerprint(proposal)
         assert model["proposal_id"] == proposal["id"]
         assert "first_floor" not in proposal
+        program = proposal["upper_program"]
+        thickness = proposal["brief_snapshot"]["wall_thickness"]
+        rooms = [r for r in proposal["rooms_by_floor"][1] if r["kind"] == "bedroom"]
+        assert len(rooms) == program["children"]
+        measures = []
+        for room in rooms:
+            clear = net_shape(room, thickness)
+            west, south, east, north = clear.bounds
+            shortest = min(east-west, north-south)
+            assert clear.area >= program["child_area_m2"] - 1e-6
+            assert shortest >= program["child_min_side_m"] - 1e-6
+            measures.append({"room_id": room["id"], "area_m2": clear.area, "shortest_side_m": shortest})
+        verification.append({"proposal_id": proposal["id"], "revision": model["revision"], "bedrooms": measures})
+        models.append(model)
         [slab_opening] = proposal["slab_openings_by_floor"][1]
         stair = next(room for room in proposal["rooms_by_floor"][1] if room["id"] == "stair-core")
         [door] = [d for d in proposal["opening_model_009"][1]["doors"] if "stair-core" in d["connects"]]
@@ -52,6 +86,15 @@ def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(propo
             assert slab.buffer(0.0001).covers(landing)
             assert slab.intersection(Polygon(slab_opening).buffer(-0.0001)).area < 1e-6
 
+    if evidence := os.getenv("ANT_FAMILY_EVIDENCE_DIR"):
+        folder = Path(evidence) / f'{len(rooms)}-bedrooms'
+        folder.mkdir(parents=True, exist_ok=True)
+        for filename, data in (
+            ("floor-plans.json", proposals), ("massing.json", models),
+            ("verification.json", {"commit": os.getenv("GITHUB_SHA"), "program": program, "alternatives": verification}),
+        ):
+            (folder / filename).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
 
 def test_selected_stack_checks_and_legacy_plan(proposals):
     plan = proposals[1]
@@ -62,6 +105,20 @@ def test_selected_stack_checks_and_legacy_plan(proposals):
     legacy.pop("slab_openings_by_floor")
     legacy["first_floor"] = {"rooms": upper, **openings}
     assert concept_massing(MassingRequest(proposal=legacy))["revision"] == geometry_fingerprint(plan)
+    if plan["upper_program"]["children"] == 3:
+        legacy.pop("upper_program")
+        old_plan = {key: value for key, value in plan.items() if key != "upper_program"}
+        assert concept_massing(MassingRequest(proposal=legacy))["revision"] == geometry_fingerprint(old_plan)
+
+    invalid = deepcopy(plan)
+    invalid["upper_program"]["child_area_m2"] = 70
+    with pytest.raises(HTTPException, match="MASSING_UPPER_BEDROOM_DIMENSIONS"):
+        concept_massing(MassingRequest(proposal=invalid))
+
+    invalid = deepcopy(plan)
+    invalid["upper_program"]["children"] = 5 - plan["upper_program"]["children"]
+    with pytest.raises(HTTPException, match="MASSING_UPPER_PROGRAM_MISMATCH"):
+        concept_massing(MassingRequest(proposal=invalid))
 
     invalid = deepcopy(plan)
     invalid["rooms_by_floor"][1][0]["polygon"][0][0] += .2

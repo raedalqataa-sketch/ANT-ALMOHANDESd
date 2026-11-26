@@ -243,6 +243,13 @@ class VillaBrief(VillaProgram):
         return self
 
 
+class UpperFloorProgram(Strict):
+    """User-selected clear dimensions for the family stack's children’s rooms."""
+    children: int = Field(default=3, ge=2, le=3)
+    child_area_m2: float = Field(default=11.5, ge=9, le=100)
+    child_min_side_m: float = Field(default=2.7, ge=2.5, le=10)
+
+
 def from_reference_program(rows):
     """Explicit migration of the reference repo's editable program contract.
 

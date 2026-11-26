@@ -13,7 +13,7 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.ops import unary_union
 
 from assl.openings_009 import cut, inward, leaf_swings
-from backend.design.general_models import VillaBrief, VillaProgram
+from backend.design.general_models import UpperFloorProgram, VillaBrief, VillaProgram
 from .central_clustered import solve_central
 from .concept_massing import draw_concept_massing
 from .export import export_dxf
@@ -309,17 +309,21 @@ def level_windows(enclosed, doors, thickness):
     return windows
 
 
-def family_proposals(brief, max_results, progress=None):
+def family_proposals(brief, max_results, progress=None, *, upper_program=None):
     """Generate one default stack or two specified functional arrangements."""
     proposals, failures = [], []
-    profiles = FAMILY_PROFILES[:2] if max_results == 2 else ((None, "east", None),)
-    for index, (group, terrace_side, _) in enumerate(profiles):
+    program = (upper_program or UpperFloorProgram()).model_dump()
+    groups = ((1, 1, 0), (0, 1, 1)) if program["children"] == 2 else (
+        FAMILY_PROFILES[0][0], FAMILY_PROFILES[1][0],
+    )
+    profiles = groups if max_results == 2 else (None,)
+    for index, group in enumerate(profiles):
         def report(percent, detail):
             progress((100 * index + percent) // len(profiles), detail)
 
         try:
             stack = build_family_stack(
-                brief, wing_group=group, terrace_side=terrace_side, progress=report if progress else None
+                brief, **program, wing_group=group, progress=report if progress else None
             )
             ground = stack["ground"]
             upper = stack["first"]
@@ -334,6 +338,7 @@ def family_proposals(brief, max_results, progress=None):
                     ground["opening_model_009"][0], {"doors": stack["doors"], "windows": windows},
                 ],
                 "upper_wing_group": stack["wing_group"],
+                "upper_program": program,
             }
             proposals.append(check_family_proposal(stack["brief"], proposal))
         except ValueError as error:
@@ -376,7 +381,8 @@ def check_family_proposal(brief, proposal):
             or not isclose(profile["intermediate_landing_level_m"], brief.floor_height / 2, abs_tol=1e-6)):
         raise ValueError("MASSING_STAIR_LANDING_LEVEL_INVALID")
 
-    kinds = {**UPPER_ROOM_KINDS, **{f"child-{i}": "bedroom" for i in range(1, 4)}}
+    program = UpperFloorProgram.model_validate(proposal.get("upper_program", {}))
+    kinds = {**UPPER_ROOM_KINDS, **{f"child-{i}": "bedroom" for i in range(1, program.children + 1)}}
     if len(upper) != len(kinds) or {room["id"]: room["kind"] for room in upper} != kinds:
         raise ValueError("MASSING_UPPER_PROGRAM_MISMATCH")
     thickness = brief.wall_thickness
@@ -391,11 +397,14 @@ def check_family_proposal(brief, proposal):
             raise ValueError("MASSING_UPPER_ROOM_BOUNDS_MISMATCH")
         if room["kind"] == "bedroom":
             clear = net_shape(room, thickness)
+            if clear.is_empty:
+                raise ValueError("MASSING_UPPER_BEDROOM_DIMENSIONS")
             x, y, right, top = clear.bounds
-            if clear.area < 11.5 - 1e-6 or min(right-x, top-y) < 2.7 - 1e-6:
+            if (clear.area < program.child_area_m2 - 1e-6
+                    or min(right-x, top-y) < program.child_min_side_m - 1e-6):
                 raise ValueError("MASSING_UPPER_BEDROOM_DIMENSIONS")
 
-    doors, _ = inspect_upper(brief, upper, upper_connections(3))
+    doors, _ = inspect_upper(brief, upper, upper_connections(program.children))
     enclosed = [room for room in upper if room["kind"] != "terrace"]
     windows = [w for w, _ in level_windows(enclosed, doors, thickness)]
     if openings[1] != {"doors": doors, "windows": windows}:

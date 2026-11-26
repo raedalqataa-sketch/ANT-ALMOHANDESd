@@ -1,0 +1,40 @@
+name: ASSL family-stack evidence
+on:
+  push:
+    branches: [work/editor-to-massing]
+    paths:
+      - 'assl/**'
+      - 'backend/**'
+      - 'frontend/composition/**'
+      - 'tests/test_clustered_family_stack.py'
+      - 'tests/test_styled_massing_geometry.py'
+      - 'requirements.txt'
+      - '.github/workflows/assl-family-stack.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ANT_FAMILY_EVIDENCE_DIR: family-stack-evidence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install existing engine dependencies
+        run: pip install -r requirements.txt
+      - name: Generate and verify two-floor alternatives
+        run: |
+          mkdir -p family-stack-evidence
+          python -m pytest -q tests/test_clustered_family_stack.py tests/test_styled_massing_geometry.py --junitxml=family-stack-evidence/tests.xml
+      - name: Archive plans, massing and verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: family-stack-evidence-${{ github.sha }}
+          path: family-stack-evidence/
+          if-no-files-found: error

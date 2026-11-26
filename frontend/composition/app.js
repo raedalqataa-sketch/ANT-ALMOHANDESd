@@ -8,7 +8,29 @@ let result,busy=false;
 const clientTable=createBriefTable({container:$('client-form'),document,onChange:syncTablePreview});
 function syncTablePreview(message){try{if(message)throw Error(message);$('brief').value=JSON.stringify(clientTable.read(),null,2);$('brief-errors').hidden=true;}catch(e){$('brief-errors').textContent=e.message;$('brief-errors').hidden=false;}}
 function readBrief(){const brief=clientTable.read();$('brief').value=JSON.stringify(brief,null,2);return brief;}
-function lockBrief(value){clientTable.setDisabled(value);$('brief-file').disabled=value;$('reset').disabled=value;}
+function lockBrief(value){
+ clientTable.setDisabled(value);$('brief-file').disabled=value;$('reset').disabled=value;
+ $('first-floor').disabled=value;
+ $('upper-program').disabled=value||!$('first-floor').checked;
+}
+function syncUpperProgram(){
+ const enabled=$('first-floor').checked;
+ $('upper-program').hidden=!enabled;
+ $('upper-program').disabled=!enabled||busy;
+}
+$('first-floor').addEventListener('change',syncUpperProgram);
+syncUpperProgram();
+function readUpperProgram(){
+ if(!$('first-floor').checked)return undefined;
+ for(const id of ['upper-area','upper-side']){
+  if(!$(id).reportValidity())throw Error('راجع أبعاد غرف الأبناء في الدور الأول.');
+ }
+ return {
+  children:Number($('upper-children').value),
+  child_area_m2:$('upper-area').valueAsNumber,
+  child_min_side_m:$('upper-side').valueAsNumber
+ };
+}
 const progress=createProgressView({container:$('generation-progress'),ring:$('generation-ring'),value:$('generation-percent'),detail:$('generation-detail'),elapsed:$('generation-elapsed')});
 const live=createLiveWorkspace({container:$('live-workspace'),canvas:$('live-canvas'),stage:$('live-stage'),steps:$('live-steps'),count:$('live-count'),accepted:$('live-accepted'),summary:$('live-summary'),toggle:$('live-toggle')},drawing);
 function status(s){$('status').textContent=s;}
@@ -41,10 +63,15 @@ if(hasUpper){
   slab_openings_by_floor:[p.slab_openings_by_floor?.[1]||[]], brief_snapshot:p.brief_snapshot,
  }));
  const layout=p.upper_wing_group?.join('');
- if(layout==='111'||layout==='210'){
+ const descriptions={
+  '111':'غرف الأبناء موزعة على ثلاثة جوانب من الصالة العائلية.',
+  '210':'غرفتان للأبناء في جناح واحد والثالثة في الجناح المقابل.',
+  '110':'غرفتا الأبناء في جناحين متقابلين على جانبي الصالة.',
+  '011':'غرفتا الأبناء في جناحين متجاورين حول الصالة.'
+ };
+ if(descriptions[layout]){
   const note=document.createElement('p');
-  note.textContent=layout==='111'?'غرف الأبناء موزعة على ثلاثة جوانب من الصالة العائلية.':
-   'غرفتان للأبناء في جناح واحد والثالثة في الجناح المقابل.';
+  note.textContent=descriptions[layout];
   card.append(note);
  }
 }
@@ -73,7 +100,7 @@ if(modes[mode]){$('generator').hidden=false;$('mode-label').textContent=modes[mo
 $('sample').onclick=async()=>{if(busy)return;live.hide();try{const r=await fetch(`/composition/${mode}-sample.json`);render(await r.json(),'نتائج المرجع المحفوظة — دون إعادة توليد');}catch(e){status(e.message);}};
 $('reset').onclick=()=>{if(!busy)return reset();};$('save-brief').onclick=()=>{try{download(readBrief(),'ANT-client-brief.json');}catch(e){status(e.message);}};
 $('brief-file').onchange=async e=>{if(busy||!e.target.files[0])return;try{clientTable.load(JSON.parse(await e.target.files[0].text()));status('فُتح برنامجك في الجدول؛ راجع القيم قبل التوليد.');}catch(error){status('تعذر قراءة البرنامج: '+error.message);}};
-$('generate').onclick=async()=>{if(busy)return;if(retired){showRetired();return;}let brief;try{brief=readBrief();}catch(e){syncTablePreview();return status('راجع جدول المتطلبات: '+e.message);}$('switch-relational').hidden=true;if(mode!=='relational'&&Array.isArray(brief.spatial_requirements)&&brief.spatial_requirements.length&&!hasCentralProgram(brief)){$('results').replaceChildren();offerRelational();return;}const partial=[];busy=true;lockBrief(true);progress.start();live.start(brief);$('generate').disabled=true;$('sample').disabled=true;$('cancel').hidden=false;$('results').replaceChildren();status('جارٍ تحميل المحرك والبحث محليًا… قد يستغرق ذلك عدة دقائق، خاصة على الهاتف. لن يُستبدل الفشل بنتائج محفوظة.');try{render(await AntComposition.generate(mode,brief,event=>{if(event.phase==='preview'){live.update(event.frame);return;}if(event.phase==='candidate'&&event.proposal){partial.push(event.proposal);live.accepted(partial.length);render({proposals:partial},'مقترح اجتاز الفحص',{pending:true});}else progress.update(event)},{firstFloor:$('first-floor').checked}),'توليد من المدخلات الحالية');if(result?.proposals?.length)progress.complete();else progress.fail();live.finish(result?.proposals?.length||0);}catch(e){progress.fail();live.finish(partial.length,true);if(partial.length)render({proposals:partial},'نتائج مقبولة قبل توقف البحث');status('تعذر إكمال التوليد: '+e.message+(partial.length?' — احتُفظ بالمقترحات المقبولة أعلاه.':''));}finally{busy=false;lockBrief(false);$('generate').disabled=false;$('sample').disabled=false;$('cancel').hidden=true;}};
+$('generate').onclick=async()=>{if(busy)return;if(retired){showRetired();return;}let brief,upperProgram;try{brief=readBrief();}catch(e){syncTablePreview();return status('راجع جدول المتطلبات: '+e.message);}try{upperProgram=readUpperProgram();}catch(e){return status(e.message);}$('switch-relational').hidden=true;if(mode!=='relational'&&Array.isArray(brief.spatial_requirements)&&brief.spatial_requirements.length&&!hasCentralProgram(brief)){$('results').replaceChildren();offerRelational();return;}const partial=[];busy=true;lockBrief(true);progress.start();live.start(brief);$('generate').disabled=true;$('sample').disabled=true;$('cancel').hidden=false;$('results').replaceChildren();status('جارٍ تحميل المحرك والبحث محليًا… قد يستغرق ذلك عدة دقائق، خاصة على الهاتف. لن يُستبدل الفشل بنتائج محفوظة.');try{render(await AntComposition.generate(mode,brief,event=>{if(event.phase==='preview'){live.update(event.frame);return;}if(event.phase==='candidate'&&event.proposal){partial.push(event.proposal);live.accepted(partial.length);render({proposals:partial},'مقترح اجتاز الفحص',{pending:true});}else progress.update(event)},{firstFloor:$('first-floor').checked,upperProgram}),'توليد من المدخلات الحالية');if(result?.proposals?.length)progress.complete();else progress.fail();live.finish(result?.proposals?.length||0);}catch(e){progress.fail();live.finish(partial.length,true);if(partial.length)render({proposals:partial},'نتائج مقبولة قبل توقف البحث');status('تعذر إكمال التوليد: '+e.message+(partial.length?' — احتُفظ بالمقترحات المقبولة أعلاه.':''));}finally{busy=false;lockBrief(false);$('generate').disabled=false;$('sample').disabled=false;$('cancel').hidden=true;}};
 $('cancel').onclick=()=>{if(confirm('إيقاف البحث؟ المدخلات ستبقى محفوظة هنا.')){sessionStorage.setItem('ant-composition-pending-brief',JSON.stringify(readBrief()));location.reload();}};
 const pending=sessionStorage.getItem('ant-composition-pending-brief');if(pending&&modes[mode]){try{clientTable.load(JSON.parse(pending));sessionStorage.removeItem('ant-composition-pending-brief');}catch(e){status('تعذر استعادة البرنامج المحفوظ: '+e.message);}}
 
