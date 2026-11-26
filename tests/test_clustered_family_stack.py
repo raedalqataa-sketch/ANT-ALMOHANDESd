@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, box
 from shapely.ops import unary_union
 
 from assl.openings_009 import inward
@@ -16,22 +16,45 @@ from backend.design.general_api import MassingRequest, concept_massing
 from backend.main import app
 
 
+REFERENCE = Path(__file__).resolve().parents[1] / "frontend/composition/reference-brief.json"
+TWO_GROUPS = [[1, 1, 0], [0, 1, 1]]
+THREE_GROUPS = [[1, 1, 1], [2, 1, 0]]
 CASES = (
-    ({"children": 2, "child_area_m2": 11.0, "child_min_side_m": 2.6}, [[1, 1, 0], [0, 1, 1]]),
-    ({"children": 3, "child_area_m2": 11.5, "child_min_side_m": 2.7}, [[1, 1, 1], [2, 1, 0]]),
+    ("2-bedrooms", None, {"children": 2, "child_area_m2": 11.0, "child_min_side_m": 2.6}, TWO_GROUPS),
+    ("3-bedrooms", None, {"children": 3, "child_area_m2": 11.5, "child_min_side_m": 2.7}, THREE_GROUPS),
+    ("narrow-28x38", (28, 38, {"west": 2.5, "east": 2.75, "north": 3.5}, {"women": 19, "women-wc": 6}),
+     {"children": 2, "child_area_m2": 11.0, "child_min_side_m": 2.6}, TWO_GROUPS),
+    ("wide-36x40", (36, 40, {"west": 4.5, "east": 3.75, "north": 4, "south": 3.5}, {}),
+     {"children": 3, "child_area_m2": 11.6, "child_min_side_m": 2.7}, THREE_GROUPS),
 )
 
 
-@pytest.fixture(scope="module", params=CASES, ids=["two-bedrooms", "three-bedrooms"])
-def proposals(request):
-    program, groups = request.param
-    reference = Path(__file__).resolve().parents[1] / "frontend/composition/reference-brief.json"
+def generate(site, program):
+    brief = json.loads(REFERENCE.read_text())
+    if site:
+        width, depth, setbacks, room_areas = site
+        brief.update(plot_width=width, plot_depth=depth)
+        brief["setbacks"].update(setbacks)
+        for room in brief["rooms"]:
+            if room["id"] in room_areas:
+                room["min_area"] = room_areas[room["id"]]
     with TestClient(app) as client:
-        result = client.post(
+        return client.post(
             "/api/v3/concepts/clustered/stream",
             params={"first_floor": "true", "max_results": 2, **program},
-            json=json.loads(reference.read_text()),
+            json=brief,
         )
+
+
+@pytest.fixture(scope="module", params=CASES, ids=[case[0] for case in CASES])
+def case(request):
+    return request.param
+
+
+@pytest.fixture(scope="module")
+def proposals(case):
+    _, site, program, groups = case
+    result = generate(site, program)
     assert result.status_code == 200
     response = json.loads(result.text.splitlines()[-1])["result"]
     assert response["requested_results"] == 2
@@ -42,7 +65,7 @@ def proposals(request):
     return plans
 
 
-def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(proposals, monkeypatch):
+def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(proposals, case, monkeypatch):
     assert proposals[0]["rooms_by_floor"][0] == proposals[1]["rooms_by_floor"][0]
     assert proposals[0]["rooms_by_floor"][1] != proposals[1]["rooms_by_floor"][1]
     assert len({geometry_fingerprint(p) for p in proposals}) == 2
@@ -60,7 +83,15 @@ def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(propo
         assert model["proposal_id"] == proposal["id"]
         assert "first_floor" not in proposal
         program = proposal["upper_program"]
-        thickness = proposal["brief_snapshot"]["wall_thickness"]
+        brief = proposal["brief_snapshot"]
+        thickness = brief["wall_thickness"]
+        setbacks = brief["setbacks"]
+        envelope = box(
+            0, 0, brief["plot_width"] - setbacks["west"] - setbacks["east"] - thickness,
+            brief["plot_depth"] - setbacks["south"] - setbacks["north"] - thickness,
+        ).buffer(1e-6)
+        for rooms, halls in zip(proposal["rooms_by_floor"], proposal["halls_by_floor"], strict=True):
+            assert all(envelope.covers(Polygon(room["polygon"])) for room in rooms + halls)
         rooms = [r for r in proposal["rooms_by_floor"][1] if r["kind"] == "bedroom"]
         assert len(rooms) == program["children"]
         measures = []
@@ -87,7 +118,7 @@ def test_two_functional_stacks_share_a_canonical_plan_and_massing_geometry(propo
             assert slab.intersection(Polygon(slab_opening).buffer(-0.0001)).area < 1e-6
 
     if evidence := os.getenv("ANT_FAMILY_EVIDENCE_DIR"):
-        folder = Path(evidence) / f'{len(rooms)}-bedrooms'
+        folder = Path(evidence) / case[0]
         folder.mkdir(parents=True, exist_ok=True)
         for filename, data in (
             ("floor-plans.json", proposals), ("massing.json", models),
@@ -105,7 +136,7 @@ def test_selected_stack_checks_and_legacy_plan(proposals):
     legacy.pop("slab_openings_by_floor")
     legacy["first_floor"] = {"rooms": upper, **openings}
     assert concept_massing(MassingRequest(proposal=legacy))["revision"] == geometry_fingerprint(plan)
-    if plan["upper_program"]["children"] == 3:
+    if plan["upper_program"] == CASES[1][2]:
         legacy.pop("upper_program")
         old_plan = {key: value for key, value in plan.items() if key != "upper_program"}
         assert concept_massing(MassingRequest(proposal=legacy))["revision"] == geometry_fingerprint(old_plan)
@@ -132,3 +163,20 @@ def test_selected_stack_checks_and_legacy_plan(proposals):
     invalid["slab_openings_by_floor"][1] = []
     with pytest.raises(HTTPException, match="MASSING_SLAB_OPENING_MISMATCH"):
         concept_massing(MassingRequest(proposal=invalid))
+
+
+def test_restricted_site_reports_envelope_shortfall():
+    site = (17, 24, dict.fromkeys(("west", "east", "north", "south"), 4), {})
+    result = generate(site, CASES[1][2])
+    assert result.status_code == 200
+    response = json.loads(result.text.splitlines()[-1])["result"]
+    assert response["status"] == "REJECT_AND_REPLAN"
+    assert response["proposals"] == []
+    assert len(response["failures"]) == response["requested_results"] == 2
+    for failure in response["failures"]:
+        assert "CENTRAL_EXCEEDS_ENVELOPE" in failure["reason"]
+        assert "available 8.80 x 15.80 m" in failure["reason"]
+    if evidence := os.getenv("ANT_FAMILY_EVIDENCE_DIR"):
+        output = Path(evidence)
+        output.mkdir(parents=True, exist_ok=True)
+        (output / "restricted-17x24.json").write_text(json.dumps(response, indent=2), encoding="utf-8")

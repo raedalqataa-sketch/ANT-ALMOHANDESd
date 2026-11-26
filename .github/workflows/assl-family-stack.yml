@@ -8,6 +8,7 @@ on:
       - 'frontend/composition/**'
       - 'tests/test_clustered_family_stack.py'
       - 'tests/test_styled_massing_geometry.py'
+      - 'scripts/export_family_site_benchmark.py'
       - 'requirements.txt'
       - '.github/workflows/assl-family-stack.yml'
   workflow_dispatch:
@@ -31,6 +32,14 @@ jobs:
         run: |
           mkdir -p family-stack-evidence
           python -m pytest -q tests/test_clustered_family_stack.py tests/test_styled_massing_geometry.py --junitxml=family-stack-evidence/tests.xml
+      - name: Export and reopen the site benchmark DXF
+        run: python -m scripts.export_family_site_benchmark family-stack-evidence ANT-Site-Benchmarks-R2010.dxf
+      - name: Archive the single AutoCAD 2010 drawing
+        uses: actions/upload-artifact@v4
+        with:
+          name: ANT-Site-Benchmarks-R2010
+          path: ANT-Site-Benchmarks-R2010.dxf
+          if-no-files-found: error
       - name: Archive plans, massing and verification
         if: always()
         uses: actions/upload-artifact@v4

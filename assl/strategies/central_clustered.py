@@ -163,7 +163,11 @@ def compose(brief,variant=0,*,grid=None):
     if isinstance(brief,VillaBrief):
         W=brief.plot_width-brief.setbacks.west-brief.setbacks.east-t
         D=brief.plot_depth-brief.setbacks.north-brief.setbacks.south-t
-        if xx-x>W+1e-6 or yy-y>D+1e-6:raise ValueError('CENTRAL_EXCEEDS_ENVELOPE')
+        if xx-x>W+1e-6 or yy-y>D+1e-6:
+            raise ValueError(
+                f"CENTRAL_EXCEEDS_ENVELOPE: footprint {xx-x:.2f} x {yy-y:.2f} m, "
+                f"available {W:.2f} x {D:.2f} m on wall axes"
+            )
         dx=(W-(xx-x))/2-x;dy=(D-(yy-y))/2-y
         if grid is not None:
             dx,dy=grid["stair_origin"];dy-=ld
