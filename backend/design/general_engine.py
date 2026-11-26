@@ -173,7 +173,11 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 u=used.copy();u[i]+=length;g=[row.copy() for row in groups];g[i].extend(bundle)
                 # Best-fit plus load balance; not an architectural quality score.
                 score=sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2 for j,(cap,v) in enumerate(zip(capacities,u)))
-                score+=14*relationship_cost(g)
+                if architecture_first and policy in ('relationship_aware','functional_hub','reference_hub'):
+                    # Functional relationships lead; unused lane capacity is secondary.
+                    score=.05*score+40*relationship_cost(g)
+                else:
+                    score+=14*relationship_cost(g)
                 expanded.append((score,u,g))
         if not expanded:
             from .allocation_repair import reassign_bundles
@@ -182,9 +186,10 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
             break
         expanded.sort(key=lambda state:state[0]);states=[(u,g) for _,u,g in expanded[:20]]
     used,groups=fallback_allocation if fallback_allocation is not None else min(states,key=lambda state:(
+        (.05 if architecture_first and policy in ('relationship_aware','functional_hub','reference_hub') else 1.)*
         sum(((cap-v)*(lanes[j]['width'] if lanes[j]['axis']=='y' else lanes[j]['depth']))**2
             for j,(cap,v) in enumerate(zip(capacities,state[0])))+
-        14*relationship_cost(state[1])))
+        (40 if architecture_first and policy in ('relationship_aware','functional_hub','reference_hub') else 14)*relationship_cost(state[1])))
     cells=[]
     for i,lane in enumerate(lanes):
         axis=lane['axis'];start=lane['y' if axis=='y' else 'x']
