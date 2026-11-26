@@ -1,3 +1,4 @@
+import {facadeChoiceKey, planSource, verifyPlanIdentity} from "/composition/selected-plan.mjs";
 import {streamRequest} from "/composition/stream.mjs";
 import {createProgressView} from "/composition/progress-view.mjs";
 
@@ -85,36 +86,25 @@ function viewer(canvas) {
   return {upload,render};
 }
 
-function planSource() {
-  const handoff = new URLSearchParams(location.search).get("edit");
-  if (handoff !== null) {
-    const saved = JSON.parse(sessionStorage.getItem("ant-massing-editor:" + handoff));
-    if (!saved?.editor_revision || !saved.identity) {
-      throw Error("افتح النسخة المختارة من المحرّر في علامة التبويب هذه.");
-    }
-    return {request:{editor_revision:saved.editor_revision}, identity:saved.identity, query:"?"+new URLSearchParams({edit:handoff})};
-  }
-  const cached = sessionStorage.getItem("ant-massing-proposal");
-  if (!cached) throw Error("اختر مسقطًا من صفحة التكوين أولًا.");
-  return {request:{proposal:JSON.parse(cached)}, query:""};
-}
-
-function verifyPlanIdentity(result, identity) {
-  if (identity && (result.version_id !== identity.version_id
-      || result.geometry_fingerprint !== identity.geometry_fingerprint
-      || result.revision !== identity.geometry_fingerprint)) {
-    throw Error("النتيجة لا تطابق النسخة المختارة من المحرّر.");
-  }
-}
-
 async function load() {
   const {request, identity, query} = planSource();
+  const facadeStyle = new URLSearchParams(location.search).get("style");
+  const selectedFacade = !renderPage && facadeStyle !== null;
+  if (selectedFacade) {
+    const selection = JSON.parse(sessionStorage.getItem(facadeChoiceKey(query, facadeStyle)));
+    if (selection?.style !== facadeStyle) throw Error("اختر الواجهة قبل فتح الكتلة.");
+    request.facade_choice = selection;
+    get("back-to-plans").href = "/facades/" + query;
+    get("back-to-plans").textContent = "العودة إلى الواجهات";
+    get("style-heading").textContent = "طراز الواجهة المختارة";
+    get("save").hidden = true;
+  }
   progress.start();
   const project=await streamRequest("/api/v3/concepts/massing/stream",request,progress.update);
   verifyPlanIdentity(project, identity);
   const choiceKey="ant-massing-style:"+(identity ? identity.version_id+":" : "")+project.revision;
   const choiceStorage=identity ? sessionStorage : localStorage;
-  const saved=choiceStorage.getItem(choiceKey);
+  const saved=selectedFacade ? facadeStyle : choiceStorage.getItem(choiceKey);
   if (renderPage) {
     project.styles=project.styles.filter(style=>style.id===saved);
     if (!project.styles.length) throw Error("اختر الطراز قبل فتح الرندر.");

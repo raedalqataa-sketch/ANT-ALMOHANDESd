@@ -126,7 +126,7 @@ class EditorRevision(Strict):
     version: int = Field(ge=1, le=200)
 
 
-class MassingRequest(Strict):
+class PlanSource(Strict):
     proposal: dict | None = None
     editor_revision: EditorRevision | None = None
 
@@ -137,17 +137,60 @@ class MassingRequest(Strict):
         return self
 
 
-def _massing_for_request(request, progress=None):
-    if request.editor_revision is None:
-        return _checked_massing(request.proposal, progress)
-    from .plan_editor_api import load_massing_revision
+class FacadeChoice(Strict):
+    style: Literal["modern", "classical"]
+    revision: str = Field(pattern=r"^[a-f0-9]{64}$")
+    mesh_revision: str = Field(pattern=r"^[a-f0-9]{64}$")
+    proposal_id: str
 
-    ref = request.editor_revision
-    proposal, identity = load_massing_revision(ref.session_id, ref.version)
-    model = _checked_massing(proposal, progress)
-    if model["revision"] != identity["geometry_fingerprint"]:
-        raise ValueError("EDITOR_GEOMETRY_MISMATCH")
+
+class MassingRequest(PlanSource):
+    facade_choice: FacadeChoice | None = None
+
+
+def _plan_for_request(request, progress):
+    from assl.strategies.styled_massing import geometry_fingerprint
+
+    identity = {}
+    proposal = request.proposal
+    if request.editor_revision is not None:
+        from .plan_editor_api import load_massing_revision
+
+        ref = request.editor_revision
+        proposal, identity = load_massing_revision(ref.session_id, ref.version)
+    plan = _checked_plan(proposal, progress)
+    if identity and geometry_fingerprint(plan) != identity["geometry_fingerprint"]:
+        raise HTTPException(422, "EDITOR_GEOMETRY_MISMATCH")
+    return plan, identity
+
+
+def _massing_for_request(request, progress=None):
+    from assl.strategies.styled_massing import geometry_fingerprint, mesh_fingerprint
+
+    plan, identity = _plan_for_request(request, progress)
+    choice = request.facade_choice
+    if choice is not None and (plan["id"] != choice.proposal_id or geometry_fingerprint(plan) != choice.revision):
+        raise HTTPException(409, "FACADE_PLAN_MISMATCH")
+    model = _build_massing(plan, progress, style_ids=(choice.style,) if choice else None)
+    if choice is not None:
+        style, = model["styles"]
+        if mesh_fingerprint(style) != choice.mesh_revision:
+            raise HTTPException(409, "FACADE_MESH_MISMATCH")
+        style["mesh_revision"] = choice.mesh_revision
     return {**model, **identity}
+
+
+@router.post('/concepts/facades')
+def concept_facades(request: PlanSource):
+    from assl.strategies.elevations import FACADE_STYLES, build_elevations
+    from shapely.errors import ShapelyError
+
+    plan, identity = _plan_for_request(request, None)
+    model = _build_massing(plan, style_ids=FACADE_STYLES)
+    try:
+        return {**build_elevations(plan, model), **identity}
+    except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
 @router.post('/concepts/massing')
@@ -161,11 +204,10 @@ def stream_massing(request: MassingRequest):
     return stream_work(lambda progress: _massing_for_request(request, progress))
 
 
-def _checked_massing(proposal, progress=None):
+def _checked_plan(proposal, progress=None):
     from assl.layout_critic_010 import critique
     from assl.openings_009 import validate
     from assl.strategies.guest_access import check_guest_wc_routes
-    from assl.strategies.styled_massing import build_styles
     from shapely.errors import ShapelyError
 
     try:
@@ -196,7 +238,17 @@ def _checked_massing(proposal, progress=None):
             proposal = check_family_proposal(brief, proposal)
         elif "slab_openings_by_floor" in proposal:
             raise ValueError("MASSING_UNVERIFIED_SLAB_OPENINGS")
-        return build_styles(proposal, progress)
+        return proposal
+    except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+def _build_massing(plan, progress=None, *, style_ids=None):
+    from assl.strategies.styled_massing import build_styles
+    from shapely.errors import ShapelyError
+
+    try:
+        return build_styles(plan, progress, style_ids=style_ids)
     except (ValueError, TypeError, KeyError, IndexError, ShapelyError) as exc:
         raise HTTPException(422, str(exc)) from exc
 

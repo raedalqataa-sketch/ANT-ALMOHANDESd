@@ -824,7 +824,7 @@ $("approve-massing").onclick = () =>
       editor_revision: { session_id: ui.sid, version: ui.version },
       identity: ui.savedIdentity,
     }));
-    location.href = "/massing/?edit=" + handoff;
+    location.href = "/facades/?edit=" + handoff;
   }, "جارٍ فتح النسخة المختارة…");
 $("file").onchange = async (e) => {
   try {

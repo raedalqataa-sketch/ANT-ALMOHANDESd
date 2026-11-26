@@ -159,6 +159,7 @@ def composition_editor():
 
 app.mount('/composition', StaticFiles(directory=ROOT/'frontend'/'composition', html=True),
           name='composition')
+app.mount('/facades', StaticFiles(directory=ROOT/'frontend'/'facades', html=True), name='facades')
 app.mount('/massing', StaticFiles(directory=ROOT/'frontend'/'massing', html=True),
           name='massing')
 

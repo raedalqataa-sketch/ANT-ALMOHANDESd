@@ -11,6 +11,9 @@ from assl.openings_009 import wall_cut
 from .classical_facade import add_portal, stair_pilasters, terrace_railings
 from .geometry import net_shape, shape
 
+WINDOW_SILL_M = .9
+WINDOW_HEAD_M = DOOR_HEAD_M = 2.15
+
 STYLES = (
     ("modern", "مودرن", "إطار غرافيتي ومظلة أفقية وشرائح خشبية", "#e6ddcc", "#353a3f"),
     ("najdi", "نجدي معاصر", "بوابة حجرية وحواجز سقف مسنّنة", "#c8a77e", "#967252"),
@@ -158,6 +161,11 @@ def frame_windows(mesh, floors, thickness, height, accent):
                 mesh.extrude(trim,z+bottom,z+top,accent)
 
 
+def mesh_fingerprint(style):
+    encoded = json.dumps(style["faces"], separators=(",", ":"), allow_nan=False).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def geometry_fingerprint(proposal):
     geometry = {k:proposal[k] for k in ("rooms_by_floor","halls_by_floor","opening_model_009","brief_snapshot")}
     geometry["entrance_platforms"] = proposal.get("entrance_platforms", [])
@@ -167,7 +175,7 @@ def geometry_fingerprint(proposal):
     return hashlib.sha256(json.dumps(geometry,sort_keys=True,separators=(",",":"),allow_nan=False).encode()).hexdigest()
 
 
-def build_styles(proposal, progress=None):
+def build_styles(proposal, progress=None, *, style_ids=None):
     floors, thickness, height = base_geometry(proposal)
     opening_model = floors[0][4]
     outside = [d for d in opening_model["doors"] if "OUTSIDE" in d["connects"]]
@@ -178,7 +186,8 @@ def build_styles(proposal, progress=None):
     receiving = next(r for r in proposal["rooms_by_floor"][0]+proposal["halls_by_floor"][0]
                      if r["id"] == entry["receiving_room"])
     variants = []
-    for index, (key, title, caption, wall, accent) in enumerate(STYLES):
+    styles = [style for style in STYLES if style_ids is None or style[0] in style_ids]
+    for index, (key, title, caption, wall, accent) in enumerate(styles):
         if progress:
             progress(30+index*16, "رفع الكتلة بطراز "+title)
         mesh = Mesh()
@@ -192,13 +201,13 @@ def build_styles(proposal, progress=None):
             mesh.extrude(footprint.difference(landing_void),z-.18,z,"#a09a8e")
             terraces = unary_union([shape(room) for room in rooms if room["kind"] == "terrace"])
             mesh.extrude(terraces.difference(footprint),z-.18,z,"#a09a8e")
-            mesh.extrude(shell.difference(doors),z,z+.9,wall)
-            mesh.extrude(shell.difference(doors.union(windows)),z+.9,z+2.15,wall)
+            mesh.extrude(shell.difference(doors),z,z+WINDOW_SILL_M,wall)
+            mesh.extrude(shell.difference(doors.union(windows)),z+WINDOW_SILL_M,z+WINDOW_HEAD_M,wall)
             # The slab supplies the top surface. Terminating the wall below it
             # removes coincident faces that caused dark seams in Cycles.
-            mesh.extrude(shell,z+2.15,z+max(2.15,height-.18),wall)
+            mesh.extrude(shell,z+DOOR_HEAD_M,z+max(DOOR_HEAD_M,height-.18),wall)
             glass = shell.intersection(windows)
-            mesh.extrude(glass,z+.9,z+2.15,"#618a9b")
+            mesh.extrude(glass,z+WINDOW_SILL_M,z+WINDOW_HEAD_M,"#618a9b")
             roof = footprint.difference(floors[i+1][0]) if i+1<len(floors) else footprint
             if i+1 < len(floors):
                 roof = roof.difference(unary_union([

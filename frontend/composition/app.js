@@ -85,13 +85,15 @@ if (p.functional_differences?.length) {
   card.append(differences);
 }
 const info=document.createElement('p');info.textContent=`${source} · ${p.rooms_by_floor[0].filter(r=>r.request_id).length} فراغات مطلوبة · 009: ${p.validation_009?.status||'غير متاح'} · 010: ${p.quality_010?.status||'غير متاح'}`;card.append(info);const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.textContent=pending?'جارٍ استكمال النتيجة…':'اختيار وتعديل';edit.disabled=pending||hasUpper;if(hasUpper)edit.textContent='المحرّر متاح لمقترحات الأرضي';edit.onclick=async()=>{edit.disabled=true;status('جارٍ فتح المسقط وفحصه في المحرّر… قد يستغرق تحميل المحرك أول مرة بعض الوقت.');try{const saved=await AntComposition.editor('/api/editor/sessions',{proposal:p});location.href='/editor/?session='+saved.session_id;}catch(e){status('تعذر فتح المحرّر: '+e.message);edit.disabled=false;}};const json=document.createElement('button');json.className='secondary';json.textContent='تنزيل المسقط JSON';json.onclick=()=>download(p,`ANT-${mode}-${i+1}.json`);const massing=document.createElement('button');
-massing.textContent='اختيار المسقط واستعراض الكتل';
+massing.textContent='اختيار المسقط وتوليد الواجهات';
 massing.disabled=pending;
 massing.onclick=()=>{
   try {
-    sessionStorage.setItem('ant-massing-proposal',JSON.stringify(p));
+    const handoff=crypto.randomUUID();
+    sessionStorage.setItem('ant-facade-plan:'+handoff,JSON.stringify(p));
     sessionStorage.setItem('ant-composition-pending-brief',$('brief').value);
-    location.href='/massing/';
+    sessionStorage.setItem('ant-composition-return-results',JSON.stringify({data,source}));
+    location.href='/facades/?plan='+handoff;
   } catch(e) {status('تعذر حفظ المسقط المختار: '+e.message);}
 };
 actions.append(massing,edit,json);card.append(actions);$('results').append(card);}const count=data.proposals?.length||0, requested=data.requested_results||1;status(pending?`ظهر ${count} مقترح مقبول. جارٍ استكمال عرض النتيجة…`:`${source}: ${count} مقترح اجتاز الفحص من أصل ${requested} مطلوب.${count<requested?'\n'+JSON.stringify(data.failures||data.rejected?.[0]||data.status):''}`);}
@@ -103,6 +105,12 @@ $('brief-file').onchange=async e=>{if(busy||!e.target.files[0])return;try{client
 $('generate').onclick=async()=>{if(busy)return;if(retired){showRetired();return;}let brief,upperProgram;try{brief=readBrief();}catch(e){syncTablePreview();return status('راجع جدول المتطلبات: '+e.message);}try{upperProgram=readUpperProgram();}catch(e){return status(e.message);}$('switch-relational').hidden=true;if(mode!=='relational'&&Array.isArray(brief.spatial_requirements)&&brief.spatial_requirements.length&&!hasCentralProgram(brief)){$('results').replaceChildren();offerRelational();return;}const partial=[];busy=true;lockBrief(true);progress.start();live.start(brief);$('generate').disabled=true;$('sample').disabled=true;$('cancel').hidden=false;$('results').replaceChildren();status('جارٍ تحميل المحرك والبحث محليًا… قد يستغرق ذلك عدة دقائق، خاصة على الهاتف. لن يُستبدل الفشل بنتائج محفوظة.');try{render(await AntComposition.generate(mode,brief,event=>{if(event.phase==='preview'){live.update(event.frame);return;}if(event.phase==='candidate'&&event.proposal){partial.push(event.proposal);live.accepted(partial.length);render({proposals:partial},'مقترح اجتاز الفحص',{pending:true});}else progress.update(event)},{firstFloor:$('first-floor').checked,upperProgram}),'توليد من المدخلات الحالية');if(result?.proposals?.length)progress.complete();else progress.fail();live.finish(result?.proposals?.length||0);}catch(e){progress.fail();live.finish(partial.length,true);if(partial.length)render({proposals:partial},'نتائج مقبولة قبل توقف البحث');status('تعذر إكمال التوليد: '+e.message+(partial.length?' — احتُفظ بالمقترحات المقبولة أعلاه.':''));}finally{busy=false;lockBrief(false);$('generate').disabled=false;$('sample').disabled=false;$('cancel').hidden=true;}};
 $('cancel').onclick=()=>{if(confirm('إيقاف البحث؟ المدخلات ستبقى محفوظة هنا.')){sessionStorage.setItem('ant-composition-pending-brief',JSON.stringify(readBrief()));location.reload();}};
 const pending=sessionStorage.getItem('ant-composition-pending-brief');if(pending&&modes[mode]){try{clientTable.load(JSON.parse(pending));sessionStorage.removeItem('ant-composition-pending-brief');}catch(e){status('تعذر استعادة البرنامج المحفوظ: '+e.message);}}
+
+const previousResults=sessionStorage.getItem('ant-composition-return-results');
+if(previousResults&&mode==='clustered'){
+ sessionStorage.removeItem('ant-composition-return-results');
+ try{const {data,source}=JSON.parse(previousResults);render(data,source);}catch{/* The generator remains available. */}
+}
 
 if(retired)showRetired();
 if(modes[mode]&&!retired){const prepare=()=>AntComposition.prepare().then(()=>{if(!busy&&!result&&$('switch-relational').hidden)status('المحرك جاهز. عدّل البرنامج ثم اضغط التوليد.');}).catch(()=>{});if(window.requestIdleCallback)window.requestIdleCallback(prepare,{timeout:1500});else setTimeout(prepare,0);}
