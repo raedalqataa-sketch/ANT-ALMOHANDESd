@@ -5,6 +5,9 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt && python -m pip check
 COPY backend ./backend
 COPY frontend ./frontend
+COPY assl ./assl
+COPY web_generator ./web_generator
+COPY quality_review ./quality_review
 COPY requirements ./requirements
 COPY constitution ./constitution
 COPY references ./references
