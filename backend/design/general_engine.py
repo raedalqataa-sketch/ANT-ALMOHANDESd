@@ -410,6 +410,11 @@ def search(brief,family,policy='legacy',core_position='rear',guest_strategy='lin
                              if r.get('request_id') and r['kind'] in ('master','bedroom')),default=1.)
         architecture_report=None
         if architecture_first:
+            from .massing_quality import measures
+            # A disconnected floor is not an acceptable architectural candidate.
+            if any(measures(cells+floor_halls)['components'] != 1
+                   for cells,floor_halls in zip(floors,halls_by_floor)):
+                continue
             from assl.architectural_composer import assess_layout
             architecture_report=assess_layout(dict(floors=floors,halls_by_floor=halls_by_floor),
                                               brief.wall_thickness)
