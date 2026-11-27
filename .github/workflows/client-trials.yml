@@ -1,0 +1,69 @@
+name: Six synthetic client acceptance trials
+on:
+  push:
+    branches: [preview/client-engine-v2]
+    paths: ['.github/workflows/client-trials.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trial:
+    if: github.ref == 'refs/heads/preview/client-engine-v2' && github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        case: [A01, A02, A03, A04, A05, A06]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Generate actual engineering candidates
+        env:
+          CASE_ID: ${{ matrix.case }}
+        run: |
+          python -u - <<'PY'
+          import os,json
+          from pathlib import Path
+          from backend.design.architect_planner import ClientIntent,propose
+          from backend.design.general_engine import generate_general
+          from backend.design.design_selection import evaluate
+          from backend.design.constitution_v2 import assess_candidate
+          cases={
+              'A01':(15,20,4,'economy','one','efficiency'),
+              'A02':(20,25,6,'standard','two','usability'),
+              'A03':(30,35,6,'luxury','one','prestige'),
+              'A04':(32,40,8,'luxury','two','prestige'),
+              'A05':(14,35,5,'luxury','two','usability'),
+              'A06':(40,45,12,'luxury','two','prestige')}
+          case=os.environ['CASE_ID']
+          w,d,n,level,floors,priority=cases[case]
+          out=Path('trial-results');out.mkdir(exist_ok=True)
+          i=ClientIntent(width=w,depth=d,family=n,city='Riyadh',street_edges=['bottom'],street_widths={'bottom':15},output_level=level,floors=floors,design_priority=priority)
+          b,_=propose(i)
+          (out/'input.json').write_text(json.dumps(i.model_dump(),ensure_ascii=False))
+          results=[]
+          for core in ('rear','front','center'):
+              try:
+                  r=generate_general(b,out/core,candidate_families=('cluster',),search_options=[dict(family='cluster',policy='relationship_aware',core_position=core)],emit_drawings=True,architecture_first=True)
+                  for m in r['candidates']:
+                      m['design_evaluation']=evaluate(m,i)
+                      m['constitution_v2']=assess_candidate(m)
+                  results.append(dict(core=core,result=r))
+              except Exception as e:
+                  results.append(dict(core=core,error=repr(e)))
+              (out/'results.json').write_text(json.dumps(results,ensure_ascii=False,default=str))
+          if not any(x.get('result',{}).get('candidates') for x in results):
+              raise RuntimeError('No candidates generated; inspect artifact')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: client-trial-${{ matrix.case }}
+          path: trial-results/
+          retention-days: 1
+          if-no-files-found: warn
