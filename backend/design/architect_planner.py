@@ -175,7 +175,8 @@ def generate_automatic(intent:ClientIntent,output_dir=None,*,constitution_v2=Fal
         return ArchitectureAutoRepairEngine(lambda proposed:validate_v4(proposed,b),max_attempts=8).repair(candidate)
     def explore(options):
         batch=generate_general(b,out,candidate_families=tuple(dict.fromkeys(o['family'] for o in options)),search_options=options,emit_drawings=False,
-            candidate_validator=preflight_v4 if generation_v4 else None,repair_layout=generation_v4)
+            candidate_validator=preflight_v4 if generation_v4 else None,repair_layout=generation_v4,
+            architecture_first=True)
         unavailable.extend(batch['unavailable']);examined.extend(options)
         for m in batch['candidates']:
             if generation_v4:
