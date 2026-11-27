@@ -117,6 +117,23 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         rank={'majlis':0,'living':1,'dining':2,'kitchen':3,'office':4,'master':5,'bedroom':6,'bathroom':7,'laundry':8,'storage':9}
         return (min(rank.get(r['kind'],10) for r in rs),*size)
     ordered=sorted(bundles.values(),key=bundle_order)
+    # Classify the complete program before beam allocation. Family bathrooms
+    # remain shared/unassigned unless the program explicitly identifies a wing.
+    wing_by_id={}
+    if architecture_first:
+        for bundle in ordered:
+            for room in bundle:
+                kind=room['kind']
+                wing_by_id[room['id']]=(
+                    'guest' if room.get('zone')=='guest' else
+                    'social' if kind in ('living','dining') else
+                    'service' if kind in ('kitchen','storage','laundry') else
+                    'private' if kind in ('master','bedroom') else 'shared')
+        # Seed guest and social/service anchors before secondary rooms.
+        wing_rank={'guest':0,'social':1,'service':2,'private':3,'shared':4}
+        ordered.sort(key=lambda bundle:(
+            min(wing_rank[wing_by_id[room['id']]] for room in bundle),
+            bundle_order(bundle)))
     def relationship_cost(groups):
         if policy not in ('relationship_aware','functional_hub','reference_hub'):return 0.
         kinds=[{r['kind'] for r in group if not r.get('guest_distributor')} for group in groups]
@@ -132,6 +149,11 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 private=family_kinds & {'master','bedroom'}
                 social=family_kinds & {'living','dining','kitchen'}
                 if private and social:cost+=12
+                wings={wing_by_id[r['id']] for r in group}
+                # Social/service adjacency is intentional; sleeping wings
+                # should not share a lane with guest or service anchors.
+                if 'private' in wings and 'service' in wings:cost+=12
+                if 'private' in wings and 'guest' in wings:cost+=24
             guest=any(r.get('zone')=='guest' for r in group)
             family=any(r.get('zone')!='guest' and r.get('request_id')
                        for r in group)
