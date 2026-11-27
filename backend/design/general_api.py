@@ -80,7 +80,7 @@ def _gemini_schema() -> dict:
 @router.post('/design')
 def design(brief: VillaBrief):
     try:
-        return generate_general(brief)
+        return generate_general(brief, architecture_first=True)
     except ValueError as exc:
         raise HTTPException(422, str(exc))
 
