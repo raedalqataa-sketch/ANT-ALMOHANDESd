@@ -134,6 +134,31 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
         ordered.sort(key=lambda bundle:(
             min(wing_rank[wing_by_id[room['id']]] for room in bundle),
             bundle_order(bundle)))
+    # Reserve preferred geometric lanes for functional wings using the actual
+    # bundle lengths, rather than assuming all wings have equal area.
+    # Preferences are soft: feasibility remains the responsibility of allocation.
+    preferred_lanes={}
+    if architecture_first and lanes:
+        remaining=capacities.copy()
+        owners=[set() for _ in lanes]
+        for bundle in ordered:
+            wing=wing_by_id[bundle[0]['id']]
+            if wing=='shared':continue
+            choices=[]
+            for i,lane in enumerate(lanes):
+                demand=sum(planned_length(room,lane,t) for room in bundle)
+                if not math.isfinite(demand) or demand>remaining[i]+EPS:continue
+                incompatible=sum(
+                    1 for other in owners[i] if other!=wing and
+                    (wing=='guest' or other=='guest' or
+                     wing=='private' or other=='private'))
+                choices.append((incompatible,0 if wing in owners[i] else 1,
+                                remaining[i]-demand,i,demand))
+            if choices:
+                _,_,_,i,demand=min(choices)
+                remaining[i]-=demand
+                owners[i].add(wing)
+                for room in bundle:preferred_lanes[room['id']]=i
     def relationship_cost(groups):
         if policy not in ('relationship_aware','functional_hub','reference_hub'):return 0.
         kinds=[{r['kind'] for r in group if not r.get('guest_distributor')} for group in groups]
@@ -143,6 +168,10 @@ def allocate(requests,lanes,t,guest_clear_width=1.6,coherent=False,policy='legac
                 first in group and second in group for group in kinds)
         cost=25*detached('kitchen','dining')+14*detached('living','dining')
         cost+=9*detached('master','bathroom')+8*detached('bedroom','bathroom')
+        if architecture_first:
+            cost+=6*sum(1 for i,group in enumerate(groups) for room in group
+                        if room['id'] in preferred_lanes and
+                        preferred_lanes[room['id']]!=i)
         for group in groups:
             if architecture_first:
                 family_kinds={r['kind'] for r in group if r.get('zone')!='guest'}
