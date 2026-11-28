@@ -5,6 +5,7 @@ from .rules_v21_vertical_core import reserve_core
 from .rules_v21_mass_proposals import propose_masses
 from .rules_v21_subdivision import subdivide_wing
 from .rules_v21_walls import extract_wall_network
+from .rules_v21_access import check_access
 
 def run(document,envelopes,capacities,core_dimensions=None,obstacles=None):
     report={"accepted":False,"stages":{},"floors":{}}
@@ -37,6 +38,7 @@ def run(document,envelopes,capacities,core_dimensions=None,obstacles=None):
             if not valid:continue
             walls=extract_wall_network(rooms)
             if walls["status"]!="network_ready":continue
-            output["layouts"].append(dict(rooms=rooms,walls=walls,accepted=False))
+            access=check_access(rooms,walls["walls"],[])
+            output["layouts"].append(dict(rooms=rooms,walls=walls,access=access,accepted=False))
     report["pending"]=["core clearance","circulation","openings","furniture","constitution coverage","architectural review"]
     return report
