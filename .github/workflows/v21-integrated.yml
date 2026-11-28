@@ -41,6 +41,9 @@ jobs:
               Path(f'integrated-results/layout-{i}.svg').write_text(''.join(parts))
           assert layouts, 'No integrated geometry; inspect report'
           assert not result['accepted']
+          assert all(l['access']['status']=='fail' for l in layouts)
+          print('Geometry candidates:',len(layouts),'Accepted:',sum(l['accepted'] for l in layouts))
+          print('Access gate correctly rejects layouts without verified entries and circulation')
           PY
       - uses: actions/upload-artifact@v4
         if: always()
