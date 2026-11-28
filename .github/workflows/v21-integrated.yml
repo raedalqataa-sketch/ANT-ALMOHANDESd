@@ -16,12 +16,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt matplotlib ezdxf
       - run: python -m pytest -q tests/test_rules_v21_floor_assignment.py
       - run: |
           mkdir -p integrated-results
           python - <<'PY'
           import json
+          import matplotlib
+          matplotlib.use('Agg')
+          import matplotlib.pyplot as plt
+          from matplotlib.patches import Rectangle
+          import ezdxf
           from pathlib import Path
           from backend.design.rules_v21_pipeline import run
           from backend.design.rules_v21_mass_geometry import mass_union
@@ -39,6 +44,21 @@ jobs:
                   parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="white" stroke="black" stroke-width="50"/><text x="{x+w/2}" y="{y+h/2}" font-size="250" text-anchor="middle">{room["id"]}</text>')
               parts.append('</svg>')
               Path(f'integrated-results/layout-{i}.svg').write_text(''.join(parts))
+              fig,ax=plt.subplots(figsize=(12,9))
+              doc=ezdxf.new('R2010'); doc.units=4
+              m=doc.modelspace()
+              for room in layout['rooms']:
+                  x,y,w,h=room['rect_mm']
+                  ax.add_patch(Rectangle((x,y),w,h,facecolor='white',edgecolor='black',linewidth=2))
+                  ax.text(x+w/2,y+h/2,room['id'],ha='center',va='center',fontsize=8)
+                  m.add_lwpolyline([(x,-y),(x+w,-y),(x+w,-y-h),(x,-y-h)],close=True)
+                  m.add_text(room['id'],dxfattribs={'height':180,'insert':(x+100,-y-h/2)})
+              ax.autoscale_view(); ax.set_aspect('equal'); ax.invert_yaxis(); ax.axis('off')
+              ax.set_title('Experimental geometry - not approved')
+              fig.savefig(f'integrated-results/layout-{i}.png',dpi=220,bbox_inches='tight'); plt.close(fig)
+              filename=f'integrated-results/layout-{i}.dxf'
+              doc.saveas(filename)
+              assert len(ezdxf.readfile(filename).modelspace())==2*len(layout['rooms'])
           assert layouts, 'No integrated geometry; inspect report'
           assert not result['accepted']
           assert any(not l['access']['unreachable'] for l in layouts), 'No connected circulation candidate'
