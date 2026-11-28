@@ -17,6 +17,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
+      - run: python -m pytest -q tests/test_rules_v21_floor_assignment.py
       - run: |
           mkdir -p integrated-results
           python - <<'PY'
