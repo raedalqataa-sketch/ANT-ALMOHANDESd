@@ -36,9 +36,13 @@ def run(document,envelopes,capacities,core_dimensions=None,obstacles=None):
                 if not sub["candidates"]:valid=False;break
                 rooms.extend(sub["candidates"][0]["rooms"])
             if not valid:continue
+            hall=[round(v*1000,6) for v in candidate["circulation_rect"]]
+            rooms.append(dict(id="circulation:main",rect_mm=hall,area_m2=hall[2]*hall[3]/1e6))
+            for room in rooms:
+                room["rect_mm"]=[round(v,6) for v in room["rect_mm"]]
             walls=extract_wall_network(rooms)
             if walls["status"]!="network_ready":continue
-            access=check_access(rooms,walls["walls"],[])
+            access=check_access(rooms,walls["walls"],["circulation:main"])
             output["layouts"].append(dict(rooms=rooms,walls=walls,access=access,accepted=False))
     report["pending"]=["core clearance","circulation","openings","furniture","constitution coverage","architectural review"]
     return report
