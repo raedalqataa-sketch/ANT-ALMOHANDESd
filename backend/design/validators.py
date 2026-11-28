@@ -222,7 +222,17 @@ def validate_model(model, opening_faces=None):
     check('parking_envelope','SPEC-PK-01','غلاف الموقف المقترح داخل الأرض ولا يتداخل مع المبنى',bad_parking)
     check('parking_maneuver','SPEC-PK-01','اتصال الموقف بالشارع ومناورة السيارة والبوابة',pending='مطلوب بالمشروع: اتجاه الشارع وعرضه والبوابة ومسار المناورة غير معتمدة')
     check('local_regulations','SPEC-IN-06','حدود الأرض والارتدادات والاشتراطات الرسمية متحققة',pending='لا يوجد رفع مساحي أو ارتدادات أو اشتراطات موثقة؛ الفراغ المحيط بالمبنى ليس اعتمادًا للارتدادات')
-    check('services_stacking','SPEC-SV-01','تنسيق الخدمات رأسيًا ومسارات الصرف والتغذية',pending='لم تُنمذج شبكة خدمات أو أعمدة أو حسابات دعم؛ بعض مناطق الخدمات متراكبة فقط')
+    wet_kinds={'bathroom','kitchen','laundry'}
+    lower=[r for r in grooms if r['kind'] in wet_kinds]
+    upper=[r for f in floors if f['id']!='GF' for r in f['rooms'] if r['kind'] in wet_kinds]
+    wet_alignment=[]
+    for u in upper:
+        overlaps=[]
+        for l in lower:
+            area=max(0,min(u['x']+u['width'],l['x']+l['width'])-max(u['x'],l['x']))*max(0,min(u['y']+u['depth'],l['y']+l['depth'])-max(u['y'],l['y']))
+            if area>EPS:overlaps.append({'lower_room':l['id'],'overlap_m2':round(area,3)})
+        wet_alignment.append({'upper_room':u['id'],'overlaps':overlaps,'overlap_fraction':round(sum(a['overlap_m2'] for a in overlaps)/(u['width']*u['depth']),4) if u['width']*u['depth']>EPS else None})
+    check('services_stacking','SPEC-SV-01','تنسيق الخدمات رأسيًا ومسارات الصرف والتغذية',observed={'upper_wet_rooms':len(upper),'aligned_rooms':sum(bool(a['overlaps']) for a in wet_alignment)},evidence={'room_alignment':wet_alignment,'scope':'geometric overlap only; not plumbing or structural approval'},pending='لم تُنمذج شبكة خدمات أو أعمدة أو حسابات دعم؛ قياس التراكب الهندسي لا يثبت صلاحية التمديدات')
     check('decisions','SPEC-PG-01','حسم تعارضات المصعد والخادمة ومدخل الخدمة',pending='القرارات الثلاثة محفوظة كمعلقة؛ لم يُحوّل التفضيل إلى إلزام أو حذف معتمد')
     check('dimensions','SPEC-QC-01','سلاسل أبعاد وتفاصيل تنفيذية كاملة',pending='تُعرض أبعاد الغرف والمبنى فقط؛ سلاسل الفتحات والمناسيب والتفاصيل التنفيذية غير مكتملة')
     return out
