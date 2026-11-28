@@ -16,15 +16,16 @@ def propose_masses(wings, envelope, max_candidates=12):
         bands=(wings[:split],wings[split:])
         for fraction in (.4,.5,.6):
             depths=(H*fraction,H*(1-fraction))
-            for overlap in (.3,.6,1.0):
+            for overlap in (1.5,1.8,2.1):
                 if overlap>=min(depths):continue
                 depths=((H-overlap)*fraction,(H-overlap)*(1-fraction))
-                rects=[]; labels=[]; exclusive_rects=[]
+                rects=[]; labels=[]; exclusive_rects=[]; spans=[]
                 for j,band in enumerate(bands):
                     widths=[w["target_m2"]/depths[j] for w in band]
                     span=sum(widths)
                     if span>W:break
                     cursor=x+(W-span)*(0 if j==0 else .5)
+                    spans.append((cursor,cursor+span))
                     for w,width in zip(band,widths):
                         rect=[cursor,y if j==0 else y+depths[0],width,depths[j]+overlap]
                         exclusive_rects.append([cursor,y if j==0 else y+depths[0]+overlap,width,depths[j]])
@@ -42,6 +43,9 @@ def propose_masses(wings, envelope, max_candidates=12):
                             area+=s*t
                     exclusive.append(area)
                 if any(a+1e-8<w["target_m2"] for a,w in zip(exclusive,wings)):continue
-                candidates.append(dict(rectangles=rects,exclusive_rectangles=exclusive_rects,zones=labels,exclusive_m2=exclusive,geometry=g,functional_verified=False,core_verified=False))
+                hall_left=min(a for a,b in spans)
+                hall_right=max(b for a,b in spans)
+                hall=[hall_left,y+depths[0],hall_right-hall_left,overlap]
+                candidates.append(dict(circulation_rect=hall,rectangles=rects,exclusive_rectangles=exclusive_rects,zones=labels,exclusive_m2=exclusive,geometry=g,functional_verified=False,core_verified=False))
     candidates.sort(key=lambda c:c["geometry"]["union_area_m2"])
     return dict(status="proposals_ready" if candidates else "search_exhausted",candidates=candidates[:max_candidates])
