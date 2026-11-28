@@ -30,7 +30,7 @@ def run(document,envelopes,capacities,core_dimensions=None,obstacles=None):
         output=report["floors"][floor]={"mass_search":result["status"],"layouts":[]}
         for candidate in result["candidates"]:
             rooms=[];valid=True
-            for z,rect in zip(candidate["zones"],candidate["rectangles"]):
+            for z,rect in zip(candidate["zones"],candidate["exclusive_rectangles"]):
                 sub=subdivide_wing([v*1000 for v in rect],groups[z])
                 if not sub["candidates"]:valid=False;break
                 rooms.extend(sub["candidates"][0]["rooms"])
