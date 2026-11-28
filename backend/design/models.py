@@ -80,7 +80,7 @@ class DesignOptions(BaseModel):
     layout_family: Literal['reference_search','garden_gallery','social_hub','open_court','legacy'] = 'reference_search'
     bedroom_count: int = Field(default=3, ge=2, le=4)
     double_height: bool | None = None
-    output_style: Literal['presentation','monochrome'] = 'presentation'
+    output_style: Literal['presentation','monochrome','linework'] = 'presentation'
     floor_height: float = Field(default=3.2, ge=2.8, le=4)
     confirmed_opening_faces: list[Literal['north','south','east','west']] | None = None
     project_profile: dict | None = None
