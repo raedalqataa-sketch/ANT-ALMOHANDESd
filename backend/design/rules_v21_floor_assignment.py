@@ -31,11 +31,11 @@ def assign_floors(document, capacities_m2, max_states=100000):
         states+=1
         key,index,area,choices=items[i]
         for floor in sorted(choices,key=lambda f:(remaining[f]-area,str(f))):
-            if remaining[f]+1e-9<area:continue
-            remaining[f]-=area
+            if remaining[floor]+1e-9<area:continue
+            remaining[floor]-=area
             placed.append(dict(program_id=key,instance=index,floor=floor,min_m2=area))
             if search(i+1):return True
-            placed.pop();remaining[f]+=area
+            placed.pop();remaining[floor]+=area
             if exhausted:return False
         return False
     if not search(0):
