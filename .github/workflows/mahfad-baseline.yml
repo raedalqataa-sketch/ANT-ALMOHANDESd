@@ -2,7 +2,7 @@ name: Mahfad baseline reproduction
 on:
   push:
     branches: [recovery/mahfad-baseline]
-    paths: ['.github/workflows/mahfad-baseline.yml']
+    paths: ['.github/workflows/mahfad-baseline.yml', 'backend/design/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -37,6 +37,12 @@ jobs:
               assert c['metrics']['bed_capacity']>=10
           assert min(c['metrics']['longest_corridor_m'] for c in result['candidates'])<=5.75
           assert min(c['metrics']['circulation_ratio'] for c in result['candidates'])<=0.1418
+          for c in result['candidates']:
+              wet=next(x for x in c['checks'] if x['check_id']=='services_stacking')
+              assert wet['status']=='PENDING'
+              rows=wet['evidence']['room_alignment']
+              assert all(0<=row['overlap_fraction']<=1.001 for row in rows)
+              print(c['candidate_id'],json.dumps(wet['observed_value']),json.dumps(rows))
           print('Mahfad baseline regression gate passed')
           PY
       - uses: actions/upload-artifact@v4
