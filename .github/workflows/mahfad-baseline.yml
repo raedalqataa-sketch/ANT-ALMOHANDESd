@@ -44,6 +44,23 @@ jobs:
               assert all(0<=row['overlap_fraction']<=1.001 for row in rows)
               print(c['candidate_id'],json.dumps(wet['observed_value']),json.dumps(rows))
           print('Mahfad baseline regression gate passed')
+          from backend.design.scene import architectural_scene
+          from backend.design.presentation import scene_svg, scene_dxf
+          from backend.design.reference_engine import generate_reference_candidates
+          opts=DesignOptions(candidate_count=1,floor_height=3.2,layout_family='reference_search',bedroom_count=3,output_style='linework')
+          models=generate_reference_candidates(opts)
+          assert models
+          for model in models:
+              assert model['presentation']['style']=='linework'
+              for floor in model['floors']:
+                  scene=architectural_scene(model,floor)
+                  layers={p['layer'] for p in scene.items}
+                  assert {'WALL','DOOR','WINDOW','DIMENSION'}<=layers
+                  assert not layers.intersection({'FURNITURE','FINISH_GRID','SHADOW','DECORATION'})
+                  assert all(p.get('fill','none')=='none' for p in scene.items)
+                  Path('baseline-results/'+model['candidate_id']+'-'+floor['id']+'-linework.svg').write_text(scene_svg(model,floor),encoding='utf-8')
+              scene_dxf(model,Path('baseline-results/'+model['candidate_id']+'-linework.dxf'))
+          print('Linework export verified')
           PY
       - uses: actions/upload-artifact@v4
         if: always()
