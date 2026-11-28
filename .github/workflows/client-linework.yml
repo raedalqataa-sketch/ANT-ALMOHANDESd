@@ -1,0 +1,45 @@
+name: Independent client linework
+on:
+  workflow_dispatch:
+  push:
+    branches: [recovery/mahfad-baseline]
+    paths:
+      - '.github/workflows/client-linework.yml'
+      - 'backend/design/client_*.py'
+jobs:
+  generate:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Generate independent client
+        run: |
+          mkdir -p client-results
+          python - <<'PY'
+          import json
+          import ezdxf
+          from backend.design.client_program import ClientProgram
+          from backend.design.client_linework import export_client
+          rows=[('majlis','majlis','guest',24),('guest_wc','bathroom','guest',9),('living','living','family',24),('kitchen','kitchen','service',18),('bed1','bedroom','private',18),('bed2','bedroom','private',18),('family_wc','bathroom','private',9)]
+          program=ClientProgram(project_id='synthetic-economic',floor_count=1,plot_width_m=20,plot_depth_m=25,rooms=[dict(id=i,kind=k,count=1,required=True,allowed_floors=[0],area_min_m2=a,area_target_m2=a,area_max_m2=a*1.2,privacy_zone=z) for i,k,z,a in rows])
+          result=export_client(program,{0:(2,3,16,9.8)},'client-results/economic.dxf')
+          with open('client-results/report.json','w') as f:json.dump(result,f,indent=2)
+          assert result.get('exported'),result
+          assert len(result['layouts'][0]['rooms'])==7
+          doc=ezdxf.readfile('client-results/economic.dxf')
+          assert not doc.audit().errors
+          for layer in ('WALL','DOOR','WINDOW','TEXT'):
+              assert any(e.dxf.layer==layer for e in doc.modelspace()),layer
+          print('Independent DXF generated; architectural approval pending')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-client-linework
+          path: client-results/
+          retention-days: 1
