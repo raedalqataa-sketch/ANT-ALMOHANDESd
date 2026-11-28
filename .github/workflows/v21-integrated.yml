@@ -1,0 +1,49 @@
+name: Integrated V2.1 geometry trial
+on:
+  push:
+    branches: [preview/client-engine-v2]
+    paths: ['.github/workflows/v21-integrated.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trial:
+    if: github.ref == 'refs/heads/preview/client-engine-v2' && github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: |
+          mkdir -p integrated-results
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from backend.design.rules_v21_pipeline import run
+          from backend.design.rules_v21_mass_geometry import mass_union
+          assert mass_union([[0,0,4,4],[2,0,4,4]])["union_area_m2"]==24
+          rows=[]
+          for key,zone,area in [('majlis','guest',24),('living','family',24),('kitchen','service',16),('bedroom','private',18)]:
+              rows.append(dict(id=key,type=key,count=1,required=True,allowed_floors=['ground'],privacy_zone=zone,area_min_m2=area,area_target_m2=area,area_max_m2=area*1.5,min_side_mm=2500,adjacency_required=[],adjacency_forbidden=[]))
+          result=run(dict(program=rows,floors=['ground']),{'ground':[0,0,16,12]},{'ground':150})
+          Path('integrated-results/report.json').write_text(json.dumps(result,indent=2))
+          layouts=result.get('floors',{}).get('ground',{}).get('layouts',[])
+          for i,layout in enumerate(layouts):
+              parts=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16000 12000">']
+              for room in layout['rooms']:
+                  x,y,w,h=room['rect_mm']
+                  parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="white" stroke="black" stroke-width="50"/><text x="{x+w/2}" y="{y+h/2}" font-size="250" text-anchor="middle">{room["id"]}</text>')
+              parts.append('</svg>')
+              Path(f'integrated-results/layout-{i}.svg').write_text(''.join(parts))
+          assert layouts, 'No integrated geometry; inspect report'
+          assert not result['accepted']
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integrated-v21-results
+          path: integrated-results/
+          retention-days: 1
