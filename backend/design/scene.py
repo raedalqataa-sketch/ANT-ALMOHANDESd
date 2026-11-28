@@ -304,4 +304,23 @@ def architectural_scene(model,floor,site_view=False):
     for i in (0,1,3,5):scene.text(bx+i,by-.12,str(i),.19,'#6a785f',layer='SCALE')
     scene.text(bx+2.5,by+.40,'متر',.18,'#7e8a70',layer='SCALE')
     scene.text(1.9,pd+1.8,'N ↑ بحسب المصدر',.20,'#8a927c',layer='TITLE')
+    if model.get('presentation',{}).get('style')=='linework':
+        excluded={'FURNITURE','DECORATION','FINISH_GRID','ROOM_FINISH','LANDSCAPE','UNDERLAY','SHADOW','PAPER'}
+        clean=[]
+        for p in scene.items:
+            if p['layer'] in excluded:continue
+            if p['layer']=='TERRACE' and p['type']=='line':continue
+            if p['type']=='text':
+                p['color']='#000000'
+            else:
+                if 'fill' in p:p['fill']='none'
+                if p.get('stroke','none')!='none':p['stroke']='#000000'
+                if p.get('stroke','none')=='none':continue
+            clean.append(p)
+        scene.items=clean
+        if not site_view:
+            dimension(scene,(fp['x']+fp['width'],fp['y']),(fp['x']+fp['width'],fp['y']+fp['depth']),f"{fp['depth']:.2f}",.45)
+            for r in floor['rooms']:
+                if r['kind']!='stairs':
+                    scene.text(r['x']+r['width']/2,r['y']+r['depth']/2+.45,f"{r['area_m2']:.1f} m²",.18,'#000000')
     return scene
