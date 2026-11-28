@@ -1,0 +1,38 @@
+name: Mahfad baseline reproduction
+on:
+  push:
+    branches: [recovery/mahfad-baseline]
+    paths: ['.github/workflows/mahfad-baseline.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    if: github.event.repository.private == false && github.ref == 'refs/heads/recovery/mahfad-baseline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: |
+          mkdir -p baseline-results
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from backend.design.models import DesignOptions
+          from backend.design.service import design
+          result=design(DesignOptions(candidate_count=3,floor_height=3.2,layout_family='reference_search',bedroom_count=3,output_style='presentation'),output_dir=Path('baseline-results'))
+          summary=[dict(id=c['candidate_id'],metrics=c['metrics'],release=c['release'],geometry_sha256=c['geometry_sha256']) for c in result['candidates']]
+          Path('baseline-results/summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2))
+          print(json.dumps(summary,ensure_ascii=False))
+          assert any(c['release']['drawing_export_allowed'] for c in result['candidates'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mahfad-baseline-drawings
+          path: baseline-results/
+          retention-days: 1
