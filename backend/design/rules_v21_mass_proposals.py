@@ -18,14 +18,16 @@ def propose_masses(wings, envelope, max_candidates=12):
             depths=(H*fraction,H*(1-fraction))
             for overlap in (.3,.6,1.0):
                 if overlap>=min(depths):continue
-                rects=[]; labels=[]
+                depths=((H-overlap)*fraction,(H-overlap)*(1-fraction))
+                rects=[]; labels=[]; exclusive_rects=[]
                 for j,band in enumerate(bands):
                     widths=[w["target_m2"]/depths[j] for w in band]
                     span=sum(widths)
                     if span>W:break
                     cursor=x+(W-span)*(0 if j==0 else .5)
                     for w,width in zip(band,widths):
-                        rect=[cursor,y if j==0 else y+depths[0]-overlap,width,depths[j]+(overlap if j==0 else 0)]
+                        rect=[cursor,y if j==0 else y+depths[0],width,depths[j]+overlap]
+                        exclusive_rects.append([cursor,y if j==0 else y+depths[0]+overlap,width,depths[j]])
                         rects.append(rect);labels.append(w.get("zone"));cursor+=width
                 if len(rects)!=len(wings):continue
                 g=mass_union(rects)
@@ -40,6 +42,6 @@ def propose_masses(wings, envelope, max_candidates=12):
                             area+=s*t
                     exclusive.append(area)
                 if any(a+1e-8<w["target_m2"] for a,w in zip(exclusive,wings)):continue
-                candidates.append(dict(rectangles=rects,zones=labels,exclusive_m2=exclusive,geometry=g,functional_verified=False,core_verified=False))
+                candidates.append(dict(rectangles=rects,exclusive_rectangles=exclusive_rects,zones=labels,exclusive_m2=exclusive,geometry=g,functional_verified=False,core_verified=False))
     candidates.sort(key=lambda c:c["geometry"]["union_area_m2"])
     return dict(status="proposals_ready" if candidates else "search_exhausted",candidates=candidates[:max_candidates])
